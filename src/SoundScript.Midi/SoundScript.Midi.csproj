@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Melanchall.DryWetMidi" Version="8.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

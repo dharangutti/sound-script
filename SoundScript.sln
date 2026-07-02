@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7074BDC5-03B6-4A6D-8D2A-24609998D2B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Core", "src\SoundScript.Core\SoundScript.Core.csproj", "{8B3504EC-5211-49AA-91FE-5837B4F6513A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Parser", "src\SoundScript.Parser\SoundScript.Parser.csproj", "{9872D1A1-0994-4F80-8856-10EA3A11810B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Midi", "src\SoundScript.Midi\SoundScript.Midi.csproj", "{78335A7F-6D14-4EC9-8CF6-06E878A0900C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Cli", "src\SoundScript.Cli\SoundScript.Cli.csproj", "{45D4F460-9BFB-4B63-8917-4724056798CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B3504EC-5211-49AA-91FE-5837B4F6513A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B3504EC-5211-49AA-91FE-5837B4F6513A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B3504EC-5211-49AA-91FE-5837B4F6513A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B3504EC-5211-49AA-91FE-5837B4F6513A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9872D1A1-0994-4F80-8856-10EA3A11810B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9872D1A1-0994-4F80-8856-10EA3A11810B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9872D1A1-0994-4F80-8856-10EA3A11810B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9872D1A1-0994-4F80-8856-10EA3A11810B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78335A7F-6D14-4EC9-8CF6-06E878A0900C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78335A7F-6D14-4EC9-8CF6-06E878A0900C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78335A7F-6D14-4EC9-8CF6-06E878A0900C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78335A7F-6D14-4EC9-8CF6-06E878A0900C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45D4F460-9BFB-4B63-8917-4724056798CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45D4F460-9BFB-4B63-8917-4724056798CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45D4F460-9BFB-4B63-8917-4724056798CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45D4F460-9BFB-4B63-8917-4724056798CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8B3504EC-5211-49AA-91FE-5837B4F6513A} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+		{9872D1A1-0994-4F80-8856-10EA3A11810B} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+		{78335A7F-6D14-4EC9-8CF6-06E878A0900C} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+		{45D4F460-9BFB-4B63-8917-4724056798CA} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+	EndGlobalSection
+EndGlobal
