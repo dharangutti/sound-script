@@ -1,4 +1,4 @@
-# sound-script-
+# sound-script
 is a tiny, deterministic music language that turns simple text into sound.
 It’s a hobby‑grade, open‑source experiment built in C#, designed for curiosity, creativity, and play.
 
