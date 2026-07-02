@@ -8,6 +8,7 @@ public enum TokenType
     Bpm,
     Play,
     For,
+    Colon,
     Bar,
     Note,
     Number,

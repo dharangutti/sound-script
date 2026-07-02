@@ -1,3 +1,3 @@
 namespace SoundScript.Core;
 
-public readonly record struct TimedNote(int MidiNumber, double StartBeat, double DurationBeats);
+public readonly record struct TimedNote(int MidiNumber, double StartBeat, double DurationBeats, double DurationMs);

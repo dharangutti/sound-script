@@ -36,7 +36,7 @@ public sealed class Parser
 
             if (Check(TokenType.Note))
             {
-                program.Notes.Add(ParseNote(Advance()));
+                program.Notes.Add(ParseNoteStatement());
                 continue;
             }
 
@@ -47,6 +47,25 @@ public sealed class Parser
         Expect(TokenType.RightBrace, "}");
         Expect(TokenType.EndOfFile, "end of file");
         return program;
+    }
+
+    private ParsedNote ParseNoteStatement()
+    {
+        var note = ParseNote(Expect(TokenType.Note, "note"));
+
+        if (Match(TokenType.Colon))
+        {
+            var durationToken = Expect(TokenType.Number, "duration");
+            return note with { DurationBeats = ParseDuration(durationToken) };
+        }
+
+        if (Match(TokenType.For))
+        {
+            var durationToken = Expect(TokenType.Number, "duration");
+            return note with { DurationBeats = ParseDuration(durationToken) };
+        }
+
+        return note;
     }
 
     private static ParsedNote ParseNote(Token token)
@@ -73,6 +92,14 @@ public sealed class Parser
             throw Invalid(token, $"Invalid note '{text}'.");
 
         return new ParsedNote(pitch, isSharp, isFlat, octave);
+    }
+
+    private static double ParseDuration(Token token)
+    {
+        if (!double.TryParse(token.Value, out var duration) || duration <= 0)
+            throw Invalid(token, "Duration must be a positive number.");
+
+        return duration;
     }
 
     private Token Expect(TokenType type, string description)

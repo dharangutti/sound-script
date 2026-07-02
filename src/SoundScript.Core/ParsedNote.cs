@@ -1,6 +1,6 @@
 namespace SoundScript.Core;
 
-public readonly record struct ParsedNote(char Pitch, bool IsSharp, bool IsFlat, int Octave)
+public readonly record struct ParsedNote(char Pitch, bool IsSharp, bool IsFlat, int Octave, double DurationBeats = 1.0)
 {
     public int ToMidiNumber()
     {

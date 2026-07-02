@@ -36,13 +36,14 @@ public sealed class Tokenizer
             var startColumn = _column;
             var current = Peek();
 
-            if (current is '{' or '}' or '|')
+            if (current is '{' or '}' or '|' or ':')
             {
                 var type = current switch
                 {
                     '{' => TokenType.LeftBrace,
                     '}' => TokenType.RightBrace,
                     '|' => TokenType.Bar,
+                    ':' => TokenType.Colon,
                     _ => throw new InvalidOperationException()
                 };
 
