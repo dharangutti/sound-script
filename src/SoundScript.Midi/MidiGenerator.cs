@@ -27,7 +27,7 @@ public static partial class MidiGenerator
             foreach (var timedNote in timedNotes)
             {
                 var startTick = (long)(timedNote.StartBeat * TicksPerQuarterNote);
-                var lengthTick = (long)(timedNote.DurationBeats * TicksPerQuarterNote);
+                var lengthTick = (long)(timedNote.DurationMs / 60_000.0 * program.Bpm * TicksPerQuarterNote);
                 notes.Add(new Note((SevenBitNumber)timedNote.MidiNumber, lengthTick, startTick));
             }
         }
