@@ -1,0 +1,15 @@
+<textarea @bind="ScriptText" rows="12" cols="60"></textarea>
+
+<button @onclick="Generate">Generate MIDI</button>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p>@ErrorMessage</p>
+}
+
+@if (MidiBytes != null)
+{
+    <a href="data:audio/midi;base64,@Convert.ToBase64String(MidiBytes)" download="output.mid">
+        Download MIDI
+    </a>
+}
