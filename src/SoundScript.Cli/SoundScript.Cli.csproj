@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
+    <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>soundscript</AssemblyName>
+    <RootNamespace>SoundScript.Cli</RootNamespace>
+  </PropertyGroup>
+
+</Project>
