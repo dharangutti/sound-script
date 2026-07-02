@@ -1,19 +1,47 @@
-# sound-script - Write Music Like Code
-is a tiny, deterministic music language that turns simple text into sound.
-It’s a hobby‑grade, open‑source experiment built in C#, designed for curiosity, creativity, and play.
+# SoundScript
 
-Instead of a studio full of instruments, you write:
+A tiny, deterministic music DSL that turns simple text into MIDI.  
+Built in C# for curiosity, creativity, and play.
 
-Code
+```
 melody {
     bpm 120
     C4 E4 G4 | C5
 }
-SoundScript reads this script, interprets the notes, and generates a MIDI file you can play anywhere.
-No DAW. No plugins. No complexity. Just text → music.
+```
 
-This project is intentionally small.
-It is not a full audio engine, not a synthesizer, not a DAW replacement.
-It is a joyful exploration of how music can be expressed through simple, deterministic code.
+**Text → parsed → interpreted → MIDI.** No DAW, no plugins, no audio synthesis.
 
-If you enjoy tiny languages, creative tools, or just want to see how music can be orchestrated through text, you’re in the right place.
+## Quick Start
+
+```bash
+dotnet build
+dotnet run --project src/SoundScript.Cli -- run examples/melody.ss
+```
+
+Open `output.mid` in any MIDI player.
+
+## Documentation
+
+Full language reference, pipeline details, and usage for CLI + Web:
+
+**[docs/SoundScript.md](docs/SoundScript.md)**
+
+## Project Layout
+
+```
+/src
+    SoundScript.Core/      # Shared models
+    SoundScript.Parser/    # Tokenizer + Parser
+    SoundScript.Midi/      # Interpreter + MIDI export
+    SoundScript.Cli/       # CLI runner
+    SoundScript.Web/       # Blazor WASM demo
+
+/examples
+    melody.ss
+    durations.ss
+```
+
+## License
+
+See [LICENSE](LICENSE).
