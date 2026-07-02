@@ -1,15 +1,44 @@
-<textarea @bind="ScriptText" rows="12" cols="60"></textarea>
+<div class="demo-page">
+    <header class="demo-header">
+        <div class="demo-badge">SoundScript Web Demo</div>
+        <h1>Text → MIDI</h1>
+        <p class="demo-lead">Write a melody in the box below, generate MIDI, and download — all in your browser.</p>
+    </header>
 
-<button @onclick="Generate">Generate MIDI</button>
+    <div class="demo-presets">
+        <span class="preset-label">Examples:</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="LoadMelodyExample">Melody</button>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="LoadDurationsExample">Durations</button>
+    </div>
 
-@if (!string.IsNullOrEmpty(ErrorMessage))
-{
-    <p>@ErrorMessage</p>
-}
+    <div class="demo-editor">
+        <label for="script-input" class="demo-label">SoundScript</label>
+        <textarea id="script-input"
+                  class="demo-textarea"
+                  @bind="ScriptText"
+                  rows="14"
+                  spellcheck="false"
+                  placeholder="melody { ... }"></textarea>
+    </div>
 
-@if (MidiBytes != null)
-{
-    <a href="data:audio/midi;base64,@Convert.ToBase64String(MidiBytes)" download="output.mid">
-        Download MIDI
-    </a>
-}
+    <div class="demo-actions">
+        <button class="btn btn-primary btn-lg" @onclick="Generate">Generate MIDI</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="demo-error" role="alert">@ErrorMessage</div>
+    }
+
+    @if (MidiBytes != null)
+    {
+        <div class="demo-success">
+            <span>MIDI ready — @MidiBytes.Length bytes</span>
+            <a class="btn btn-success"
+               href="data:audio/midi;base64,@Convert.ToBase64String(MidiBytes)"
+               download="soundscript.mid">
+                Download MIDI
+            </a>
+        </div>
+    }
+</div>

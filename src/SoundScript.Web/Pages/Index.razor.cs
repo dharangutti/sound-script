@@ -5,7 +5,7 @@ namespace SoundScript.Web.Pages;
 
 public partial class Index
 {
-    private string ScriptText { get; set; } =
+    private const string MelodyExample =
         """
         melody {
             bpm 120
@@ -13,8 +13,35 @@ public partial class Index
         }
         """;
 
+    private const string DurationsExample =
+        """
+        melody {
+            bpm 100
+            C4 for 2
+            E4 for 1
+            G4:4
+            C5
+        }
+        """;
+
+    private string ScriptText { get; set; } = MelodyExample;
+
     private byte[]? MidiBytes { get; set; }
     private string? ErrorMessage { get; set; }
+
+    private void LoadMelodyExample()
+    {
+        ScriptText = MelodyExample;
+        MidiBytes = null;
+        ErrorMessage = null;
+    }
+
+    private void LoadDurationsExample()
+    {
+        ScriptText = DurationsExample;
+        MidiBytes = null;
+        ErrorMessage = null;
+    }
 
     private void Generate()
     {
