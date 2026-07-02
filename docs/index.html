@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundScript Documentation</title>
+</head>
+<body>
+
+<h1>SoundScript Documentation (v1–v3)</h1>
+<p>A tiny, deterministic music DSL that turns simple text into MIDI.</p>
+<p>Built in C#, designed for curiosity, creativity, and play.</p>
+<hr>
+<h2>What SoundScript Is</h2>
+<p>SoundScript is a micro-language that lets you write music like code:</p>
+<pre><code>melody {
+    bpm 120
+    C4 E4 G4 | C5
+}</code></pre>
+<p>The engine parses this DSL and generates a MIDI file — no DAW, no plugins, no audio synthesis.</p>
+<p>Just <strong>text → parsed → interpreted → MIDI</strong>.</p>
+<p>Everything is intentionally small, deterministic, and hobby-friendly.</p>
+<hr>
+<h2>Project Structure</h2>
+<pre><code>/src
+    SoundScript.Core/      # Models: Token, ParsedNote, MelodyProgram, TimedNote
+    SoundScript.Parser/    # Tokenizer + Parser
+    SoundScript.Midi/      # Interpreter + MIDI generator (DryWetMIDI)
+    SoundScript.Cli/       # CLI runner (executable: soundscript)
+    SoundScript.Web/       # Blazor WASM web demo
+
+/examples
+    melody.ss              # v1 example — notes + BPM
+    durations.ss           # v3 example — note durations</code></pre>
+<table>
+<tr>
+<th>Project</th>
+<th>Role</th>
+</tr>
+<tr>
+<td><strong>SoundScript.Core</strong></td>
+<td>Shared types used across the pipeline</td>
+</tr>
+<tr>
+<td><strong>SoundScript.Parser</strong></td>
+<td>Lexical analysis and parsing into <code>MelodyProgram</code></td>
+</tr>
+<tr>
+<td><strong>SoundScript.Midi</strong></td>
+<td>Beat timing and MIDI file export</td>
+</tr>
+<tr>
+<td><strong>SoundScript.Cli</strong></td>
+<td>Command-line entry point</td>
+</tr>
+<tr>
+<td><strong>SoundScript.Web</strong></td>
+<td>Browser-based demo (client-side WASM)</td>
+</tr>
+</table>
+<hr>
+<h2>How to Build</h2>
+<h3>Prerequisites</h3>
+<p>- <a href="https://dotnet.microsoft.com/download">.NET 8 SDK</a></p>
+<p>- (Optional) VS Code or JetBrains Rider</p>
+<p>- (Optional) A modern browser for the Web UI</p>
+<h3>Build everything</h3>
+<pre><code>dotnet build</code></pre>
+<hr>
+<h2>How to Use (CLI)</h2>
+<h3>Run a script</h3>
+<pre><code>dotnet run --project src/SoundScript.Cli -- run examples/melody.ss</code></pre>
+<p>This writes <code>output.mid</code> in the current directory.</p>
+<h3>Custom output filename</h3>
+<pre><code>dotnet run --project src/SoundScript.Cli -- run examples/melody.ss my-song.mid</code></pre>
+<h3>Run the durations example</h3>
+<pre><code>dotnet run --project src/SoundScript.Cli -- run examples/durations.ss</code></pre>
+<hr>
+<h2>How to Use (Web Version)</h2>
+<h3>Run the Blazor WASM app</h3>
+<pre><code>dotnet run --project src/SoundScript.Web</code></pre>
+<p>Open the URL shown in the console.</p>
+<p>You will see:</p>
+<p>- A <strong>textarea</strong> with DSL pre-filled (the default melody example)</p>
+<p>- A <strong>Generate MIDI</strong> button</p>
+<p>- A <strong>Download MIDI</strong> link (appears after generation)</p>
+<p>Everything runs <strong>client-side in the browser</strong> — no server processing, no filesystem access. MIDI bytes are generated in memory and offered as a base64 download link.</p>
+<hr>
+<h2>Language Reference (v1–v3)</h2>
+<p>Every script is a single <code>melody { ... }</code> block. Whitespace separates tokens.</p>
+<h3>1. Notes</h3>
+<p>Write pitch letter + octave number:</p>
+<pre><code>C4 E4 G4 C5</code></pre>
+<p><strong>Format:</strong> <code>[A–G][#|b]?[octave]</code></p>
+<table>
+<tr>
+<th>Example</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td><code>C4</code></td>
+<td>Middle C</td>
+</tr>
+<tr>
+<td><code>F#4</code></td>
+<td>F sharp, octave 4</td>
+</tr>
+<tr>
+<td><code>Bb3</code></td>
+<td>B flat, octave 3</td>
+</tr>
+</table>
+<p>Notes are case-insensitive for the pitch letter (<code>c4</code> and <code>C4</code> are equivalent).</p>
+<h3>2. BPM</h3>
+<p>Set tempo inside the melody block:</p>
+<pre><code>bpm 120</code></pre>
+<p>- Must be a <strong>positive integer</strong></p>
+<p>- Default if omitted: <strong>120 BPM</strong></p>
+<h3>3. Bar separator</h3>
+<pre><code>C4 E4 | G4 C5</code></pre>
+<p>The <code>|</code> token is <strong>recognized but ignored</strong> — reserved for future bar/timing features.</p>
+<h3>4. Durations (v3)</h3>
+<p>Durations are measured in <strong>beats</strong> (quarter-note beats at the current BPM).</p>
+<h4>Default — 1 beat</h4>
+<pre><code>C5</code></pre>
+<h4>Verb form</h4>
+<pre><code>C4 for 2</code></pre>
+<h4>Compact form</h4>
+<pre><code>G4:4</code></pre>
+<table>
+<tr>
+<th>Note in <code>durations.ss</code></th>
+<th>Duration</th>
+</tr>
+<tr>
+<td><code>C4 for 2</code></td>
+<td>2 beats</td>
+</tr>
+<tr>
+<td><code>E4 for 1</code></td>
+<td>1 beat</td>
+</tr>
+<tr>
+<td><code>G4:4</code></td>
+<td>4 beats</td>
+</tr>
+<tr>
+<td><code>C5</code></td>
+<td>1 beat (default)</td>
+</tr>
+</table>
+<p>Duration values must be <strong>positive numbers</strong>.</p>
+<h3>Full durations example</h3>
+<pre><code>melody {
+    bpm 100
+    C4 for 2
+    E4 for 1
+    G4:4
+    C5
+}</code></pre>
+<h3>Recognized but unused (reserved)</h3>
+<p>The tokenizer recognizes <code>play</code> as a keyword, but the parser does not use it yet. It is reserved for future features.</p>
+<hr>
+<h2>How It Works (Pipeline)</h2>
+<pre><code>DSL script
+    ↓
+Tokenizer          →  Token stream (melody, notes, bpm, for, :, |, numbers, …)
+    ↓
+Parser             →  MelodyProgram { Bpm, List&lt;ParsedNote&gt; }
+    ↓
+Interpreter        →  List&lt;TimedNote&gt; (beats → milliseconds)
+    ↓
+MidiGenerator      →  output.mid  (via DryWetMIDI)</code></pre>
+<h3>Core models</h3>
+<table>
+<tr>
+<th>Type</th>
+<th>Fields / purpose</th>
+</tr>
+<tr>
+<td><code>ParsedNote</code></td>
+<td>Pitch, accidental, octave, <code>DurationBeats</code> (default <code>1</code>)</td>
+</tr>
+<tr>
+<td><code>MelodyProgram</code></td>
+<td><code>Bpm</code>, ordered list of <code>ParsedNote</code></td>
+</tr>
+<tr>
+<td><code>TimedNote</code></td>
+<td><code>MidiNumber</code>, <code>StartBeat</code>, <code>DurationBeats</code>, <code>DurationMs</code></td>
+</tr>
+</table>
+<h3>Timing</h3>
+<p>The interpreter converts beats to milliseconds:</p>
+<pre><code>durationMs = (60_000 / bpm) × durationBeats</code></pre>
+<p>Notes are placed <strong>sequentially</strong>: each note starts where the previous one ends.</p>
+<p>The MIDI generator writes a <strong>single track</strong> at 480 ticks per quarter note.</p>
+<h3>MIDI note mapping</h3>
+<p>Pitch letters map to standard MIDI note numbers. For example, at octave 4:</p>
+<table>
+<tr>
+<th>Note</th>
+<th>MIDI number</th>
+</tr>
+<tr>
+<td>C4</td>
+<td>60</td>
+</tr>
+<tr>
+<td>E4</td>
+<td>64</td>
+</tr>
+<tr>
+<td>G4</td>
+<td>67</td>
+</tr>
+<tr>
+<td>C5</td>
+<td>72</td>
+</tr>
+</table>
+<hr>
+<h2>Design Philosophy</h2>
+<p>- <strong>Tiny language</strong> — minimal syntax, no AST complexity</p>
+<p>- <strong>Deterministic behavior</strong> — same input always produces the same MIDI</p>
+<p>- <strong>MIDI-first</strong> — no audio synthesis</p>
+<p>- <strong>Incremental growth</strong> — one small feature at a time</p>
+<h3>Not supported yet</h3>
+<p>- Multi-track</p>
+<p>- Loops</p>
+<p>- Instruments / program changes</p>
+<p>- Chords</p>
+<p>- Rests</p>
+<p>- Velocity</p>
+<p>- Bar-aware timing (beyond token recognition)</p>
+<hr>
+<h2>Future Roadmap (Recommended Order)</h2>
+<p>These are planned directions, not implemented features.</p>
+<h3>Phase 4 — Instruments</h3>
+<pre><code>instrument piano
+instrument violin
+instrument 41</code></pre>
+<h3>Phase 5 — Loops</h3>
+<pre><code>loop 4 {
+    C4 E4
+}</code></pre>
+<h3>Phase 6 — Rests</h3>
+<pre><code>rest for 2</code></pre>
+<h3>Phase 7 — Chords</h3>
+<pre><code>[C4 E4 G4] for 2</code></pre>
+<h3>Phase 8 — Multi-track</h3>
+<pre><code>track piano {
+    C4 E4 G4
+}
+
+track violin {
+    G3 A3 B3
+}</code></pre>
+<h3>Phase 9 — Velocity</h3>
+<pre><code>C4 @80</code></pre>
+<h3>Phase 10 — Web Syntax Highlighting</h3>
+<p>Minimal, deterministic, offline.</p>
+<hr>
+<h2>Quick Reference</h2>
+<table>
+<tr>
+<th>Task</th>
+<th>Command</th>
+</tr>
+<tr>
+<td>Build</td>
+<td><code>dotnet build</code></td>
+</tr>
+<tr>
+<td>CLI — default example</td>
+<td><code>dotnet run --project src/SoundScript.Cli -- run examples/melody.ss</code></td>
+</tr>
+<tr>
+<td>CLI — durations example</td>
+<td><code>dotnet run --project src/SoundScript.Cli -- run examples/durations.ss</code></td>
+</tr>
+<tr>
+<td>Web UI</td>
+<td><code>dotnet run --project src/SoundScript.Web</code></td>
+</tr>
+</table>
+<hr>
+<h2>License</h2>
+<p>See <a href="../LICENSE">LICENSE</a> in the repository root.</p>
+<h2>About the Project</h2>
+<p>SoundScript is a tiny, deterministic music DSL created to turn simple text into MIDI. 
+It is intentionally minimal, hobby‑grade, and designed for clarity, reproducibility, and joy. 
+The language runs entirely through a tokenizer → parser → interpreter → MIDI generator pipeline.</p>
+
+<h2>About the Author</h2>
+<p>SoundScript is created by Anup Jayant Dharangutti, Music Enthusiast, 
+architect of enterprise‑grade automation systems, and creator of UniverseGlance and AutomationGlance. 
+He builds deterministic tools, micro‑languages, and creative engines as part of his unified research project.</p>
+
+</body>
+</html>
