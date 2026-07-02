@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SoundScript — a tiny, deterministic music DSL that turns simple text into MIDI. Write melodies like code.">
+    <title>SoundScript — Text to MIDI</title>
+    <style>
+        :root {
+            --bg: #0b0d12;
+            --surface: #141820;
+            --surface-2: #1c2230;
+            --border: #2a3347;
+            --text: #e8ecf4;
+            --muted: #9aa6bd;
+            --accent: #6ee7b7;
+            --accent-2: #818cf8;
+            --gold: #fbbf24;
+            --code-bg: #0f131a;
+            --radius: 12px;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(129, 140, 248, 0.18), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 0%, rgba(110, 231, 183, 0.1), transparent),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 4rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0 2.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(110, 231, 183, 0.1);
+            border: 1px solid rgba(110, 231, 183, 0.25);
+            border-radius: 999px;
+            padding: 0.35rem 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0 0 1rem;
+            letter-spacing: -0.03em;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lead {
+            font-size: 1.15rem;
+            color: var(--muted);
+            max-width: 36rem;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.7rem 1.25rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .btn:hover {
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #34d399, #6ee7b7);
+            color: #052e1e;
+            box-shadow: 0 8px 24px rgba(110, 231, 183, 0.25);
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .hero-code {
+            margin: 2.5rem auto 0;
+            max-width: 32rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .hero-code-bar {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.75rem 1rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-r { background: #f87171; }
+        .dot-y { background: #fbbf24; }
+        .dot-g { background: #34d399; }
+
+        .hero-code pre {
+            margin: 0;
+            padding: 1.25rem 1.5rem;
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #c7d2e8;
+            overflow-x: auto;
+        }
+
+        .kw { color: var(--accent-2); }
+        .num { color: var(--gold); }
+        .note { color: var(--accent); }
+
+        section {
+            margin-top: 3.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .pipeline span {
+            padding: 0.4rem 0.75rem;
+            background: var(--surface-2);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .pipeline .arrow { color: var(--muted); background: none; border: none; padding: 0; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .card h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .card pre {
+            margin: 0;
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--muted);
+            overflow-x: auto;
+        }
+
+        .steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .steps li {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .steps li:last-child { border-bottom: none; }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(129, 140, 248, 0.15);
+            color: var(--accent-2);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .steps code {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.85rem;
+            background: var(--code-bg);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            color: var(--gold);
+        }
+
+        .about {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1.75rem;
+            margin-top: 1rem;
+        }
+
+        .about p { margin: 0; color: var(--muted); }
+        .about p + p { margin-top: 0.75rem; }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        footer a { color: var(--muted); }
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .pipeline { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <div class="badge">Open Source · C# · MIDI</div>
+            <h1>Write music like <span>code</span></h1>
+            <p class="lead">
+                SoundScript is a tiny, deterministic music DSL — type a melody, get a MIDI file.
+                No DAW. No plugins. Just text → MIDI.
+            </p>
+            <div class="cta-row">
+                <a class="btn btn-primary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
+                <a class="btn btn-secondary" href="SoundScript.md">Full Documentation</a>
+            </div>
+            <div class="hero-code">
+                <div class="hero-code-bar">
+                    <span class="dot dot-r"></span>
+                    <span class="dot dot-y"></span>
+                    <span class="dot dot-g"></span>
+                </div>
+                <pre><span class="kw">melody</span> {
+    <span class="kw">bpm</span> <span class="num">120</span>
+    <span class="note">C4</span> <span class="note">E4</span> <span class="note">G4</span> | <span class="note">C5</span>
+}</pre>
+            </div>
+        </header>
+
+        <section>
+            <h2>How it works</h2>
+            <div class="pipeline">
+                <span>DSL script</span>
+                <span class="arrow">→</span>
+                <span>Tokenizer</span>
+                <span class="arrow">→</span>
+                <span>Parser</span>
+                <span class="arrow">→</span>
+                <span>Interpreter</span>
+                <span class="arrow">→</span>
+                <span>MIDI file</span>
+            </div>
+        </section>
+
+        <section>
+            <h2>Try it now</h2>
+            <ul class="steps">
+                <li>
+                    <span class="step-num">1</span>
+                    <div>
+                        <strong>Clone &amp; build</strong><br>
+                        <code>git clone https://github.com/dharangutti/sound-script.git</code><br>
+                        <code>cd sound-script &amp;&amp; dotnet build</code>
+                    </div>
+                </li>
+                <li>
+                    <span class="step-num">2</span>
+                    <div>
+                        <strong>Run the CLI</strong><br>
+                        <code>dotnet run --project src/SoundScript.Cli -- run examples/melody.ss</code>
+                    </div>
+                </li>
+                <li>
+                    <span class="step-num">3</span>
+                    <div>
+                        <strong>Or launch the web demo</strong><br>
+                        <code>dotnet run --project src/SoundScript.Web</code><br>
+                        <span style="color: var(--muted); font-size: 0.9rem;">Edit scripts in the browser and download MIDI instantly — runs entirely client-side.</span>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Examples</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>melody.ss — notes &amp; BPM</h3>
+                    <pre>melody {
+    bpm 120
+    C4 E4 G4 | C5
+}</pre>
+                </div>
+                <div class="card">
+                    <h3>durations.ss — beat lengths</h3>
+                    <pre>melody {
+    bpm 100
+    C4 for 2
+    E4 for 1
+    G4:4
+    C5
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>About the Project</h2>
+            <div class="about">
+                <p>SoundScript is a tiny, deterministic music DSL created to turn simple text into MIDI.
+                It is intentionally minimal, hobby‑grade, and designed for clarity, reproducibility, and joy.
+                The language runs entirely through a tokenizer → parser → interpreter → MIDI generator pipeline.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>About the Author</h2>
+            <div class="about">
+                <p>SoundScript is created by Anup Jayant Dharangutti, Music Enthusiast,
+                architect of enterprise‑grade automation systems, and creator of
+                <a href="https://universeglance.com">UniverseGlance</a> and
+                <a href="https://automationglance.com">AutomationGlance</a>.
+                He builds deterministic tools, micro‑languages, and creative engines as part of his unified research project.</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>
+                <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
+                <a href="SoundScript.md">Documentation</a> ·
+                <a href="https://www.dharangutti.in">dharangutti.in</a>
+            </p>
+            <p style="margin-top: 0.5rem;">MIT License · Built with curiosity, creativity, and play.</p>
+        </footer>
+    </div>
+</body>
+</html>
