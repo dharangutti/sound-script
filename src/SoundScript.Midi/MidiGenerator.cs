@@ -5,11 +5,17 @@ using SoundScript.Core;
 
 namespace SoundScript.Midi;
 
-public static class MidiGenerator
+public static partial class MidiGenerator
 {
     private const int TicksPerQuarterNote = 480;
 
     public static void Write(MelodyProgram program, IReadOnlyList<TimedNote> timedNotes, string outputPath)
+    {
+        var midiFile = CreateMidiFile(program, timedNotes);
+        midiFile.Write(outputPath, overwriteFile: true);
+    }
+
+    private static MidiFile CreateMidiFile(MelodyProgram program, IReadOnlyList<TimedNote> timedNotes)
     {
         var midiFile = new MidiFile();
         var trackChunk = new TrackChunk();
@@ -29,6 +35,6 @@ public static class MidiGenerator
         midiFile.Chunks.Add(trackChunk);
         midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision(TicksPerQuarterNote);
         midiFile.ReplaceTempoMap(TempoMap.Create(Tempo.FromBeatsPerMinute(program.Bpm)));
-        midiFile.Write(outputPath, overwriteFile: true);
+        return midiFile;
     }
 }
