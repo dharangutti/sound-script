@@ -87,5 +87,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/imports.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [blocks.md](blocks.md) — imported blocks
 - [architecture.md](architecture.md) — ProgramLoader

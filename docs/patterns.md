@@ -51,5 +51,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/patterns.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [advanced-chords.md](advanced-chords.md) — voicing on pattern chords
 - [orchestration.md](orchestration.md) — track-level chord helpers

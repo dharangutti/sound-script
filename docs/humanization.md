@@ -48,5 +48,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/humanization.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [track-metadata.md](track-metadata.md) — `humanize` statement
 - [pipeline.md](pipeline.md) — post-pass humanization
