@@ -28,10 +28,17 @@ public static class Interpreter
         public DynamicRampState? DynamicRamp { get; set; }
     }
 
+    private sealed class ExecutionContext
+    {
+        public Dictionary<string, List<AstNode>> Blocks { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, List<AstNode>> Sequences { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ExpandingBlocks { get; } = new(StringComparer.OrdinalIgnoreCase);
+    }
+
     public static InterpretedProgram Interpret(ProgramNode program)
     {
         var result = new InterpretedProgram();
-        var sequences = new Dictionary<string, List<AstNode>>(StringComparer.OrdinalIgnoreCase);
+        var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackBuilder>(StringComparer.OrdinalIgnoreCase);
         var clock = new GlobalBeatClock();
         TrackBuilder? defaultTrack = null;
@@ -53,29 +60,29 @@ public static class Interpreter
                     result.TimeSignatureNumerator = time.Numerator;
                     result.TimeSignatureDenominator = time.Denominator;
                     break;
+                case BlockNode block:
+                    context.Blocks[block.Name] = block.Body;
+                    break;
                 case SequenceNode sequence:
-                    sequences[sequence.Name] = sequence.Body;
+                    context.Sequences[sequence.Name] = sequence.Body;
                     break;
                 case TrackNode track:
-                    tempo = ExecuteBlock(GetOrCreateTrack(tracks, track.Name), track.Body, sequences, tempo, result, clock);
+                    tempo = ExecuteStatements(GetOrCreateTrack(tracks, track.Name), track.Body, context, tempo, result, clock);
                     result.Tempo = tempo;
                     break;
                 case MelodyNode melody:
                     defaultTrack ??= GetOrCreateTrack(tracks, "melody");
-                    tempo = ExecuteBlock(defaultTrack, melody.Body, sequences, tempo, result, clock);
+                    tempo = ExecuteStatements(defaultTrack, melody.Body, context, tempo, result, clock);
                     result.Tempo = tempo;
                     break;
                 case PlayNode play:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    if (!sequences.TryGetValue(play.SequenceName, out var sequenceBody))
-                        throw new InvalidOperationException($"Unknown sequence '{play.SequenceName}'.");
-
-                    tempo = ExecuteSequencePlay(defaultTrack, play.SequenceName, sequenceBody, sequences, tempo, result, clock);
+                    tempo = ExecutePlay(defaultTrack, play, context, tempo, result, clock);
                     result.Tempo = tempo;
                     break;
                 case LoopNode loop:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    tempo = ExecuteLoop(defaultTrack, loop, sequences, tempo, result, clock);
+                    tempo = ExecuteLoop(defaultTrack, loop, context, tempo, result, clock);
                     result.Tempo = tempo;
                     break;
                 case InstrumentNode instrument:
@@ -135,10 +142,10 @@ public static class Interpreter
         return track;
     }
 
-    private static int ExecuteBlock(
+    private static int ExecuteStatements(
         TrackBuilder track,
         IReadOnlyList<AstNode> body,
-        Dictionary<string, List<AstNode>> sequences,
+        ExecutionContext context,
         int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
@@ -176,12 +183,10 @@ public static class Interpreter
                     EmitChord(track, chord, tempo, clock, result);
                     break;
                 case LoopNode loop:
-                    tempo = ExecuteLoop(track, loop, sequences, tempo, result, clock);
+                    tempo = ExecuteLoop(track, loop, context, tempo, result, clock);
                     break;
                 case PlayNode play:
-                    if (!sequences.TryGetValue(play.SequenceName, out var sequenceBody))
-                        throw new InvalidOperationException($"Unknown sequence '{play.SequenceName}'.");
-                    tempo = ExecuteSequencePlay(track, play.SequenceName, sequenceBody, sequences, tempo, result, clock);
+                    tempo = ExecutePlay(track, play, context, tempo, result, clock);
                     break;
                 case BarNode:
                     CloseMeasure(track);
@@ -192,10 +197,56 @@ public static class Interpreter
         return tempo;
     }
 
+    private static int ExecutePlay(
+        TrackBuilder track,
+        PlayNode play,
+        ExecutionContext context,
+        int tempo,
+        InterpretedProgram result,
+        GlobalBeatClock clock)
+    {
+        if (context.Blocks.TryGetValue(play.SequenceName, out var blockBody))
+            return ExecuteNamedBlockPlay(track, play.SequenceName, blockBody, context, tempo, result, clock);
+
+        if (context.Sequences.TryGetValue(play.SequenceName, out var sequenceBody))
+            return ExecuteSequencePlay(track, play.SequenceName, sequenceBody, context, tempo, result, clock);
+
+        throw new InvalidOperationException($"Unknown block '{play.SequenceName}'.");
+    }
+
+    private static int ExecuteNamedBlockPlay(
+        TrackBuilder track,
+        string blockName,
+        IReadOnlyList<AstNode> blockBody,
+        ExecutionContext context,
+        int tempo,
+        InterpretedProgram result,
+        GlobalBeatClock clock)
+    {
+        if (!context.ExpandingBlocks.Add(blockName))
+            throw new InvalidOperationException($"Recursive block call detected: '{blockName}'.");
+
+        try
+        {
+            var parentContext = CaptureContext(track);
+            RestoreContext(track, parentContext);
+
+            var tempoAfter = ExecuteStatements(track, blockBody, context, tempo, result, clock);
+            track.LastPhraseMidi = track.LastEmittedMidi;
+            track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
+            RestoreContext(track, parentContext);
+            return tempoAfter;
+        }
+        finally
+        {
+            context.ExpandingBlocks.Remove(blockName);
+        }
+    }
+
     private static int ExecuteLoop(
         TrackBuilder track,
         LoopNode loop,
-        Dictionary<string, List<AstNode>> sequences,
+        ExecutionContext context,
         int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
@@ -209,7 +260,7 @@ public static class Interpreter
                 track.CurrentBeat = BeatMath.RoundBeat(loopStart + iterationDuration * i);
 
             var iterationStart = BeatMath.RoundBeat(track.CurrentBeat);
-            tempo = ExecuteBlock(track, loop.Body, sequences, tempo, result, clock);
+            tempo = ExecuteStatements(track, loop.Body, context, tempo, result, clock);
             iterationDuration = BeatMath.RoundBeat(track.CurrentBeat - iterationStart);
         }
 
@@ -232,7 +283,7 @@ public static class Interpreter
         TrackBuilder track,
         string sequenceName,
         IReadOnlyList<AstNode> sequenceBody,
-        Dictionary<string, List<AstNode>> sequences,
+        ExecutionContext context,
         int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
@@ -244,7 +295,7 @@ public static class Interpreter
 
         RestoreContext(track, parentContext);
 
-        var tempoAfter = ExecuteBlock(track, sequenceBody, sequences, tempo, result, clock);
+        var tempoAfter = ExecuteStatements(track, sequenceBody, context, tempo, result, clock);
         track.LastPhraseMidi = track.LastEmittedMidi;
         track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
         RestoreContext(track, parentContext);
