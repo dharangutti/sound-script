@@ -1,5 +1,6 @@
 using SoundScript.Core;
 using SoundScript.Core.Ast;
+using SoundScript.Core.Notation;
 
 namespace SoundScript.Parser;
 
@@ -64,6 +65,7 @@ public sealed class Parser
             return ParseChordStatement();
 
         var unexpected = Peek();
+        ThrowIfInvalidNoteAttempt(unexpected);
         throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
     }
 
@@ -174,6 +176,7 @@ public sealed class Parser
             return ParseChordStatement();
 
         var unexpected = Peek();
+        ThrowIfInvalidNoteAttempt(unexpected);
         throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
     }
 
@@ -228,22 +231,28 @@ public sealed class Parser
         if (IsDominantSeventhAmbiguity(noteToken))
             return ParseDominantSeventhChord(noteToken);
 
-        var note = ParseNoteToken(noteToken);
-        note = note with
+        var (durationBeats, standardDuration) = ParseOptionalDuration();
+        var notation = NotationParser.BuildNotatedNote(
+            noteToken.Value,
+            noteToken,
+            durationBeats,
+            standardDuration);
+
+        return new NoteNode
         {
-            DurationBeats = ParseOptionalDuration(),
+            Notation = notation,
             Velocity = ParseOptionalVelocity()
         };
-        return note;
     }
 
     private ChordNode ParseChordStatement()
     {
         var chordToken = Expect(TokenType.Chord, "chord");
         var chord = ParseChordToken(chordToken);
+        var (durationBeats, _) = ParseOptionalDuration();
         chord = chord with
         {
-            DurationBeats = ParseOptionalDuration(),
+            DurationBeats = durationBeats,
             Velocity = ParseOptionalVelocity()
         };
         return chord;
@@ -288,6 +297,7 @@ public sealed class Parser
             index++;
         }
 
+        var (durationBeats, _) = ParseOptionalDuration();
         var chord = new ChordNode
         {
             Root = root,
@@ -295,42 +305,17 @@ public sealed class Parser
             IsFlat = isFlat,
             Quality = ChordQuality.Dominant7,
             Octave = 4,
-            DurationBeats = ParseOptionalDuration(),
+            DurationBeats = durationBeats,
             Velocity = ParseOptionalVelocity()
         };
         return chord;
     }
 
-    private static NoteNode ParseNoteToken(Token token)
-    {
-        var text = token.Value;
-        var pitch = text[0];
-        var index = 1;
-        var isSharp = false;
-        var isFlat = false;
-
-        if (index < text.Length && text[index] == '#')
+    private static NoteNode ParseNoteToken(Token token) =>
+        new()
         {
-            isSharp = true;
-            index++;
-        }
-        else if (index < text.Length && (text[index] == 'b' || text[index] == 'B'))
-        {
-            isFlat = true;
-            index++;
-        }
-
-        if (!int.TryParse(text[index..], out var octave))
-            throw Invalid(token, $"Invalid note '{text}'.");
-
-        return new NoteNode
-        {
-            Pitch = pitch,
-            IsSharp = isSharp,
-            IsFlat = isFlat,
-            Octave = octave
+            Notation = NotationParser.BuildNotatedNote(token.Value, token)
         };
-    }
 
     private static ChordNode ParseChordToken(Token token)
     {
@@ -390,33 +375,28 @@ public sealed class Parser
         throw new InvalidOperationException($"Unknown chord quality in '{suffix}'.");
     }
 
-    private double ParseOptionalDuration()
+    private (double Beats, NoteDuration? StandardDuration) ParseOptionalDuration()
     {
         if (Match(TokenType.Colon))
         {
             var durationToken = Expect(TokenType.Number, "duration");
-            return ParseDuration(durationToken);
+            return (ParseDuration(durationToken), null);
         }
 
         if (Match(TokenType.For))
         {
             var durationToken = Expect(TokenType.Number, "duration");
-            return ParseDuration(durationToken);
+            return (ParseDuration(durationToken), null);
         }
 
         if (Match(TokenType.Duration))
         {
-            return Previous().Value.ToLowerInvariant() switch
-            {
-                "q" => 1.0,
-                "h" => 2.0,
-                "e" => 0.5,
-                "w" => 4.0,
-                _ => throw Invalid(Previous(), "Unknown duration.")
-            };
+            var durationToken = Previous();
+            var (standardDuration, beats) = NotationParser.ParseDurationAlias(durationToken.Value, durationToken);
+            return (beats, standardDuration);
         }
 
-        return 1.0;
+        return (1.0, null);
     }
 
     private int? ParseOptionalVelocity()
@@ -484,6 +464,18 @@ public sealed class Parser
     private Token Peek() => _tokens[_position];
 
     private Token Previous() => _tokens[_position - 1];
+
+    private static void ThrowIfInvalidNoteAttempt(Token token)
+    {
+        if (token.Type == TokenType.Duration && token.Value.Length > 1)
+            throw Invalid(token, $"Unknown duration: '{token.Value}'");
+
+        if (token.Type != TokenType.Identifier)
+            return;
+
+        if (NotationParser.TryGetInvalidNoteMessage(token.Value, out var message))
+            throw Invalid(token, message);
+    }
 
     private static InvalidOperationException Invalid(Token token, string message) =>
         new($"{message} (line {token.Line}, column {token.Column}).");
