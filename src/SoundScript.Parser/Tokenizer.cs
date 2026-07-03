@@ -40,7 +40,12 @@ public sealed class Tokenizer
         ["mp"] = TokenType.Dynamic,
         ["mf"] = TokenType.Dynamic,
         ["f"] = TokenType.Dynamic,
-        ["import"] = TokenType.Import
+        ["import"] = TokenType.Import,
+        ["drop2"] = TokenType.ChordVoicing,
+        ["drop3"] = TokenType.ChordVoicing,
+        ["inv1"] = TokenType.ChordVoicing,
+        ["inv2"] = TokenType.ChordVoicing,
+        ["spread"] = TokenType.ChordVoicing
     };
 
     private static readonly string[] ChordSuffixes =

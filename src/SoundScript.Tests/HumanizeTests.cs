@@ -49,12 +49,12 @@ public class HumanizeTests
             }
             """;
 
-        HumanizeApplicator.SetSeed(7);
+        HumanizeApplicator.SetSeed(99);
+        var expectedStart = HumanizeApplicator.ApplyToStartBeat(0, 0.03, 120, 0);
         var humanized = Interpret(source).Tracks.Single().Notes.Single();
-        HumanizeApplicator.SetSeed(7);
-        var dry = Interpret("track piano { C4 q }").Tracks.Single().Notes.Single();
 
-        Assert.NotEqual(dry.StartBeat, humanized.StartBeat);
+        Assert.NotEqual(0, expectedStart);
+        Assert.Equal(expectedStart, humanized.StartBeat);
         Assert.Equal(1.0, humanized.DurationBeats);
     }
 
@@ -73,9 +73,9 @@ public class HumanizeTests
         var shaped = PlaybackShaper.ShapeNote(
             null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, "piano", 1.0).Velocity;
 
-        HumanizeApplicator.SetSeed(11);
+        HumanizeApplicator.SetSeed(99);
+        var expectedVelocity = HumanizeApplicator.ApplyVelocity(shaped, 0.03, 0);
         var humanized = Interpret(source).Tracks.Single().Notes.Single();
-        HumanizeApplicator.SetSeed(11);
         var dry = Interpret("""
             track piano {
                 instrument piano
@@ -85,7 +85,8 @@ public class HumanizeTests
             """).Tracks.Single().Notes.Single();
 
         Assert.Equal(shaped, dry.Velocity);
-        Assert.NotEqual(shaped, humanized.Velocity);
+        Assert.NotEqual(shaped, expectedVelocity);
+        Assert.Equal(expectedVelocity, humanized.Velocity);
     }
 
     private static InterpretedProgram Interpret(string source)

@@ -11,6 +11,7 @@ public sealed record ChordNode : AstNode
     public int Octave { get; init; } = 4;
     public double DurationBeats { get; init; } = 1.0;
     public int? Velocity { get; init; }
+    public ChordVoicingStyle? Voicing { get; init; }
 
     public IReadOnlyList<int> ToMidiNumbers()
     {
