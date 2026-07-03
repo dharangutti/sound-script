@@ -24,5 +24,9 @@ public enum TokenType
     Track,
     Duration,
     VelocityPrefix,
+    Rest,
+    Tie,
+    Articulation,
+    Dynamic,
     EndOfFile
 }

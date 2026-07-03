@@ -24,7 +24,15 @@ public sealed class Tokenizer
         ["quarter"] = TokenType.Duration,
         ["half"] = TokenType.Duration,
         ["eighth"] = TokenType.Duration,
-        ["whole"] = TokenType.Duration
+        ["whole"] = TokenType.Duration,
+        ["rest"] = TokenType.Rest,
+        ["staccato"] = TokenType.Articulation,
+        ["legato"] = TokenType.Articulation,
+        ["accent"] = TokenType.Articulation,
+        ["p"] = TokenType.Dynamic,
+        ["mp"] = TokenType.Dynamic,
+        ["mf"] = TokenType.Dynamic,
+        ["f"] = TokenType.Dynamic
     };
 
     private static readonly string[] ChordSuffixes =
@@ -56,7 +64,7 @@ public sealed class Tokenizer
             var startColumn = _column;
             var current = Peek();
 
-            if (current is '{' or '}' or '|' or ':' or '/')
+            if (current is '{' or '}' or '|' or ':' or '/' or '~')
             {
                 var type = current switch
                 {
@@ -65,6 +73,7 @@ public sealed class Tokenizer
                     '|' => TokenType.Bar,
                     ':' => TokenType.Colon,
                     '/' => TokenType.Slash,
+                    '~' => TokenType.Tie,
                     _ => throw new InvalidOperationException()
                 };
 
