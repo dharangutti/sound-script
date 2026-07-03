@@ -18,6 +18,8 @@ public sealed record NotatedNote
     public int? AdjustedOctave { get; init; }
     public int? AdjustedMidiNumber { get; init; }
     public int PhraseIndex { get; init; }
+    public int? ShapedVelocity { get; init; }
+    public double? ShapedDurationBeats { get; init; }
 
     public int EffectiveOctave => AdjustedOctave ?? Octave;
 

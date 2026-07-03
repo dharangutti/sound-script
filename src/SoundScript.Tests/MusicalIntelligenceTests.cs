@@ -89,12 +89,25 @@ public class MusicalIntelligenceTests
             }
             """;
 
-        var velocities = Interpret(source).Tracks.Single().Notes.Select(n => n.Velocity).ToList();
+        var interpreted = Interpret(source);
+        var velocities = interpreted.Tracks.Single().Notes.Select(n => n.Velocity).ToList();
+        int[] rampVelocities = [64, 80, 96];
 
-        Assert.Equal(64, velocities[0]);
-        Assert.Equal(80, velocities[1]);
-        Assert.Equal(96, velocities[2]);
-        Assert.Contains(Interpret(source).Warnings, w => w.Contains("Dynamic ramp applied"));
+        for (var i = 0; i < rampVelocities.Length; i++)
+        {
+            var expected = PlaybackShaper.ShapeNote(
+                null,
+                rampVelocities[i],
+                null,
+                DynamicLevel.Forte,
+                64,
+                null,
+                null,
+                1.0).Velocity;
+            Assert.Equal(expected, velocities[i]);
+        }
+
+        Assert.Contains(interpreted.Warnings, w => w.Contains("Dynamic ramp applied"));
     }
 
     [Fact]

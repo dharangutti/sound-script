@@ -291,19 +291,25 @@ public static class Interpreter
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
         var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
-        var velocity = ComputeFinalVelocity(
+        var shaped = PlaybackShaper.ShapeNote(
             note.Velocity,
-            rampVelocity: null,
+            rampVelocity,
             notation.Dynamic,
             track.CurrentDynamic,
             track.CurrentVelocity,
             notation.Articulation,
             track.CurrentInstrumentName,
-            rampVelocity);
+            notation.DurationBeats);
 
-        var writtenBeats = notation.DurationBeats;
-        var playbackBeats = ApplyArticulationDuration(writtenBeats, notation.Articulation);
-        var durationMs = BeatsToMilliseconds(playbackBeats, tempo);
+        ApplyPlaybackWarnings(result, shaped);
+
+        notation = notation with
+        {
+            ShapedVelocity = shaped.Velocity,
+            ShapedDurationBeats = shaped.DurationBeats
+        };
+
+        var durationMs = BeatsToMilliseconds(shaped.DurationBeats, tempo);
         var midiNumber = notation.ResolvedMidiNumber;
 
         track.Notes.Add(new TimedNote(
@@ -314,7 +320,7 @@ public static class Interpreter
             shaped.Velocity));
 
         track.LastEmittedMidi = midiNumber;
-        AdvanceTiming(track, writtenBeats);
+        AdvanceTiming(track, notation.DurationBeats);
     }
 
     private static NotatedNote ApplyMusicalIntelligence(
@@ -369,13 +375,17 @@ public static class Interpreter
         if (spacedAdjusted)
             AddWarning(result, "Harmonic spacing adjustment applied");
 
+        var (balancedVelocities, balanced) = ChordBalancer.Apply(spacedNotes, shaped.Velocity);
+        if (balanced)
+            AddWarning(result, "Chord balance applied");
+
         var durationMs = BeatsToMilliseconds(chord.DurationBeats, tempo);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
 
-        foreach (var midiNumber in spacedNotes)
+        for (var i = 0; i < spacedNotes.Length; i++)
         {
             track.Notes.Add(new TimedNote(
-                voicedNotes[i],
+                spacedNotes[i],
                 globalBeat,
                 durationBeats,
                 durationMs,
@@ -385,24 +395,18 @@ public static class Interpreter
         AdvanceTiming(track, chord.DurationBeats);
     }
 
-    private static int ComputeFinalVelocity(
-        int? noteVelocity,
-        DynamicLevel? noteDynamic,
-        DynamicLevel? trackDynamic,
-        int trackVelocity,
-        ArticulationType? articulation,
-        string? instrumentName,
-        int? rampVelocity = null)
+    private static void ApplyPlaybackWarnings(InterpretedProgram result, PlaybackShapeResult shaped)
     {
-        var baseVelocity = noteVelocity
-            ?? rampVelocity
-            ?? noteDynamic?.ToVelocity()
-            ?? trackDynamic?.ToVelocity()
-            ?? trackVelocity;
-
-        baseVelocity = ApplyArticulationVelocity(baseVelocity, articulation);
-        baseVelocity = Math.Clamp((int)Math.Round(baseVelocity * InstrumentGainMap.GetGain(instrumentName)), 1, 127);
-        return VelocityCurve.Apply(baseVelocity, VelocityCurve.ForArticulation(articulation));
+        if (shaped.DynamicShaped)
+            AddWarning(result, "Dynamic shaping applied");
+        if (shaped.ArticulationShaped)
+            AddWarning(result, "Articulation shaping applied");
+        if (shaped.GainRefined)
+            AddWarning(result, "Instrument gain refinement applied");
+        if (shaped.DurationNormalized)
+            AddWarning(result, "Duration normalization applied");
+        if (shaped.ExpressiveApplied)
+            AddWarning(result, "Expressive curve applied");
     }
 
     private static void AdvanceTiming(TrackBuilder track, double beats)
