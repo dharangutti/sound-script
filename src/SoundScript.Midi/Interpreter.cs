@@ -1,5 +1,7 @@
 using SoundScript.Core;
 using SoundScript.Core.Ast;
+using SoundScript.Core.Notation;
+using SoundScript.Parser;
 
 namespace SoundScript.Midi;
 
@@ -11,6 +13,10 @@ public static class Interpreter
         public double CurrentBeat { get; set; }
         public int CurrentProgram { get; set; } = InstrumentMap.DefaultProgram;
         public int CurrentVelocity { get; set; } = 64;
+        public DynamicLevel? CurrentDynamic { get; set; }
+        public bool HasBarLines { get; set; }
+        public double CurrentMeasureBeats { get; set; }
+        public List<double> MeasureBeats { get; } = [];
         public List<TimedNote> Notes { get; } = [];
         public List<ProgramChange> ProgramChanges { get; } = [];
     }
@@ -43,12 +49,12 @@ public static class Interpreter
                     sequences[sequence.Name] = sequence.Body;
                     break;
                 case TrackNode track:
-                    tempo = ExecuteBlock(GetOrCreateTrack(tracks, track.Name), track.Body, sequences, tempo);
+                    tempo = ExecuteBlock(GetOrCreateTrack(tracks, track.Name), track.Body, sequences, tempo, result);
                     result.Tempo = tempo;
                     break;
                 case MelodyNode melody:
                     defaultTrack ??= GetOrCreateTrack(tracks, "melody");
-                    tempo = ExecuteBlock(defaultTrack, melody.Body, sequences, tempo);
+                    tempo = ExecuteBlock(defaultTrack, melody.Body, sequences, tempo, result);
                     result.Tempo = tempo;
                     break;
                 case PlayNode play:
@@ -56,13 +62,13 @@ public static class Interpreter
                     if (!sequences.TryGetValue(play.SequenceName, out var sequenceBody))
                         throw new InvalidOperationException($"Unknown sequence '{play.SequenceName}'.");
 
-                    tempo = ExecuteBlock(defaultTrack, sequenceBody, sequences, tempo);
+                    tempo = ExecuteBlock(defaultTrack, sequenceBody, sequences, tempo, result);
                     result.Tempo = tempo;
                     break;
                 case LoopNode loop:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     for (var i = 0; i < loop.Count; i++)
-                        tempo = ExecuteBlock(defaultTrack, loop.Body, sequences, tempo);
+                        tempo = ExecuteBlock(defaultTrack, loop.Body, sequences, tempo, result);
                     result.Tempo = tempo;
                     break;
                 case InstrumentNode instrument:
@@ -73,6 +79,14 @@ public static class Interpreter
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     defaultTrack.CurrentVelocity = velocity.Velocity;
                     break;
+                case DynamicNode dynamic:
+                    defaultTrack ??= GetOrCreateTrack(tracks, "default");
+                    defaultTrack.CurrentDynamic = dynamic.Level;
+                    break;
+                case RestNode rest:
+                    defaultTrack ??= GetOrCreateTrack(tracks, "default");
+                    EmitRest(defaultTrack, rest);
+                    break;
                 case NoteNode note:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     EmitNote(defaultTrack, note, tempo);
@@ -82,12 +96,15 @@ public static class Interpreter
                     EmitChord(defaultTrack, chord, tempo);
                     break;
                 case BarNode:
+                    defaultTrack ??= GetOrCreateTrack(tracks, "default");
+                    CloseMeasure(defaultTrack);
                     break;
             }
         }
 
         foreach (var track in tracks.Values)
         {
+            FlushMeasureValidation(track, result);
             if (track.Notes.Count == 0)
                 continue;
 
@@ -115,7 +132,8 @@ public static class Interpreter
         TrackBuilder track,
         IReadOnlyList<AstNode> body,
         Dictionary<string, List<AstNode>> sequences,
-        int tempo)
+        int tempo,
+        InterpretedProgram result)
     {
         foreach (var statement in body)
         {
@@ -127,11 +145,21 @@ public static class Interpreter
                 case TempoNode tempoNode:
                     tempo = tempoNode.Bpm;
                     break;
+                case TimeSignatureNode time:
+                    result.TimeSignatureNumerator = time.Numerator;
+                    result.TimeSignatureDenominator = time.Denominator;
+                    break;
                 case InstrumentNode instrument:
                     ApplyInstrument(track, instrument.ProgramNumber);
                     break;
                 case VelocityNode velocity:
                     track.CurrentVelocity = velocity.Velocity;
+                    break;
+                case DynamicNode dynamic:
+                    track.CurrentDynamic = dynamic.Level;
+                    break;
+                case RestNode rest:
+                    EmitRest(track, rest);
                     break;
                 case NoteNode note:
                     EmitNote(track, note, tempo);
@@ -141,14 +169,15 @@ public static class Interpreter
                     break;
                 case LoopNode loop:
                     for (var i = 0; i < loop.Count; i++)
-                        tempo = ExecuteBlock(track, loop.Body, sequences, tempo);
+                        tempo = ExecuteBlock(track, loop.Body, sequences, tempo, result);
                     break;
                 case PlayNode play:
                     if (!sequences.TryGetValue(play.SequenceName, out var sequenceBody))
                         throw new InvalidOperationException($"Unknown sequence '{play.SequenceName}'.");
-                    tempo = ExecuteBlock(track, sequenceBody, sequences, tempo);
+                    tempo = ExecuteBlock(track, sequenceBody, sequences, tempo, result);
                     break;
                 case BarNode:
+                    CloseMeasure(track);
                     break;
             }
         }
@@ -165,27 +194,41 @@ public static class Interpreter
         }
     }
 
+    private static void EmitRest(TrackBuilder track, RestNode rest)
+    {
+        rest.Rest.StartTime = track.CurrentBeat;
+        AdvanceTiming(track, rest.Rest.DurationBeats);
+    }
+
     private static void EmitNote(TrackBuilder track, NoteNode note, int tempo)
     {
-        var velocity = note.Velocity ?? track.CurrentVelocity;
         var notation = note.Notation;
         notation.StartTime = track.CurrentBeat;
 
-        var durationMs = BeatsToMilliseconds(notation.DurationBeats, tempo);
+        var velocity = note.Velocity
+            ?? notation.Dynamic?.ToVelocity()
+            ?? track.CurrentDynamic?.ToVelocity()
+            ?? track.CurrentVelocity;
+
+        velocity = ApplyArticulationVelocity(velocity, notation.Articulation);
+
+        var writtenBeats = notation.DurationBeats;
+        var playbackBeats = ApplyArticulationDuration(writtenBeats, notation.Articulation);
+        var durationMs = BeatsToMilliseconds(playbackBeats, tempo);
 
         track.Notes.Add(new TimedNote(
             notation.ToMidiNumber(),
             notation.StartTime,
-            notation.DurationBeats,
+            playbackBeats,
             durationMs,
             velocity));
 
-        track.CurrentBeat += notation.DurationBeats;
+        AdvanceTiming(track, writtenBeats);
     }
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo)
     {
-        var velocity = chord.Velocity ?? track.CurrentVelocity;
+        var velocity = chord.Velocity ?? track.CurrentDynamic?.ToVelocity() ?? track.CurrentVelocity;
         var durationMs = BeatsToMilliseconds(chord.DurationBeats, tempo);
         var startBeat = track.CurrentBeat;
 
@@ -199,8 +242,55 @@ public static class Interpreter
                 velocity));
         }
 
-        track.CurrentBeat += chord.DurationBeats;
+        AdvanceTiming(track, chord.DurationBeats);
     }
+
+    private static void AdvanceTiming(TrackBuilder track, double beats)
+    {
+        track.CurrentBeat += beats;
+        track.CurrentMeasureBeats += beats;
+    }
+
+    private static void CloseMeasure(TrackBuilder track)
+    {
+        track.HasBarLines = true;
+        track.MeasureBeats.Add(track.CurrentMeasureBeats);
+        track.CurrentMeasureBeats = 0;
+    }
+
+    private static void FlushMeasureValidation(TrackBuilder track, InterpretedProgram result)
+    {
+        if (!track.HasBarLines
+            || result.TimeSignatureNumerator is not int numerator
+            || result.TimeSignatureDenominator is not int denominator)
+            return;
+
+        if (track.CurrentMeasureBeats > 0)
+            track.MeasureBeats.Add(track.CurrentMeasureBeats);
+
+        foreach (var warning in NotationParser.ValidateMeasure(track.MeasureBeats, numerator, denominator))
+        {
+            if (!result.Warnings.Contains(warning))
+                result.Warnings.Add(warning);
+        }
+    }
+
+    private static double ApplyArticulationDuration(double beats, ArticulationType? articulation) =>
+        articulation switch
+        {
+            ArticulationType.Staccato => beats * 0.5,
+            ArticulationType.Legato => beats,
+            ArticulationType.Accent => beats,
+            _ => beats
+        };
+
+    private static int ApplyArticulationVelocity(int velocity, ArticulationType? articulation) =>
+        articulation switch
+        {
+            ArticulationType.Accent => Math.Min(127, (int)Math.Round(velocity * 1.25)),
+            ArticulationType.Legato => Math.Max(1, (int)Math.Round(velocity * 0.95)),
+            _ => velocity
+        };
 
     public static double BeatsToMilliseconds(double beats, int bpm) =>
         (60_000.0 / bpm) * beats;

@@ -4,7 +4,7 @@ namespace SoundScript.Core.Notation;
 /// Canonical internal representation of a single notated pitch.
 /// Duration and start time are populated as the note moves through parse and interpret.
 /// </summary>
-public sealed class NotatedNote
+public sealed record NotatedNote
 {
     public PitchClass PitchClass { get; init; }
     public AccidentalType Accidental { get; init; }
@@ -12,6 +12,14 @@ public sealed class NotatedNote
     public NoteDuration? StandardDuration { get; init; }
     public double DurationBeats { get; init; } = 1.0;
     public double StartTime { get; set; }
+    public ArticulationType? Articulation { get; init; }
+    public DynamicLevel? Dynamic { get; init; }
+    public bool IsTied { get; init; }
+
+    public bool MatchesPitch(NotatedNote other) =>
+        PitchClass == other.PitchClass
+        && Accidental == other.Accidental
+        && Octave == other.Octave;
 
     public int ToMidiNumber()
     {

@@ -58,6 +58,22 @@ public sealed class Parser
         if (Match(TokenType.Velocity))
             return ParseVelocityStatement();
 
+        if (Match(TokenType.Rest))
+            return ParseRestStatement();
+
+        if (Match(TokenType.Dynamic))
+            return ParseDynamicStatement();
+
+        if (Check(TokenType.Articulation))
+        {
+            var articulation = ParseOptionalPrefixArticulation();
+            if (Check(TokenType.Note))
+                return ParseNoteStatement(articulation);
+
+            var articulationTarget = Peek();
+            throw Invalid(articulationTarget, "Expected note after articulation.");
+        }
+
         if (Check(TokenType.Note))
             return ParseNoteStatement();
 
@@ -169,6 +185,22 @@ public sealed class Parser
         if (Match(TokenType.Bar))
             return new BarNode();
 
+        if (Match(TokenType.Rest))
+            return ParseRestStatement();
+
+        if (Match(TokenType.Dynamic))
+            return ParseDynamicStatement();
+
+        if (Check(TokenType.Articulation))
+        {
+            var articulation = ParseOptionalPrefixArticulation();
+            if (Check(TokenType.Note))
+                return ParseNoteStatement(articulation);
+
+            var articulationTarget = Peek();
+            throw Invalid(articulationTarget, "Expected note after articulation.");
+        }
+
         if (Check(TokenType.Note))
             return ParseNoteStatement();
 
@@ -224,25 +256,111 @@ public sealed class Parser
         return new VelocityNode { Velocity = velocity };
     }
 
-    private AstNode ParseNoteStatement()
+    private AstNode ParseNoteStatement(ArticulationType? prefixArticulation = null)
     {
         var noteToken = Expect(TokenType.Note, "note");
 
         if (IsDominantSeventhAmbiguity(noteToken))
             return ParseDominantSeventhChord(noteToken);
 
+        var note = BuildNoteNode(noteToken, prefixArticulation);
+
+        while (Match(TokenType.Tie))
+        {
+            var tieToken = Previous();
+            var tiedToken = Expect(TokenType.Note, "tied note");
+            if (IsDominantSeventhAmbiguity(tiedToken))
+                throw Invalid(tiedToken, "Invalid tie: chords cannot be tied.");
+
+            var tiedNote = BuildNoteNode(tiedToken);
+            note = note with { Notation = NotationParser.ParseTie(note.Notation, tiedNote.Notation, tieToken) };
+        }
+
+        return note;
+    }
+
+    private NoteNode BuildNoteNode(Token noteToken, ArticulationType? prefixArticulation = null)
+    {
         var (durationBeats, standardDuration) = ParseOptionalDuration();
+        var articulation = prefixArticulation;
+
+        if (Match(TokenType.Articulation))
+        {
+            var articulationToken = Previous();
+            articulation = NotationParser.ParseArticulation(articulationToken.Value, articulationToken);
+        }
+
         var notation = NotationParser.BuildNotatedNote(
             noteToken.Value,
             noteToken,
             durationBeats,
-            standardDuration);
+            standardDuration,
+            articulation);
 
         return new NoteNode
         {
             Notation = notation,
             Velocity = ParseOptionalVelocity()
         };
+    }
+
+    private RestNode ParseRestStatement()
+    {
+        var (durationBeats, standardDuration) = ParseRestDuration();
+        return new RestNode
+        {
+            Rest = NotationParser.ParseRest(durationBeats, standardDuration)
+        };
+    }
+
+    private DynamicNode ParseDynamicStatement()
+    {
+        var token = Previous();
+        return new DynamicNode
+        {
+            Level = NotationParser.ParseDynamic(token.Value, token)
+        };
+    }
+
+    private ArticulationType? ParseOptionalPrefixArticulation()
+    {
+        if (!Match(TokenType.Articulation))
+            return null;
+
+        var token = Previous();
+        return NotationParser.ParseArticulation(token.Value, token);
+    }
+
+    private (double Beats, NoteDuration? StandardDuration) ParseRestDuration()
+    {
+        if (Match(TokenType.Colon))
+        {
+            var durationToken = Expect(TokenType.Number, "rest duration");
+            return (ParseDuration(durationToken), null);
+        }
+
+        if (Match(TokenType.For))
+        {
+            var durationToken = Expect(TokenType.Number, "rest duration");
+            return (ParseDuration(durationToken), null);
+        }
+
+        if (Match(TokenType.Duration))
+        {
+            var durationToken = Previous();
+            if (Match(TokenType.Duration))
+            {
+                var extraToken = Previous();
+                throw Invalid(extraToken, $"Invalid rest duration: 'rest {durationToken.Value}{extraToken.Value}'");
+            }
+
+            NotationParser.ValidateRestDurationToken(durationToken.Value, durationToken);
+            var (standardDuration, beats) = NotationParser.ParseDurationAlias(durationToken.Value, durationToken);
+            return (beats, standardDuration);
+        }
+
+        var next = Peek();
+        throw Invalid(next, $"Invalid rest duration: 'rest {next.Value}'");
     }
 
     private ChordNode ParseChordStatement()
@@ -423,7 +541,8 @@ public sealed class Parser
         var token = Peek();
         if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
-            or TokenType.Sequence or TokenType.Loop or TokenType.Velocity or TokenType.Track)
+            or TokenType.Sequence or TokenType.Loop or TokenType.Velocity or TokenType.Track
+            or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
         {
             Advance();
             return token.Value;
@@ -470,11 +589,17 @@ public sealed class Parser
         if (token.Type == TokenType.Duration && token.Value.Length > 1)
             throw Invalid(token, $"Unknown duration: '{token.Value}'");
 
-        if (token.Type != TokenType.Identifier)
-            return;
+        if (token.Type == TokenType.Identifier)
+        {
+            if (NotationParser.TryGetInvalidArticulationMessage(token.Value, out var articulationMessage))
+                throw Invalid(token, articulationMessage);
 
-        if (NotationParser.TryGetInvalidNoteMessage(token.Value, out var message))
-            throw Invalid(token, message);
+            if (NotationParser.TryGetInvalidDynamicMessage(token.Value, out var dynamicMessage))
+                throw Invalid(token, dynamicMessage);
+
+            if (NotationParser.TryGetInvalidNoteMessage(token.Value, out var message))
+                throw Invalid(token, message);
+        }
     }
 
     private static InvalidOperationException Invalid(Token token, string message) =>
