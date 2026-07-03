@@ -14,6 +14,7 @@ public partial class Playground
       tempo 120
 
       melody {
+          mf
           C4 q
           E4 q
           G4 q
@@ -32,8 +33,44 @@ public partial class Playground
     ScriptText =
         """
         melody {
-            bpm 120
-            C4 E4 G4 | C5
+            tempo 120
+            C4 q E4 q G4 q | C5 h
+        }
+        """;
+    ClearState();
+  }
+
+  private void LoadArticulationsExample()
+  {
+    ScriptText =
+        """
+        tempo 120
+        instrument piano
+
+        melody {
+            staccato C4 q
+            D4 q legato
+            accent E4 q
+            C5 h
+        }
+        """;
+    ClearState();
+  }
+
+  private void LoadDynamicsExample()
+  {
+    ScriptText =
+        """
+        tempo 96
+        instrument piano
+
+        melody {
+            p
+            C4 q D4 q
+            mf
+            E4 q F4 q
+            f
+            G4 h
         }
         """;
     ClearState();
@@ -56,6 +93,37 @@ public partial class Playground
     ClearState();
   }
 
+  private void LoadIntelligenceExample()
+  {
+    ScriptText =
+        """
+        tempo 110
+        instrument violin
+
+        sequence phrasea {
+            C5 q
+            D5 q
+            E5 h
+        }
+
+        sequence phraseb {
+            G5 q
+            A5 q
+            B5 h
+        }
+
+        melody {
+            p
+            C4 q D4 q E4 q
+            f
+            F4 q G4 q A4 q
+            play phrasea
+            play phraseb
+        }
+        """;
+    ClearState();
+  }
+
   private void LoadMultitrackExample()
   {
     ScriptText =
@@ -73,6 +141,26 @@ public partial class Playground
             instrument bass
             C2 h
             G2 h
+        }
+        """;
+    ClearState();
+  }
+
+  private void LoadPlaybackExample()
+  {
+    ScriptText =
+        """
+        tempo 120
+        instrument piano
+
+        melody {
+            mf
+            staccato C4 q
+            legato E4 q
+            accent G4 q
+            Cmaj q
+            f
+            C5 h
         }
         """;
     ClearState();

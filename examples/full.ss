@@ -1,9 +1,9 @@
 tempo 120
 time 4/4
-instrument piano
 
 sequence intro {
-    Cmaj4 q
+    mf
+    Cmaj q
     Dm q
     G7 q
 }
@@ -11,10 +11,19 @@ sequence intro {
 track melody {
     instrument flute
     play intro
-    loop 2 {
-        C5 q v100
-        D5 q v80
-    }
+    f
+    staccato C5 q
+    legato D5 q
+    accent E5 q
+    C5 q ~ C5 q
+}
+
+track harmony {
+    instrument piano
+    Cmaj q
+    Fmaj q
+    G7 q
+    Cmaj h
 }
 
 track bass {
