@@ -32,7 +32,8 @@ public sealed class Tokenizer
         ["p"] = TokenType.Dynamic,
         ["mp"] = TokenType.Dynamic,
         ["mf"] = TokenType.Dynamic,
-        ["f"] = TokenType.Dynamic
+        ["f"] = TokenType.Dynamic,
+        ["import"] = TokenType.Import
     };
 
     private static readonly string[] ChordSuffixes =
@@ -63,6 +64,12 @@ public sealed class Tokenizer
             var startLine = _line;
             var startColumn = _column;
             var current = Peek();
+
+            if (current == '"')
+            {
+                tokens.Add(ReadStringLiteral(startLine, startColumn));
+                continue;
+            }
 
             if (current is '{' or '}' or '|' or ':' or '/' or '~')
             {
@@ -111,6 +118,27 @@ public sealed class Tokenizer
 
         tokens.Add(new Token(TokenType.EndOfFile, string.Empty, _line, _column));
         return tokens;
+    }
+
+    private Token ReadStringLiteral(int line, int column)
+    {
+        Advance();
+        var start = _index;
+
+        while (!IsAtEnd() && Peek() != '"')
+        {
+            if (Peek() == '\n')
+                throw new InvalidOperationException($"Unterminated string literal at line {line}, column {column}.");
+
+            Advance();
+        }
+
+        if (IsAtEnd())
+            throw new InvalidOperationException($"Unterminated string literal at line {line}, column {column}.");
+
+        var value = _source[start.._index];
+        Advance();
+        return new Token(TokenType.StringLiteral, value, line, column);
     }
 
     private Token ReadNumber(int line, int column)
