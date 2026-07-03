@@ -1,6 +1,27 @@
-# SoundScript Playground — Verification Checklist
+# SoundScript Playground — Verification Checklist (V2)
 
 Use this checklist after building or deploying the playground.
+
+## V2 Presets
+
+The playground ships with **V2** and **Core** preset groups (see `Playground.razor` / `Playground.razor.cs`).
+
+| Preset | Demonstrates |
+|--------|--------------|
+| **Showcase** | Patterns, blocks, phrases, layers, orchestration |
+| **Blocks** | Named blocks + `play` |
+| **Metadata** | `gain`, `humanize` |
+| **Tempo** | `tempo 120 → 160 over 4 bars` |
+| **Layers** | `layer piano` / `layer cello` |
+| **Humanize** | Deterministic timing + velocity jitter |
+| **Chords+** | `drop2`, `inv1`, `spread` |
+| **Phrases** | `phrase { curve soft ... }` |
+| **Patterns** | `pattern arp` + `play arp Cmaj q` |
+| **Orchestration** | `double octave`, `reinforce bass`, `brighten top` |
+
+**Note:** Imports require the CLI (`ProgramLoader`); they are not available in the browser playground.
+
+The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI.
 
 ## Build
 
@@ -25,7 +46,9 @@ python3 -m http.server 8080
 - [ ] **Stop** halts playback
 - [ ] **Download MIDI** saves a `.mid` file
 - [ ] Invalid syntax shows an error in the error panel
-- [ ] Example buttons (Melody, Chords, Multi-track) load presets
+- [ ] V2 preset buttons (Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Patterns, Orchestration) load scripts
+- [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
+- [ ] Pipeline display shows PhraseShaper, PatternExpander, Orchestration, Layers, Humanize
 
 ## Offline test
 

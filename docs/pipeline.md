@@ -1,4 +1,4 @@
-# Interpreter Pipeline (v1.2)
+# Interpreter Pipeline (V2)
 
 End-to-end flow from SoundScript source to MIDI output.
 
@@ -7,135 +7,109 @@ End-to-end flow from SoundScript source to MIDI output.
 ```
 DSL script
     ↓
-┌───────────┐
-│ Tokenizer │  →  Token stream
-└─────┬─────┘
-      ↓
-┌───────────┐
-│  Parser   │  →  ProgramNode (AST)
-└─────┬─────┘
-      ↓
-┌───────────────────────────────────────────────────┐
-│                  Interpreter                       │
-│                                                    │
-│  For each statement:                               │
-│    rest  → advance beat clock                      │
-│    note  → resolve notation → intelligence → shape │
-│    chord → expand → voice → space → shape        │
-│    track → separate MIDI track                     │
-│                                                    │
-│  Post-processing:                                  │
-│    measure validation warnings                     │
-│    multi-track sync (GlobalBeatClock)              │
-└─────┬─────────────────────────────────────────────┘
-      ↓
-┌───────────────┐
-│ MidiGenerator │  →  output.mid
-└───────────────┘
+ProgramLoader (imports)     ← V2
+    ↓
+Tokenizer → Parser → ProgramNode (AST)
+    ↓
+┌────────────────────────────────────────────────────────────┐
+│                      Interpreter                            │
+│                                                             │
+│  Register: blocks, sequences, patterns                      │
+│                                                             │
+│  Per statement:                                             │
+│    import  → (resolved at load)                             │
+│    block   → register body                                  │
+│    pattern → register definition                            │
+│    play    → block / sequence / pattern+chord expansion     │
+│    phrase  → scoped shaping context                         │
+│    note    → intelligence → phrase → playback → emit      │
+│    chord   → voice → advanced → orchestration → space      │
+│    layer   → add MIDI channel                               │
+│                                                             │
+│  Post-processing:                                           │
+│    HumanizeApplicator (per track)                           │
+│    measure validation                                       │
+└────────────────────────────┬───────────────────────────────┘
+                             ↓
+                      MidiGenerator → output.mid
 ```
 
-## Per-Note Pipeline
+## Per-Note Pipeline (V2)
 
 ```
-NoteNode.Notation (NotatedNote)
+NoteNode
     │
-    ├─► Resolve MIDI number
-    │
-    ├─► Phase 4: OctaveSmoother
-    ├─► Phase 4: MelodicContour
-    ├─► Phase 4: PhraseSmoother (at boundaries)
-    ├─► Phase 4: DynamicContext.Resolve (ramp velocity)
-    │
-    ├─► Phase 5: PlaybackShaper.ShapeNote
+    ├─► MusicalIntelligence (OctaveSmoother, MelodicContour, PhraseSmoother)
+    ├─► DynamicContext.Resolve (ramp)
+    ├─► PhraseShaper                    ← V2 phrase blocks
+    ├─► PlaybackShaper.ShapeNote
     │       ├─ DynamicShaper
     │       ├─ ArticulationShaper
-    │       ├─ InstrumentGainMap
-    │       ├─ InstrumentGainRefiner
+    │       ├─ InstrumentGainMap (per layer)
     │       ├─ ExpressiveCurve
     │       └─ DurationNormalizer
-    │
-    └─► Emit TimedNote → track.Notes
+    ├─► track gain
+    └─► TimedNote → HumanizeApplicator → MIDI
 ```
 
-## Per-Chord Pipeline
+## Per-Chord Pipeline (V2)
 
 ```
 ChordNode
     │
-    ├─► Expand intervals → MIDI numbers
-    ├─► Phase 1: ChordVoicing
-    ├─► Phase 4: HarmonicSpacing
-    ├─► Phase 5: PlaybackShaper.ShapeChordVelocity
-    ├─► Phase 5: ChordBalancer (per-voice velocities)
+    ├─► ChordVoicing (Phase 1)
+    ├─► AdvancedChordVoicing          ← V2 drop2, inv1, spread
+    ├─► ChordOrchestration            ← V2 double octave, bass, top
+    ├─► HarmonicSpacing (Phase 4)
+    ├─► PlaybackShaper + ChordBalancer (per layer)
+    └─► TimedNotes → HumanizeApplicator → MIDI
+```
+
+## Pattern Play Pipeline (V2)
+
+```
+play arp Cmaj q
     │
-    └─► Emit simultaneous TimedNotes
+    ├─► PatternExpander.Expand(pattern, chord)
+    │       ├─ ChordVoicing → AdvancedChordVoicing → HarmonicSpacing
+    │       └─ NoteNode[] (arp / strum / rhythm)
+    └─► EmitNote (each) → full per-note pipeline
 ```
 
-## Playback Shaping Pipeline (Phase 5)
+## Layer Pipeline (V2)
 
 ```
-Base velocity
-    ↓
-DynamicShaper          ← after DynamicContext ramp
-    ↓
-ArticulationShaper
-    ↓
-InstrumentGainMap
-    ↓
-InstrumentGainRefiner
-    ↓
-ExpressiveCurve
-    ↓
-DurationNormalizer
-    ↓
-ChordBalancer (chords)
-    ↓
-MIDI emission
+track with layers [piano, cello]
+    │
+    EmitNote(C4)
+        ├─► PlaybackShaper(piano) → channel 0
+        └─► PlaybackShaper(cello) → channel 1
 ```
 
-## Multi-Track Sync
+## Tempo Automation (V2)
 
 ```
-Track A: notes at beats 0, 1, 2, 3
-Track B: notes at beats 0, 2
-         ↓
-GlobalBeatClock tracks global beat position
-         ↓
-Sync correction if drift > threshold
+tempo 120 → 140 over 4 bars
+    │
+    └─► TempoAutomationMap.AddRamp()
+            └─► beat-accurate BeatsToMilliseconds()
 ```
 
-## Warnings (Non-Blocking)
-
-All warnings are collected in `InterpretedProgram.Warnings` and do not stop interpretation.
+## Warnings
 
 | Stage | Warning |
 |-------|---------|
-| Measure validation | `Measure incomplete` / `Measure excess` |
-| Chord voicing | `Chord voicing adjusted` |
-| Harmonic spacing | `Harmonic spacing adjusted` |
-| Octave / contour | `Octave adjusted` / `Melodic contour adjusted` |
-| Phrase smoothing | `Phrase boundary smoothed` |
-| Dynamic ramp | `Dynamic ramp applied` |
-| Dynamic shaping | `Dynamic shaping applied` |
-| Articulation | `Articulation shaping applied` |
-| Gain refinement | `Instrument gain refinement applied` |
-| Duration | `Duration normalization applied` |
-| Expressive curve | `Expressive curve applied` |
-| Chord balance | `Chord balance applied` |
-| Multi-track sync | `Sync correction applied` |
-
-## Timing
-
-```
-durationMs = (60_000 / tempo) × shapedDurationBeats
-ticks = durationMs × 480 / (60_000 / tempo)
-```
-
-Default: **480 ticks per quarter note**.
+| Import override | `Duplicate block name` |
+| Block recursion | `Recursive block call detected` |
+| Chord voicing | `Chord voicing adjustment applied` |
+| Advanced voicing | `Advanced chord voicing applied` |
+| Orchestration | `Orchestration applied` |
+| Harmonic spacing | `Harmonic spacing adjustment applied` |
+| Phrase shaping | `Phrase shaping applied` |
+| Phrase boundary | `Phrase smoothing applied` |
+| Humanization | (no warning — silent) |
 
 ## Playground Pipeline
-
-In the browser playground, the pipeline extends one step further:
 
 ```
 Interpreter → MidiGenerator → Web Audio (local soundfont)
@@ -143,6 +117,5 @@ Interpreter → MidiGenerator → Web Audio (local soundfont)
 
 ## Related
 
-- [architecture.md](architecture.md) — System overview
-- [playback-quality.md](playback-quality.md) — Shaping module details
-- [musical-intelligence.md](musical-intelligence.md) — Intelligence modules
+- [architecture.md](architecture.md)
+- [whats-new-v2.md](whats-new-v2.md)

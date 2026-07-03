@@ -1,34 +1,42 @@
-tempo 120
-time 4/4
+import "import-lib.ss"
 
-sequence intro {
-    mf
-    Cmaj q
-    Dm q
-    G7 q
+time 4/4
+tempo 120
+
+block verse {
+    phrase {
+        mf
+        play intro
+    }
+}
+
+pattern arp {
+    updown
 }
 
 track melody {
     instrument flute
-    play intro
+    layer flute
+    layer cello
+    gain 0.9
+    humanize 0.02
+    play verse
+    play arp Cmaj q
     f
     staccato C5 q
     legato D5 q
     accent E5 q
-    C5 q ~ C5 q
 }
 
 track harmony {
     instrument piano
-    Cmaj q
-    Fmaj q
-    G7 q
-    Cmaj h
+    double octave
+    reinforce bass
+    Cmaj drop2 h
+    Fmaj spread h
 }
 
 track bass {
     instrument bass
-    velocity 90
-    C2 h
-    G2 h
+    play bassline
 }
