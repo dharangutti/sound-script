@@ -239,6 +239,9 @@ public sealed class Parser
         if (Match(TokenType.Instrument))
             return ParseInstrumentStatement();
 
+        if (Match(TokenType.Layer))
+            return ParseLayerStatement();
+
         if (Match(TokenType.Gain))
             return ParseGainStatement();
 
@@ -346,6 +349,16 @@ public sealed class Parser
         {
             Numerator = numerator,
             Denominator = denominator
+        };
+    }
+
+    private LayerNode ParseLayerStatement()
+    {
+        var nameToken = Expect(TokenType.Identifier, "layer instrument name");
+        return new LayerNode
+        {
+            Name = nameToken.Value,
+            ProgramNumber = InstrumentMap.Resolve(nameToken.Value)
         };
     }
 
@@ -654,7 +667,7 @@ public sealed class Parser
         var token = Peek();
         if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
-            or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars
+            or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars or TokenType.Layer
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
         {

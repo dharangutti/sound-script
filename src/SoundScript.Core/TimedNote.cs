@@ -5,4 +5,5 @@ public readonly record struct TimedNote(
     double StartBeat,
     double DurationBeats,
     double DurationMs,
-    int Velocity = 64);
+    int Velocity = 64,
+    byte Channel = 0);

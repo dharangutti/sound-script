@@ -21,6 +21,7 @@ public enum TokenType
     Number,
     Identifier,
     Instrument,
+    Layer,
     Gain,
     Humanize,
     Sequence,

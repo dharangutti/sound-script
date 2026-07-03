@@ -7,4 +7,4 @@ public sealed class InterpretedTrack
     public List<ProgramChange> ProgramChanges { get; } = [];
 }
 
-public readonly record struct ProgramChange(double Beat, int ProgramNumber);
+public readonly record struct ProgramChange(double Beat, int ProgramNumber, byte Channel = 0);
