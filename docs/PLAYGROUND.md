@@ -45,6 +45,15 @@ python3 -m http.server 8080
 1. **Settings → Pages → Source**: Deploy from branch `gh-pages` / `(root)`
 2. **Custom domain**: `soundscript.net`
 
+## Mobile audio (iOS Safari, Android Chrome, Samsung Browser)
+
+- [ ] **Run** is the first interaction that creates `AudioContext` (no audio init on page load)
+- [ ] First **Run** tap plays audio on mobile (silent mode off)
+- [ ] Subsequent **Run** taps reuse context and play normally
+- [ ] If blocked, console shows: `AudioContext blocked — ensure silent mode is off.`
+
+Audio unlock flow: compile synchronously → `startPlayback` is the first `await` → `audioContext.resume()` inside the tap handler.
+
 ## No external dependencies
 
 - [ ] Network tab shows no CDN or API requests after initial load

@@ -68,6 +68,7 @@ The playground is a client-only Blazor WebAssembly app that:
 
 - Runs the full tokenizer → parser → AST → interpreter → MIDI pipeline in your browser
 - Plays MIDI through Web Audio with a **local soundfont** (no CDN, no API calls)
+- **Mobile-safe audio**: `AudioContext` is created and resumed inside the Run tap via `startPlayback()`
 - Works offline once loaded
 - Deploys as static files on GitHub Pages
 
