@@ -83,17 +83,19 @@ public class NotationExtensionsTests
             melody {
                 p
                 C4 q
-                f
+                mp
                 D4 q
+                mf
+                E4 q
             }
             """;
 
         var program = Parse(source);
-        var interpreted = Interpreter.Interpret(program);
-        var notes = interpreted.Tracks.Single().Notes;
+        var notes = Interpreter.Interpret(program).Tracks.Single().Notes;
 
         Assert.Equal(48, notes[0].Velocity);
-        Assert.Equal(96, notes[1].Velocity);
+        Assert.Equal(64, notes[1].Velocity);
+        Assert.Equal(80, notes[2].Velocity);
     }
 
     [Fact]
