@@ -207,9 +207,7 @@ window.SoundScriptMidi = (function () {
             masterGain.connect(audioContext.destination);
         }
 
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
+        await audioContext.resume();
 
         if (audioContext.state === 'suspended') {
             console.warn('AudioContext blocked — ensure silent mode is off.');
@@ -244,6 +242,4 @@ window.SoundScriptMidi = (function () {
     };
 })();
 
-window.startPlayback = function (midiBytes) {
-    return window.SoundScriptMidi.startPlayback(midiBytes);
-};
+window.startPlayback = window.SoundScriptMidi.startPlayback;
