@@ -21,6 +21,11 @@ public static class Interpreter
         public List<double> MeasureBeats { get; } = [];
         public List<TimedNote> Notes { get; } = [];
         public List<ProgramChange> ProgramChanges { get; } = [];
+        public int? LastEmittedMidi { get; set; }
+        public int? LastPhraseMidi { get; set; }
+        public bool PendingPhraseBoundary { get; set; }
+        public int PhraseIndex { get; set; }
+        public DynamicRampState? DynamicRamp { get; set; }
     }
 
     public static InterpretedProgram Interpret(ProgramNode program)
@@ -83,7 +88,7 @@ public static class Interpreter
                     break;
                 case DynamicNode dynamic:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    defaultTrack.CurrentDynamic = dynamic.Level;
+                    ApplyDynamic(defaultTrack, dynamic, result);
                     break;
                 case RestNode rest:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
@@ -159,7 +164,7 @@ public static class Interpreter
                     track.CurrentVelocity = velocity.Velocity;
                     break;
                 case DynamicNode dynamic:
-                    track.CurrentDynamic = dynamic.Level;
+                    ApplyDynamic(track, dynamic, result);
                     break;
                 case RestNode rest:
                     EmitRest(track, rest, clock, result);
@@ -240,8 +245,21 @@ public static class Interpreter
         RestoreContext(track, parentContext);
 
         var tempoAfter = ExecuteBlock(track, sequenceBody, sequences, tempo, result, clock);
+        track.LastPhraseMidi = track.LastEmittedMidi;
+        track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
         RestoreContext(track, parentContext);
         return tempoAfter;
+    }
+
+    private static void ApplyDynamic(TrackBuilder track, DynamicNode dynamic, InterpretedProgram result)
+    {
+        if (DynamicContext.IsAbruptChange(track.CurrentDynamic, dynamic.Level))
+        {
+            track.DynamicRamp = DynamicContext.StartRamp(track.CurrentDynamic, dynamic.Level);
+            AddWarning(result, "Dynamic ramp applied");
+        }
+
+        track.CurrentDynamic = dynamic.Level;
     }
 
     private static void ApplyInstrument(TrackBuilder track, InstrumentNode instrument)
@@ -267,31 +285,66 @@ public static class Interpreter
 
     private static void EmitNote(TrackBuilder track, NoteNode note, int tempo, GlobalBeatClock clock, InterpretedProgram result)
     {
-        var notation = note.Notation;
+        var notation = ApplyMusicalIntelligence(track, note.Notation, result);
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         notation.StartTime = globalBeat;
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
+        var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
         var velocity = ComputeFinalVelocity(
             note.Velocity,
             notation.Dynamic,
             track.CurrentDynamic,
             track.CurrentVelocity,
             notation.Articulation,
-            track.CurrentInstrumentName);
+            track.CurrentInstrumentName,
+            rampVelocity);
 
         var writtenBeats = notation.DurationBeats;
         var playbackBeats = ApplyArticulationDuration(writtenBeats, notation.Articulation);
         var durationMs = BeatsToMilliseconds(playbackBeats, tempo);
+        var midiNumber = notation.ResolvedMidiNumber;
 
         track.Notes.Add(new TimedNote(
-            notation.ToMidiNumber(),
+            midiNumber,
             globalBeat,
             BeatMath.RoundBeat(playbackBeats),
             durationMs,
             velocity));
 
+        track.LastEmittedMidi = midiNumber;
         AdvanceTiming(track, writtenBeats);
+    }
+
+    private static NotatedNote ApplyMusicalIntelligence(
+        TrackBuilder track,
+        NotatedNote notation,
+        InterpretedProgram result)
+    {
+        notation = notation with { PhraseIndex = ++track.PhraseIndex };
+
+        if (track.PendingPhraseBoundary && track.LastPhraseMidi is not null)
+        {
+            var (phraseAdjusted, phraseChanged) = PhraseSmoother.Apply(track.LastPhraseMidi, notation);
+            notation = phraseAdjusted;
+            if (phraseChanged)
+                AddWarning(result, "Phrase smoothing applied");
+            track.PendingPhraseBoundary = false;
+        }
+
+        var previousMidi = track.LastEmittedMidi;
+
+        var (octaveAdjusted, octaveChanged) = OctaveSmoother.Apply(previousMidi, notation);
+        notation = octaveAdjusted;
+        if (octaveChanged)
+            AddWarning(result, "Octave smoothing applied");
+
+        var (contourAdjusted, contourChanged) = MelodicContour.Apply(previousMidi, notation);
+        notation = contourAdjusted;
+        if (contourChanged)
+            AddWarning(result, "Melodic contour correction applied");
+
+        return notation;
     }
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo, GlobalBeatClock clock, InterpretedProgram result)
@@ -307,14 +360,18 @@ public static class Interpreter
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
-        var (voicedNotes, adjusted) = ChordVoicing.Apply(chord.ToMidiNumbers());
-        if (adjusted)
+        var (voicedNotes, voicedAdjusted) = ChordVoicing.Apply(chord.ToMidiNumbers());
+        if (voicedAdjusted)
             AddWarning(result, "Chord voicing adjustment applied");
+
+        var (spacedNotes, spacedAdjusted) = HarmonicSpacing.Apply(voicedNotes);
+        if (spacedAdjusted)
+            AddWarning(result, "Harmonic spacing adjustment applied");
 
         var durationMs = BeatsToMilliseconds(chord.DurationBeats, tempo);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
 
-        foreach (var midiNumber in voicedNotes)
+        foreach (var midiNumber in spacedNotes)
         {
             track.Notes.Add(new TimedNote(
                 midiNumber,
@@ -333,9 +390,11 @@ public static class Interpreter
         DynamicLevel? trackDynamic,
         int trackVelocity,
         ArticulationType? articulation,
-        string? instrumentName)
+        string? instrumentName,
+        int? rampVelocity = null)
     {
         var baseVelocity = noteVelocity
+            ?? rampVelocity
             ?? noteDynamic?.ToVelocity()
             ?? trackDynamic?.ToVelocity()
             ?? trackVelocity;
