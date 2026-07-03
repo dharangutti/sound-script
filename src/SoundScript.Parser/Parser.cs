@@ -73,6 +73,9 @@ public sealed class Parser
         if (Match(TokenType.Dynamic))
             return ParseDynamicStatement();
 
+        if (Match(TokenType.Orchestration))
+            return ParseOrchestrationStatement();
+
         if (Check(TokenType.Articulation))
         {
             var articulation = ParseOptionalPrefixArticulation();
@@ -235,6 +238,9 @@ public sealed class Parser
         if (Match(TokenType.Dynamic))
             return ParseDynamicStatement();
 
+        if (Match(TokenType.Orchestration))
+            return ParseOrchestrationStatement();
+
         if (Check(TokenType.Articulation))
         {
             var articulation = ParseOptionalPrefixArticulation();
@@ -321,6 +327,9 @@ public sealed class Parser
         if (Match(TokenType.Dynamic))
             return ParseDynamicStatement();
 
+        if (Match(TokenType.Orchestration))
+            return ParseOrchestrationStatement();
+
         if (Check(TokenType.Articulation))
         {
             var articulation = ParseOptionalPrefixArticulation();
@@ -371,6 +380,23 @@ public sealed class Parser
         };
     }
 
+    private OrchestrationNode ParseOrchestrationStatement()
+    {
+        var keyword = Previous().Value.ToLowerInvariant();
+        var modifier = Expect(TokenType.Identifier, "orchestration modifier");
+
+        return keyword switch
+        {
+            "double" when modifier.Value.Equals("octave", StringComparison.OrdinalIgnoreCase)
+                => new OrchestrationNode { Type = OrchestrationType.DoubleOctave },
+            "reinforce" when modifier.Value.Equals("bass", StringComparison.OrdinalIgnoreCase)
+                => new OrchestrationNode { Type = OrchestrationType.ReinforceBass },
+            "brighten" when modifier.Value.Equals("top", StringComparison.OrdinalIgnoreCase)
+                => new OrchestrationNode { Type = OrchestrationType.BrightenTop },
+            _ => throw Invalid(modifier, $"Unknown orchestration directive '{keyword} {modifier.Value}'.")
+        };
+    }
+
     private AstNode ParseBodyStatement(bool allowLoop)
     {
         if (allowLoop && Match(TokenType.Loop))
@@ -414,6 +440,9 @@ public sealed class Parser
 
         if (Match(TokenType.Dynamic))
             return ParseDynamicStatement();
+
+        if (Match(TokenType.Orchestration))
+            return ParseOrchestrationStatement();
 
         if (Check(TokenType.Articulation))
         {
@@ -842,7 +871,7 @@ public sealed class Parser
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
             or TokenType.Curve or TokenType.Transition or TokenType.Pattern
-            or TokenType.PatternRhythm)
+            or TokenType.PatternRhythm or TokenType.Orchestration)
         {
             Advance();
             return token.Value;
