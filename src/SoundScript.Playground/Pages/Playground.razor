@@ -1,0 +1,74 @@
+<div class="playground">
+    <header class="playground-header">
+        <div class="header-top">
+            <a class="home-link" href="/">← SoundScript</a>
+            <span class="badge">Playground</span>
+        </div>
+        <h1>SoundScript Playground</h1>
+        <p class="lead">Type SoundScript, compile to MIDI, and hear it in your browser — fully client-side.</p>
+    </header>
+
+    <div class="presets">
+        <span class="preset-label">Examples:</span>
+        <button type="button" class="btn btn-secondary" @onclick="LoadMelodyExample">Melody</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadChordsExample">Chords</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadMultitrackExample">Multi-track</button>
+    </div>
+
+    <div class="panes">
+        <section class="pane pane-editor">
+            <label class="pane-label" for="script-input">SoundScript</label>
+            <textarea id="script-input"
+                      class="script-input"
+                      @bind="ScriptText"
+                      spellcheck="false"
+                      placeholder="melody { ... }"></textarea>
+        </section>
+
+        <section class="pane pane-output">
+            <label class="pane-label">Output</label>
+
+            <div class="actions">
+                <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunAsync">
+                    @(IsRunning ? "Running…" : "Run")
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
+                @if (MidiBytes is not null)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="DownloadAsync">Download MIDI</button>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(StatusMessage))
+            {
+                <div class="status" role="status">@StatusMessage</div>
+            }
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="error" role="alert">
+                    <strong>Error</strong>
+                    <pre>@ErrorMessage</pre>
+                </div>
+            }
+
+            <div class="pipeline">
+                <span>Tokenizer</span>
+                <span class="arrow">→</span>
+                <span>Parser</span>
+                <span class="arrow">→</span>
+                <span>AST</span>
+                <span class="arrow">→</span>
+                <span>Interpreter</span>
+                <span class="arrow">→</span>
+                <span>MIDI</span>
+                <span class="arrow">→</span>
+                <span>Web Audio</span>
+            </div>
+
+            <p class="hint">
+                No server, no API calls. The SoundScript engine runs in WebAssembly; playback uses a local soundfont.
+            </p>
+        </section>
+    </div>
+</div>

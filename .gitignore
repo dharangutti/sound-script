@@ -4,5 +4,7 @@ obj/
 *.suo
 .vs/
 output.mid
+docs/playground/*
+!docs/playground/.gitkeep
 *.dll
 !**/refs/**/*.dll

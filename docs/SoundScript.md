@@ -31,7 +31,8 @@ Everything is intentionally small, deterministic, and hobby-friendly.
     SoundScript.Parser/    # Tokenizer + Parser
     SoundScript.Midi/      # Interpreter + MIDI generator (DryWetMIDI)
     SoundScript.Cli/       # CLI runner (executable: soundscript)
-    SoundScript.Web/       # Blazor WASM web demo
+    SoundScript.Web/       # Blazor WASM web demo (dev)
+    SoundScript.Playground/ # Blazor WASM playground (GitHub Pages)
 
 /examples
     melody.ss              # Phase 1 — notes + BPM
@@ -52,23 +53,77 @@ Everything is intentionally small, deterministic, and hobby-friendly.
 | **SoundScript.Parser** | Lexical analysis and parsing into `ProgramNode` |
 | **SoundScript.Midi** | Beat scheduling, instrument/velocity handling, MIDI export |
 | **SoundScript.Cli** | Command-line entry point |
-| **SoundScript.Web** | Browser-based demo (client-side WASM) |
+| **SoundScript.Web** | Local browser demo (client-side WASM) |
+| **SoundScript.Playground** | Hosted playground for [soundscript.net/playground](https://soundscript.net/playground/) |
 
 ---
 
-## How to Build
+## Try in Browser
+
+Open the **SoundScript Playground** — no install required:
+
+**[https://soundscript.net/playground/](https://soundscript.net/playground/)**
+
+The playground is a client-only Blazor WebAssembly app that:
+
+- Runs the full tokenizer → parser → AST → interpreter → MIDI pipeline in your browser
+- Plays MIDI through Web Audio with a **local soundfont** (no CDN, no API calls)
+- Works offline once loaded
+- Deploys as static files on GitHub Pages
+
+---
+
+## How to Build the Playground
 
 ### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- (Optional) VS Code or JetBrains Rider
-- (Optional) A modern browser for the Web UI
 
 ### Build everything
 
 ```bash
 dotnet build
 ```
+
+### Publish playground to `docs/playground/`
+
+```bash
+dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
+```
+
+Output is written to `docs/playground/` (configured in the project file). This folder is deployed to GitHub Pages at `/playground/`.
+
+### Run locally during development
+
+```bash
+dotnet run --project src/SoundScript.Playground
+```
+
+Open `http://localhost:5180/playground/` (uses `--pathbase=/playground` to match production).
+
+### GitHub Pages deployment
+
+A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) runs on every push to `main`:
+
+1. Publishes `SoundScript.Playground` into `docs/playground/`
+2. Publishes the entire `docs/` folder to the `gh-pages` branch
+
+**Pages settings** (one-time):
+
+1. Go to **Settings → Pages**
+2. Set **Source** to **Deploy from a branch**
+3. Branch: `gh-pages`, folder: `/ (root)`
+4. Custom domain: `soundscript.net` (CNAME file is in `docs/CNAME`)
+
+Site layout:
+
+```
+/docs/index.html              → https://soundscript.net/
+/docs/playground/index.html   → https://soundscript.net/playground/
+/docs/playground/soundfont/   → local WAV samples
+```
+
+See [PLAYGROUND.md](PLAYGROUND.md) for a full verification checklist.
 
 ---
 
@@ -97,13 +152,13 @@ dotnet run --project src/SoundScript.Cli -- run examples/multitrack.ss
 
 ---
 
-## How to Use (Web Version)
+## How to Use (Web Version — Local Dev)
 
 ```bash
 dotnet run --project src/SoundScript.Web
 ```
 
-Open the URL shown in the console. The web demo runs client-side in the browser.
+Open the URL shown in the console. For the hosted public playground, use [soundscript.net/playground](https://soundscript.net/playground/) instead.
 
 ---
 
@@ -343,7 +398,8 @@ The MIDI generator writes **480 ticks per quarter note**.
 | Phase 3 example | `dotnet run --project src/SoundScript.Cli -- run examples/durations.ss` |
 | Phase 6 chords | `dotnet run --project src/SoundScript.Cli -- run examples/chords.ss` |
 | Phase 10 multi-track | `dotnet run --project src/SoundScript.Cli -- run examples/multitrack.ss` |
-| Web UI | `dotnet run --project src/SoundScript.Web` |
+| **Browser playground** | [soundscript.net/playground](https://soundscript.net/playground/) |
+| Web UI (local) | `dotnet run --project src/SoundScript.Web` |
 
 ---
 
