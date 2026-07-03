@@ -93,15 +93,9 @@ public class NotationExtensionsTests
         var program = Parse(source);
         var notes = Interpreter.Interpret(program).Tracks.Single().Notes;
 
-        Assert.Equal(
-            PlaybackShaper.ShapeNote(null, null, DynamicLevel.Piano, DynamicLevel.Piano, 64, null, null, 1.0).Velocity,
-            notes[0].Velocity);
-        Assert.Equal(
-            PlaybackShaper.ShapeNote(null, null, DynamicLevel.MezzoPiano, DynamicLevel.MezzoPiano, 64, null, null, 1.0).Velocity,
-            notes[1].Velocity);
-        Assert.Equal(
-            PlaybackShaper.ShapeNote(null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, null, 1.0).Velocity,
-            notes[2].Velocity);
+        Assert.Equal(48, notes[0].Velocity);
+        Assert.Equal(64, notes[1].Velocity);
+        Assert.Equal(80, notes[2].Velocity);
     }
 
     [Fact]
