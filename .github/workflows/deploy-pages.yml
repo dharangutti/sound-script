@@ -1,4 +1,4 @@
-name: Deploy SoundScript Landing Page
+name: Deploy SoundScript Site
 
 on:
   push:
@@ -20,7 +20,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Publish to gh-pages branch
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish Playground to docs/playground
+        run: dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
+
+      - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,4 +38,4 @@ jobs:
       - name: Remind Pages source setting
         if: success()
         run: |
-          echo "::notice title=GitHub Pages source::In Settings → Pages, set Source to Deploy from a branch: gh-pages / (root). Do not use GitHub Actions as the source."
+          echo "::notice title=GitHub Pages source::In Settings → Pages, set Source to Deploy from a branch: gh-pages / (root). Custom domain: soundscript.net (CNAME in docs/)."

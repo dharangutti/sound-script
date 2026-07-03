@@ -21,6 +21,20 @@ dotnet run --project src/SoundScript.Cli -- run examples/melody.ss
 
 Open `output.mid` in any MIDI player.
 
+## Playground
+
+Try SoundScript in your browser (no install):
+
+**[soundscript.net/playground](https://soundscript.net/playground/)**
+
+Build and publish locally:
+
+```bash
+dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
+```
+
+Output goes to `docs/playground/` for GitHub Pages deployment.
+
 ## Documentation
 
 Full language reference, pipeline details, and usage for CLI + Web:
@@ -35,7 +49,8 @@ Full language reference, pipeline details, and usage for CLI + Web:
     SoundScript.Parser/    # Tokenizer + Parser
     SoundScript.Midi/      # Interpreter + MIDI export
     SoundScript.Cli/       # CLI runner
-    SoundScript.Web/       # Blazor WASM demo
+    SoundScript.Web/       # Local Blazor demo
+    SoundScript.Playground/ # GitHub Pages playground
 
 /examples
     melody.ss
