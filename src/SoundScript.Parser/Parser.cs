@@ -40,6 +40,9 @@ public sealed class Parser
         if (Match(TokenType.Sequence))
             return ParseSequenceBlock();
 
+        if (Match(TokenType.Block))
+            return ParseNamedBlock();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -140,9 +143,60 @@ public sealed class Parser
         return sequence;
     }
 
+    private BlockNode ParseNamedBlock()
+    {
+        var name = ParseName("block name");
+        Expect(TokenType.LeftBrace, "{");
+
+        var block = new BlockNode { Name = name };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            block.Body.Add(ParseBlockBodyStatement());
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return block;
+    }
+
+    private AstNode ParseBlockBodyStatement()
+    {
+        if (Match(TokenType.Play))
+            return ParsePlayStatement();
+
+        if (Match(TokenType.Bar))
+            return new BarNode();
+
+        if (Match(TokenType.Rest))
+            return ParseRestStatement();
+
+        if (Match(TokenType.Dynamic))
+            return ParseDynamicStatement();
+
+        if (Check(TokenType.Articulation))
+        {
+            var articulation = ParseOptionalPrefixArticulation();
+            if (Check(TokenType.Note))
+                return ParseNoteStatement(articulation);
+
+            var articulationTarget = Peek();
+            throw Invalid(articulationTarget, "Expected note after articulation.");
+        }
+
+        if (Check(TokenType.Note))
+            return ParseNoteStatement();
+
+        if (Check(TokenType.Chord))
+            return ParseChordStatement();
+
+        var unexpected = Peek();
+        ThrowIfInvalidNoteAttempt(unexpected);
+        throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
     private PlayNode ParsePlayStatement()
     {
-        var name = ParseName("sequence name");
+        var name = ParseName("block or sequence name");
         return new PlayNode { SequenceName = name };
     }
 
@@ -554,7 +608,7 @@ public sealed class Parser
         var token = Peek();
         if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
-            or TokenType.Sequence or TokenType.Loop or TokenType.Velocity or TokenType.Track
+            or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
         {
             Advance();

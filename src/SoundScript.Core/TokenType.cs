@@ -19,6 +19,7 @@ public enum TokenType
     Identifier,
     Instrument,
     Sequence,
+    Block,
     Loop,
     Velocity,
     Track,

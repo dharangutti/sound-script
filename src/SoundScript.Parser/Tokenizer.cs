@@ -14,6 +14,7 @@ public sealed class Tokenizer
         ["for"] = TokenType.For,
         ["instrument"] = TokenType.Instrument,
         ["sequence"] = TokenType.Sequence,
+        ["block"] = TokenType.Block,
         ["loop"] = TokenType.Loop,
         ["velocity"] = TokenType.Velocity,
         ["track"] = TokenType.Track,
