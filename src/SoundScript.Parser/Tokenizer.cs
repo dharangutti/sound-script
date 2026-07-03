@@ -13,6 +13,8 @@ public sealed class Tokenizer
         ["play"] = TokenType.Play,
         ["for"] = TokenType.For,
         ["instrument"] = TokenType.Instrument,
+        ["gain"] = TokenType.Gain,
+        ["humanize"] = TokenType.Humanize,
         ["sequence"] = TokenType.Sequence,
         ["block"] = TokenType.Block,
         ["loop"] = TokenType.Loop,
@@ -147,6 +149,13 @@ public sealed class Tokenizer
         var start = _index;
         while (!IsAtEnd() && char.IsDigit(Peek()))
             Advance();
+
+        if (!IsAtEnd() && Peek() == '.' && _index + 1 < _source.Length && char.IsDigit(_source[_index + 1]))
+        {
+            Advance();
+            while (!IsAtEnd() && char.IsDigit(Peek()))
+                Advance();
+        }
 
         return new Token(TokenType.Number, _source[start.._index], line, column);
     }

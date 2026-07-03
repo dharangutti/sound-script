@@ -18,6 +18,8 @@ public enum TokenType
     Number,
     Identifier,
     Instrument,
+    Gain,
+    Humanize,
     Sequence,
     Block,
     Loop,
