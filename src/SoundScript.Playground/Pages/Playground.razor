@@ -5,14 +5,18 @@
             <span class="badge">Playground</span>
         </div>
         <h1>SoundScript Playground</h1>
-        <p class="lead">Type SoundScript, compile to MIDI, and hear it in your browser — fully client-side.</p>
+        <p class="lead">Type SoundScript v1.2, compile to MIDI, and hear it in your browser — fully client-side.</p>
     </header>
 
     <div class="presets">
         <span class="preset-label">Examples:</span>
         <button type="button" class="btn btn-secondary" @onclick="LoadMelodyExample">Melody</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadArticulationsExample">Articulations</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadDynamicsExample">Dynamics</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadChordsExample">Chords</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadIntelligenceExample">Intelligence</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadMultitrackExample">Multi-track</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadPlaybackExample">Playback</button>
     </div>
 
     <div class="panes">
@@ -60,6 +64,8 @@
                 <span>AST</span>
                 <span class="arrow">→</span>
                 <span>Interpreter</span>
+                <span class="arrow">→</span>
+                <span>Shaping</span>
                 <span class="arrow">→</span>
                 <span>MIDI</span>
                 <span class="arrow">→</span>
