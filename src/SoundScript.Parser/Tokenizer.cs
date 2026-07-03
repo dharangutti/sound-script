@@ -9,6 +9,9 @@ public sealed class Tokenizer
         ["melody"] = TokenType.Melody,
         ["bpm"] = TokenType.Bpm,
         ["tempo"] = TokenType.Tempo,
+        ["over"] = TokenType.Over,
+        ["bar"] = TokenType.Bars,
+        ["bars"] = TokenType.Bars,
         ["time"] = TokenType.Time,
         ["play"] = TokenType.Play,
         ["for"] = TokenType.For,
@@ -71,6 +74,21 @@ public sealed class Tokenizer
             if (current == '"')
             {
                 tokens.Add(ReadStringLiteral(startLine, startColumn));
+                continue;
+            }
+
+            if (current == '-' && _index + 1 < _source.Length && _source[_index + 1] == '>')
+            {
+                Advance();
+                Advance();
+                tokens.Add(new Token(TokenType.Arrow, "->", startLine, startColumn));
+                continue;
+            }
+
+            if (current == '\u2192')
+            {
+                Advance();
+                tokens.Add(new Token(TokenType.Arrow, "\u2192", startLine, startColumn));
                 continue;
             }
 
