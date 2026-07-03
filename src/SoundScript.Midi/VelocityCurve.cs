@@ -5,7 +5,8 @@ internal enum VelocityCurveType
 {
     Linear,
     Soft,
-    Hard
+    Hard,
+    Balanced
 }
 
 internal static class VelocityCurve
@@ -17,6 +18,7 @@ internal static class VelocityCurve
         {
             VelocityCurveType.Soft => Math.Sqrt(normalized),
             VelocityCurveType.Hard => normalized * normalized,
+            VelocityCurveType.Balanced => 0.35 * normalized + 0.65 * Math.Sqrt(normalized),
             _ => normalized
         };
 
