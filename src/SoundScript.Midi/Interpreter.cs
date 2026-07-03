@@ -44,19 +44,21 @@ public static class Interpreter
         var tracks = new Dictionary<string, TrackBuilder>(StringComparer.OrdinalIgnoreCase);
         var clock = new GlobalBeatClock();
         TrackBuilder? defaultTrack = null;
-        var tempo = result.Tempo;
+        var globalTempoBeat = 0.0;
 
         foreach (var statement in program.Statements)
         {
             switch (statement)
             {
                 case TempoNode tempoNode:
-                    tempo = tempoNode.Bpm;
-                    result.Tempo = tempo;
+                    ScheduleTempo(result, globalTempoBeat, tempoNode.Bpm);
+                    break;
+                case TempoRampNode tempoRamp:
+                    ScheduleTempoRamp(result, globalTempoBeat, tempoRamp);
+                    globalTempoBeat += tempoRamp.Bars * GetBeatsPerBar(result);
                     break;
                 case BpmNode bpm:
-                    tempo = bpm.Bpm;
-                    result.Tempo = tempo;
+                    ScheduleTempo(result, globalTempoBeat, bpm.Bpm);
                     break;
                 case TimeSignatureNode time:
                     result.TimeSignatureNumerator = time.Numerator;
@@ -69,23 +71,19 @@ public static class Interpreter
                     context.Sequences[sequence.Name] = sequence.Body;
                     break;
                 case TrackNode track:
-                    tempo = ExecuteStatements(GetOrCreateTrack(tracks, track.Name), track.Body, context, tempo, result, clock);
-                    result.Tempo = tempo;
+                    ExecuteStatements(GetOrCreateTrack(tracks, track.Name), track.Body, context, result, clock);
                     break;
                 case MelodyNode melody:
                     defaultTrack ??= GetOrCreateTrack(tracks, "melody");
-                    tempo = ExecuteStatements(defaultTrack, melody.Body, context, tempo, result, clock);
-                    result.Tempo = tempo;
+                    ExecuteStatements(defaultTrack, melody.Body, context, result, clock);
                     break;
                 case PlayNode play:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    tempo = ExecutePlay(defaultTrack, play, context, tempo, result, clock);
-                    result.Tempo = tempo;
+                    ExecutePlay(defaultTrack, play, context, result, clock);
                     break;
                 case LoopNode loop:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    tempo = ExecuteLoop(defaultTrack, loop, context, tempo, result, clock);
-                    result.Tempo = tempo;
+                    ExecuteLoop(defaultTrack, loop, context, result, clock);
                     break;
                 case InstrumentNode instrument:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
@@ -105,11 +103,11 @@ public static class Interpreter
                     break;
                 case NoteNode note:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    EmitNote(defaultTrack, note, tempo, clock, result);
+                    EmitNote(defaultTrack, note, clock, result);
                     break;
                 case ChordNode chord:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    EmitChord(defaultTrack, chord, tempo, clock, result);
+                    EmitChord(defaultTrack, chord, clock, result);
                     break;
                 case BarNode:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
@@ -127,7 +125,10 @@ public static class Interpreter
             var interpretedTrack = new InterpretedTrack { Name = track.Name };
             foreach (var note in track.Notes)
             {
-                var startBeat = HumanizeApplicator.ApplyToStartBeat(note.StartBeat, track.Humanize, result.Tempo);
+                var startBeat = HumanizeApplicator.ApplyToStartBeat(
+                    note.StartBeat,
+                    track.Humanize,
+                    (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)));
                 interpretedTrack.Notes.Add(note with { StartBeat = startBeat });
             }
             interpretedTrack.ProgramChanges.AddRange(track.ProgramChanges);
@@ -148,11 +149,10 @@ public static class Interpreter
         return track;
     }
 
-    private static int ExecuteStatements(
+    private static void ExecuteStatements(
         TrackBuilder track,
         IReadOnlyList<AstNode> body,
         ExecutionContext context,
-        int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
     {
@@ -161,10 +161,13 @@ public static class Interpreter
             switch (statement)
             {
                 case BpmNode bpm:
-                    tempo = bpm.Bpm;
+                    ScheduleTempo(result, clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset), bpm.Bpm);
                     break;
                 case TempoNode tempoNode:
-                    tempo = tempoNode.Bpm;
+                    ScheduleTempo(result, clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset), tempoNode.Bpm);
+                    break;
+                case TempoRampNode tempoRamp:
+                    ScheduleTempoRamp(result, clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset), tempoRamp);
                     break;
                 case TimeSignatureNode time:
                     result.TimeSignatureNumerator = time.Numerator;
@@ -189,49 +192,51 @@ public static class Interpreter
                     EmitRest(track, rest, clock, result);
                     break;
                 case NoteNode note:
-                    EmitNote(track, note, tempo, clock, result);
+                    EmitNote(track, note, clock, result);
                     break;
                 case ChordNode chord:
-                    EmitChord(track, chord, tempo, clock, result);
+                    EmitChord(track, chord, clock, result);
                     break;
                 case LoopNode loop:
-                    tempo = ExecuteLoop(track, loop, context, tempo, result, clock);
+                    ExecuteLoop(track, loop, context, result, clock);
                     break;
                 case PlayNode play:
-                    tempo = ExecutePlay(track, play, context, tempo, result, clock);
+                    ExecutePlay(track, play, context, result, clock);
                     break;
                 case BarNode:
                     CloseMeasure(track);
                     break;
             }
         }
-
-        return tempo;
     }
 
-    private static int ExecutePlay(
+    private static void ExecutePlay(
         TrackBuilder track,
         PlayNode play,
         ExecutionContext context,
-        int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
     {
         if (context.Blocks.TryGetValue(play.SequenceName, out var blockBody))
-            return ExecuteNamedBlockPlay(track, play.SequenceName, blockBody, context, tempo, result, clock);
+        {
+            ExecuteNamedBlockPlay(track, play.SequenceName, blockBody, context, result, clock);
+            return;
+        }
 
         if (context.Sequences.TryGetValue(play.SequenceName, out var sequenceBody))
-            return ExecuteSequencePlay(track, play.SequenceName, sequenceBody, context, tempo, result, clock);
+        {
+            ExecuteSequencePlay(track, play.SequenceName, sequenceBody, context, result, clock);
+            return;
+        }
 
         throw new InvalidOperationException($"Unknown block '{play.SequenceName}'.");
     }
 
-    private static int ExecuteNamedBlockPlay(
+    private static void ExecuteNamedBlockPlay(
         TrackBuilder track,
         string blockName,
         IReadOnlyList<AstNode> blockBody,
         ExecutionContext context,
-        int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
     {
@@ -243,11 +248,10 @@ public static class Interpreter
             var parentContext = CaptureContext(track);
             RestoreContext(track, parentContext);
 
-            var tempoAfter = ExecuteStatements(track, blockBody, context, tempo, result, clock);
+            ExecuteStatements(track, blockBody, context, result, clock);
             track.LastPhraseMidi = track.LastEmittedMidi;
             track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
             RestoreContext(track, parentContext);
-            return tempoAfter;
         }
         finally
         {
@@ -255,11 +259,10 @@ public static class Interpreter
         }
     }
 
-    private static int ExecuteLoop(
+    private static void ExecuteLoop(
         TrackBuilder track,
         LoopNode loop,
         ExecutionContext context,
-        int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
     {
@@ -272,7 +275,7 @@ public static class Interpreter
                 track.CurrentBeat = BeatMath.RoundBeat(loopStart + iterationDuration * i);
 
             var iterationStart = BeatMath.RoundBeat(track.CurrentBeat);
-            tempo = ExecuteStatements(track, loop.Body, context, tempo, result, clock);
+            ExecuteStatements(track, loop.Body, context, result, clock);
             iterationDuration = BeatMath.RoundBeat(track.CurrentBeat - iterationStart);
         }
 
@@ -287,16 +290,13 @@ public static class Interpreter
         {
             track.CurrentBeat = alignedEnd;
         }
-
-        return tempo;
     }
 
-    private static int ExecuteSequencePlay(
+    private static void ExecuteSequencePlay(
         TrackBuilder track,
         string sequenceName,
         IReadOnlyList<AstNode> sequenceBody,
         ExecutionContext context,
-        int tempo,
         InterpretedProgram result,
         GlobalBeatClock clock)
     {
@@ -307,11 +307,30 @@ public static class Interpreter
 
         RestoreContext(track, parentContext);
 
-        var tempoAfter = ExecuteStatements(track, sequenceBody, context, tempo, result, clock);
+        ExecuteStatements(track, sequenceBody, context, result, clock);
         track.LastPhraseMidi = track.LastEmittedMidi;
         track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
         RestoreContext(track, parentContext);
-        return tempoAfter;
+    }
+
+    private static double GetBeatsPerBar(InterpretedProgram result)
+    {
+        var numerator = result.TimeSignatureNumerator ?? 4;
+        var denominator = result.TimeSignatureDenominator ?? 4;
+        return numerator * 4.0 / denominator;
+    }
+
+    private static void ScheduleTempo(InterpretedProgram result, double beat, int bpm)
+    {
+        result.TempoMap.SetTempo(beat, bpm);
+        result.Tempo = bpm;
+    }
+
+    private static void ScheduleTempoRamp(InterpretedProgram result, double beat, TempoRampNode ramp)
+    {
+        var durationBeats = ramp.Bars * GetBeatsPerBar(result);
+        result.TempoMap.AddRamp(beat, durationBeats, ramp.StartBpm, ramp.EndBpm);
+        result.Tempo = ramp.EndBpm;
     }
 
     private static void ApplyDynamic(TrackBuilder track, DynamicNode dynamic, InterpretedProgram result)
@@ -346,7 +365,7 @@ public static class Interpreter
         AdvanceTiming(track, rest.Rest.DurationBeats);
     }
 
-    private static void EmitNote(TrackBuilder track, NoteNode note, int tempo, GlobalBeatClock clock, InterpretedProgram result)
+    private static void EmitNote(TrackBuilder track, NoteNode note, GlobalBeatClock clock, InterpretedProgram result)
     {
         var notation = ApplyMusicalIntelligence(track, note.Notation, result);
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
@@ -372,7 +391,7 @@ public static class Interpreter
             ShapedDurationBeats = shaped.DurationBeats
         };
 
-        var durationMs = BeatsToMilliseconds(shaped.DurationBeats, tempo);
+        var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, shaped.DurationBeats);
         var midiNumber = notation.ResolvedMidiNumber;
         var velocity = ApplyTrackGain(shaped.Velocity, track.Gain);
 
@@ -418,7 +437,7 @@ public static class Interpreter
         return notation;
     }
 
-    private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo, GlobalBeatClock clock, InterpretedProgram result)
+    private static void EmitChord(TrackBuilder track, ChordNode chord, GlobalBeatClock clock, InterpretedProgram result)
     {
         var shaped = PlaybackShaper.ShapeChordVelocity(
             chord.Velocity,
@@ -443,7 +462,7 @@ public static class Interpreter
         if (balanced)
             AddWarning(result, "Chord balance applied");
 
-        var durationMs = BeatsToMilliseconds(chord.DurationBeats, tempo);
+        var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, chord.DurationBeats);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
 
         for (var i = 0; i < spacedNotes.Length; i++)

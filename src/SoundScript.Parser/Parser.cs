@@ -304,10 +304,27 @@ public sealed class Parser
         return value;
     }
 
-    private TempoNode ParseTempoStatement()
+    private AstNode ParseTempoStatement()
     {
-        var token = Expect(TokenType.Number, "tempo value");
-        return new TempoNode { Bpm = ParsePositiveInt(token, "Tempo") };
+        var startToken = Expect(TokenType.Number, "tempo value");
+        var startBpm = ParsePositiveInt(startToken, "Tempo");
+
+        if (!Match(TokenType.Arrow))
+            return new TempoNode { Bpm = startBpm };
+
+        var endToken = Expect(TokenType.Number, "target tempo");
+        var endBpm = ParsePositiveInt(endToken, "Target tempo");
+        Expect(TokenType.Over, "over");
+        var barsToken = Expect(TokenType.Number, "bar count");
+        var bars = ParsePositiveInt(barsToken, "Bar count");
+        Expect(TokenType.Bars, "bars");
+
+        return new TempoRampNode
+        {
+            StartBpm = startBpm,
+            EndBpm = endBpm,
+            Bars = bars
+        };
     }
 
     private BpmNode ParseBpmStatement()
@@ -637,7 +654,7 @@ public sealed class Parser
         var token = Peek();
         if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
-            or TokenType.Gain or TokenType.Humanize
+            or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
         {

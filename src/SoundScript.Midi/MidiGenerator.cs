@@ -46,7 +46,7 @@ public static partial class MidiGenerator
                 foreach (var timedNote in track.Notes)
                 {
                     var startTick = (long)(timedNote.StartBeat * TicksPerQuarterNote);
-                    var lengthTick = Math.Max(1, (long)(timedNote.DurationMs / 60_000.0 * program.Tempo * TicksPerQuarterNote));
+                    var lengthTick = Math.Max(1, (long)(timedNote.DurationBeats * TicksPerQuarterNote));
                     var note = new Note((SevenBitNumber)timedNote.MidiNumber, lengthTick, startTick)
                     {
                         Velocity = (SevenBitNumber)timedNote.Velocity
@@ -72,7 +72,21 @@ public static partial class MidiGenerator
             midiFile.Chunks.Add(new TrackChunk());
 
         midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision(TicksPerQuarterNote);
-        midiFile.ReplaceTempoMap(TempoMap.Create(Tempo.FromBeatsPerMinute(program.Tempo)));
+        midiFile.ReplaceTempoMap(BuildTempoMap(program));
         return midiFile;
+    }
+
+    private static TempoMap BuildTempoMap(InterpretedProgram program)
+    {
+        var timeDivision = new TicksPerQuarterNoteTimeDivision(TicksPerQuarterNote);
+        using var manager = new TempoMapManager(timeDivision);
+
+        foreach (var point in program.TempoMap.GetTempoMapPoints().OrderBy(point => point.Beat))
+        {
+            var tick = (long)Math.Round(point.Beat * TicksPerQuarterNote);
+            manager.SetTempo(tick, Tempo.FromBeatsPerMinute(point.Bpm));
+        }
+
+        return manager.TempoMap;
     }
 }
