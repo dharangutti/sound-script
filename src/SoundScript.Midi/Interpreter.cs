@@ -26,6 +26,8 @@ public static class Interpreter
         public bool PendingPhraseBoundary { get; set; }
         public int PhraseIndex { get; set; }
         public DynamicRampState? DynamicRamp { get; set; }
+        public double Gain { get; set; } = 1.0;
+        public double Humanize { get; set; }
     }
 
     private sealed class ExecutionContext
@@ -123,7 +125,11 @@ public static class Interpreter
                 continue;
 
             var interpretedTrack = new InterpretedTrack { Name = track.Name };
-            interpretedTrack.Notes.AddRange(track.Notes);
+            foreach (var note in track.Notes)
+            {
+                var startBeat = HumanizeApplicator.ApplyToStartBeat(note.StartBeat, track.Humanize, result.Tempo);
+                interpretedTrack.Notes.Add(note with { StartBeat = startBeat });
+            }
             interpretedTrack.ProgramChanges.AddRange(track.ProgramChanges);
             result.Tracks.Add(interpretedTrack);
         }
@@ -166,6 +172,12 @@ public static class Interpreter
                     break;
                 case InstrumentNode instrument:
                     ApplyInstrument(track, instrument);
+                    break;
+                case GainNode gain:
+                    track.Gain = gain.Value;
+                    break;
+                case HumanizeNode humanize:
+                    track.Humanize = humanize.Value;
                     break;
                 case VelocityNode velocity:
                     track.CurrentVelocity = velocity.Velocity;
@@ -362,13 +374,14 @@ public static class Interpreter
 
         var durationMs = BeatsToMilliseconds(shaped.DurationBeats, tempo);
         var midiNumber = notation.ResolvedMidiNumber;
+        var velocity = ApplyTrackGain(shaped.Velocity, track.Gain);
 
         track.Notes.Add(new TimedNote(
             midiNumber,
             globalBeat,
             shaped.DurationBeats,
             durationMs,
-            shaped.Velocity));
+            velocity));
 
         track.LastEmittedMidi = midiNumber;
         AdvanceTiming(track, notation.DurationBeats);
@@ -440,7 +453,7 @@ public static class Interpreter
                 globalBeat,
                 durationBeats,
                 durationMs,
-                balancedVelocities[i]));
+                ApplyTrackGain(balancedVelocities[i], track.Gain)));
         }
 
         AdvanceTiming(track, chord.DurationBeats);
@@ -459,6 +472,9 @@ public static class Interpreter
         if (shaped.ExpressiveApplied)
             AddWarning(result, "Expressive curve applied");
     }
+
+    private static int ApplyTrackGain(int velocity, double gain) =>
+        Math.Clamp((int)Math.Round(velocity * gain), 1, 127);
 
     private static void AdvanceTiming(TrackBuilder track, double beats)
     {

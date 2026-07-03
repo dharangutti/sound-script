@@ -239,6 +239,12 @@ public sealed class Parser
         if (Match(TokenType.Instrument))
             return ParseInstrumentStatement();
 
+        if (Match(TokenType.Gain))
+            return ParseGainStatement();
+
+        if (Match(TokenType.Humanize))
+            return ParseHumanizeStatement();
+
         if (Match(TokenType.Velocity))
             return ParseVelocityStatement();
 
@@ -273,6 +279,29 @@ public sealed class Parser
         var unexpected = Peek();
         ThrowIfInvalidNoteAttempt(unexpected);
         throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
+    private GainNode ParseGainStatement()
+    {
+        var token = Expect(TokenType.Number, "gain value");
+        return new GainNode { Value = ParseUnitInterval(token, "Gain") };
+    }
+
+    private HumanizeNode ParseHumanizeStatement()
+    {
+        var token = Expect(TokenType.Number, "humanize value");
+        if (!double.TryParse(token.Value, out var value) || value < 0)
+            throw Invalid(token, "Humanize must be a non-negative number.");
+
+        return new HumanizeNode { Value = value };
+    }
+
+    private static double ParseUnitInterval(Token token, string label)
+    {
+        if (!double.TryParse(token.Value, out var value) || value < 0 || value > 1)
+            throw Invalid(token, $"{label} must be between 0.0 and 1.0.");
+
+        return value;
     }
 
     private TempoNode ParseTempoStatement()
@@ -608,6 +637,7 @@ public sealed class Parser
         var token = Peek();
         if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
+            or TokenType.Gain or TokenType.Humanize
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
         {
