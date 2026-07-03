@@ -37,6 +37,7 @@ public static class Interpreter
         public double Gain { get; set; } = 1.0;
         public double Humanize { get; set; }
         public PhraseScope? ActivePhrase { get; set; }
+        public OrchestrationSettings Orchestration { get; } = new();
     }
 
     private sealed class ExecutionContext
@@ -224,6 +225,9 @@ public static class Interpreter
                     break;
                 case DynamicNode dynamic:
                     ApplyDynamic(track, dynamic, result);
+                    break;
+                case OrchestrationNode orchestration:
+                    ApplyOrchestration(track, orchestration);
                     break;
                 case PhraseCurveNode curve:
                     ApplyPhraseCurve(track, curve);
@@ -484,6 +488,22 @@ public static class Interpreter
             track.ActivePhrase.Dynamic = dynamic.Level;
     }
 
+    private static void ApplyOrchestration(TrackBuilder track, OrchestrationNode orchestration)
+    {
+        switch (orchestration.Type)
+        {
+            case OrchestrationType.DoubleOctave:
+                track.Orchestration.DoubleOctave = true;
+                break;
+            case OrchestrationType.ReinforceBass:
+                track.Orchestration.ReinforceBass = true;
+                break;
+            case OrchestrationType.BrightenTop:
+                track.Orchestration.BrightenTop = true;
+                break;
+        }
+    }
+
     private static void ApplyPhraseCurve(TrackBuilder track, PhraseCurveNode curve)
     {
         if (track.ActivePhrase is not null)
@@ -640,7 +660,11 @@ public static class Interpreter
         if (advancedAdjusted)
             AddWarning(result, "Advanced chord voicing applied");
 
-        var (spacedNotes, spacedAdjusted) = HarmonicSpacing.Apply(advancedNotes);
+        var (orchestratedNotes, orchestratedAdjusted) = ChordOrchestration.Apply(advancedNotes, track.Orchestration);
+        if (orchestratedAdjusted)
+            AddWarning(result, "Orchestration applied");
+
+        var (spacedNotes, spacedAdjusted) = HarmonicSpacing.Apply(orchestratedNotes);
         if (spacedAdjusted)
             AddWarning(result, "Harmonic spacing adjustment applied");
 

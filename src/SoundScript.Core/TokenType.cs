@@ -42,6 +42,7 @@ public enum TokenType
     Pattern,
     PatternDirective,
     PatternRhythm,
+    Orchestration,
     Import,
     StringLiteral,
     EndOfFile

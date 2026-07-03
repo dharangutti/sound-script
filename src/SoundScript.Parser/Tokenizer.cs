@@ -59,7 +59,10 @@ public sealed class Tokenizer
         ["down"] = TokenType.PatternDirective,
         ["updown"] = TokenType.PatternDirective,
         ["strum"] = TokenType.PatternDirective,
-        ["rhythm"] = TokenType.PatternRhythm
+        ["rhythm"] = TokenType.PatternRhythm,
+        ["double"] = TokenType.Orchestration,
+        ["reinforce"] = TokenType.Orchestration,
+        ["brighten"] = TokenType.Orchestration
     };
 
     private static readonly string[] ChordSuffixes =
