@@ -26,6 +26,7 @@ public static class Interpreter
         public bool HasBarLines { get; set; }
         public double CurrentMeasureBeats { get; set; }
         public List<double> MeasureBeats { get; } = [];
+        public List<int> MeasureLines { get; } = [];
         public List<TimedNote> Notes { get; } = [];
         public List<ProgramChange> ProgramChanges { get; } = [];
         public List<TrackLayer> Layers { get; } = [];
@@ -48,7 +49,10 @@ public static class Interpreter
         public HashSet<string> ExpandingBlocks { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
-    public static InterpretedProgram Interpret(ProgramNode program)
+    public static InterpretedProgram Interpret(ProgramNode program) =>
+        Interpret(program, null);
+
+    public static InterpretedProgram Interpret(ProgramNode program, string? sourceFile)
     {
         var result = new InterpretedProgram();
         var context = new ExecutionContext();
@@ -123,21 +127,23 @@ public static class Interpreter
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     EmitChord(defaultTrack, chord, clock, result);
                     break;
-                case BarNode:
+                case BarNode bar:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    CloseMeasure(defaultTrack);
+                    CloseMeasure(defaultTrack, bar.Line);
                     break;
             }
         }
 
         foreach (var track in tracks.Values)
+            FlushMeasureValidation(track, result, sourceFile);
+
+        var noteIndex = 0;
+        foreach (var track in tracks.Values)
         {
-            FlushMeasureValidation(track, result);
             if (track.Notes.Count == 0)
                 continue;
 
             var interpretedTrack = new InterpretedTrack { Name = track.Name };
-            var noteIndex = 0;
             foreach (var note in track.Notes)
             {
                 var startBeat = HumanizeApplicator.ApplyToStartBeat(
@@ -253,8 +259,8 @@ public static class Interpreter
                 case PlayNode play:
                     ExecutePlay(track, play, context, result, clock);
                     break;
-                case BarNode:
-                    CloseMeasure(track);
+                case BarNode bar:
+                    CloseMeasure(track, bar.Line);
                     break;
             }
         }
@@ -749,14 +755,15 @@ public static class Interpreter
         track.CurrentMeasureBeats = BeatMath.AddBeats(track.CurrentMeasureBeats, beats);
     }
 
-    private static void CloseMeasure(TrackBuilder track)
+    private static void CloseMeasure(TrackBuilder track, int line)
     {
         track.HasBarLines = true;
         track.MeasureBeats.Add(BeatMath.RoundBeat(track.CurrentMeasureBeats));
+        track.MeasureLines.Add(line);
         track.CurrentMeasureBeats = 0;
     }
 
-    private static void FlushMeasureValidation(TrackBuilder track, InterpretedProgram result)
+    private static void FlushMeasureValidation(TrackBuilder track, InterpretedProgram result, string? sourceFile)
     {
         if (!track.HasBarLines
             || result.TimeSignatureNumerator is not int numerator
@@ -764,10 +771,33 @@ public static class Interpreter
             return;
 
         if (track.CurrentMeasureBeats > 0)
+        {
             track.MeasureBeats.Add(BeatMath.RoundBeat(track.CurrentMeasureBeats));
+            track.MeasureLines.Add(0);
+        }
 
         foreach (var warning in NotationParser.ValidateMeasure(track.MeasureBeats, numerator, denominator))
-            AddWarning(result, warning);
+            AddWarning(result, FormatSourceWarning(sourceFile, warning, track.MeasureLines));
+    }
+
+    private static string FormatSourceWarning(string? sourceFile, string warning, IReadOnlyList<int> measureLines)
+    {
+        if (string.IsNullOrEmpty(sourceFile))
+            return warning;
+
+        const string prefix = "Measure ";
+        if (!warning.StartsWith(prefix, StringComparison.Ordinal))
+            return $"{sourceFile}:0: {warning}";
+
+        var separator = warning.IndexOf(' ', prefix.Length);
+        if (separator < 0 || !int.TryParse(warning.AsSpan(prefix.Length, separator - prefix.Length), out var measureNumber))
+            return $"{sourceFile}:0: {warning}";
+
+        var line = measureNumber > 0 && measureNumber <= measureLines.Count
+            ? measureLines[measureNumber - 1]
+            : 0;
+
+        return $"{sourceFile}:{line}: {warning}";
     }
 
     private static SequenceContext CaptureContext(TrackBuilder track) => new()

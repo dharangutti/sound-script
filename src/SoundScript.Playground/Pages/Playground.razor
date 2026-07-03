@@ -62,6 +62,19 @@
                 <div class="status" role="status">@StatusMessage</div>
             }
 
+            @if (WarningMessages.Count > 0)
+            {
+                <div class="warning" role="status">
+                    <strong>Warnings</strong>
+                    <ul>
+                        @foreach (var warning in WarningMessages)
+                        {
+                            <li>@warning</li>
+                        }
+                    </ul>
+                </div>
+            }
+
             @if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 <div class="error" role="alert">
