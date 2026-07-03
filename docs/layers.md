@@ -44,5 +44,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/layers.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [track-metadata.md](track-metadata.md) — gain and humanize per track
 - [playback-quality.md](playback-quality.md) — per-instrument shaping

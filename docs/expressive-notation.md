@@ -2,6 +2,8 @@
 
 Phase 3 adds rests, ties, articulations, dynamics, and measure validation — all using existing keyword-free or minimal-keyword syntax.
 
+→ [language-reference.md](language-reference.md) — Complete syntax
+
 ## Rests
 
 ```
@@ -14,7 +16,7 @@ melody {
 
 - `rest` advances the beat clock by the given duration.
 - No MIDI note is emitted.
-- Duration syntax matches notes (`q`, `h`, `e`, `w`, `for N`, `:N`).
+- Duration syntax matches notes (`q`, `h`, `e`, `w`, `quarter`, `half`, `eighth`, `whole`, `for N`, `:N`).
 
 ## Ties
 
@@ -26,7 +28,9 @@ melody {
 
 - The `~` operator ties adjacent notes of the **same pitch**.
 - Durations merge into a single sustained note (2 beats in the example above).
+- Multiple ties chain: `C5 q ~ C5 q ~ G5 q` (last segment must match pitch or error).
 - Mismatched pitches produce an error: `Invalid tie: pitches differ`.
+- Chords cannot be tied.
 
 ## Articulations
 
@@ -36,7 +40,19 @@ melody {
 | Legato | `C4 q legato` | ~97% duration |
 | Accent | `accent C4 q` | ~110% velocity, ~102% duration |
 
-Articulations may appear before or after the note token.
+Articulations may appear before or after the note token. One articulation per note.
+
+## Slurs
+
+SoundScript does **not** have a separate slur token or AST node. Expressive continuity is expressed through:
+
+| Mechanism | Syntax | Effect |
+|-----------|--------|--------|
+| **Tie** | `C5 q ~ C5 q` | Merge durations into one sustained note |
+| **Legato** | `C4 q legato` | ~97% duration per note |
+| **Phrase block** | `phrase { ... }` | Scoped dynamics, curve, transition |
+
+For legato phrasing across distinct pitches, use `phrase { curve soft ... }` or per-note `legato`.
 
 ## Dynamics
 
@@ -62,6 +78,20 @@ melody {
 
 Dynamics persist on the track until changed. Per-note `vN` overrides still apply before shaping.
 
+## Phrase Boundaries
+
+There is no `phrase-boundary` keyword. Boundaries are **implicit**, set when:
+
+1. A `phrase { }` block exits
+2. A `play <block>` finishes
+3. A `play <sequence>` finishes
+
+The next emitted note may trigger `PhraseSmoother` → warning `Phrase smoothing applied`.
+
+**Not** set after: plain notes, `play <pattern>`, loop end, or track/melody end.
+
+→ [phrases.md](phrases.md) · [blocks.md](blocks.md) · [musical-intelligence.md](musical-intelligence.md)
+
 ## Measure Validation
 
 When `time` is declared and bar lines (`|`) are used, the interpreter validates measure durations:
@@ -69,15 +99,15 @@ When `time` is declared and bar lines (`|`) are used, the interpreter validates 
 ```
 time 4/4
 melody {
-    C4 q E4 q G4 q |    ← complete (3 beats — warning: incomplete)
+    C4 q E4 q G4 q |    ← incomplete (3 beats — warning)
     C4 h |              ← complete (2 beats)
 }
 ```
 
 Warnings (non-blocking):
 
-- `Measure incomplete: expected N beats, found M`
-- `Measure excess: expected N beats, found M`
+- `Measure N incomplete: expected X beats, got Y`
+- `Measure N exceeds expected duration`
 
 ## Interpreter Flow (Expressive Notation)
 
@@ -104,5 +134,7 @@ MIDI emission
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
+- [notation.md](notation.md) — Notation model (Phase 2)
 - [playback-quality.md](playback-quality.md) — How articulations and dynamics are shaped
 - [musical-intelligence.md](musical-intelligence.md) — Dynamic ramping across abrupt changes

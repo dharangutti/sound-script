@@ -42,5 +42,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/metadata.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [humanization.md](humanization.md) — jitter details
 - [layers.md](layers.md) — multi-instrument tracks

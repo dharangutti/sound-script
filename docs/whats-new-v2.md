@@ -56,6 +56,10 @@ The browser playground includes V2 presets for blocks, metadata, tempo automatio
 
 All v1.2 syntax remains valid. V2 adds optional statements and modifiers; existing `melody`, `track`, `sequence`, and `play` workflows are unchanged.
 
+## Language Reference
+
+→ [language-reference.md](language-reference.md) — Complete V2 syntax
+
 ## v1.2 Foundation
 
 V2 builds on the five-phase v1.2 engine:

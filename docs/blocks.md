@@ -60,5 +60,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [imports.md](imports.md) — share blocks across files
 - [phrases.md](phrases.md) — phrase blocks inside tracks
