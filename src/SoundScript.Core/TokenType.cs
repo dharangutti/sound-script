@@ -36,6 +36,9 @@ public enum TokenType
     Tie,
     Articulation,
     Dynamic,
+    Phrase,
+    Curve,
+    Transition,
     Import,
     StringLiteral,
     EndOfFile

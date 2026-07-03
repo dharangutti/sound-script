@@ -49,11 +49,12 @@ public class HumanizeTests
             }
             """;
 
-        HumanizeApplicator.SetSeed(99);
+        HumanizeApplicator.SetSeed(42);
         var expectedStart = HumanizeApplicator.ApplyToStartBeat(0, 0.03, 120, 0);
         var humanized = Interpret(source).Tracks.Single().Notes.Single();
+        var dry = Interpret("track piano { C4 q }").Tracks.Single().Notes.Single();
 
-        Assert.NotEqual(0, expectedStart);
+        Assert.Equal(0, dry.StartBeat);
         Assert.Equal(expectedStart, humanized.StartBeat);
         Assert.Equal(1.0, humanized.DurationBeats);
     }

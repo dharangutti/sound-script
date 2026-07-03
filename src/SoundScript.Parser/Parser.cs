@@ -164,6 +164,9 @@ public sealed class Parser
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
+        if (Match(TokenType.Phrase))
+            return ParsePhraseBlock();
+
         if (Match(TokenType.Bar))
             return new BarNode();
 
@@ -222,10 +225,96 @@ public sealed class Parser
         return loop;
     }
 
+    private PhraseNode ParsePhraseBlock()
+    {
+        Expect(TokenType.LeftBrace, "{");
+
+        var phrase = new PhraseNode();
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+            phrase.Body.Add(ParsePhraseBodyStatement());
+
+        Expect(TokenType.RightBrace, "}");
+        return phrase;
+    }
+
+    private AstNode ParsePhraseBodyStatement()
+    {
+        if (Match(TokenType.Curve))
+            return ParsePhraseCurveStatement();
+
+        if (Match(TokenType.Transition))
+            return ParsePhraseTransitionStatement();
+
+        if (Match(TokenType.Play))
+            return ParsePlayStatement();
+
+        if (Match(TokenType.Bar))
+            return new BarNode();
+
+        if (Match(TokenType.Rest))
+            return ParseRestStatement();
+
+        if (Match(TokenType.Dynamic))
+            return ParseDynamicStatement();
+
+        if (Check(TokenType.Articulation))
+        {
+            var articulation = ParseOptionalPrefixArticulation();
+            if (Check(TokenType.Note))
+                return ParseNoteStatement(articulation);
+
+            var articulationTarget = Peek();
+            throw Invalid(articulationTarget, "Expected note after articulation.");
+        }
+
+        if (Check(TokenType.Note))
+            return ParseNoteStatement();
+
+        if (Check(TokenType.Chord))
+            return ParseChordStatement();
+
+        var unexpected = Peek();
+        ThrowIfInvalidNoteAttempt(unexpected);
+        throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
+    private PhraseCurveNode ParsePhraseCurveStatement()
+    {
+        var token = Expect(TokenType.Identifier, "phrase curve");
+        return new PhraseCurveNode
+        {
+            Curve = token.Value.ToLowerInvariant() switch
+            {
+                "soft" => PhraseCurveType.Soft,
+                "hard" => PhraseCurveType.Hard,
+                "balanced" => PhraseCurveType.Balanced,
+                _ => throw Invalid(token, $"Unknown phrase curve '{token.Value}'.")
+            }
+        };
+    }
+
+    private PhraseTransitionNode ParsePhraseTransitionStatement()
+    {
+        var token = Expect(TokenType.Identifier, "phrase transition");
+        return new PhraseTransitionNode
+        {
+            Mode = token.Value.ToLowerInvariant() switch
+            {
+                "smooth" => PhraseTransitionMode.Smooth,
+                "abrupt" => PhraseTransitionMode.Abrupt,
+                _ => throw Invalid(token, $"Unknown phrase transition '{token.Value}'.")
+            }
+        };
+    }
+
     private AstNode ParseBodyStatement(bool allowLoop)
     {
         if (allowLoop && Match(TokenType.Loop))
             return ParseLoopBlock();
+
+        if (Match(TokenType.Phrase))
+            return ParsePhraseBlock();
 
         if (Match(TokenType.Bpm))
             return ParseBpmStatement();
@@ -688,7 +777,8 @@ public sealed class Parser
             or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
             or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars or TokenType.Layer
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
-            or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic)
+            or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
+            or TokenType.Curve or TokenType.Transition)
         {
             Advance();
             return token.Value;

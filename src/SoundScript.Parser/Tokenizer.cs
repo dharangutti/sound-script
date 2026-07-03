@@ -45,7 +45,15 @@ public sealed class Tokenizer
         ["drop3"] = TokenType.ChordVoicing,
         ["inv1"] = TokenType.ChordVoicing,
         ["inv2"] = TokenType.ChordVoicing,
-        ["spread"] = TokenType.ChordVoicing
+        ["spread"] = TokenType.ChordVoicing,
+        ["phrase"] = TokenType.Phrase,
+        ["curve"] = TokenType.Curve,
+        ["transition"] = TokenType.Transition,
+        ["soft"] = TokenType.Identifier,
+        ["hard"] = TokenType.Identifier,
+        ["balanced"] = TokenType.Identifier,
+        ["smooth"] = TokenType.Identifier,
+        ["abrupt"] = TokenType.Identifier
     };
 
     private static readonly string[] ChordSuffixes =

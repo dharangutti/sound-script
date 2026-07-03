@@ -36,6 +36,7 @@ public static class Interpreter
         public DynamicRampState? DynamicRamp { get; set; }
         public double Gain { get; set; } = 1.0;
         public double Humanize { get; set; }
+        public PhraseScope? ActivePhrase { get; set; }
     }
 
     private sealed class ExecutionContext
@@ -220,6 +221,12 @@ public static class Interpreter
                 case DynamicNode dynamic:
                     ApplyDynamic(track, dynamic, result);
                     break;
+                case PhraseCurveNode curve:
+                    ApplyPhraseCurve(track, curve);
+                    break;
+                case PhraseTransitionNode transition:
+                    ApplyPhraseTransition(track, transition);
+                    break;
                 case RestNode rest:
                     EmitRest(track, rest, clock, result);
                     break;
@@ -231,6 +238,9 @@ public static class Interpreter
                     break;
                 case LoopNode loop:
                     ExecuteLoop(track, loop, context, result, clock);
+                    break;
+                case PhraseNode phrase:
+                    ExecutePhrase(track, phrase, context, result, clock);
                     break;
                 case PlayNode play:
                     ExecutePlay(track, play, context, result, clock);
@@ -289,6 +299,59 @@ public static class Interpreter
         {
             context.ExpandingBlocks.Remove(blockName);
         }
+    }
+
+    private static void ExecutePhrase(
+        TrackBuilder track,
+        PhraseNode phrase,
+        ExecutionContext context,
+        InterpretedProgram result,
+        GlobalBeatClock clock)
+    {
+        var parentContext = CaptureContext(track);
+        var phraseScope = new PhraseScope
+        {
+            Dynamic = track.CurrentDynamic,
+            NoteCount = CountPhraseNotes(phrase.Body, context)
+        };
+        track.ActivePhrase = phraseScope;
+
+        ExecuteStatements(track, phrase.Body, context, result, clock);
+
+        track.LastPhraseMidi = track.LastEmittedMidi;
+        track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
+        track.ActivePhrase = null;
+        RestoreContext(track, parentContext);
+    }
+
+    private static int CountPhraseNotes(IReadOnlyList<AstNode> body, ExecutionContext context)
+    {
+        var count = 0;
+
+        foreach (var statement in body)
+        {
+            switch (statement)
+            {
+                case NoteNode:
+                case ChordNode:
+                    count++;
+                    break;
+                case PlayNode play when context.Blocks.TryGetValue(play.SequenceName, out var blockBody):
+                    count += CountPhraseNotes(blockBody, context);
+                    break;
+                case PlayNode play when context.Sequences.TryGetValue(play.SequenceName, out var sequenceBody):
+                    count += CountPhraseNotes(sequenceBody, context);
+                    break;
+                case LoopNode loop:
+                    count += CountPhraseNotes(loop.Body, context) * loop.Count;
+                    break;
+                case PhraseNode nested:
+                    count += CountPhraseNotes(nested.Body, context);
+                    break;
+            }
+        }
+
+        return count;
     }
 
     private static void ExecuteLoop(
@@ -374,6 +437,20 @@ public static class Interpreter
         }
 
         track.CurrentDynamic = dynamic.Level;
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.Dynamic = dynamic.Level;
+    }
+
+    private static void ApplyPhraseCurve(TrackBuilder track, PhraseCurveNode curve)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.Curve = curve.Curve;
+    }
+
+    private static void ApplyPhraseTransition(TrackBuilder track, PhraseTransitionNode transition)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.Transition = transition.Mode;
     }
 
     private static void AddLayer(TrackBuilder track, LayerNode layer)
@@ -431,16 +508,18 @@ public static class Interpreter
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
         var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
+        var (resolvedNoteVelocity, resolvedRampVelocity, effectiveDynamic) =
+            ResolvePhraseVelocities(track, note.Velocity, rampVelocity, result);
         var midiNumber = notation.ResolvedMidiNumber;
         PlaybackShapeResult? lastShaped = null;
 
         foreach (var layer in GetPlaybackLayers(track))
         {
             var shaped = PlaybackShaper.ShapeNote(
-                note.Velocity,
-                rampVelocity,
+                resolvedNoteVelocity,
+                resolvedRampVelocity,
                 notation.Dynamic,
-                track.CurrentDynamic,
+                effectiveDynamic,
                 track.CurrentVelocity,
                 notation.Articulation,
                 layer.InstrumentName,
@@ -527,9 +606,12 @@ public static class Interpreter
 
         foreach (var layer in GetPlaybackLayers(track))
         {
+            var (resolvedChordVelocity, _, effectiveDynamic) =
+                ResolvePhraseVelocities(track, chord.Velocity, null, result);
+
             var shaped = PlaybackShaper.ShapeChordVelocity(
-                chord.Velocity,
-                track.CurrentDynamic,
+                resolvedChordVelocity,
+                effectiveDynamic,
                 track.CurrentVelocity,
                 layer.InstrumentName);
 
@@ -552,6 +634,29 @@ public static class Interpreter
         }
 
         AdvanceTiming(track, chord.DurationBeats);
+    }
+
+    private static (int? NoteVelocity, int? RampVelocity, DynamicLevel? EffectiveDynamic) ResolvePhraseVelocities(
+        TrackBuilder track,
+        int? noteVelocity,
+        int? rampVelocity,
+        InterpretedProgram result)
+    {
+        var effectiveDynamic = track.ActivePhrase?.Dynamic ?? track.CurrentDynamic;
+
+        if (track.ActivePhrase is null)
+            return (noteVelocity, rampVelocity, effectiveDynamic);
+
+        var baseVelocity = noteVelocity
+            ?? rampVelocity
+            ?? effectiveDynamic?.ToVelocity()
+            ?? track.CurrentVelocity;
+
+        var (phraseVelocity, shaped) = PhraseShaper.Apply(baseVelocity, track.ActivePhrase);
+        if (shaped)
+            AddWarning(result, "Phrase shaping applied");
+
+        return (phraseVelocity, null, effectiveDynamic);
     }
 
     private static void ApplyPlaybackWarnings(InterpretedProgram result, PlaybackShapeResult shaped)
