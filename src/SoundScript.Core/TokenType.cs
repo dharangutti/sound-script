@@ -28,5 +28,7 @@ public enum TokenType
     Tie,
     Articulation,
     Dynamic,
+    Import,
+    StringLiteral,
     EndOfFile
 }

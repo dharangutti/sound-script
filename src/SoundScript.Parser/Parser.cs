@@ -28,6 +28,9 @@ public sealed class Parser
 
     private AstNode ParseTopLevelStatement()
     {
+        if (Match(TokenType.Import))
+            return ParseImportStatement();
+
         if (Match(TokenType.Melody))
             return ParseMelodyBlock();
 
@@ -83,6 +86,12 @@ public sealed class Parser
         var unexpected = Peek();
         ThrowIfInvalidNoteAttempt(unexpected);
         throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
+    private ImportNode ParseImportStatement()
+    {
+        var pathToken = Expect(TokenType.StringLiteral, "import path");
+        return new ImportNode { Path = pathToken.Value };
     }
 
     private MelodyNode ParseMelodyBlock()

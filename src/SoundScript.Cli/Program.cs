@@ -20,10 +20,11 @@ var outputPath = args.Length > 2
 
 try
 {
-    var source = File.ReadAllText(scriptPath);
-    var tokens = new Tokenizer(source).Tokenize();
-    var program = new Parser(tokens).Parse();
-    var interpreted = Interpreter.Interpret(program);
+    var loaded = ProgramLoader.Load(scriptPath);
+    var interpreted = Interpreter.Interpret(loaded.Program);
+    foreach (var warning in loaded.Warnings)
+        interpreted.Warnings.Add(warning);
+
     MidiGenerator.Write(interpreted, outputPath);
 
     var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
