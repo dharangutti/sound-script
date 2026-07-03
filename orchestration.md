@@ -66,5 +66,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/orchestration.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [advanced-chords.md](advanced-chords.md) — per-chord voicing
 - [layers.md](layers.md) — multi-instrument tracks

@@ -50,5 +50,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/advanced-chords.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [orchestration.md](orchestration.md) — track-level chord enrichment
 - [stabilization.md](stabilization.md) — Phase 1 ChordVoicing

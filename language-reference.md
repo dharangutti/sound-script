@@ -4,16 +4,34 @@ Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. 
 
 > V2 extends [v1.2](whats-new-v1.2.md) with imports, blocks, metadata, patterns, phrases, and orchestration. → [whats-new-v2.md](whats-new-v2.md)
 
-## Notes & Melody Blocks
+## Lexical Rules
+
+- **Comments:** none — `#` is not a comment token.
+- **Case:** keywords are case-insensitive (`Melody`, `melody`, `MELODY` are equivalent).
+- **Strings:** `"relative/path.ss"` for imports.
+- **Numbers:** integers or decimals (`120`, `0.5`, `1.5`).
+- **Bar line:** `|` — measure boundary when `time` is declared.
+- **Tie:** `~` — merges adjacent notes of the same pitch.
+- **Tempo arrow:** `->` or Unicode `→` — connects start and end BPM in tempo ramps.
+
+## Program Structure
 
 ```
-melody {
-    tempo 120
-    C4 q E4 q G4 q | C5 h
-}
+program ::= statement*
 ```
 
-**Note format:** `[A–G][#|b]?[octave]`
+Top-level statements: `import`, `block`, `pattern`, `track`, `melody`, `sequence`, `loop`, `play`, tempo/time, instrument/layer metadata, orchestration, notes, chords, rests, dynamics.
+
+## Notes
+
+**Format:** `[A–G][accidental]?[octave]`
+
+| Accidental | Syntax | Example |
+|------------|--------|---------|
+| Sharp | `#` | `F#4` |
+| Flat | `b`, `B`, `♭` | `Bb3`, `Db4` |
+| Natural | `♮` | `C♮4` |
+| None | (omit) | `C4` |
 
 | Example | Meaning |
 |---------|---------|
@@ -21,13 +39,175 @@ melody {
 | `F#4` | F sharp, octave 4 |
 | `Bb3` | B flat, octave 3 |
 
+- Octave range: **0–8** (4 = middle-C octave).
+- At most one accidental per note.
+
+## Durations
+
+| Syntax | Beats | Notes |
+|--------|-------|-------|
+| *(omitted)* | 1.0 | Default quarter-note length |
+| `q`, `quarter` | 1.0 | Quarter note |
+| `h`, `half` | 2.0 | Half note |
+| `e`, `eighth` | 0.5 | Eighth note |
+| `w`, `whole` | 4.0 | Whole note |
+| `for N` | N | Numeric beats (`C4 for 2`) |
+| `:N` | N | Colon form (`G4:4`, `G4:0.5`) |
+
+**Dotted suffix notation** (e.g. `q.`) is not supported. Use numeric forms for fractional beats (`C4 for 1.5`, `D4:1.5`).
+
+Repeated single-letter aliases (`qq`, `hh`) are rejected.
+
+→ [notation.md](notation.md) for the internal `NotatedNote` model.
+
+## Rests
+
+```
+rest q
+rest e
+rest for 2
+rest:4
+```
+
+Rests advance the beat clock; no MIDI note is emitted. Duration syntax matches notes.
+
+→ [expressive-notation.md](expressive-notation.md)
+
+## Ties
+
+```
+C5 q ~ C5 q
+C5 q ~ C5 q ~ C5 h
+```
+
+- `~` ties adjacent notes of the **same pitch**.
+- Durations merge into one sustained note.
+- Mismatched pitches error: `Invalid tie: pitches differ`.
+- Chords cannot be tied.
+
+## Articulations
+
+| Articulation | Syntax | Effect |
+|--------------|--------|--------|
+| Staccato | `staccato C4 q` | ~47% duration, slightly softer |
+| Legato | `C4 q legato` | ~97% duration |
+| Accent | `accent C4 q` | ~110% velocity, ~102% duration |
+
+One articulation per note, as prefix or suffix (not both).
+
+→ [expressive-notation.md](expressive-notation.md) · [playback-quality.md](playback-quality.md)
+
+## Dynamics
+
+| Marking | Base velocity |
+|---------|---------------|
+| `p` | 48 |
+| `mp` | 64 |
+| `mf` | 80 |
+| `f` | 96 |
+
+Dynamics persist on the track until changed. Per-note `vN` overrides apply before shaping.
+
+## Velocity
+
+```
+velocity 90        // track-scoped default (1–127)
+C4 q v100          // per-note override
+```
+
+## Chords
+
+```
+Cmaj q
+Dm h
+G7 q
+Fmaj7 w
+Cmaj drop2 q
+Cmaj inv1 h
+Cmaj spread q
+```
+
+| Suffix | Quality | Intervals (semitones) |
+|--------|---------|------------------------|
+| *(none)* / `maj` | Major | 0, 4, 7 |
+| `m` / `min` | Minor | 0, 3, 7 |
+| `dim` | Diminished | 0, 3, 6 |
+| `aug` | Augmented | 0, 4, 8 |
+| `maj7` | Major 7 | 0, 4, 7, 11 |
+| `7` | Dominant 7 | 0, 4, 7, 10 |
+
+### Dominant-7 Disambiguation
+
+Tokens like `G7` are lexed as notes. The parser reinterprets them as dominant-7 chords **only when a duration follows**:
+
+```
+G7 q      ← dominant-7 chord (octave 4)
+B7        ← note B, octave 7 (no duration)
+C7 h      ← dominant-7 chord
+```
+
+Dominant-7 chords cannot specify octave and cannot be tied.
+
+### Advanced Voicing (V2)
+
+| Modifier | Effect |
+|----------|--------|
+| `drop2` / `drop3` | Drop voicing |
+| `inv1` / `inv2` | Inversions |
+| `spread` | Widen upper voices |
+
+→ [advanced-chords.md](advanced-chords.md)
+
+## Time Signature & Measures
+
+```
+time 4/4
+melody {
+    C4 q E4 q G4 q |
+    C4 h |
+}
+```
+
+When `time` is declared and bar lines (`|`) are used, measure durations are validated. Warnings are non-blocking:
+
+- `Measure N incomplete: expected X beats, got Y`
+- `Measure N exceeds expected duration`
+
+## Tempo
+
+```
+bpm 120
+tempo 120
+tempo 120 → 140 over 4 bars
+```
+
+- `bpm` and `tempo` set instant tempo.
+- Only `tempo` supports ramps (`→` or `->`, `over N bar` / `over N bars`).
+- Multiple top-level ramps chain sequentially.
+
+→ [tempo-automation.md](tempo-automation.md)
+
+## Instruments & Layers
+
+```
+instrument piano
+layer piano
+layer cello
+```
+
+Supported: `piano`, `bass`, `violin`, `flute`, `guitar`, `trumpet`, `cello`, `organ`, `synth`
+
+→ [layers.md](layers.md)
+
 ## Imports (V2)
 
 ```ss
 import "lib.ss"
 ```
 
-Relative paths only. See [imports.md](imports.md).
+Relative paths only. Nested imports allowed; circular imports error. Later definitions override earlier.
+
+→ [imports.md](imports.md)
 
 ## Named Blocks (V2)
 
@@ -36,7 +216,26 @@ block intro { C4 q E4 q G4 q }
 play intro
 ```
 
-See [blocks.md](blocks.md).
+Blocks expand inline. Recursion is rejected. Body allows notes, chords, dynamics, articulations, rests, bar lines, `phrase`, `orchestration`, and nested `play`. Blocks do **not** allow loops, tempo/time, or track metadata.
+
+→ [blocks.md](blocks.md)
+
+## Sequences & Loops
+
+```
+sequence intro { C4 q D4 q }
+play intro
+
+loop 4 { C4 q D4 q }
+```
+
+| | `block` | `sequence` |
+|---|---------|------------|
+| Body | Musical events, phrase, play | Full track body |
+| Recursion guard | Yes | No |
+| Loops inside | No | Yes |
+
+`loop` is allowed in `track`, `sequence`, and top-level — not in `melody` or nested inside another `loop`.
 
 ## Phrases (V2)
 
@@ -49,7 +248,15 @@ phrase {
 }
 ```
 
-See [phrases.md](phrases.md).
+| Statement | Values |
+|-----------|--------|
+| `curve` | `soft`, `hard`, `balanced` |
+| `transition` | `smooth`, `abrupt` |
+| Dynamics | `p`, `mp`, `mf`, `f` (scoped to phrase) |
+
+Phrase blocks set **phrase boundaries** on exit (same as `play` block/sequence). Nested `phrase` inside `phrase` is not supported.
+
+→ [phrases.md](phrases.md)
 
 ## Patterns (V2)
 
@@ -58,7 +265,17 @@ pattern arp { up }
 play arp Cmaj q
 ```
 
-See [patterns.md](patterns.md).
+| Body | Kind | Behavior |
+|------|------|----------|
+| `up` | Arpeggio | Ascending; duration split evenly |
+| `down` | Arpeggio | Descending |
+| `updown` | Arpeggio | Ascend then descend |
+| `strum` | Strum | Staggered chord tones (0.05 beat offset) |
+| `rhythm e e q` | Rhythm | Custom durations per voice |
+
+Pattern play does **not** set phrase boundaries.
+
+→ [patterns.md](patterns.md)
 
 ## Track Metadata (V2)
 
@@ -76,84 +293,53 @@ track piano {
 }
 ```
 
-See [track-metadata.md](track-metadata.md), [layers.md](layers.md), [orchestration.md](orchestration.md).
+| Statement | Range | Effect |
+|-----------|-------|--------|
+| `gain N` | 0.0–1.0 | Velocity multiplier after playback shaping |
+| `humanize N` | ≥ 0 | Deterministic timing + velocity jitter |
 
-## Tempo Automation (V2)
+→ [track-metadata.md](track-metadata.md) · [humanization.md](humanization.md) · [layers.md](layers.md) · [orchestration.md](orchestration.md)
 
-```ss
-time 4/4
-tempo 120 → 140 over 4 bars
-```
-
-See [tempo-automation.md](tempo-automation.md).
-
-## Durations
-
-| Syntax | Beats |
-|--------|-------|
-| `C5` | 1 (default) |
-| `C4 for 2` | 2 |
-| `G4:4` | 4 |
-| `C4 q` | 1 (quarter) |
-| `D4 h` | 2 (half) |
-| `E4 e` | 0.5 (eighth) |
-| `F4 w` | 4 (whole) |
-
-## Instruments
-
-`piano`, `bass`, `violin`, `flute`, `guitar`, `trumpet`, `cello`, `organ`, `synth`
-
-## Chords
+## Orchestration (V2)
 
 ```
-Cmaj q
-Dm h
-G7 q
-Fmaj7 w
+double octave
+reinforce bass
+brighten top
 ```
 
-### Advanced Voicing (V2)
+Track-scoped, sticky flags affecting all subsequent chords.
+
+→ [orchestration.md](orchestration.md)
+
+## Context Matrix
+
+| Statement | Top | Melody | Track/Seq | Block | Phrase |
+|-----------|-----|--------|-----------|-------|--------|
+| `import` | ✓ | | | | |
+| `block` / `pattern` def | ✓ | | | | |
+| `track` / `melody` / `sequence` | ✓ | | | | |
+| `loop` | ✓ | ✗ | ✓ | ✗ | ✗ |
+| `phrase` | | ✓ | ✓ | ✓ | ✗ |
+| `instrument` / `layer` / `gain` / `humanize` / `velocity` | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `tempo` / `bpm` / `time` | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `orchestration` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `play` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| note / chord / rest / dynamic / bar | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+## Melody & Track Blocks
 
 ```
-Cmaj drop2 q
-Cmaj inv1 h
-Cmaj spread q
-```
+melody {
+    tempo 120
+    C4 q E4 q G4 q | C5 h
+}
 
-| Modifier | Effect |
-|----------|--------|
-| `drop2` / `drop3` | Drop voicing |
-| `inv1` / `inv2` | Inversions |
-| `spread` | Widen upper voices |
-
-See [advanced-chords.md](advanced-chords.md).
-
-## Sequences & Loops
-
-```
-sequence intro { C4 q D4 q }
-play intro
-
-loop 4 { C4 q D4 q }
-```
-
-## Dynamics
-
-| Marking | Base velocity |
-|---------|---------------|
-| `p` | 48 |
-| `mp` | 64 |
-| `mf` | 80 |
-| `f` | 96 |
-
-## Rests, Ties, Articulations
-
-```
-rest q
-C5 q ~ C5 q
-staccato C4 q
-C4 q legato
-accent C4 q
+track melody {
+    instrument piano
+    mf
+    C4 q
+}
 ```
 
 ## AST Node Types
@@ -171,9 +357,16 @@ accent C4 q
 | `ProgramNode` | Root container |
 | `TrackNode` / `MelodyNode` | Track blocks |
 | `NoteNode` / `ChordNode` | Musical events |
+| `RestNode` | Rest |
+| `DynamicNode` | Dynamic marking |
+| `PlayNode` | Block / sequence / pattern invocation |
+| `LoopNode` | Loop |
+| `PhraseCurveNode` / `PhraseTransitionNode` | Phrase shaping |
 
 ## Related
 
-- [whats-new-v2.md](whats-new-v2.md)
-- [pipeline.md](pipeline.md)
-- [examples.md](examples.md)
+- [notation.md](notation.md) — Notation engine (Phase 2)
+- [expressive-notation.md](expressive-notation.md) — Rests, ties, articulations (Phase 3)
+- [whats-new-v2.md](whats-new-v2.md) — V2 changelog
+- [pipeline.md](pipeline.md) — Interpreter pipeline
+- [examples.md](examples.md) — Example catalog

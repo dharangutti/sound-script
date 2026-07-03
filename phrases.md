@@ -67,5 +67,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/phrases.ss
 
 ## Related
 
+- [language-reference.md](language-reference.md) — Complete syntax
 - [blocks.md](blocks.md) — phrase boundaries with `play`
 - [musical-intelligence.md](musical-intelligence.md) — PhraseSmoother
