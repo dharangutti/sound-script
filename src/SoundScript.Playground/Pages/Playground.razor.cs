@@ -2,13 +2,11 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Midi;
 using SoundScript.Parser;
-using SoundScript.Playground.Services;
 
 namespace SoundScript.Playground.Pages;
 
 public partial class Playground
 {
-  [Inject] private MidiPlaybackService MidiPlayback { get; set; } = null!;
   [Inject] private IJSRuntime Js { get; set; } = null!;
 
   private const string DefaultScript =
@@ -28,12 +26,6 @@ public partial class Playground
   private string? StatusMessage { get; set; }
   private byte[]? MidiBytes { get; set; }
   private bool IsRunning { get; set; }
-
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (firstRender)
-      await MidiPlayback.EnsureInitializedAsync();
-  }
 
   private void LoadMelodyExample()
   {
@@ -92,11 +84,8 @@ public partial class Playground
     {
       IsRunning = true;
       ErrorMessage = null;
-      StatusMessage = "Compiling…";
+      StatusMessage = null;
       MidiBytes = null;
-      StateHasChanged();
-
-      await MidiPlayback.StopAsync();
 
       var tokens = new Tokenizer(ScriptText).Tokenize();
       var program = new SoundScript.Parser.Parser(tokens).Parse();
@@ -107,11 +96,10 @@ public partial class Playground
       MidiBytes = stream.ToArray();
 
       var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
-      StatusMessage = $"Compiled {noteCount} note(s) across {interpreted.Tracks.Count} track(s) at {interpreted.Tempo} BPM.";
-      StateHasChanged();
 
-      await MidiPlayback.PlayAsync(MidiBytes);
-      StatusMessage = $"Playing — {noteCount} note(s) at {interpreted.Tempo} BPM.";
+      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
+
+      StatusMessage = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s) at {interpreted.Tempo} BPM.";
     }
     catch (Exception ex)
     {
@@ -128,7 +116,7 @@ public partial class Playground
 
   private async Task StopAsync()
   {
-    await MidiPlayback.StopAsync();
+    await Js.InvokeVoidAsync("SoundScriptMidi.stop");
     StatusMessage = "Stopped.";
     StateHasChanged();
   }
