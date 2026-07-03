@@ -272,37 +272,45 @@ public static class Interpreter
         notation.StartTime = globalBeat;
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
-        var velocity = ComputeFinalVelocity(
+        var shaped = PlaybackShaper.ShapeNote(
             note.Velocity,
+            rampVelocity: null,
             notation.Dynamic,
             track.CurrentDynamic,
             track.CurrentVelocity,
             notation.Articulation,
-            track.CurrentInstrumentName);
+            track.CurrentInstrumentName,
+            notation.DurationBeats);
 
-        var writtenBeats = notation.DurationBeats;
-        var playbackBeats = ApplyArticulationDuration(writtenBeats, notation.Articulation);
-        var durationMs = BeatsToMilliseconds(playbackBeats, tempo);
+        ApplyPlaybackWarnings(result, shaped);
+
+        notation = notation with
+        {
+            ShapedVelocity = shaped.Velocity,
+            ShapedDurationBeats = shaped.DurationBeats
+        };
+
+        var durationMs = BeatsToMilliseconds(shaped.DurationBeats, tempo);
 
         track.Notes.Add(new TimedNote(
             notation.ToMidiNumber(),
             globalBeat,
-            BeatMath.RoundBeat(playbackBeats),
+            shaped.DurationBeats,
             durationMs,
-            velocity));
+            shaped.Velocity));
 
-        AdvanceTiming(track, writtenBeats);
+        AdvanceTiming(track, notation.DurationBeats);
     }
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo, GlobalBeatClock clock, InterpretedProgram result)
     {
-        var velocity = ComputeFinalVelocity(
+        var shaped = PlaybackShaper.ShapeChordVelocity(
             chord.Velocity,
-            null,
             track.CurrentDynamic,
             track.CurrentVelocity,
-            null,
             track.CurrentInstrumentName);
+
+        ApplyPlaybackWarnings(result, shaped);
 
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
@@ -311,38 +319,38 @@ public static class Interpreter
         if (adjusted)
             AddWarning(result, "Chord voicing adjustment applied");
 
+        var (balancedVelocities, balanced) = ChordBalancer.Apply(voicedNotes, shaped.Velocity);
+        if (balanced)
+            AddWarning(result, "Chord balance applied");
+
         var durationMs = BeatsToMilliseconds(chord.DurationBeats, tempo);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
 
-        foreach (var midiNumber in voicedNotes)
+        for (var i = 0; i < voicedNotes.Length; i++)
         {
             track.Notes.Add(new TimedNote(
-                midiNumber,
+                voicedNotes[i],
                 globalBeat,
                 durationBeats,
                 durationMs,
-                velocity));
+                balancedVelocities[i]));
         }
 
         AdvanceTiming(track, chord.DurationBeats);
     }
 
-    private static int ComputeFinalVelocity(
-        int? noteVelocity,
-        DynamicLevel? noteDynamic,
-        DynamicLevel? trackDynamic,
-        int trackVelocity,
-        ArticulationType? articulation,
-        string? instrumentName)
+    private static void ApplyPlaybackWarnings(InterpretedProgram result, PlaybackShapeResult shaped)
     {
-        var baseVelocity = noteVelocity
-            ?? noteDynamic?.ToVelocity()
-            ?? trackDynamic?.ToVelocity()
-            ?? trackVelocity;
-
-        baseVelocity = ApplyArticulationVelocity(baseVelocity, articulation);
-        baseVelocity = Math.Clamp((int)Math.Round(baseVelocity * InstrumentGainMap.GetGain(instrumentName)), 1, 127);
-        return VelocityCurve.Apply(baseVelocity, VelocityCurve.ForArticulation(articulation));
+        if (shaped.DynamicShaped)
+            AddWarning(result, "Dynamic shaping applied");
+        if (shaped.ArticulationShaped)
+            AddWarning(result, "Articulation shaping applied");
+        if (shaped.GainRefined)
+            AddWarning(result, "Instrument gain refinement applied");
+        if (shaped.DurationNormalized)
+            AddWarning(result, "Duration normalization applied");
+        if (shaped.ExpressiveApplied)
+            AddWarning(result, "Expressive curve applied");
     }
 
     private static void AdvanceTiming(TrackBuilder track, double beats)
@@ -418,23 +426,6 @@ public static class Interpreter
         if (!result.Warnings.Contains(warning))
             result.Warnings.Add(warning);
     }
-
-    private static double ApplyArticulationDuration(double beats, ArticulationType? articulation) =>
-        articulation switch
-        {
-            ArticulationType.Staccato => BeatMath.RoundBeat(beats * 0.5),
-            ArticulationType.Legato => BeatMath.RoundBeat(beats),
-            ArticulationType.Accent => BeatMath.RoundBeat(beats),
-            _ => BeatMath.RoundBeat(beats)
-        };
-
-    private static int ApplyArticulationVelocity(int velocity, ArticulationType? articulation) =>
-        articulation switch
-        {
-            ArticulationType.Accent => Math.Min(127, (int)Math.Round(velocity * 1.25)),
-            ArticulationType.Legato => Math.Max(1, (int)Math.Round(velocity * 0.95)),
-            _ => velocity
-        };
 
     public static double BeatsToMilliseconds(double beats, int bpm) =>
         (60_000.0 / bpm) * beats;

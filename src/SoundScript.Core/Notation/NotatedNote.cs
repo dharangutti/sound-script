@@ -15,6 +15,8 @@ public sealed record NotatedNote
     public ArticulationType? Articulation { get; init; }
     public DynamicLevel? Dynamic { get; init; }
     public bool IsTied { get; init; }
+    public int? ShapedVelocity { get; init; }
+    public double? ShapedDurationBeats { get; init; }
 
     public bool MatchesPitch(NotatedNote other) =>
         PitchClass == other.PitchClass

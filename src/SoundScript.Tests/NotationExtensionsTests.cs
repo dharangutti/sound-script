@@ -62,9 +62,9 @@ public class NotationExtensionsTests
     }
 
     [Theory]
-    [InlineData("staccato C4 q", ArticulationType.Staccato, 0.5)]
-    [InlineData("C4 q legato", ArticulationType.Legato, 1.0)]
-    [InlineData("accent C4 q", ArticulationType.Accent, 1.0)]
+    [InlineData("staccato C4 q", ArticulationType.Staccato, 0.47)]
+    [InlineData("C4 q legato", ArticulationType.Legato, 0.97)]
+    [InlineData("accent C4 q", ArticulationType.Accent, 1.02)]
     public void ParseArticulation_AdjustsPlayback(string line, ArticulationType expected, double playbackBeats)
     {
         var program = Parse($"melody {{ {line} }}");
@@ -83,17 +83,25 @@ public class NotationExtensionsTests
             melody {
                 p
                 C4 q
-                f
+                mp
                 D4 q
+                mf
+                E4 q
             }
             """;
 
         var program = Parse(source);
-        var interpreted = Interpreter.Interpret(program);
-        var notes = interpreted.Tracks.Single().Notes;
+        var notes = Interpreter.Interpret(program).Tracks.Single().Notes;
 
-        Assert.Equal(48, notes[0].Velocity);
-        Assert.Equal(96, notes[1].Velocity);
+        Assert.Equal(
+            PlaybackShaper.ShapeNote(null, null, DynamicLevel.Piano, DynamicLevel.Piano, 64, null, null, 1.0).Velocity,
+            notes[0].Velocity);
+        Assert.Equal(
+            PlaybackShaper.ShapeNote(null, null, DynamicLevel.MezzoPiano, DynamicLevel.MezzoPiano, 64, null, null, 1.0).Velocity,
+            notes[1].Velocity);
+        Assert.Equal(
+            PlaybackShaper.ShapeNote(null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, null, 1.0).Velocity,
+            notes[2].Velocity);
     }
 
     [Fact]

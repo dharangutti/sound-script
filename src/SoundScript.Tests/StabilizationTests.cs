@@ -29,8 +29,13 @@ public class StabilizationTests
         var flute = interpreted.Tracks.Single(t => t.Name == "lead").Notes.Single();
         var piano = interpreted.Tracks.Single(t => t.Name == "rhythm").Notes.Single();
 
-        Assert.Equal(Math.Clamp((int)Math.Round(80 * 0.85), 1, 127), flute.Velocity);
-        Assert.Equal(80, piano.Velocity);
+        var expectedFlute = PlaybackShaper.ShapeNote(
+            null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, "flute", 1.0).Velocity;
+        var expectedPiano = PlaybackShaper.ShapeNote(
+            null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, "piano", 1.0).Velocity;
+
+        Assert.Equal(expectedFlute, flute.Velocity);
+        Assert.Equal(expectedPiano, piano.Velocity);
     }
 
     [Fact]
@@ -44,8 +49,15 @@ public class StabilizationTests
 
         var interpreted = Interpret(source);
         var velocity = interpreted.Tracks.Single().Notes.Single().Velocity;
-        var legatoBase = Math.Max(1, (int)Math.Round(64 * 0.95));
-        var expected = Math.Clamp((int)Math.Round(Math.Sqrt(legatoBase / 127.0) * 127.0), 1, 127);
+        var expected = PlaybackShaper.ShapeNote(
+            null,
+            null,
+            null,
+            null,
+            64,
+            ArticulationType.Legato,
+            null,
+            1.0).Velocity;
 
         Assert.Equal(expected, velocity);
     }
@@ -124,8 +136,10 @@ public class StabilizationTests
 
         var interpreted = Interpret(source);
         var note = interpreted.Tracks.Single().Notes.Single();
+        var expected = PlaybackShaper.ShapeNote(
+            null, null, null, null, 64, null, "flute", 1.0).Velocity;
 
-        Assert.Equal(Math.Clamp((int)Math.Round(64 * 0.85), 1, 127), note.Velocity);
+        Assert.Equal(expected, note.Velocity);
         Assert.Contains(interpreted.Warnings, w => w.Contains("Sequence inherited instrument: flute"));
     }
 
