@@ -27,4 +27,19 @@ public static class InstrumentMap
 
     public static bool TryResolve(string name, out int program) =>
         Programs.TryGetValue(name, out program);
+
+    public static bool TryGetName(int program, out string name)
+    {
+        foreach (var pair in Programs)
+        {
+            if (pair.Value == program)
+            {
+                name = pair.Key;
+                return true;
+            }
+        }
+
+        name = string.Empty;
+        return false;
+    }
 }
