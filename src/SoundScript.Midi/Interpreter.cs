@@ -293,6 +293,7 @@ public static class Interpreter
         var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
         var velocity = ComputeFinalVelocity(
             note.Velocity,
+            rampVelocity: null,
             notation.Dynamic,
             track.CurrentDynamic,
             track.CurrentVelocity,
@@ -308,9 +309,9 @@ public static class Interpreter
         track.Notes.Add(new TimedNote(
             midiNumber,
             globalBeat,
-            BeatMath.RoundBeat(playbackBeats),
+            shaped.DurationBeats,
             durationMs,
-            velocity));
+            shaped.Velocity));
 
         track.LastEmittedMidi = midiNumber;
         AdvanceTiming(track, writtenBeats);
@@ -349,13 +350,13 @@ public static class Interpreter
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo, GlobalBeatClock clock, InterpretedProgram result)
     {
-        var velocity = ComputeFinalVelocity(
+        var shaped = PlaybackShaper.ShapeChordVelocity(
             chord.Velocity,
-            null,
             track.CurrentDynamic,
             track.CurrentVelocity,
-            null,
             track.CurrentInstrumentName);
+
+        ApplyPlaybackWarnings(result, shaped);
 
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
@@ -374,11 +375,11 @@ public static class Interpreter
         foreach (var midiNumber in spacedNotes)
         {
             track.Notes.Add(new TimedNote(
-                midiNumber,
+                voicedNotes[i],
                 globalBeat,
                 durationBeats,
                 durationMs,
-                velocity));
+                balancedVelocities[i]));
         }
 
         AdvanceTiming(track, chord.DurationBeats);
@@ -477,23 +478,6 @@ public static class Interpreter
         if (!result.Warnings.Contains(warning))
             result.Warnings.Add(warning);
     }
-
-    private static double ApplyArticulationDuration(double beats, ArticulationType? articulation) =>
-        articulation switch
-        {
-            ArticulationType.Staccato => BeatMath.RoundBeat(beats * 0.5),
-            ArticulationType.Legato => BeatMath.RoundBeat(beats),
-            ArticulationType.Accent => BeatMath.RoundBeat(beats),
-            _ => BeatMath.RoundBeat(beats)
-        };
-
-    private static int ApplyArticulationVelocity(int velocity, ArticulationType? articulation) =>
-        articulation switch
-        {
-            ArticulationType.Accent => Math.Min(127, (int)Math.Round(velocity * 1.25)),
-            ArticulationType.Legato => Math.Max(1, (int)Math.Round(velocity * 0.95)),
-            _ => velocity
-        };
 
     public static double BeatsToMilliseconds(double beats, int bpm) =>
         (60_000.0 / bpm) * beats;

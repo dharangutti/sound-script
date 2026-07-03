@@ -62,9 +62,9 @@ public class NotationExtensionsTests
     }
 
     [Theory]
-    [InlineData("staccato C4 q", ArticulationType.Staccato, 0.5)]
-    [InlineData("C4 q legato", ArticulationType.Legato, 1.0)]
-    [InlineData("accent C4 q", ArticulationType.Accent, 1.0)]
+    [InlineData("staccato C4 q", ArticulationType.Staccato, 0.47)]
+    [InlineData("C4 q legato", ArticulationType.Legato, 0.97)]
+    [InlineData("accent C4 q", ArticulationType.Accent, 1.02)]
     public void ParseArticulation_AdjustsPlayback(string line, ArticulationType expected, double playbackBeats)
     {
         var program = Parse($"melody {{ {line} }}");
