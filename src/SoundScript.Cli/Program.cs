@@ -21,11 +21,14 @@ var outputPath = args.Length > 2
 try
 {
     var loaded = ProgramLoader.Load(scriptPath);
-    var interpreted = Interpreter.Interpret(loaded.Program);
+    var interpreted = Interpreter.Interpret(loaded.Program, scriptPath);
     foreach (var warning in loaded.Warnings)
         interpreted.Warnings.Add(warning);
 
     MidiGenerator.Write(interpreted, outputPath);
+
+    foreach (var warning in interpreted.Warnings)
+        Console.Error.WriteLine($"warning: {warning}");
 
     var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
     Console.WriteLine($"Wrote {noteCount} notes across {interpreted.Tracks.Count} track(s) to {outputPath} at {interpreted.Tempo} BPM.");

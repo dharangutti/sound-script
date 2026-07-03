@@ -230,7 +230,7 @@ public sealed class Parser
             return ParsePhraseBlock();
 
         if (Match(TokenType.Bar))
-            return new BarNode();
+            return new BarNode(Previous().Line);
 
         if (Match(TokenType.Rest))
             return ParseRestStatement();
@@ -319,7 +319,7 @@ public sealed class Parser
             return ParsePlayStatement();
 
         if (Match(TokenType.Bar))
-            return new BarNode();
+            return new BarNode(Previous().Line);
 
         if (Match(TokenType.Rest))
             return ParseRestStatement();
@@ -433,7 +433,7 @@ public sealed class Parser
             return ParsePlayStatement();
 
         if (Match(TokenType.Bar))
-            return new BarNode();
+            return new BarNode(Previous().Line);
 
         if (Match(TokenType.Rest))
             return ParseRestStatement();

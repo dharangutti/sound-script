@@ -31,6 +31,7 @@ public partial class Playground
   private string ScriptText { get; set; } = DefaultScript;
   private string? ErrorMessage { get; set; }
   private string? StatusMessage { get; set; }
+  private List<string> WarningMessages { get; set; } = [];
   private byte[]? MidiBytes { get; set; }
   private bool IsRunning { get; set; }
 
@@ -339,11 +340,21 @@ public partial class Playground
       IsRunning = true;
       ErrorMessage = null;
       StatusMessage = null;
+      WarningMessages = [];
       MidiBytes = null;
+
+      if (SourceDiagnostics.ContainsImport(ScriptText))
+        WarningMessages.Add("Imports are not supported in the browser playground. Use the CLI (ProgramLoader) for multi-file projects.");
 
       var tokens = new Tokenizer(ScriptText).Tokenize();
       var program = new SoundScript.Parser.Parser(tokens).Parse();
-      var interpreted = Interpreter.Interpret(program);
+      var interpreted = Interpreter.Interpret(program, "playground.ss");
+
+      foreach (var warning in interpreted.Warnings)
+      {
+        if (!WarningMessages.Contains(warning))
+          WarningMessages.Add(warning);
+      }
 
       using var stream = new MemoryStream();
       MidiGenerator.Write(interpreted, stream);
@@ -388,6 +399,7 @@ public partial class Playground
   {
     ErrorMessage = null;
     StatusMessage = null;
+    WarningMessages = [];
     MidiBytes = null;
   }
 }
