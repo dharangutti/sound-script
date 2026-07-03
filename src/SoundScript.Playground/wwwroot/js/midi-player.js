@@ -5,7 +5,7 @@ window.SoundScriptMidi = (function () {
     let masterGain = null;
     let activeNodes = [];
     let stopTimer = null;
-    let initialized = false;
+    let soundfontLoaded = false;
 
     function readVarLen(data, offset) {
         let value = 0;
@@ -175,28 +175,7 @@ window.SoundScriptMidi = (function () {
         }
     }
 
-    async function init() {
-        if (initialized) {
-            return;
-        }
-
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        masterGain = audioContext.createGain();
-        masterGain.gain.value = 0.85;
-        masterGain.connect(audioContext.destination);
-
-        await SoundScriptSoundfont.load(audioContext);
-        initialized = true;
-    }
-
-    async function play(midiBytes) {
-        await init();
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
-
-        clearScheduled();
-
+    function scheduleNotes(midiBytes) {
         const { notes, totalDuration } = parseMidi(midiBytes);
         const now = audioContext.currentTime + 0.05;
 
@@ -218,6 +197,33 @@ window.SoundScriptMidi = (function () {
         }, (totalDuration + 0.5) * 1000);
     }
 
+    async function startPlayback(midiBytes) {
+        clearScheduled();
+
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioContext.createGain();
+            masterGain.gain.value = 0.85;
+            masterGain.connect(audioContext.destination);
+        }
+
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
+
+        if (audioContext.state === 'suspended') {
+            console.warn('AudioContext blocked — ensure silent mode is off.');
+            return;
+        }
+
+        if (!soundfontLoaded) {
+            await SoundScriptSoundfont.load(audioContext);
+            soundfontLoaded = true;
+        }
+
+        scheduleNotes(midiBytes);
+    }
+
     function stop() {
         clearScheduled();
     }
@@ -232,9 +238,12 @@ window.SoundScriptMidi = (function () {
     }
 
     return {
-        init,
-        play,
+        startPlayback,
         stop,
         download
     };
 })();
+
+window.startPlayback = function (midiBytes) {
+    return window.SoundScriptMidi.startPlayback(midiBytes);
+};
