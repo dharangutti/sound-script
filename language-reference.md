@@ -1,6 +1,8 @@
-# SoundScript Language Reference (v1.2)
+# SoundScript Language Reference (V2)
 
 Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. Statements appear at the top level or inside blocks.
+
+> V2 extends [v1.2](whats-new-v1.2.md) with imports, blocks, metadata, patterns, phrases, and orchestration. → [whats-new-v2.md](whats-new-v2.md)
 
 ## Notes & Melody Blocks
 
@@ -19,19 +21,73 @@ melody {
 | `F#4` | F sharp, octave 4 |
 | `Bb3` | B flat, octave 3 |
 
-Pitch letters are case-insensitive.
+## Imports (V2)
 
-## Bar Separator
-
-```
-C4 E4 | G4 C5
+```ss
+import "lib.ss"
 ```
 
-The `|` token marks measure boundaries. In v1.2, bar lines trigger **measure validation warnings** when note durations do not match the declared time signature.
+Relative paths only. See [imports.md](imports.md).
+
+## Named Blocks (V2)
+
+```ss
+block intro { C4 q E4 q G4 q }
+play intro
+```
+
+See [blocks.md](blocks.md).
+
+## Phrases (V2)
+
+```ss
+phrase {
+    curve soft
+    transition smooth
+    mf
+    C4 q E4 q G4 q
+}
+```
+
+See [phrases.md](phrases.md).
+
+## Patterns (V2)
+
+```ss
+pattern arp { up }
+play arp Cmaj q
+```
+
+See [patterns.md](patterns.md).
+
+## Track Metadata (V2)
+
+```ss
+track piano {
+    instrument piano
+    gain 0.9
+    humanize 0.03
+    layer piano
+    layer cello
+    double octave
+    reinforce bass
+    brighten top
+    C4 q
+}
+```
+
+See [track-metadata.md](track-metadata.md), [layers.md](layers.md), [orchestration.md](orchestration.md).
+
+## Tempo Automation (V2)
+
+```ss
+time 4/4
+tempo 120 → 140 over 4 bars
+```
+
+See [tempo-automation.md](tempo-automation.md).
 
 ## Durations
-
-Durations are measured in **beats** (quarter-note beats at the current tempo).
 
 | Syntax | Beats |
 |--------|-------|
@@ -43,38 +99,9 @@ Durations are measured in **beats** (quarter-note beats at the current tempo).
 | `E4 e` | 0.5 (eighth) |
 | `F4 w` | 4 (whole) |
 
-`tempo` and legacy `bpm` both set beats per minute (default **120**).
-
 ## Instruments
 
-```
-instrument piano
-instrument flute
-```
-
-| Instrument | GM Program |
-|------------|------------|
-| `piano` | 0 |
-| `bass` | 32 |
-| `violin` | 40 |
-| `flute` | 73 |
-| `guitar` | 24 |
-| `trumpet` | 56 |
-| `cello` | 42 |
-| `organ` | 19 |
-| `synth` | 80 |
-
-Default: acoustic grand piano (program 0).
-
-## Tempo & Time Signature
-
-```
-tempo 120
-time 4/4
-time 3/4
-```
-
-`time` sets MIDI time-signature metadata and enables measure validation warnings.
+`piano`, `bass`, `violin`, `flute`, `guitar`, `trumpet`, `cello`, `organ`, `synth`
 
 ## Chords
 
@@ -85,134 +112,68 @@ G7 q
 Fmaj7 w
 ```
 
-| Syntax | Quality | Intervals (semitones) |
-|--------|---------|----------------------|
-| `Cmaj`, `C` | Major | 0, 4, 7 |
-| `Dm` | Minor | 0, 3, 7 |
-| `Cdim` | Diminished | 0, 3, 6 |
-| `Caug` | Augmented | 0, 4, 8 |
-| `G7` | Dominant 7th | 0, 4, 7, 10 |
-| `Fmaj7` | Major 7th | 0, 4, 7, 11 |
-
-Optional octave suffix: `Cmaj4`, `Dm5` (default octave: 4).
-
-**Backward compatibility:** `G7` alone inside a `melody` block is parsed as **G at octave 7**. Write `G7 q` to play a G dominant 7th chord.
-
-## Sequences & Blocks
+### Advanced Voicing (V2)
 
 ```
-sequence intro {
-    C4 q
-    D4 q
-}
+Cmaj drop2 q
+Cmaj inv1 h
+Cmaj spread q
+```
 
+| Modifier | Effect |
+|----------|--------|
+| `drop2` / `drop3` | Drop voicing |
+| `inv1` / `inv2` | Inversions |
+| `spread` | Widen upper voices |
+
+See [advanced-chords.md](advanced-chords.md).
+
+## Sequences & Loops
+
+```
+sequence intro { C4 q D4 q }
 play intro
+
+loop 4 { C4 q D4 q }
 ```
 
-## Loops
+## Dynamics
 
-```
-loop 4 {
-    C4 q
-    D4 q
-}
-```
+| Marking | Base velocity |
+|---------|---------------|
+| `p` | 48 |
+| `mp` | 64 |
+| `mf` | 80 |
+| `f` | 96 |
 
-Repeats the block **N** times.
-
-## Velocity
-
-```
-velocity 80
-C4 q v100
-```
-
-- `velocity N` sets the track default (1–127, default **64**).
-- `vN` on a note overrides for that note.
-
-## Multi-Track
-
-```
-track melody {
-    instrument flute
-    C5 q
-}
-
-track bass {
-    instrument bass
-    C2 h
-}
-```
-
-Each `track` block becomes a separate MIDI track.
-
-## Rests (v1.2)
+## Rests, Ties, Articulations
 
 ```
 rest q
-rest e
-```
-
-Advances the beat clock without emitting a note.
-
-## Ties (v1.2)
-
-```
 C5 q ~ C5 q
+staccato C4 q
+C4 q legato
+accent C4 q
 ```
-
-Merges durations for the same pitch into a single sustained note. Tied pitches must match.
-
-## Articulations (v1.2)
-
-| Keyword | Position |
-|---------|----------|
-| `staccato C4 q` | Before note |
-| `C4 q legato` | After note |
-| `accent C4 q` | Before note |
-
-## Dynamics (v1.2)
-
-| Marking | Level | Base velocity |
-|---------|-------|---------------|
-| `p` | Piano | 48 |
-| `mp` | Mezzo-piano | 64 |
-| `mf` | Mezzo-forte | 80 |
-| `f` | Forte | 96 |
-
-Dynamics apply to subsequent notes until changed.
 
 ## AST Node Types
 
 | Node | Purpose |
 |------|---------|
+| `ImportNode` | File import |
+| `BlockNode` | Named reusable block |
+| `PatternNode` | Pattern definition |
+| `PhraseNode` | Phrase block |
+| `OrchestrationNode` | Orchestration helper |
+| `LayerNode` | Instrument layer |
+| `GainNode` / `HumanizeNode` | Track metadata |
+| `TempoRampNode` | Tempo automation |
 | `ProgramNode` | Root container |
-| `MelodyNode` | Legacy melody block |
-| `TrackNode` | Named multi-track block |
-| `SequenceNode` | Reusable sequence |
-| `PlayNode` | Inline sequence expansion |
-| `LoopNode` | Repeat block |
-| `InstrumentNode` | MIDI program change |
-| `TempoNode` / `BpmNode` | Tempo |
-| `TimeSignatureNode` | Time signature |
-| `VelocityNode` | Track velocity |
-| `DynamicNode` | Dynamic marking |
-| `NoteNode` | Single note (`NotatedNote`) |
-| `ChordNode` | Chord |
-| `RestNode` | Rest |
-| `BarNode` | Measure boundary |
+| `TrackNode` / `MelodyNode` | Track blocks |
+| `NoteNode` / `ChordNode` | Musical events |
 
-## Timing Formula
+## Related
 
-```
-durationMs = (60_000 / tempo) × durationBeats
-```
-
-MIDI generator uses **480 ticks per quarter note**.
-
-## Related Documentation
-
-- [notation.md](notation.md) — Notation engine internals
-- [expressive-notation.md](expressive-notation.md) — Rests, ties, articulations
-- [pipeline.md](pipeline.md) — Interpreter and shaping flow
-- [examples.md](examples.md) — Runnable examples
+- [whats-new-v2.md](whats-new-v2.md)
+- [pipeline.md](pipeline.md)
+- [examples.md](examples.md)

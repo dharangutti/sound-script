@@ -1,95 +1,77 @@
-# SoundScript Architecture (v1.2)
+# SoundScript Architecture (V2)
 
-System architecture for the SoundScript engine.
+System overview for the SoundScript engine and documentation suite.
 
 ## Project Layout
 
 ```
-sound-script/
-├── src/
-│   ├── SoundScript.Core/       # Shared models, AST, notation types
-│   ├── SoundScript.Parser/     # Tokenizer, Parser, NotationParser
-│   ├── SoundScript.Midi/       # Interpreter, shaping, MIDI export
-│   ├── SoundScript.Cli/        # Command-line runner
-│   ├── SoundScript.Playground/ # Blazor WASM browser playground
-│   ├── SoundScript.Web/        # Local Blazor demo
-│   └── SoundScript.Tests/      # Unit and integration tests
-├── docs/                       # Documentation and website
-├── examples/                   # Example .ss scripts
-└── README.md
+/src
+    SoundScript.Core/       # AST, NotatedNote, TempoAutomationMap, InstrumentMap
+    SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
+    SoundScript.Midi/       # Interpreter, shaping, PatternExpander, ChordOrchestration
+    SoundScript.Cli/        # Command-line runner (ProgramLoader)
+    SoundScript.Playground/ # Browser playground (Blazor WASM)
+    SoundScript.Web/        # Local Blazor demo
+    SoundScript.Tests/      # xUnit tests
+
+/docs                       # V2 documentation + website
+/examples                   # V2 example scripts
 ```
 
-## Component Responsibilities
+## Component Map
 
-| Project | Role |
-|---------|------|
-| **SoundScript.Core** | AST nodes, `NotatedNote`, `InterpretedProgram`, instrument maps |
-| **SoundScript.Parser** | Lexical analysis, parsing, notation validation |
-| **SoundScript.Midi** | Interpretation, musical intelligence, playback shaping, MIDI generation |
-| **SoundScript.Cli** | `soundscript run script.ss` entry point |
-| **SoundScript.Playground** | Client-side WASM playground for soundscript.net |
-| **SoundScript.Web** | Local development web UI |
+| Component | Project | Role |
+|-----------|---------|------|
+| `ProgramLoader` | Parser | Import resolution, AST merge |
+| `Tokenizer` / `Parser` | Parser | DSL → AST |
+| `Interpreter` | Midi | AST → InterpretedProgram |
+| `PatternExpander` | Midi | Pattern → NoteNode[] |
+| `ChordOrchestration` | Midi | Orchestration helpers |
+| `PhraseShaper` | Midi | Phrase-level shaping |
+| `AdvancedChordVoicing` | Midi | drop2, inv1, spread |
+| `HumanizeApplicator` | Midi | Deterministic jitter |
+| `TempoAutomationMap` | Core | Linear tempo ramps |
+| `MidiGenerator` | Midi | InterpretedProgram → .mid |
 
-## Layer Diagram
+## Layer Diagram (V2)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                     SoundScript DSL                      │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────┐
-│  SoundScript.Parser                                      │
-│  Tokenizer → Parser → NotationParser                     │
-└─────────────────────────┬───────────────────────────────┘
-                          │ ProgramNode (AST)
-┌─────────────────────────▼───────────────────────────────┐
-│  SoundScript.Midi — Interpreter                          │
-│  ┌─────────────┐ ┌──────────────┐ ┌──────────────────┐  │
-│  │ Stabilization│ │ Intelligence │ │ Playback Quality │  │
-│  │ BeatMath     │ │ Contour      │ │ PlaybackShaper   │  │
-│  │ ChordVoicing │ │ Spacing      │ │ DynamicShaper    │  │
-│  │ GlobalClock  │ │ Phrase/Dyn   │ │ ChordBalancer    │  │
-│  └─────────────┘ └──────────────┘ └──────────────────┘  │
-└─────────────────────────┬───────────────────────────────┘
-                          │ InterpretedProgram
-┌─────────────────────────▼───────────────────────────────┐
-│  MidiGenerator (DryWetMIDI) → .mid file                  │
+│                     SoundScript.Cli                      │
+│                     Playground (WASM)                    │
+└──────────────────────────┬──────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────┐
+│  ProgramLoader → Parser → Interpreter → MidiGenerator    │
+│                                                          │
+│  V2 modules:                                             │
+│    PatternExpander │ PhraseShaper │ ChordOrchestration   │
+│    HumanizeApplicator │ TempoAutomationMap │ Layers      │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Notation Model
+## Engine Phases
 
-```
-NoteNode
-  └── NotatedNote
-        ├── PitchClass, Accidental, Octave
-        ├── DurationBeats, StandardDuration
-        ├── Articulation, Dynamic, IsTied     (Phase 3)
-        ├── AdjustedMidiNumber, PhraseIndex   (Phase 4)
-        └── ShapedVelocity, ShapedDuration    (Phase 5)
-```
-
-## Engine Phase Map
-
-| Engine Phase | Modules | Location |
-|--------------|---------|----------|
-| Phase 2 — Notation | `NotatedNote`, `NotationParser` | Core, Parser |
-| Phase 3 — Expressive | `RestNode`, `DynamicNode`, ties | Core, Parser, Midi |
-| Phase 1 — Stabilization | `BeatMath`, `ChordVoicing`, `GlobalBeatClock` | Midi |
-| Phase 4 — Intelligence | `OctaveSmoother`, `HarmonicSpacing`, `DynamicContext` | Midi |
-| Phase 5 — Playback | `PlaybackShaper`, `ExpressiveCurve`, `ChordBalancer` | Midi |
+| Phase | Modules | V2 additions |
+|-------|---------|--------------|
+| Load | ProgramLoader | Imports |
+| Parse | Tokenizer, Parser | pattern, phrase, orchestration tokens |
+| Voicing | ChordVoicing, AdvancedChordVoicing | drop2, inv1, spread |
+| Orchestration | ChordOrchestration | double octave, bass, top |
+| Intelligence | OctaveSmoother, PhraseSmoother | Phrase blocks |
+| Phrase shaping | PhraseShaper | curve, transition |
+| Patterns | PatternExpander | arp, strum, rhythm |
+| Playback | PlaybackShaper, Layers | per-layer channels |
+| Post | HumanizeApplicator | deterministic jitter |
+| Export | MidiGenerator, TempoAutomationMap | tempo ramps |
 
 ## Deployment
 
-```
-GitHub Actions (push to main)
-    ↓
-dotnet publish SoundScript.Playground → docs/playground/
-    ↓
-Deploy docs/ → gh-pages → soundscript.net
-```
+- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss`
+- **Website:** `docs/` → GitHub Pages → soundscript.net
+- **Playground:** `dotnet publish` → `docs/playground/`
 
 ## Related
 
-- [pipeline.md](pipeline.md) — Interpreter and shaping pipeline details
-- [language-reference.md](language-reference.md) — DSL syntax
+- [pipeline.md](pipeline.md)
+- [whats-new-v2.md](whats-new-v2.md)

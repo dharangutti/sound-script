@@ -1,68 +1,84 @@
-# SoundScript Examples (v1.2)
+# SoundScript Examples (V2)
 
-Runnable example scripts in the `examples/` directory. Run any example with:
+Runnable example scripts for every major feature.
 
-```bash
-dotnet run --project src/SoundScript.Cli -- run examples/<name>.ss
-```
+## V2 Feature Examples
 
-## v1.2 Feature Examples
+| Example | Feature | Run |
+|---------|---------|-----|
+| [imports.ss](../examples/imports.ss) | Multi-file imports | `dotnet run --project src/SoundScript.Cli -- run examples/imports.ss` |
+| [import-lib.ss](../examples/import-lib.ss) | Shared library (imported) | (used by imports.ss) |
+| [blocks.ss](../examples/blocks.ss) | Named blocks | `... run examples/blocks.ss` |
+| [metadata.ss](../examples/metadata.ss) | Gain + humanize | `... run examples/metadata.ss` |
+| [tempo-automation.ss](../examples/tempo-automation.ss) | Tempo ramps | `... run examples/tempo-automation.ss` |
+| [layers.ss](../examples/layers.ss) | Instrument layers | `... run examples/layers.ss` |
+| [humanization.ss](../examples/humanization.ss) | Deterministic jitter | `... run examples/humanization.ss` |
+| [advanced-chords.ss](../examples/advanced-chords.ss) | drop2, inv1, spread | `... run examples/advanced-chords.ss` |
+| [phrases.ss](../examples/phrases.ss) | Phrase engine v2 | `... run examples/phrases.ss` |
+| [patterns.ss](../examples/patterns.ss) | Arp, strum, rhythm | `... run examples/patterns.ss` |
+| [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
+| [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 
-| File | Feature | Engine phase |
-|------|---------|--------------|
-| [melody.ss](../examples/melody.ss) | Basic melody and tempo | — |
-| [rests.ss](../examples/rests.ss) | Rests | Phase 3 |
-| [ties.ss](../examples/ties.ss) | Ties (`~`) | Phase 3 |
-| [articulations.ss](../examples/articulations.ss) | Staccato, legato, accent | Phase 3 + 5 |
-| [dynamics.ss](../examples/dynamics.ss) | `p`, `mp`, `mf`, `f` | Phase 3 + 5 |
-| [chord-voicing.ss](../examples/chord-voicing.ss) | Low-root chord voicing | Phase 1 |
-| [harmonic-spacing.ss](../examples/harmonic-spacing.ss) | Wide chord spacing | Phase 4 |
-| [melodic-contour.ss](../examples/melodic-contour.ss) | Wide melodic leaps | Phase 4 |
-| [phrase-smoothing.ss](../examples/phrase-smoothing.ss) | Sequence phrase boundaries | Phase 4 |
-| [dynamic-ramping.ss](../examples/dynamic-ramping.ss) | Abrupt dynamic changes | Phase 4 |
-| [multitrack-sync.ss](../examples/multitrack-sync.ss) | Multi-track alignment | Phase 1 |
-| [playback-shaping.ss](../examples/playback-shaping.ss) | Full shaping pipeline | Phase 5 |
+## Updated v1.2 Examples
 
-## Language Feature Examples
+| Example | V2 updates |
+|---------|------------|
+| [full.ss](../examples/full.ss) | imports, blocks, phrases, patterns, layers, orchestration |
+| [phrase-smoothing.ss](../examples/phrase-smoothing.ss) | phrase blocks + block play |
 
-| File | Feature |
-|------|---------|
-| [durations.ss](../examples/durations.ss) | Duration syntax (`for`, `:`, aliases) |
-| [instruments.ss](../examples/instruments.ss) | Instrument selection |
-| [tempo-time.ss](../examples/tempo-time.ss) | Tempo and time signature |
+## Core Language Examples
+
+| Example | Demonstrates |
+|---------|--------------|
+| [melody.ss](../examples/melody.ss) | Basic melody |
+| [rests.ss](../examples/rests.ss) | Rests |
+| [ties.ss](../examples/ties.ss) | Ties |
+| [articulations.ss](../examples/articulations.ss) | Staccato, legato, accent |
+| [dynamics.ss](../examples/dynamics.ss) | Dynamic markings |
 | [chords.ss](../examples/chords.ss) | Chord progressions |
-| [sequences.ss](../examples/sequences.ss) | Sequences and `play` |
+| [sequences.ss](../examples/sequences.ss) | Sequences |
 | [loops.ss](../examples/loops.ss) | Loops |
+| [multitrack.ss](../examples/multitrack.ss) | Multi-track |
 | [velocity.ss](../examples/velocity.ss) | Velocity control |
-| [multitrack.ss](../examples/multitrack.ss) | Multi-track blocks |
+| [instruments.ss](../examples/instruments.ss) | Instruments |
+| [tempo-time.ss](../examples/tempo-time.ss) | Tempo and time signature |
+| [durations.ss](../examples/durations.ss) | Duration syntax |
 
-## Showcase
+## Engine Intelligence Examples
 
-| File | Description |
-|------|-------------|
-| [full.ss](../examples/full.ss) | Combined v1.2 showcase |
+| Example | Demonstrates |
+|---------|--------------|
+| [chord-voicing.ss](../examples/chord-voicing.ss) | Phase 1 voicing |
+| [harmonic-spacing.ss](../examples/harmonic-spacing.ss) | Harmonic spacing |
+| [melodic-contour.ss](../examples/melodic-contour.ss) | Melodic contour |
+| [dynamic-ramping.ss](../examples/dynamic-ramping.ss) | Dynamic ramping |
+| [multitrack-sync.ss](../examples/multitrack-sync.ss) | Multi-track sync |
+| [playback-shaping.ss](../examples/playback-shaping.ss) | Playback shaping |
 
-## Playground Presets
+## Playground Presets (V2)
 
-The [browser playground](https://soundscript.net/playground/) includes presets matching these examples:
-
-- Melody
-- Articulations & Dynamics
-- Chords
-- Musical Intelligence
-- Multi-track
-- Playback Shaping
-
-## Run All Examples
-
-```bash
-for f in examples/*.ss; do
-  echo "=== $f ==="
-  dotnet run --project src/SoundScript.Cli -- run "$f" /tmp/test.mid
-done
-```
+| Preset | Content |
+|--------|---------|
+| V2 Showcase | Combined imports, patterns, phrases, layers |
+| Imports | Multi-file import demo |
+| Blocks | Named block expansion |
+| Metadata | Gain + humanize |
+| Tempo | Tempo automation ramp |
+| Layers | Piano + cello layers |
+| Humanize | Deterministic jitter |
+| Advanced Chords | drop2, inv1, spread |
+| Phrases | Phrase curves + transitions |
+| Patterns | Arp, strum, rhythm |
+| Orchestration | double octave, bass, top |
+| Melody | Basic melody (v1.2) |
+| Articulations | Staccato, legato, accent |
+| Dynamics | p → mf → f |
+| Chords | Chord progressions |
+| Intelligence | Sequences + contour |
+| Multi-track | Melody + bass |
+| Playback | Shaping pipeline |
 
 ## Related
 
-- [language-reference.md](language-reference.md) — Syntax reference
-- [whats-new-v1.2.md](whats-new-v1.2.md) — v1.2 changelog
+- [whats-new-v2.md](whats-new-v2.md)
+- [language-reference.md](language-reference.md)

@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SoundScript.Playground",
   "resources": {
-    "hash": "sha256-gr11CwhxZEm8JplpTSt1oEdLr1l59F4mhX2tWb/+GFE=",
+    "hash": "sha256-HbMnxO4rkIk4JqMTqbHQ2rGfgQw3Ou/ix1aBmjCyBtg=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-YDHEHpc+/PUWFYa9BMCN3EcVlpemjKD024swcpPfMIQ="
     },
@@ -33,10 +33,10 @@
       "Microsoft.Extensions.Primitives.wasm": "sha256-jLo6FXr+jliGEvOzNn1Q59o7Nu9X7gMB626shZ36H0A=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-9IZ9TrlZNlZnRwyJW/atfyaqWDHIYDE3OuK1qLDwd+I=",
       "Microsoft.JSInterop.wasm": "sha256-p+3yNP8Ov8fHqh80OwxB+cSgrgFabbbE0DqHNhnvTRc=",
-      "SoundScript.Core.wasm": "sha256-IOXdeYznR9NRlWzz7ca7iBdXnZejVMUJRowbI4nxq5U=",
-      "SoundScript.Midi.wasm": "sha256-6h4grswKh7JQ1P/f/xT3g2wsI89U00H/jo9vCKBwp1o=",
-      "SoundScript.Parser.wasm": "sha256-vlZfRUfGf54hM0VI7ON10OxESWkEWQE8NjE328HQBck=",
-      "SoundScript.Playground.wasm": "sha256-LCoQNbjZ/O0NoTG/is6ScSlbdIvWheHKpIgnji0RVDw=",
+      "SoundScript.Core.wasm": "sha256-ApJyiXH3Kvj1zkj+rzv4V3V7y6jpqZH0tG9BsA7hkPc=",
+      "SoundScript.Midi.wasm": "sha256-yYL9PSWPuMn79HLy3aSoZDYP5TeDjHajoQo2f+Ow3lc=",
+      "SoundScript.Parser.wasm": "sha256-JLfsontHoq9DMaeZsPFUQRWHNqpzxO3BY47WTwf0JQo=",
+      "SoundScript.Playground.wasm": "sha256-sWdoAoB4bKL8e7nb7tU46PS/Fqxe8jWC0yl4OcbIGfU=",
       "System.Collections.Concurrent.wasm": "sha256-+7LteTEbj9uF5idtxA4dKOzpdhQgGJhBuy25QyWkwJI=",
       "System.Collections.wasm": "sha256-VPgkcpjP0g4lptLc9GWedE6tode0yMqtL9JwlF3ta74=",
       "System.ComponentModel.Primitives.wasm": "sha256-2yVmu3xPhmOOZfWSOJgIoPimZ561LhQoha9XTvruCR0=",
