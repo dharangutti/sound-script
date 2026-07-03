@@ -131,13 +131,22 @@ public static class Interpreter
                 continue;
 
             var interpretedTrack = new InterpretedTrack { Name = track.Name };
+            var noteIndex = 0;
             foreach (var note in track.Notes)
             {
                 var startBeat = HumanizeApplicator.ApplyToStartBeat(
                     note.StartBeat,
                     track.Humanize,
-                    (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)));
-                interpretedTrack.Notes.Add(note with { StartBeat = startBeat });
+                    (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)),
+                    noteIndex,
+                    note.Channel);
+                var velocity = HumanizeApplicator.ApplyVelocity(
+                    note.Velocity,
+                    track.Humanize,
+                    noteIndex,
+                    note.Channel);
+                interpretedTrack.Notes.Add(note with { StartBeat = startBeat, Velocity = velocity });
+                noteIndex++;
             }
 
             if (track.Layers.Count > 0)
