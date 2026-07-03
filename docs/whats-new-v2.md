@@ -48,7 +48,7 @@ Multi-layer:  per-layer PlaybackShaper + MIDI channel
 
 ## Updated Playground
 
-The browser playground includes V2 presets for imports, blocks, metadata, tempo automation, layers, humanization, advanced chords, phrases, patterns, and orchestration.
+The browser playground includes V2 presets for blocks, metadata, tempo automation, layers, humanization, advanced chords, phrases, patterns, and orchestration. Imports use the CLI (`ProgramLoader`) only.
 
 → [soundscript.net/playground](https://soundscript.net/playground/)
 
