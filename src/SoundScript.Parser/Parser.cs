@@ -43,6 +43,9 @@ public sealed class Parser
         if (Match(TokenType.Block))
             return ParseNamedBlock();
 
+        if (Match(TokenType.Pattern))
+            return ParseNamedPattern();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -159,6 +162,62 @@ public sealed class Parser
         return block;
     }
 
+    private PatternNode ParseNamedPattern()
+    {
+        var name = ParseName("pattern name");
+        Expect(TokenType.LeftBrace, "{");
+
+        var pattern = new PatternNode { Name = name };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            if (Match(TokenType.PatternRhythm))
+            {
+                pattern.RhythmBeats.AddRange(ParsePatternRhythmDurations());
+                pattern = pattern with { Kind = PatternKind.Rhythm };
+                continue;
+            }
+
+            if (!Match(TokenType.PatternDirective))
+            {
+                var unexpected = Peek();
+                throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}' in pattern body.");
+            }
+
+            var directive = Previous().Value.ToLowerInvariant();
+            pattern = directive switch
+            {
+                "up" => pattern with { Kind = PatternKind.Arpeggio, Direction = PatternDirection.Up },
+                "down" => pattern with { Kind = PatternKind.Arpeggio, Direction = PatternDirection.Down },
+                "updown" => pattern with { Kind = PatternKind.Arpeggio, Direction = PatternDirection.UpDown },
+                "strum" => pattern with { Kind = PatternKind.Strum, Direction = PatternDirection.Up },
+                _ => throw Invalid(Previous(), $"Unknown pattern directive '{directive}'.")
+            };
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return pattern;
+    }
+
+    private IEnumerable<double> ParsePatternRhythmDurations()
+    {
+        while (Check(TokenType.Duration) || Check(TokenType.Number))
+        {
+            if (Check(TokenType.Duration))
+            {
+                var token = Advance();
+                yield return NotationParser.ParseDurationAlias(token.Value, token).Beats;
+                continue;
+            }
+
+            var numberToken = Expect(TokenType.Number, "rhythm duration");
+            if (!double.TryParse(numberToken.Value, out var beats) || beats <= 0)
+                throw Invalid(numberToken, "Rhythm duration must be a positive number.");
+
+            yield return beats;
+        }
+    }
+
     private AstNode ParseBlockBodyStatement()
     {
         if (Match(TokenType.Play))
@@ -199,7 +258,11 @@ public sealed class Parser
 
     private PlayNode ParsePlayStatement()
     {
-        var name = ParseName("block or sequence name");
+        var name = ParseName("block, sequence, or pattern name");
+
+        if (Check(TokenType.Chord))
+            return new PlayNode { SequenceName = name, PatternChord = ParseChordStatement() };
+
         return new PlayNode { SequenceName = name };
     }
 
@@ -778,7 +841,8 @@ public sealed class Parser
             or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars or TokenType.Layer
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
-            or TokenType.Curve or TokenType.Transition)
+            or TokenType.Curve or TokenType.Transition or TokenType.Pattern
+            or TokenType.PatternRhythm)
         {
             Advance();
             return token.Value;

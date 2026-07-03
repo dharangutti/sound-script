@@ -39,6 +39,9 @@ public enum TokenType
     Phrase,
     Curve,
     Transition,
+    Pattern,
+    PatternDirective,
+    PatternRhythm,
     Import,
     StringLiteral,
     EndOfFile

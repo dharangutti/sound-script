@@ -43,6 +43,7 @@ public static class Interpreter
     {
         public Dictionary<string, List<AstNode>> Blocks { get; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, List<AstNode>> Sequences { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, PatternNode> Patterns { get; } = new(StringComparer.OrdinalIgnoreCase);
         public HashSet<string> ExpandingBlocks { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
@@ -75,6 +76,9 @@ public static class Interpreter
                     break;
                 case BlockNode block:
                     context.Blocks[block.Name] = block.Body;
+                    break;
+                case PatternNode pattern:
+                    context.Patterns[pattern.Name] = pattern;
                     break;
                 case SequenceNode sequence:
                     context.Sequences[sequence.Name] = sequence.Body;
@@ -271,7 +275,46 @@ public static class Interpreter
             return;
         }
 
+        if (context.Patterns.TryGetValue(play.SequenceName, out var pattern))
+        {
+            ExecutePatternPlay(track, pattern, play, result, clock);
+            return;
+        }
+
         throw new InvalidOperationException($"Unknown block '{play.SequenceName}'.");
+    }
+
+    private static void ExecutePatternPlay(
+        TrackBuilder track,
+        PatternNode pattern,
+        PlayNode play,
+        InterpretedProgram result,
+        GlobalBeatClock clock)
+    {
+        if (play.PatternChord is not ChordNode chord)
+            throw new InvalidOperationException($"Pattern '{pattern.Name}' requires a chord: play {pattern.Name} Cmaj q");
+
+        var expanded = PatternExpander.Expand(pattern, chord);
+        if (expanded.Count == 0)
+            return;
+
+        if (pattern.Kind == PatternKind.Strum)
+        {
+            var startBeat = track.CurrentBeat;
+            var stagger = PatternExpander.GetStrumStaggerBeats();
+
+            for (var i = 0; i < expanded.Count; i++)
+            {
+                track.CurrentBeat = BeatMath.RoundBeat(startBeat + stagger * i);
+                EmitNote(track, expanded[i], clock, result);
+            }
+
+            track.CurrentBeat = BeatMath.RoundBeat(startBeat + chord.DurationBeats);
+            return;
+        }
+
+        foreach (var note in expanded)
+            EmitNote(track, note, clock, result);
     }
 
     private static void ExecuteNamedBlockPlay(
