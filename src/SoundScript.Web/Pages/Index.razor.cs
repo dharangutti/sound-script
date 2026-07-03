@@ -52,10 +52,10 @@ public partial class Index
 
             var tokens = new Tokenizer(ScriptText).Tokenize();
             var program = new SoundScript.Parser.Parser(tokens).Parse();
-            var timedNotes = Interpreter.Interpret(program);
+            var interpreted = Interpreter.Interpret(program);
 
             using var stream = new MemoryStream();
-            MidiGenerator.Write(program, timedNotes, stream);
+            MidiGenerator.Write(interpreted, stream);
             MidiBytes = stream.ToArray();
         }
         catch (Exception ex)

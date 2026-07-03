@@ -1,4 +1,5 @@
 using SoundScript.Core;
+using SoundScript.Core.Ast;
 
 namespace SoundScript.Parser;
 
@@ -12,68 +13,299 @@ public sealed class Parser
         _tokens = tokens;
     }
 
-    public MelodyProgram Parse()
+    public ProgramNode Parse()
     {
-        Expect(TokenType.Melody, "melody");
-        Expect(TokenType.LeftBrace, "{");
+        var program = new ProgramNode();
 
-        var program = new MelodyProgram();
-
-        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        while (!Check(TokenType.EndOfFile))
         {
-            if (Match(TokenType.Bpm))
-            {
-                var bpmToken = Expect(TokenType.Number, "BPM value");
-                if (!int.TryParse(bpmToken.Value, out var bpm) || bpm <= 0)
-                    throw Invalid(bpmToken, "BPM must be a positive integer.");
-
-                program.Bpm = bpm;
-                continue;
-            }
-
-            if (Match(TokenType.Bar))
-                continue;
-
-            if (Check(TokenType.Note))
-            {
-                program.Notes.Add(ParseNoteStatement());
-                continue;
-            }
-
-            var unexpected = Peek();
-            throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+            program.Statements.Add(ParseTopLevelStatement());
         }
 
-        Expect(TokenType.RightBrace, "}");
-        Expect(TokenType.EndOfFile, "end of file");
         return program;
     }
 
-    private ParsedNote ParseNoteStatement()
+    private AstNode ParseTopLevelStatement()
     {
-        var note = ParseNote(Expect(TokenType.Note, "note"));
+        if (Match(TokenType.Melody))
+            return ParseMelodyBlock();
 
-        if (Match(TokenType.Colon))
+        if (Match(TokenType.Track))
+            return ParseTrackBlock();
+
+        if (Match(TokenType.Sequence))
+            return ParseSequenceBlock();
+
+        if (Match(TokenType.Play))
+            return ParsePlayStatement();
+
+        if (Match(TokenType.Loop))
+            return ParseLoopBlock();
+
+        if (Match(TokenType.Tempo))
+            return ParseTempoStatement();
+
+        if (Match(TokenType.Bpm))
+            return ParseBpmStatement();
+
+        if (Match(TokenType.Time))
+            return ParseTimeSignatureStatement();
+
+        if (Match(TokenType.Instrument))
+            return ParseInstrumentStatement();
+
+        if (Match(TokenType.Velocity))
+            return ParseVelocityStatement();
+
+        if (Check(TokenType.Note))
+            return ParseNoteStatement();
+
+        if (Check(TokenType.Chord))
+            return ParseChordStatement();
+
+        var unexpected = Peek();
+        throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
+    private MelodyNode ParseMelodyBlock()
+    {
+        Expect(TokenType.LeftBrace, "{");
+        var melody = new MelodyNode();
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            var durationToken = Expect(TokenType.Number, "duration");
-            return note with { DurationBeats = ParseDuration(durationToken) };
+            melody.Body.Add(ParseBodyStatement(allowLoop: false));
         }
 
-        if (Match(TokenType.For))
+        Expect(TokenType.RightBrace, "}");
+        return melody;
+    }
+
+    private TrackNode ParseTrackBlock()
+    {
+        var name = ParseName("track name");
+        Expect(TokenType.LeftBrace, "{");
+
+        var track = new TrackNode { Name = name };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            var durationToken = Expect(TokenType.Number, "duration");
-            return note with { DurationBeats = ParseDuration(durationToken) };
+            track.Body.Add(ParseBodyStatement(allowLoop: true));
         }
 
+        Expect(TokenType.RightBrace, "}");
+        return track;
+    }
+
+    private SequenceNode ParseSequenceBlock()
+    {
+        var name = ParseName("sequence name");
+        Expect(TokenType.LeftBrace, "{");
+
+        var sequence = new SequenceNode { Name = name };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            sequence.Body.Add(ParseBodyStatement(allowLoop: true));
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return sequence;
+    }
+
+    private PlayNode ParsePlayStatement()
+    {
+        var name = ParseName("sequence name");
+        return new PlayNode { SequenceName = name };
+    }
+
+    private LoopNode ParseLoopBlock()
+    {
+        var countToken = Expect(TokenType.Number, "loop count");
+        if (!int.TryParse(countToken.Value, out var count) || count <= 0)
+            throw Invalid(countToken, "Loop count must be a positive integer.");
+
+        Expect(TokenType.LeftBrace, "{");
+
+        var loop = new LoopNode { Count = count };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            if (Check(TokenType.Loop))
+                throw Invalid(Peek(), "Nested loops are not supported.");
+
+            loop.Body.Add(ParseBodyStatement(allowLoop: false));
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return loop;
+    }
+
+    private AstNode ParseBodyStatement(bool allowLoop)
+    {
+        if (allowLoop && Match(TokenType.Loop))
+            return ParseLoopBlock();
+
+        if (Match(TokenType.Bpm))
+            return ParseBpmStatement();
+
+        if (Match(TokenType.Tempo))
+            return ParseTempoStatement();
+
+        if (Match(TokenType.Time))
+            return ParseTimeSignatureStatement();
+
+        if (Match(TokenType.Instrument))
+            return ParseInstrumentStatement();
+
+        if (Match(TokenType.Velocity))
+            return ParseVelocityStatement();
+
+        if (Match(TokenType.Play))
+            return ParsePlayStatement();
+
+        if (Match(TokenType.Bar))
+            return new BarNode();
+
+        if (Check(TokenType.Note))
+            return ParseNoteStatement();
+
+        if (Check(TokenType.Chord))
+            return ParseChordStatement();
+
+        var unexpected = Peek();
+        throw Invalid(unexpected, $"Unexpected token '{unexpected.Value}'.");
+    }
+
+    private TempoNode ParseTempoStatement()
+    {
+        var token = Expect(TokenType.Number, "tempo value");
+        return new TempoNode { Bpm = ParsePositiveInt(token, "Tempo") };
+    }
+
+    private BpmNode ParseBpmStatement()
+    {
+        var token = Expect(TokenType.Number, "BPM value");
+        return new BpmNode { Bpm = ParsePositiveInt(token, "BPM") };
+    }
+
+    private TimeSignatureNode ParseTimeSignatureStatement()
+    {
+        var numeratorToken = Expect(TokenType.Number, "time signature numerator");
+        Expect(TokenType.Slash, "/");
+        var denominatorToken = Expect(TokenType.Number, "time signature denominator");
+
+        var numerator = ParsePositiveInt(numeratorToken, "Time signature numerator");
+        var denominator = ParsePositiveInt(denominatorToken, "Time signature denominator");
+
+        return new TimeSignatureNode
+        {
+            Numerator = numerator,
+            Denominator = denominator
+        };
+    }
+
+    private InstrumentNode ParseInstrumentStatement()
+    {
+        var nameToken = Expect(TokenType.Identifier, "instrument name");
+        return new InstrumentNode { ProgramNumber = InstrumentMap.Resolve(nameToken.Value) };
+    }
+
+    private VelocityNode ParseVelocityStatement()
+    {
+        var token = Expect(TokenType.Number, "velocity value");
+        var velocity = ParsePositiveInt(token, "Velocity");
+        if (velocity > 127)
+            throw Invalid(token, "Velocity must be between 1 and 127.");
+
+        return new VelocityNode { Velocity = velocity };
+    }
+
+    private AstNode ParseNoteStatement()
+    {
+        var noteToken = Expect(TokenType.Note, "note");
+
+        if (IsDominantSeventhAmbiguity(noteToken))
+            return ParseDominantSeventhChord(noteToken);
+
+        var note = ParseNoteToken(noteToken);
+        note = note with
+        {
+            DurationBeats = ParseOptionalDuration(),
+            Velocity = ParseOptionalVelocity()
+        };
         return note;
     }
 
-    private static ParsedNote ParseNote(Token token)
+    private ChordNode ParseChordStatement()
+    {
+        var chordToken = Expect(TokenType.Chord, "chord");
+        var chord = ParseChordToken(chordToken);
+        chord = chord with
+        {
+            DurationBeats = ParseOptionalDuration(),
+            Velocity = ParseOptionalVelocity()
+        };
+        return chord;
+    }
+
+    private bool IsDominantSeventhAmbiguity(Token noteToken)
+    {
+        if (!noteToken.Value.EndsWith('7'))
+            return false;
+
+        var text = noteToken.Value;
+        var index = 1;
+
+        if (index < text.Length && text[index] is '#' or 'b' or 'B')
+            index++;
+
+        if (index >= text.Length || text[index] != '7')
+            return false;
+
+        if (index + 1 < text.Length)
+            return false;
+
+        return Check(TokenType.Duration);
+    }
+
+    private ChordNode ParseDominantSeventhChord(Token token)
+    {
+        var text = token.Value;
+        var root = text[0];
+        var index = 1;
+        var isSharp = false;
+        var isFlat = false;
+
+        if (index < text.Length && text[index] == '#')
+        {
+            isSharp = true;
+            index++;
+        }
+        else if (index < text.Length && (text[index] == 'b' || text[index] == 'B'))
+        {
+            isFlat = true;
+            index++;
+        }
+
+        var chord = new ChordNode
+        {
+            Root = root,
+            IsSharp = isSharp,
+            IsFlat = isFlat,
+            Quality = ChordQuality.Dominant7,
+            Octave = 4,
+            DurationBeats = ParseOptionalDuration(),
+            Velocity = ParseOptionalVelocity()
+        };
+        return chord;
+    }
+
+    private static NoteNode ParseNoteToken(Token token)
     {
         var text = token.Value;
         var pitch = text[0];
         var index = 1;
-
         var isSharp = false;
         var isFlat = false;
 
@@ -91,7 +323,111 @@ public sealed class Parser
         if (!int.TryParse(text[index..], out var octave))
             throw Invalid(token, $"Invalid note '{text}'.");
 
-        return new ParsedNote(pitch, isSharp, isFlat, octave);
+        return new NoteNode
+        {
+            Pitch = pitch,
+            IsSharp = isSharp,
+            IsFlat = isFlat,
+            Octave = octave
+        };
+    }
+
+    private static ChordNode ParseChordToken(Token token)
+    {
+        var text = token.Value;
+        var root = text[0];
+        var index = 1;
+        var isSharp = false;
+        var isFlat = false;
+
+        if (index < text.Length && text[index] == '#')
+        {
+            isSharp = true;
+            index++;
+        }
+        else if (index < text.Length && (text[index] == 'b' || text[index] == 'B'))
+        {
+            isFlat = true;
+            index++;
+        }
+
+        var remaining = text[index..];
+        var (quality, suffixLength) = ParseChordQuality(remaining);
+        index += suffixLength;
+
+        var octave = 4;
+        if (index < text.Length)
+        {
+            if (!int.TryParse(text[index..], out octave))
+                throw Invalid(token, $"Invalid chord '{text}'.");
+        }
+
+        return new ChordNode
+        {
+            Root = root,
+            IsSharp = isSharp,
+            IsFlat = isFlat,
+            Quality = quality,
+            Octave = octave
+        };
+    }
+
+    private static (ChordQuality Quality, int Length) ParseChordQuality(string suffix)
+    {
+        if (suffix.StartsWith("maj7", StringComparison.OrdinalIgnoreCase))
+            return (ChordQuality.Major7, 4);
+        if (suffix.StartsWith("maj", StringComparison.OrdinalIgnoreCase))
+            return (ChordQuality.Major, 3);
+        if (suffix.StartsWith("min", StringComparison.OrdinalIgnoreCase))
+            return (ChordQuality.Minor, 3);
+        if (suffix.StartsWith("dim", StringComparison.OrdinalIgnoreCase))
+            return (ChordQuality.Diminished, 3);
+        if (suffix.StartsWith("aug", StringComparison.OrdinalIgnoreCase))
+            return (ChordQuality.Augmented, 3);
+        if (suffix.StartsWith('m') && (suffix.Length == 1 || char.IsDigit(suffix[1])))
+            return (ChordQuality.Minor, 1);
+
+        throw new InvalidOperationException($"Unknown chord quality in '{suffix}'.");
+    }
+
+    private double ParseOptionalDuration()
+    {
+        if (Match(TokenType.Colon))
+        {
+            var durationToken = Expect(TokenType.Number, "duration");
+            return ParseDuration(durationToken);
+        }
+
+        if (Match(TokenType.For))
+        {
+            var durationToken = Expect(TokenType.Number, "duration");
+            return ParseDuration(durationToken);
+        }
+
+        if (Match(TokenType.Duration))
+        {
+            return Previous().Value.ToLowerInvariant() switch
+            {
+                "q" => 1.0,
+                "h" => 2.0,
+                "e" => 0.5,
+                "w" => 4.0,
+                _ => throw Invalid(Previous(), "Unknown duration.")
+            };
+        }
+
+        return 1.0;
+    }
+
+    private int? ParseOptionalVelocity()
+    {
+        if (!Match(TokenType.VelocityPrefix))
+            return null;
+
+        if (!int.TryParse(Previous().Value, out var velocity) || velocity <= 0 || velocity > 127)
+            throw Invalid(Previous(), "Velocity must be between 1 and 127.");
+
+        return velocity;
     }
 
     private static double ParseDuration(Token token)
@@ -100,6 +436,28 @@ public sealed class Parser
             throw Invalid(token, "Duration must be a positive number.");
 
         return duration;
+    }
+
+    private string ParseName(string description)
+    {
+        var token = Peek();
+        if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
+            or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
+            or TokenType.Sequence or TokenType.Loop or TokenType.Velocity or TokenType.Track)
+        {
+            Advance();
+            return token.Value;
+        }
+
+        throw Invalid(token, $"Expected {description}.");
+    }
+
+    private static int ParsePositiveInt(Token token, string label)
+    {
+        if (!int.TryParse(token.Value, out var value) || value <= 0)
+            throw Invalid(token, $"{label} must be a positive integer.");
+
+        return value;
     }
 
     private Token Expect(TokenType type, string description)
@@ -124,6 +482,8 @@ public sealed class Parser
     private Token Advance() => _tokens[_position++];
 
     private Token Peek() => _tokens[_position];
+
+    private Token Previous() => _tokens[_position - 1];
 
     private static InvalidOperationException Invalid(Token token, string message) =>
         new($"{message} (line {token.Line}, column {token.Column}).");

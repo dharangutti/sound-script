@@ -1,7 +1,14 @@
-namespace SoundScript.Core;
+namespace SoundScript.Core.Ast;
 
-public readonly record struct ParsedNote(char Pitch, bool IsSharp, bool IsFlat, int Octave, double DurationBeats = 1.0)
+public sealed record NoteNode : AstNode
 {
+    public char Pitch { get; init; }
+    public bool IsSharp { get; init; }
+    public bool IsFlat { get; init; }
+    public int Octave { get; init; }
+    public double DurationBeats { get; init; } = 1.0;
+    public int? Velocity { get; init; }
+
     public int ToMidiNumber()
     {
         var pitchClass = Pitch switch
