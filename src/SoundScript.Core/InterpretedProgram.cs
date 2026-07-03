@@ -1,0 +1,9 @@
+namespace SoundScript.Core;
+
+public sealed class InterpretedProgram
+{
+    public int Tempo { get; set; } = 120;
+    public int? TimeSignatureNumerator { get; set; }
+    public int? TimeSignatureDenominator { get; set; }
+    public List<InterpretedTrack> Tracks { get; } = [];
+}

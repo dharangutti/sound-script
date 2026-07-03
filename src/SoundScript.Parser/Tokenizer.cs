@@ -8,9 +8,25 @@ public sealed class Tokenizer
     {
         ["melody"] = TokenType.Melody,
         ["bpm"] = TokenType.Bpm,
+        ["tempo"] = TokenType.Tempo,
+        ["time"] = TokenType.Time,
         ["play"] = TokenType.Play,
-        ["for"] = TokenType.For
+        ["for"] = TokenType.For,
+        ["instrument"] = TokenType.Instrument,
+        ["sequence"] = TokenType.Sequence,
+        ["loop"] = TokenType.Loop,
+        ["velocity"] = TokenType.Velocity,
+        ["track"] = TokenType.Track,
+        ["q"] = TokenType.Duration,
+        ["h"] = TokenType.Duration,
+        ["e"] = TokenType.Duration,
+        ["w"] = TokenType.Duration
     };
+
+    private static readonly string[] ChordSuffixes =
+    [
+        "maj7", "maj", "min", "dim", "aug", "m"
+    ];
 
     private readonly string _source;
     private int _index;
@@ -36,7 +52,7 @@ public sealed class Tokenizer
             var startColumn = _column;
             var current = Peek();
 
-            if (current is '{' or '}' or '|' or ':')
+            if (current is '{' or '}' or '|' or ':' or '/')
             {
                 var type = current switch
                 {
@@ -44,11 +60,24 @@ public sealed class Tokenizer
                     '}' => TokenType.RightBrace,
                     '|' => TokenType.Bar,
                     ':' => TokenType.Colon,
+                    '/' => TokenType.Slash,
                     _ => throw new InvalidOperationException()
                 };
 
                 Advance();
                 tokens.Add(new Token(type, current.ToString(), startLine, startColumn));
+                continue;
+            }
+
+            if (current == 'v' && _index + 1 < _source.Length && char.IsDigit(_source[_index + 1]))
+            {
+                Advance();
+                var numberStart = _index;
+                while (!IsAtEnd() && char.IsDigit(Peek()))
+                    Advance();
+
+                var value = _source[numberStart.._index];
+                tokens.Add(new Token(TokenType.VelocityPrefix, value, startLine, startColumn));
                 continue;
             }
 
@@ -60,7 +89,7 @@ public sealed class Tokenizer
 
             if (char.IsLetter(current))
             {
-                tokens.Add(ReadWordOrNote(startLine, startColumn));
+                tokens.Add(ReadWordOrNoteOrChord(startLine, startColumn));
                 continue;
             }
 
@@ -80,17 +109,31 @@ public sealed class Tokenizer
         return new Token(TokenType.Number, _source[start.._index], line, column);
     }
 
-    private Token ReadWordOrNote(int line, int column)
+    private Token ReadWordOrNoteOrChord(int line, int column)
     {
         var start = _index;
         var pitch = Advance();
 
         if (IsNotePitch(pitch))
         {
+            var savedIndex = _index;
+            var savedColumn = _column;
+
             if (!IsAtEnd() && Peek() == '#')
                 Advance();
             else if (!IsAtEnd() && (Peek() == 'b' || Peek() == 'B') && (_index + 1 >= _source.Length || !char.IsDigit(_source[_index + 1])))
                 Advance();
+
+            var chordSuffix = TryReadChordSuffix();
+            if (chordSuffix is not null)
+            {
+                var octaveDigits = ReadOctaveDigits();
+                var text = _source[start.._index];
+                return new Token(TokenType.Chord, text, line, column);
+            }
+
+            _index = savedIndex;
+            _column = savedColumn;
 
             if (!IsAtEnd() && char.IsDigit(Peek()))
             {
@@ -112,7 +155,47 @@ public sealed class Tokenizer
         if (Keywords.TryGetValue(word, out var keyword))
             return new Token(keyword, word, line, column);
 
-        throw new InvalidOperationException($"Unknown token '{word}' at line {line}, column {column}.");
+        return new Token(TokenType.Identifier, word, line, column);
+    }
+
+    private string? TryReadChordSuffix()
+    {
+        foreach (var suffix in ChordSuffixes)
+        {
+            if (MatchesAt(suffix))
+            {
+                for (var i = 0; i < suffix.Length; i++)
+                    Advance();
+                return suffix;
+            }
+        }
+
+        return null;
+    }
+
+    private string ReadOctaveDigits()
+    {
+        var start = _index;
+        while (!IsAtEnd() && char.IsDigit(Peek()))
+            Advance();
+        return _source[start.._index];
+    }
+
+    private bool MatchesAt(string text)
+    {
+        if (_index + text.Length > _source.Length)
+            return false;
+
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (char.ToLowerInvariant(_source[_index + i]) != char.ToLowerInvariant(text[i]))
+                return false;
+        }
+
+        if (_index + text.Length < _source.Length && char.IsLetter(_source[_index + text.Length]))
+            return false;
+
+        return true;
     }
 
     private static bool IsNotePitch(char c) =>

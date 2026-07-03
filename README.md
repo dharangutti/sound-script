@@ -40,6 +40,13 @@ Full language reference, pipeline details, and usage for CLI + Web:
 /examples
     melody.ss
     durations.ss
+    instruments.ss
+    chords.ss
+    sequences.ss
+    loops.ss
+    velocity.ss
+    multitrack.ss
+    full.ss
 ```
 
 ## License

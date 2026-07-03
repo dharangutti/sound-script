@@ -23,10 +23,11 @@ try
     var source = File.ReadAllText(scriptPath);
     var tokens = new Tokenizer(source).Tokenize();
     var program = new Parser(tokens).Parse();
-    var timedNotes = Interpreter.Interpret(program);
-    MidiGenerator.Write(program, timedNotes, outputPath);
+    var interpreted = Interpreter.Interpret(program);
+    MidiGenerator.Write(interpreted, outputPath);
 
-    Console.WriteLine($"Wrote {timedNotes.Count} notes to {outputPath} at {program.Bpm} BPM.");
+    var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
+    Console.WriteLine($"Wrote {noteCount} notes across {interpreted.Tracks.Count} track(s) to {outputPath} at {interpreted.Tempo} BPM.");
     return 0;
 }
 catch (Exception ex)

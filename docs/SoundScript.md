@@ -1,4 +1,4 @@
-# SoundScript Documentation (v1–v3)
+# SoundScript Documentation
 
 A tiny, deterministic music DSL that turns simple text into MIDI.  
 Built in C#, designed for curiosity, creativity, and play.
@@ -17,7 +17,7 @@ melody {
 ```
 
 The engine parses this DSL and generates a MIDI file — no DAW, no plugins, no audio synthesis.  
-Just **text → parsed → interpreted → MIDI**.
+Just **text → tokenizer → parser → AST → interpreter → MIDI**.
 
 Everything is intentionally small, deterministic, and hobby-friendly.
 
@@ -27,22 +27,30 @@ Everything is intentionally small, deterministic, and hobby-friendly.
 
 ```
 /src
-    SoundScript.Core/      # Models: Token, ParsedNote, MelodyProgram, TimedNote
+    SoundScript.Core/      # AST nodes, tokens, interpreted program models
     SoundScript.Parser/    # Tokenizer + Parser
     SoundScript.Midi/      # Interpreter + MIDI generator (DryWetMIDI)
     SoundScript.Cli/       # CLI runner (executable: soundscript)
     SoundScript.Web/       # Blazor WASM web demo
 
 /examples
-    melody.ss              # v1 example — notes + BPM
-    durations.ss           # v3 example — note durations
+    melody.ss              # Phase 1 — notes + BPM
+    durations.ss           # Phase 3 — note durations
+    instruments.ss         # Phase 4 — instrument selection
+    tempo-time.ss          # Phase 5 — tempo & time signature
+    chords.ss              # Phase 6 — chords
+    sequences.ss           # Phase 7 — sequences & blocks
+    loops.ss               # Phase 8 — loops
+    velocity.ss            # Phase 9 — velocity control
+    multitrack.ss          # Phase 10 — multi-track support
+    full.ss                # Combined example
 ```
 
 | Project | Role |
 |---------|------|
-| **SoundScript.Core** | Shared types used across the pipeline |
-| **SoundScript.Parser** | Lexical analysis and parsing into `MelodyProgram` |
-| **SoundScript.Midi** | Beat timing and MIDI file export |
+| **SoundScript.Core** | AST nodes, tokens, `InterpretedProgram`, `TimedNote` |
+| **SoundScript.Parser** | Lexical analysis and parsing into `ProgramNode` |
+| **SoundScript.Midi** | Beat scheduling, instrument/velocity handling, MIDI export |
 | **SoundScript.Cli** | Command-line entry point |
 | **SoundScript.Web** | Browser-based demo (client-side WASM) |
 
@@ -80,121 +88,196 @@ This writes `output.mid` in the current directory.
 dotnet run --project src/SoundScript.Cli -- run examples/melody.ss my-song.mid
 ```
 
-### Run the durations example
+### Run all examples
 
 ```bash
-dotnet run --project src/SoundScript.Cli -- run examples/durations.ss
+dotnet run --project src/SoundScript.Cli -- run examples/chords.ss
+dotnet run --project src/SoundScript.Cli -- run examples/multitrack.ss
 ```
 
 ---
 
 ## How to Use (Web Version)
 
-### Run the Blazor WASM app
-
 ```bash
 dotnet run --project src/SoundScript.Web
 ```
 
-Open the URL shown in the console.
-
-You will see:
-
-- A **textarea** with DSL pre-filled (the default melody example)
-- A **Generate MIDI** button
-- A **Download MIDI** link (appears after generation)
-
-Everything runs **client-side in the browser** — no server processing, no filesystem access. MIDI bytes are generated in memory and offered as a base64 download link.
+Open the URL shown in the console. The web demo runs client-side in the browser.
 
 ---
 
-## Language Reference (v1–v3)
+## Language Reference
 
-Every script is a single `melody { ... }` block. Whitespace separates tokens.
+Whitespace separates tokens. Statements can appear at the top level or inside blocks.
 
-### 1. Notes
+### Phase 1 — Notes & Melody Blocks
 
-Write pitch letter + octave number:
+Every legacy script can still be a single `melody { ... }` block:
 
 ```
-C4 E4 G4 C5
+melody {
+    bpm 120
+    C4 E4 G4 | C5
+}
 ```
 
-**Format:** `[A–G][#|b]?[octave]`
+**Note format:** `[A–G][#|b]?[octave]`
 
 | Example | Meaning |
 |---------|---------|
-| `C4` | Middle C |
+| `C4` | Middle C (MIDI 60) |
 | `F#4` | F sharp, octave 4 |
 | `Bb3` | B flat, octave 3 |
 
-Notes are case-insensitive for the pitch letter (`c4` and `C4` are equivalent).
+Notes are case-insensitive for the pitch letter.
 
-### 2. BPM
-
-Set tempo inside the melody block:
-
-```
-bpm 120
-```
-
-- Must be a **positive integer**
-- Default if omitted: **120 BPM**
-
-### 3. Bar separator
+### Phase 2 — Bar Separator
 
 ```
 C4 E4 | G4 C5
 ```
 
-The `|` token is **recognized but ignored** — reserved for future bar/timing features.
+The `|` token is recognized but ignored — reserved for future bar-aware features.
 
-### 4. Durations (v3)
+### Phase 3 — Durations
 
-Durations are measured in **beats** (quarter-note beats at the current BPM).
+Durations are measured in **beats** (quarter-note beats at the current tempo).
 
-#### Default — 1 beat
+| Syntax | Beats |
+|--------|-------|
+| `C5` | 1 (default) |
+| `C4 for 2` | 2 |
+| `G4:4` | 4 |
+| `C4 q` | 1 (quarter) |
+| `D4 h` | 2 (half) |
+| `E4 e` | 0.5 (eighth) |
+| `F4 w` | 4 (whole) |
 
-```
-C5
-```
+Legacy `bpm` and new `tempo` both set beats per minute (default **120**).
 
-#### Verb form
-
-```
-C4 for 2
-```
-
-#### Compact form
-
-```
-G4:4
-```
-
-| Note in `durations.ss` | Duration |
-|------------------------|----------|
-| `C4 for 2` | 2 beats |
-| `E4 for 1` | 1 beat |
-| `G4:4` | 4 beats |
-| `C5` | 1 beat (default) |
-
-Duration values must be **positive numbers**.
-
-### Full durations example
+### Phase 4 — Instruments
 
 ```
-melody {
-    bpm 100
-    C4 for 2
-    E4 for 1
-    G4:4
-    C5
+instrument piano
+instrument violin
+instrument flute
+```
+
+| Instrument | GM Program |
+|------------|------------|
+| `piano` | 0 (Acoustic Grand Piano) |
+| `bass` | 32 (Acoustic Bass) |
+| `violin` | 40 |
+| `flute` | 73 |
+| `guitar` | 24 |
+| `trumpet` | 56 |
+| `cello` | 42 |
+| `organ` | 19 |
+| `synth` | 80 |
+
+Default instrument: **acoustic grand piano (0)**.  
+The interpreter emits a MIDI program change before subsequent notes on that track.
+
+### Phase 5 — Tempo & Time Signature
+
+```
+tempo 120
+time 4/4
+time 3/4
+```
+
+- `tempo` (or legacy `bpm`) affects all note durations.
+- `time` sets time signature metadata in the MIDI file (no rhythmic validation).
+
+### Phase 6 — Chords
+
+```
+Cmaj
+Dm
+G7 q
+Fmaj7 h
+```
+
+Chords expand into multiple simultaneous notes.
+
+| Syntax | Quality | Intervals (semitones) |
+|--------|---------|----------------------|
+| `Cmaj`, `C` + maj | Major | 0, 4, 7 |
+| `Dm`, `D` + m | Minor | 0, 3, 7 |
+| `Cdim` | Diminished | 0, 3, 6 |
+| `Caug` | Augmented | 0, 4, 8 |
+| `G7 q` | Dominant 7th | 0, 4, 7, 10 |
+| `Fmaj7` | Major 7th | 0, 4, 7, 11 |
+
+Optional octave suffix: `Cmaj4`, `Dm5` (default octave: 4).
+
+**Backward compatibility:** `G7` alone inside a `melody` block is still parsed as **G at octave 7**.  
+Write `G7 q` (with a letter duration) to play a G dominant 7th chord.
+
+### Phase 7 — Sequences & Blocks
+
+```
+sequence intro {
+    C4 q
+    D4 q
+    E4 h
+}
+
+sequence chorus {
+    G4 q
+    A4 q
+    B4 h
+}
+
+play intro
+play chorus
+```
+
+- `sequence` defines a reusable named block.
+- `play` expands the sequence inline at the current position.
+
+### Phase 8 — Loops
+
+```
+loop 4 {
+    C4 q
+    D4 q
 }
 ```
 
-### Recognized but unused (reserved)
+Repeats the block **N** times. Nested loops are not supported.
 
-The tokenizer recognizes `play` as a keyword, but the parser does not use it yet. It is reserved for future features.
+### Phase 9 — Velocity Control
+
+```
+velocity 80
+
+C4 q v100
+D4 q v60
+E4 q
+```
+
+- `velocity N` sets the global default (1–127, default **64**).
+- `vN` on a note overrides the global for that note.
+
+### Phase 10 — Multi-Track Support
+
+```
+track melody {
+    instrument flute
+    C5 q
+    D5 q
+}
+
+track bass {
+    instrument bass
+    C2 h
+    G2 h
+}
+```
+
+Each `track` block becomes a separate MIDI track. The interpreter merges all tracks into a single MIDI file.
 
 ---
 
@@ -203,119 +286,51 @@ The tokenizer recognizes `play` as a keyword, but the parser does not use it yet
 ```
 DSL script
     ↓
-Tokenizer          →  Token stream (melody, notes, bpm, for, :, |, numbers, …)
+Tokenizer          →  Token stream
     ↓
-Parser             →  MelodyProgram { Bpm, List<ParsedNote> }
+Parser             →  ProgramNode (AST)
     ↓
-Interpreter        →  List<TimedNote> (beats → milliseconds)
+Interpreter        →  InterpretedProgram (tracks, timed notes, program changes)
     ↓
 MidiGenerator      →  output.mid  (via DryWetMIDI)
 ```
 
-### Core models
+### AST node types
 
-| Type | Fields / purpose |
-|------|------------------|
-| `ParsedNote` | Pitch, accidental, octave, `DurationBeats` (default `1`) |
-| `MelodyProgram` | `Bpm`, ordered list of `ParsedNote` |
-| `TimedNote` | `MidiNumber`, `StartBeat`, `DurationBeats`, `DurationMs` |
+| Node | Purpose |
+|------|---------|
+| `ProgramNode` | Root container for all statements |
+| `MelodyNode` | Legacy melody block (backward compatible) |
+| `TrackNode` | Named multi-track block |
+| `SequenceNode` | Reusable named sequence |
+| `PlayNode` | Inline sequence expansion |
+| `LoopNode` | Repeat block N times |
+| `InstrumentNode` | MIDI program change |
+| `TempoNode` / `BpmNode` | Tempo setting |
+| `TimeSignatureNode` | Time signature metadata |
+| `VelocityNode` | Global velocity setting |
+| `NoteNode` | Single note with pitch, duration, optional velocity |
+| `ChordNode` | Chord expanded to simultaneous notes |
+| `BarNode` | Ignored bar separator |
 
 ### Timing
 
-The interpreter converts beats to milliseconds:
-
 ```
-durationMs = (60_000 / bpm) × durationBeats
+durationMs = (60_000 / tempo) × durationBeats
 ```
 
-Notes are placed **sequentially**: each note starts where the previous one ends.  
-The MIDI generator writes a **single track** at 480 ticks per quarter note.
-
-### MIDI note mapping
-
-Pitch letters map to standard MIDI note numbers. For example, at octave 4:
-
-| Note | MIDI number |
-|------|-------------|
-| C4 | 60 |
-| E4 | 64 |
-| G4 | 67 |
-| C5 | 72 |
+Monophonic tracks place notes sequentially. Chords place all notes at the same start beat.  
+The MIDI generator writes **480 ticks per quarter note**.
 
 ---
 
 ## Design Philosophy
 
-- **Tiny language** — minimal syntax, no AST complexity
+- **Tiny language** — human-readable, hobby-grade syntax
 - **Deterministic behavior** — same input always produces the same MIDI
 - **MIDI-first** — no audio synthesis
-- **Incremental growth** — one small feature at a time
-
-### Not supported yet
-
-- Multi-track
-- Loops
-- Instruments / program changes
-- Chords
-- Rests
-- Velocity
-- Bar-aware timing (beyond token recognition)
-
----
-
-## Future Roadmap (Recommended Order)
-
-These are planned directions, not implemented features.
-
-### Phase 4 — Instruments
-
-```
-instrument piano
-instrument violin
-instrument 41
-```
-
-### Phase 5 — Loops
-
-```
-loop 4 {
-    C4 E4
-}
-```
-
-### Phase 6 — Rests
-
-```
-rest for 2
-```
-
-### Phase 7 — Chords
-
-```
-[C4 E4 G4] for 2
-```
-
-### Phase 8 — Multi-track
-
-```
-track piano {
-    C4 E4 G4
-}
-
-track violin {
-    G3 A3 B3
-}
-```
-
-### Phase 9 — Velocity
-
-```
-C4 @80
-```
-
-### Phase 10 — Web Syntax Highlighting
-
-Minimal, deterministic, offline.
+- **Additive growth** — phases 1–3 syntax remains valid
+- **No randomness, no external DSL dependencies**
 
 ---
 
@@ -324,8 +339,10 @@ Minimal, deterministic, offline.
 | Task | Command |
 |------|---------|
 | Build | `dotnet build` |
-| CLI — default example | `dotnet run --project src/SoundScript.Cli -- run examples/melody.ss` |
-| CLI — durations example | `dotnet run --project src/SoundScript.Cli -- run examples/durations.ss` |
+| Phase 1 example | `dotnet run --project src/SoundScript.Cli -- run examples/melody.ss` |
+| Phase 3 example | `dotnet run --project src/SoundScript.Cli -- run examples/durations.ss` |
+| Phase 6 chords | `dotnet run --project src/SoundScript.Cli -- run examples/chords.ss` |
+| Phase 10 multi-track | `dotnet run --project src/SoundScript.Cli -- run examples/multitrack.ss` |
 | Web UI | `dotnet run --project src/SoundScript.Web` |
 
 ---
