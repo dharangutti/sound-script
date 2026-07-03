@@ -243,7 +243,11 @@ public sealed class Parser
     private InstrumentNode ParseInstrumentStatement()
     {
         var nameToken = Expect(TokenType.Identifier, "instrument name");
-        return new InstrumentNode { ProgramNumber = InstrumentMap.Resolve(nameToken.Value) };
+        return new InstrumentNode
+        {
+            Name = nameToken.Value,
+            ProgramNumber = InstrumentMap.Resolve(nameToken.Value)
+        };
     }
 
     private VelocityNode ParseVelocityStatement()
