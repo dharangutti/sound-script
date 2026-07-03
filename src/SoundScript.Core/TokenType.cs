@@ -18,6 +18,7 @@ public enum TokenType
     Slash,
     Note,
     Chord,
+    ChordVoicing,
     Number,
     Identifier,
     Instrument,

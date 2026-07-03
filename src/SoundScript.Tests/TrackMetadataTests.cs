@@ -68,7 +68,7 @@ public class TrackMetadataTests
     [Fact]
     public void Interpret_AppliesIndependentMetadataPerTrack()
     {
-        HumanizeApplicator.SetSeed(5);
+        HumanizeApplicator.SetSeed(99);
 
         try
         {
@@ -96,8 +96,10 @@ public class TrackMetadataTests
             var shapedPiano = PlaybackShaper.ShapeNote(
                 null, null, DynamicLevel.MezzoForte, DynamicLevel.MezzoForte, 64, null, "piano", 1.0).Velocity;
 
+            var expectedSoftStart = HumanizeApplicator.ApplyToStartBeat(0, 0.02, 60, 0);
             Assert.Equal(shapedPiano, dry.Velocity);
-            Assert.NotEqual(0.0, soft.StartBeat);
+            Assert.NotEqual(0.0, expectedSoftStart);
+            Assert.Equal(expectedSoftStart, soft.StartBeat);
             Assert.Equal(0.0, dry.StartBeat);
         }
         finally

@@ -493,13 +493,32 @@ public sealed class Parser
     {
         var chordToken = Expect(TokenType.Chord, "chord");
         var chord = ParseChordToken(chordToken);
+        var voicing = ParseOptionalChordVoicing();
         var (durationBeats, _) = ParseOptionalDuration();
         chord = chord with
         {
+            Voicing = voicing,
             DurationBeats = durationBeats,
             Velocity = ParseOptionalVelocity()
         };
         return chord;
+    }
+
+    private ChordVoicingStyle? ParseOptionalChordVoicing()
+    {
+        if (!Match(TokenType.ChordVoicing))
+            return null;
+
+        var token = Previous();
+        return token.Value.ToLowerInvariant() switch
+        {
+            "drop2" => ChordVoicingStyle.Drop2,
+            "drop3" => ChordVoicingStyle.Drop3,
+            "inv1" => ChordVoicingStyle.Inversion1,
+            "inv2" => ChordVoicingStyle.Inversion2,
+            "spread" => ChordVoicingStyle.Spread,
+            _ => throw Invalid(token, $"Unknown chord voicing '{token.Value}'.")
+        };
     }
 
     private bool IsDominantSeventhAmbiguity(Token noteToken)

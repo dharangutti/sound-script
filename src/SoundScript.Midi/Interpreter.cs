@@ -514,7 +514,11 @@ public static class Interpreter
         if (voicedAdjusted)
             AddWarning(result, "Chord voicing adjustment applied");
 
-        var (spacedNotes, spacedAdjusted) = HarmonicSpacing.Apply(voicedNotes);
+        var (advancedNotes, advancedAdjusted) = AdvancedChordVoicing.Apply(voicedNotes, chord.Voicing);
+        if (advancedAdjusted)
+            AddWarning(result, "Advanced chord voicing applied");
+
+        var (spacedNotes, spacedAdjusted) = HarmonicSpacing.Apply(advancedNotes);
         if (spacedAdjusted)
             AddWarning(result, "Harmonic spacing adjustment applied");
 
