@@ -113,6 +113,7 @@ public static class ProgramLoader
             TrackNode track => track.Name,
             SequenceNode sequence => sequence.Name,
             BlockNode block => block.Name,
+            PatternNode pattern => pattern.Name,
             MelodyNode => "melody",
             _ => null
         };
