@@ -23,20 +23,27 @@ public static partial class MidiGenerator
         foreach (var track in program.Tracks)
         {
             var trackChunk = new TrackChunk();
-            var initialProgram = track.ProgramChanges.Count > 0
-                ? track.ProgramChanges[0].ProgramNumber
-                : InstrumentMap.DefaultProgram;
-
-            trackChunk.Events.Add(new ProgramChangeEvent((SevenBitNumber)initialProgram)
-            {
-                Channel = (FourBitNumber)DefaultChannel
-            });
 
             if (program.TimeSignatureNumerator is not null && program.TimeSignatureDenominator is not null)
             {
                 trackChunk.Events.Add(new TimeSignatureEvent(
                     (byte)program.TimeSignatureNumerator.Value,
                     (byte)program.TimeSignatureDenominator.Value));
+            }
+
+            var initialPrograms = track.ProgramChanges
+                .GroupBy(change => change.Channel)
+                .ToDictionary(group => group.Key, group => group.OrderBy(change => change.Beat).First().ProgramNumber);
+
+            if (initialPrograms.Count == 0)
+                initialPrograms[DefaultChannel] = InstrumentMap.DefaultProgram;
+
+            foreach (var (channel, programNumber) in initialPrograms.OrderBy(pair => pair.Key))
+            {
+                trackChunk.Events.Add(new ProgramChangeEvent((SevenBitNumber)programNumber)
+                {
+                    Channel = (FourBitNumber)channel
+                });
             }
 
             using (var notesManager = trackChunk.ManageNotes())
@@ -49,19 +56,20 @@ public static partial class MidiGenerator
                     var lengthTick = Math.Max(1, (long)(timedNote.DurationBeats * TicksPerQuarterNote));
                     var note = new Note((SevenBitNumber)timedNote.MidiNumber, lengthTick, startTick)
                     {
-                        Velocity = (SevenBitNumber)timedNote.Velocity
+                        Velocity = (SevenBitNumber)timedNote.Velocity,
+                        Channel = (FourBitNumber)timedNote.Channel
                     };
                     notes.Add(note);
                 }
             }
 
-            foreach (var programChange in track.ProgramChanges.Skip(1))
+            foreach (var programChange in track.ProgramChanges.Where(change => change.Beat > 0))
             {
                 var tick = (long)(programChange.Beat * TicksPerQuarterNote);
                 trackChunk.Events.Add(new ProgramChangeEvent((SevenBitNumber)programChange.ProgramNumber)
                 {
                     DeltaTime = tick,
-                    Channel = (FourBitNumber)DefaultChannel
+                    Channel = (FourBitNumber)programChange.Channel
                 });
             }
 

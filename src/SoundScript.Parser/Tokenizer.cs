@@ -16,6 +16,7 @@ public sealed class Tokenizer
         ["play"] = TokenType.Play,
         ["for"] = TokenType.For,
         ["instrument"] = TokenType.Instrument,
+        ["layer"] = TokenType.Layer,
         ["gain"] = TokenType.Gain,
         ["humanize"] = TokenType.Humanize,
         ["sequence"] = TokenType.Sequence,

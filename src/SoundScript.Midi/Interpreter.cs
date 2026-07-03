@@ -7,6 +7,13 @@ namespace SoundScript.Midi;
 
 public static class Interpreter
 {
+    private sealed class TrackLayer
+    {
+        public string? InstrumentName { get; init; }
+        public int ProgramNumber { get; init; }
+        public byte Channel { get; init; }
+    }
+
     private sealed class TrackBuilder
     {
         public string Name { get; init; } = "default";
@@ -21,6 +28,7 @@ public static class Interpreter
         public List<double> MeasureBeats { get; } = [];
         public List<TimedNote> Notes { get; } = [];
         public List<ProgramChange> ProgramChanges { get; } = [];
+        public List<TrackLayer> Layers { get; } = [];
         public int? LastEmittedMidi { get; set; }
         public int? LastPhraseMidi { get; set; }
         public bool PendingPhraseBoundary { get; set; }
@@ -131,7 +139,19 @@ public static class Interpreter
                     (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)));
                 interpretedTrack.Notes.Add(note with { StartBeat = startBeat });
             }
-            interpretedTrack.ProgramChanges.AddRange(track.ProgramChanges);
+
+            if (track.Layers.Count > 0)
+            {
+                foreach (var layer in track.Layers)
+                {
+                    interpretedTrack.ProgramChanges.Add(new ProgramChange(0, layer.ProgramNumber, layer.Channel));
+                }
+            }
+            else
+            {
+                interpretedTrack.ProgramChanges.AddRange(track.ProgramChanges);
+            }
+
             result.Tracks.Add(interpretedTrack);
         }
 
@@ -175,6 +195,9 @@ public static class Interpreter
                     break;
                 case InstrumentNode instrument:
                     ApplyInstrument(track, instrument);
+                    break;
+                case LayerNode layer:
+                    AddLayer(track, layer);
                     break;
                 case GainNode gain:
                     track.Gain = gain.Value;
@@ -344,6 +367,32 @@ public static class Interpreter
         track.CurrentDynamic = dynamic.Level;
     }
 
+    private static void AddLayer(TrackBuilder track, LayerNode layer)
+    {
+        track.Layers.Add(new TrackLayer
+        {
+            InstrumentName = layer.Name,
+            ProgramNumber = layer.ProgramNumber,
+            Channel = (byte)track.Layers.Count
+        });
+    }
+
+    private static IEnumerable<TrackLayer> GetPlaybackLayers(TrackBuilder track)
+    {
+        if (track.Layers.Count > 0)
+            return track.Layers;
+
+        return
+        [
+            new TrackLayer
+            {
+                InstrumentName = track.CurrentInstrumentName,
+                ProgramNumber = track.CurrentProgram,
+                Channel = 0
+            }
+        ];
+    }
+
     private static void ApplyInstrument(TrackBuilder track, InstrumentNode instrument)
     {
         if (track.CurrentProgram != instrument.ProgramNumber)
@@ -373,34 +422,44 @@ public static class Interpreter
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
         var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
-        var shaped = PlaybackShaper.ShapeNote(
-            note.Velocity,
-            rampVelocity,
-            notation.Dynamic,
-            track.CurrentDynamic,
-            track.CurrentVelocity,
-            notation.Articulation,
-            track.CurrentInstrumentName,
-            notation.DurationBeats);
-
-        ApplyPlaybackWarnings(result, shaped);
-
-        notation = notation with
-        {
-            ShapedVelocity = shaped.Velocity,
-            ShapedDurationBeats = shaped.DurationBeats
-        };
-
-        var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, shaped.DurationBeats);
         var midiNumber = notation.ResolvedMidiNumber;
-        var velocity = ApplyTrackGain(shaped.Velocity, track.Gain);
+        PlaybackShapeResult? lastShaped = null;
 
-        track.Notes.Add(new TimedNote(
-            midiNumber,
-            globalBeat,
-            shaped.DurationBeats,
-            durationMs,
-            velocity));
+        foreach (var layer in GetPlaybackLayers(track))
+        {
+            var shaped = PlaybackShaper.ShapeNote(
+                note.Velocity,
+                rampVelocity,
+                notation.Dynamic,
+                track.CurrentDynamic,
+                track.CurrentVelocity,
+                notation.Articulation,
+                layer.InstrumentName,
+                notation.DurationBeats);
+
+            ApplyPlaybackWarnings(result, shaped);
+            lastShaped = shaped;
+
+            var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, shaped.DurationBeats);
+            var velocity = ApplyTrackGain(shaped.Velocity, track.Gain);
+
+            track.Notes.Add(new TimedNote(
+                midiNumber,
+                globalBeat,
+                shaped.DurationBeats,
+                durationMs,
+                velocity,
+                layer.Channel));
+        }
+
+        if (lastShaped is not null)
+        {
+            notation = notation with
+            {
+                ShapedVelocity = lastShaped.Value.Velocity,
+                ShapedDurationBeats = lastShaped.Value.DurationBeats
+            };
+        }
 
         track.LastEmittedMidi = midiNumber;
         AdvanceTiming(track, notation.DurationBeats);
@@ -439,14 +498,6 @@ public static class Interpreter
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, GlobalBeatClock clock, InterpretedProgram result)
     {
-        var shaped = PlaybackShaper.ShapeChordVelocity(
-            chord.Velocity,
-            track.CurrentDynamic,
-            track.CurrentVelocity,
-            track.CurrentInstrumentName);
-
-        ApplyPlaybackWarnings(result, shaped);
-
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
@@ -458,21 +509,33 @@ public static class Interpreter
         if (spacedAdjusted)
             AddWarning(result, "Harmonic spacing adjustment applied");
 
-        var (balancedVelocities, balanced) = ChordBalancer.Apply(spacedNotes, shaped.Velocity);
-        if (balanced)
-            AddWarning(result, "Chord balance applied");
-
         var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, chord.DurationBeats);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
 
-        for (var i = 0; i < spacedNotes.Length; i++)
+        foreach (var layer in GetPlaybackLayers(track))
         {
-            track.Notes.Add(new TimedNote(
-                spacedNotes[i],
-                globalBeat,
-                durationBeats,
-                durationMs,
-                ApplyTrackGain(balancedVelocities[i], track.Gain)));
+            var shaped = PlaybackShaper.ShapeChordVelocity(
+                chord.Velocity,
+                track.CurrentDynamic,
+                track.CurrentVelocity,
+                layer.InstrumentName);
+
+            ApplyPlaybackWarnings(result, shaped);
+
+            var (balancedVelocities, balanced) = ChordBalancer.Apply(spacedNotes, shaped.Velocity);
+            if (balanced)
+                AddWarning(result, "Chord balance applied");
+
+            for (var i = 0; i < spacedNotes.Length; i++)
+            {
+                track.Notes.Add(new TimedNote(
+                    spacedNotes[i],
+                    globalBeat,
+                    durationBeats,
+                    durationMs,
+                    ApplyTrackGain(balancedVelocities[i], track.Gain),
+                    layer.Channel));
+            }
         }
 
         AdvanceTiming(track, chord.DurationBeats);
