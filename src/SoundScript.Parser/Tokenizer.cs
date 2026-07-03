@@ -20,7 +20,11 @@ public sealed class Tokenizer
         ["q"] = TokenType.Duration,
         ["h"] = TokenType.Duration,
         ["e"] = TokenType.Duration,
-        ["w"] = TokenType.Duration
+        ["w"] = TokenType.Duration,
+        ["quarter"] = TokenType.Duration,
+        ["half"] = TokenType.Duration,
+        ["eighth"] = TokenType.Duration,
+        ["whole"] = TokenType.Duration
     };
 
     private static readonly string[] ChordSuffixes =
@@ -119,15 +123,12 @@ public sealed class Tokenizer
             var savedIndex = _index;
             var savedColumn = _column;
 
-            if (!IsAtEnd() && Peek() == '#')
-                Advance();
-            else if (!IsAtEnd() && (Peek() == 'b' || Peek() == 'B') && (_index + 1 >= _source.Length || !char.IsDigit(_source[_index + 1])))
-                Advance();
+            ConsumeOptionalChordAccidental();
 
             var chordSuffix = TryReadChordSuffix();
             if (chordSuffix is not null)
             {
-                var octaveDigits = ReadOctaveDigits();
+                ReadOctaveDigits();
                 var text = _source[start.._index];
                 return new Token(TokenType.Chord, text, line, column);
             }
@@ -135,17 +136,19 @@ public sealed class Tokenizer
             _index = savedIndex;
             _column = savedColumn;
 
-            if (!IsAtEnd() && char.IsDigit(Peek()))
+            if (TryReadNoteOctaveSuffix())
             {
-                while (!IsAtEnd() && char.IsDigit(Peek()))
-                    Advance();
-
                 var text = _source[start.._index];
                 return new Token(TokenType.Note, text, line, column);
             }
 
             _index = start;
             _column = column;
+        }
+        else if (char.IsLetter(pitch) && TryReadInvalidNoteLikeSuffix())
+        {
+            var text = _source[start.._index];
+            return new Token(TokenType.Identifier, text, line, column);
         }
 
         while (!IsAtEnd() && char.IsLetterOrDigit(Peek()))
@@ -156,6 +159,93 @@ public sealed class Tokenizer
             return new Token(keyword, word, line, column);
 
         return new Token(TokenType.Identifier, word, line, column);
+    }
+
+    private void ConsumeOptionalChordAccidental()
+    {
+        if (!IsAtEnd() && Peek() == '#')
+            Advance();
+        else if (!IsAtEnd() && IsFlatSymbol(Peek()) && (_index + 1 >= _source.Length || !char.IsDigit(_source[_index + 1])))
+            Advance();
+        else if (!IsAtEnd() && IsNaturalSymbol(Peek()))
+            Advance();
+    }
+
+    private void ConsumeNoteAccidentals()
+    {
+        while (!IsAtEnd())
+        {
+            if (Peek() == '#')
+            {
+                Advance();
+                continue;
+            }
+
+            if (IsFlatSymbol(Peek()) && _index + 1 < _source.Length && char.IsDigit(_source[_index + 1]))
+            {
+                Advance();
+                continue;
+            }
+
+            if (IsFlatSymbol(Peek()) && (_index + 1 >= _source.Length || !char.IsLetter(_source[_index + 1])))
+            {
+                Advance();
+                continue;
+            }
+
+            if (IsNaturalSymbol(Peek()))
+            {
+                Advance();
+                continue;
+            }
+
+            break;
+        }
+    }
+
+    private bool TryReadNoteOctaveSuffix()
+    {
+        ConsumeNoteAccidentals();
+
+        if (!IsAtEnd() && Peek() == '-')
+            Advance();
+
+        if (IsAtEnd() || !char.IsDigit(Peek()))
+            return false;
+
+        while (!IsAtEnd() && char.IsDigit(Peek()))
+            Advance();
+
+        return true;
+    }
+
+    private bool TryReadInvalidNoteLikeSuffix()
+    {
+        while (!IsAtEnd())
+        {
+            if (IsAccidentalSymbol(Peek()))
+            {
+                Advance();
+                continue;
+            }
+
+            if (Peek() == '-')
+            {
+                Advance();
+                continue;
+            }
+
+            if (char.IsDigit(Peek()))
+            {
+                while (!IsAtEnd() && char.IsDigit(Peek()))
+                    Advance();
+                return true;
+            }
+
+            break;
+        }
+
+        return false;
     }
 
     private string? TryReadChordSuffix()
@@ -197,6 +287,13 @@ public sealed class Tokenizer
 
         return true;
     }
+
+    private static bool IsFlatSymbol(char value) => value is 'b' or 'B' or '\u266D';
+
+    private static bool IsNaturalSymbol(char value) => value is '\u266E';
+
+    private static bool IsAccidentalSymbol(char value) =>
+        value is '#' or '\u266F' or 'b' or 'B' or '\u266D' or '\u266E';
 
     private static bool IsNotePitch(char c) =>
         c is 'A' or 'B' or 'C' or 'D' or 'E' or 'F' or 'G'

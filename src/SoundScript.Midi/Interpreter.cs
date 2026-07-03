@@ -168,16 +168,19 @@ public static class Interpreter
     private static void EmitNote(TrackBuilder track, NoteNode note, int tempo)
     {
         var velocity = note.Velocity ?? track.CurrentVelocity;
-        var durationMs = BeatsToMilliseconds(note.DurationBeats, tempo);
+        var notation = note.Notation;
+        notation.StartTime = track.CurrentBeat;
+
+        var durationMs = BeatsToMilliseconds(notation.DurationBeats, tempo);
 
         track.Notes.Add(new TimedNote(
-            note.ToMidiNumber(),
-            track.CurrentBeat,
-            note.DurationBeats,
+            notation.ToMidiNumber(),
+            notation.StartTime,
+            notation.DurationBeats,
             durationMs,
             velocity));
 
-        track.CurrentBeat += note.DurationBeats;
+        track.CurrentBeat += notation.DurationBeats;
     }
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, int tempo)

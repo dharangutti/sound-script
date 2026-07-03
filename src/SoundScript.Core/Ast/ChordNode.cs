@@ -1,3 +1,5 @@
+using SoundScript.Core.Notation;
+
 namespace SoundScript.Core.Ast;
 
 public sealed record ChordNode : AstNode
@@ -12,13 +14,7 @@ public sealed record ChordNode : AstNode
 
     public IReadOnlyList<int> ToMidiNumbers()
     {
-        var rootMidi = new NoteNode
-        {
-            Pitch = Root,
-            IsSharp = IsSharp,
-            IsFlat = IsFlat,
-            Octave = Octave
-        }.ToMidiNumber();
+        var rootMidi = BuildRootNotation().ToMidiNumber();
 
         var intervals = Quality switch
         {
@@ -33,4 +29,21 @@ public sealed record ChordNode : AstNode
 
         return intervals.Select(i => rootMidi + i).ToList();
     }
+
+    private NotatedNote BuildRootNotation() => new()
+    {
+        PitchClass = Root switch
+        {
+            'C' or 'c' => PitchClass.C,
+            'D' or 'd' => PitchClass.D,
+            'E' or 'e' => PitchClass.E,
+            'F' or 'f' => PitchClass.F,
+            'G' or 'g' => PitchClass.G,
+            'A' or 'a' => PitchClass.A,
+            'B' or 'b' => PitchClass.B,
+            _ => throw new InvalidOperationException($"Invalid chord root: {Root}")
+        },
+        Accidental = IsSharp ? AccidentalType.Sharp : IsFlat ? AccidentalType.Flat : AccidentalType.None,
+        Octave = Octave
+    };
 }
