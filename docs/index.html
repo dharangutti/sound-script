@@ -291,7 +291,7 @@
 <body>
     <div class="wrap">
         <header>
-            <div class="badge">v1.2 · Open Source · C# · MIDI</div>
+            <div class="badge">V2 · Open Source · C# · MIDI</div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">
                 SoundScript is a tiny, deterministic music DSL — type a melody with notation,
@@ -300,7 +300,7 @@
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Playground</a>
-                <a class="btn btn-secondary" href="whats-new-v1.2.md">What's New in v1.2</a>
+                <a class="btn btn-secondary" href="whats-new-v2.md">What's New in V2</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
                 <a class="btn btn-secondary" href="SoundScript.md">Documentation</a>
             </div>
@@ -310,10 +310,17 @@
                     <span class="dot dot-y"></span>
                     <span class="dot dot-g"></span>
                 </div>
-                <pre><span class="kw">melody</span> {
-    <span class="kw">tempo</span> <span class="num">120</span>
-    <span class="kw">mf</span>
-    <span class="note">C4</span> <span class="note">q</span> <span class="note">E4</span> <span class="note">q</span> <span class="note">G4</span> <span class="note">q</span> | <span class="note">C5</span> <span class="note">h</span>
+                <pre><span class="kw">block</span> intro {
+    <span class="kw">phrase</span> {
+        <span class="kw">mf</span>
+        <span class="kw">play</span> arp <span class="note">Cmaj</span> <span class="note">q</span>
+    }
+}
+<span class="kw">pattern</span> arp { <span class="kw">up</span> }
+<span class="kw">track</span> melody {
+    <span class="kw">layer</span> piano
+    <span class="kw">gain</span> <span class="num">0.9</span>
+    <span class="kw">play</span> intro
 }</pre>
             </div>
         </header>
@@ -321,64 +328,72 @@
         <section>
             <h2>How it works</h2>
             <div class="pipeline">
-                <span>DSL script</span>
-                <span class="arrow">→</span>
-                <span>Tokenizer</span>
+                <span>Import</span>
                 <span class="arrow">→</span>
                 <span>Parser</span>
                 <span class="arrow">→</span>
                 <span>Interpreter</span>
                 <span class="arrow">→</span>
-                <span>Playback Shaping</span>
+                <span>PhraseShaper</span>
                 <span class="arrow">→</span>
-                <span>MIDI file</span>
+                <span>PatternExpander</span>
+                <span class="arrow">→</span>
+                <span>Orchestration</span>
+                <span class="arrow">→</span>
+                <span>Layers</span>
+                <span class="arrow">→</span>
+                <span>Humanize</span>
+                <span class="arrow">→</span>
+                <span>MIDI</span>
             </div>
             <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
-                v1.2 adds musical intelligence (contour, spacing, dynamic ramping) and a six-stage
-                playback shaping pipeline for cleaner, more expressive output.
+                V2 adds imports, blocks, patterns, phrases, orchestration, layers, and deterministic humanization.
                 <a href="pipeline.md">Full pipeline reference →</a>
             </p>
         </section>
 
         <section>
-            <h2>v1.2 Features</h2>
+            <h2>V2 Features</h2>
             <div class="grid-2">
                 <div class="card">
-                    <h3>Notation &amp; Expression</h3>
-                    <pre>rest q
-C5 q ~ C5 q
-staccato C4 q
-mf / f</pre>
+                    <h3>Imports &amp; Blocks</h3>
+                    <pre>import "lib.ss"
+block intro { ... }
+play intro</pre>
                     <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="notation.md">Notation</a> ·
-                        <a href="expressive-notation.md">Expressive notation</a>
+                        <a href="imports.md">Imports</a> ·
+                        <a href="blocks.md">Blocks</a>
                     </p>
                 </div>
                 <div class="card">
-                    <h3>Musical Intelligence</h3>
-                    <pre>Wide leaps smoothed
-Chord spacing refined
-Dynamic ramping (p → f)</pre>
+                    <h3>Patterns &amp; Phrases</h3>
+                    <pre>pattern arp { up }
+play arp Cmaj q
+phrase { curve soft }</pre>
                     <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="musical-intelligence.md">Intelligence reference →</a>
+                        <a href="patterns.md">Patterns</a> ·
+                        <a href="phrases.md">Phrases</a>
                     </p>
                 </div>
                 <div class="card">
-                    <h3>Playback Quality</h3>
-                    <pre>Dynamic curves
-Articulation shaping
-Chord velocity balance</pre>
+                    <h3>Metadata &amp; Layers</h3>
+                    <pre>gain 0.9
+humanize 0.03
+layer piano
+layer cello</pre>
                     <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="playback-quality.md">Shaping pipeline →</a>
+                        <a href="track-metadata.md">Metadata</a> ·
+                        <a href="layers.md">Layers</a>
                     </p>
                 </div>
                 <div class="card">
-                    <h3>Stabilization</h3>
-                    <pre>Beat-grid timing
-Chord voicing
-Multi-track sync</pre>
+                    <h3>Orchestration &amp; Chords</h3>
+                    <pre>double octave
+Cmaj drop2
+tempo 120 → 140 over 4 bars</pre>
                     <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="stabilization.md">Stabilization →</a>
+                        <a href="orchestration.md">Orchestration</a> ·
+                        <a href="advanced-chords.md">Advanced chords</a>
                     </p>
                 </div>
             </div>
@@ -399,7 +414,7 @@ Multi-track sync</pre>
                     <span class="step-num">2</span>
                     <div>
                         <strong>Run the CLI</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- run examples/melody.ss</code>
+                        <code>dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss</code>
                     </div>
                 </li>
                 <li>
@@ -417,38 +432,33 @@ Multi-track sync</pre>
             <h2>Examples</h2>
             <div class="grid-2">
                 <div class="card">
-                    <h3>melody.ss — basic melody</h3>
-                    <pre>melody {
-    tempo 120
-    C4 q E4 q G4 q | C5 h
+                    <h3>patterns.ss — arpeggios</h3>
+                    <pre>pattern arp { up }
+play arp Cmaj q</pre>
+                </div>
+                <div class="card">
+                    <h3>phrases.ss — phrase shaping</h3>
+                    <pre>phrase {
+    curve soft
+    mf
+    C4 q E4 q
 }</pre>
                 </div>
                 <div class="card">
-                    <h3>articulations.ss — expression</h3>
-                    <pre>staccato C4 q
-D4 q legato
-accent E4 q</pre>
+                    <h3>metadata.ss — gain + humanize</h3>
+                    <pre>gain 0.85
+humanize 0.02
+C4 q</pre>
                 </div>
                 <div class="card">
-                    <h3>dynamics.ss — dynamic markings</h3>
-                    <pre>p
-C4 q D4 q
-mf
-E4 q F4 q
-f
-G4 h</pre>
-                </div>
-                <div class="card">
-                    <h3>playback-shaping.ss — v1.2 pipeline</h3>
-                    <pre>mf
-staccato C4 q
-Cmaj q
-f
-C5 h</pre>
+                    <h3>orchestration.ss — helpers</h3>
+                    <pre>double octave
+reinforce bass
+Cmaj w</pre>
                 </div>
             </div>
             <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
-                22 example scripts in the repository.
+                32+ example scripts in the repository.
                 <a href="examples.md">Full example catalog →</a>
             </p>
         </section>
@@ -465,11 +475,19 @@ C5 h</pre>
                     </p>
                 </div>
                 <div class="card">
+                    <h3>V2 Features</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                        <a href="whats-new-v2.md">What's new in V2</a><br>
+                        <a href="imports.md">Imports</a> · <a href="patterns.md">Patterns</a><br>
+                        <a href="phrases.md">Phrases</a> · <a href="orchestration.md">Orchestration</a>
+                    </p>
+                </div>
+                <div class="card">
                     <h3>Engine &amp; Architecture</h3>
                     <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
                         <a href="architecture.md">Architecture</a><br>
                         <a href="pipeline.md">Interpreter pipeline</a><br>
-                        <a href="whats-new-v1.2.md">What's new in v1.2</a>
+                        <a href="whats-new-v1.2.md">v1.2 foundation</a>
                     </p>
                 </div>
             </div>
@@ -478,10 +496,10 @@ C5 h</pre>
         <section>
             <h2>About the Project</h2>
             <div class="about">
-                <p>SoundScript v1.2 is a tiny, deterministic music DSL created to turn simple text into
-                professional-sounding MIDI. It runs through a tokenizer → parser → interpreter →
-                playback shaping → MIDI generator pipeline — intentionally minimal, hobby‑grade,
-                and designed for clarity, reproducibility, and joy.</p>
+                <p>SoundScript V2 is a tiny, deterministic music DSL that turns simple text into
+                professional-sounding MIDI. Imports, blocks, patterns, phrases, layers, and orchestration
+                extend the v1.2 engine — intentionally minimal, hobby‑grade, and designed for clarity,
+                reproducibility, and joy.</p>
             </div>
         </section>
 
@@ -499,7 +517,7 @@ C5 h</pre>
         <footer>
             <p>
                 <a href="playground/">Playground</a> ·
-                <a href="whats-new-v1.2.md">What's New</a> ·
+                <a href="whats-new-v2.md">What's New</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="SoundScript.md">Documentation</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>

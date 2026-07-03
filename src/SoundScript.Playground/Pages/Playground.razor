@@ -2,14 +2,28 @@
     <header class="playground-header">
         <div class="header-top">
             <a class="home-link" href="/">← SoundScript</a>
-            <span class="badge">Playground</span>
+            <span class="badge">Playground · V2</span>
         </div>
         <h1>SoundScript Playground</h1>
-        <p class="lead">Type SoundScript v1.2, compile to MIDI, and hear it in your browser — fully client-side.</p>
+        <p class="lead">Type SoundScript V2, compile to MIDI, and hear it in your browser — fully client-side.</p>
     </header>
 
     <div class="presets">
-        <span class="preset-label">Examples:</span>
+        <span class="preset-label">V2:</span>
+        <button type="button" class="btn btn-secondary" @onclick="LoadV2ShowcaseExample">Showcase</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadBlocksExample">Blocks</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadMetadataExample">Metadata</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadTempoExample">Tempo</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadLayersExample">Layers</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadHumanizeExample">Humanize</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadAdvancedChordsExample">Chords+</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadPhrasesExample">Phrases</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadPatternsExample">Patterns</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadOrchestrationExample">Orchestration</button>
+    </div>
+
+    <div class="presets">
+        <span class="preset-label">Core:</span>
         <button type="button" class="btn btn-secondary" @onclick="LoadMelodyExample">Melody</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadArticulationsExample">Articulations</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadDynamicsExample">Dynamics</button>
@@ -26,7 +40,7 @@
                       class="script-input"
                       @bind="ScriptText"
                       spellcheck="false"
-                      placeholder="melody { ... }"></textarea>
+                      placeholder="track melody { ... }"></textarea>
         </section>
 
         <section class="pane pane-output">
@@ -61,19 +75,23 @@
                 <span class="arrow">→</span>
                 <span>Parser</span>
                 <span class="arrow">→</span>
-                <span>AST</span>
-                <span class="arrow">→</span>
                 <span>Interpreter</span>
                 <span class="arrow">→</span>
-                <span>Shaping</span>
+                <span>PhraseShaper</span>
+                <span class="arrow">→</span>
+                <span>PatternExpander</span>
+                <span class="arrow">→</span>
+                <span>Orchestration</span>
+                <span class="arrow">→</span>
+                <span>Layers</span>
+                <span class="arrow">→</span>
+                <span>Humanize</span>
                 <span class="arrow">→</span>
                 <span>MIDI</span>
-                <span class="arrow">→</span>
-                <span>Web Audio</span>
             </div>
 
             <p class="hint">
-                No server, no API calls. The SoundScript engine runs in WebAssembly; playback uses a local soundfont.
+                No server, no API calls. Imports use the CLI (<code>ProgramLoader</code>); all other V2 features run here.
             </p>
         </section>
     </div>

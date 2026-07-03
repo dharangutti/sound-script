@@ -1,70 +1,63 @@
-# SoundScript Documentation (v1.2)
+# SoundScript Documentation (V2)
 
-A tiny, deterministic music DSL that turns simple text into professional-sounding MIDI.
-
-**[What's New in v1.2](whats-new-v1.2.md)** · **[Playground](https://soundscript.net/playground/)** · **[GitHub](https://github.com/dharangutti/sound-script)**
-
----
+SoundScript is a tiny music DSL that compiles text to MIDI. This is the documentation hub for **V2**.
 
 ## Documentation Index
 
+### V2 Features
+
 | Document | Description |
 |----------|-------------|
-| [language-reference.md](language-reference.md) | Complete DSL syntax reference |
-| [notation.md](notation.md) | Notation engine (Phase 2) |
-| [expressive-notation.md](expressive-notation.md) | Rests, ties, articulations, dynamics (Phase 3) |
-| [stabilization.md](stabilization.md) | Beat math, voicing, sync (Phase 1) |
-| [musical-intelligence.md](musical-intelligence.md) | Contour, spacing, dynamics (Phase 4) |
-| [playback-quality.md](playback-quality.md) | Playback shaping pipeline (Phase 5) |
-| [pipeline.md](pipeline.md) | Interpreter and shaping flow |
+| [whats-new-v2.md](whats-new-v2.md) | V2 changelog |
+| [imports.md](imports.md) | Multi-file imports |
+| [blocks.md](blocks.md) | Named blocks |
+| [track-metadata.md](track-metadata.md) | Gain + humanize |
+| [tempo-automation.md](tempo-automation.md) | Tempo ramps |
+| [layers.md](layers.md) | Instrument layers |
+| [humanization.md](humanization.md) | Deterministic jitter |
+| [advanced-chords.md](advanced-chords.md) | drop2, inv1, spread |
+| [phrases.md](phrases.md) | Phrase engine v2 |
+| [patterns.md](patterns.md) | Pattern engine |
+| [orchestration.md](orchestration.md) | Orchestration helpers |
+
+### Reference
+
+| Document | Description |
+|----------|-------------|
+| [language-reference.md](language-reference.md) | Complete syntax |
+| [pipeline.md](pipeline.md) | Interpreter pipeline |
 | [architecture.md](architecture.md) | System architecture |
 | [examples.md](examples.md) | Example catalog |
-| [whats-new-v1.2.md](whats-new-v1.2.md) | v1.2 changelog |
-| [PLAYGROUND.md](PLAYGROUND.md) | Playground build and verification |
 
----
+### v1.2 Foundation
+
+| Document | Description |
+|----------|-------------|
+| [notation.md](notation.md) | Notation engine (Phase 2) |
+| [expressive-notation.md](expressive-notation.md) | Rests, ties, articulations (Phase 3) |
+| [stabilization.md](stabilization.md) | Timing and voicing (Phase 1) |
+| [musical-intelligence.md](musical-intelligence.md) | Contour and spacing (Phase 4) |
+| [playback-quality.md](playback-quality.md) | Playback shaping (Phase 5) |
+| [whats-new-v1.2.md](whats-new-v1.2.md) | v1.2 changelog |
 
 ## Quick Start
 
 ```bash
 dotnet build
-dotnet run --project src/SoundScript.Cli -- run examples/melody.ss
+dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
 ```
 
-## Interpreter Pipeline
+## Playground
 
-```
-DSL → Tokenizer → Parser → AST → Interpreter → PlaybackShaper → MIDI
-```
-
-Full details: [pipeline.md](pipeline.md)
-
-## Try in Browser
-
-**[https://soundscript.net/playground/](https://soundscript.net/playground/)**
-
-Client-side Blazor WASM — tokenizer through Web Audio playback, fully offline.
-
-### Build Playground
+**[soundscript.net/playground](https://soundscript.net/playground/)**
 
 ```bash
 dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
 ```
 
-Output: `docs/playground/` → deployed to GitHub Pages.
-
----
-
 ## Design Philosophy
 
-- **Tiny language** — human-readable, hobby-grade syntax
-- **Deterministic** — same input always produces the same MIDI
-- **MIDI-first** — no audio synthesis in the engine
-- **Additive growth** — all prior syntax remains valid
-- **No randomness** — reproducible output every time
-
----
-
-## License
-
-See [LICENSE](../LICENSE) in the repository root.
+- **Deterministic** — same script, same MIDI
+- **Text-first** — music as code
+- **Layered engine** — parse, interpret, shape, export
+- **Non-destructive warnings** — intelligence adjusts; never aborts
