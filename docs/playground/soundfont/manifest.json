@@ -1,0 +1,7 @@
+{
+  "name": "SoundScript Piano",
+  "format": "wav-samples",
+  "baseMidi": 48,
+  "pitchClasses": ["C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"],
+  "samplePath": "samples/{pitch}.wav"
+}
