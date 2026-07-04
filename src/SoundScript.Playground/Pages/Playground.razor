@@ -25,6 +25,15 @@
     </div>
 
     <div class="presets">
+        <span class="preset-label">Text-to-Melody:</span>
+        <input class="compose-input"
+               @bind="ComposeText"
+               spellcheck="false"
+               placeholder="Type plain text to compose from" />
+        <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="ComposeFromTextAsync">Compose from text</button>
+    </div>
+
+    <div class="presets">
         <span class="preset-label">Core:</span>
         <button type="button" class="btn btn-secondary" @onclick="LoadMelodyExample">Melody</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadArticulationsExample">Articulations</button>
@@ -107,12 +116,16 @@
                 <span>MIDI</span>
                 <span class="arrow">+</span>
                 <span>Voice</span>
+                <span class="arrow">+</span>
+                <span>PhonemeComposer</span>
             </div>
 
             <p class="hint">
                 No server, no API calls. Imports use the CLI (<code>ProgramLoader</code>); all other V2 features run here.
                 <code>voice</code> blocks speak their lyrics through your browser's speech synthesis while the melody plays —
                 the downloaded MIDI carries the lyrics as standard karaoke events.
+                <strong>Compose from text</strong> runs the deterministic <code>PhonemeComposer</code>
+                (text → syllables → phonemes → gestures → MIDI): the same text always produces the same MIDI bytes.
             </p>
         </section>
     </div>

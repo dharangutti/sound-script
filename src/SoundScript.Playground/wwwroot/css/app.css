@@ -113,6 +113,23 @@ a:hover { text-decoration: underline; }
     font-size: 0.9rem;
 }
 
+.compose-input {
+    flex: 1 1 16rem;
+    min-width: 12rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-bg);
+    color: #c7d2e8;
+    font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+}
+
+.compose-input:focus {
+    outline: 2px solid rgba(110, 231, 183, 0.35);
+    outline-offset: 2px;
+}
+
 .panes {
     display: grid;
     grid-template-columns: 1fr 1fr;
