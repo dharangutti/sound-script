@@ -237,12 +237,20 @@ loop 4 { C4 q D4 q }
 
 `loop` is allowed in `track`, `sequence`, and top-level — not in `melody` or nested inside another `loop`.
 
-## Phrases (V2)
+## Phrases (V2 + V3)
 
 ```ss
 phrase {
-    curve soft
-    transition smooth
+    curve soft              // soft | hard | balanced | expressive | swell | fade
+    curve gentle            // V3 alias for soft
+    transition smooth       // smooth | abrupt | soft | expressive
+    transition sharp        // V3 alias for abrupt
+    crescendo               // V3 dynamic envelope
+    decrescendo             // V3 dynamic envelope
+    articulation legato     // V3 phrase default (staccato | legato | accent | detached)
+    swing 0.67              // V3 timing (0.0–1.0)
+    push 0.02               // V3 timing (beats ahead)
+    pull 0.01               // V3 timing (beats behind)
     mf
     C4 q E4 q G4 q
 }
@@ -250,13 +258,16 @@ phrase {
 
 | Statement | Values |
 |-----------|--------|
-| `curve` | `soft`, `hard`, `balanced` |
-| `transition` | `smooth`, `abrupt` |
+| `curve` | `soft`/`gentle`, `hard`/`strong`/`aggressive`, `balanced`, `expressive`, `swell`, `fade` |
+| `transition` | `smooth`, `abrupt`/`sharp`, `soft`, `expressive` |
+| `crescendo` / `decrescendo` | Phrase velocity ramp |
+| `articulation` | `staccato`, `legato`, `accent`, `detached` |
+| `swing` / `push` / `pull` | Deterministic timing offsets |
 | Dynamics | `p`, `mp`, `mf`, `f` (scoped to phrase) |
 
 Phrase blocks set **phrase boundaries** on exit (same as `play` block/sequence). Nested `phrase` inside `phrase` is not supported.
 
-→ [phrases.md](phrases.md)
+→ [phrases.md](phrases.md) · [phrases-v3.md](phrases-v3.md)
 
 ## Patterns (V2)
 
@@ -362,6 +373,8 @@ track melody {
 | `PlayNode` | Block / sequence / pattern invocation |
 | `LoopNode` | Loop |
 | `PhraseCurveNode` / `PhraseTransitionNode` | Phrase shaping |
+| `PhraseArticulationNode` / `PhraseEnvelopeNode` | V3 phrase defaults and envelopes |
+| `PhraseSwingNode` / `PhrasePushNode` / `PhrasePullNode` | V3 timing modifiers |
 
 ## Related
 

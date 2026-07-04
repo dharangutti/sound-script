@@ -4,5 +4,8 @@ public enum PhraseCurveType
 {
     Soft,
     Hard,
-    Balanced
+    Balanced,
+    Expressive,
+    Swell,
+    Fade
 }

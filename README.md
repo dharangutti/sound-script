@@ -43,7 +43,7 @@ V2 extends the v1.2 five-phase engine with compositional and production features
 | **Layers** | `layer piano` / `layer cello` |
 | **Humanization** | Deterministic timing + velocity jitter |
 | **Advanced chords** | `Cmaj drop2`, `inv1`, `spread` |
-| **Phrases** | `phrase { curve soft ... }` |
+| **Phrases** | `phrase { curve soft ... }` · [V3 aliases & envelopes](docs/phrases-v3.md) |
 | **Patterns** | `pattern arp { up }` + `play arp Cmaj q` |
 | **Orchestration** | `double octave`, `reinforce bass`, `brighten top` |
 
@@ -82,6 +82,7 @@ MidiGenerator → output.mid
 | [examples/humanization.ss](examples/humanization.ss) | Deterministic jitter |
 | [examples/advanced-chords.ss](examples/advanced-chords.ss) | drop2, inv1, spread |
 | [examples/phrases.ss](examples/phrases.ss) | Phrase engine v2 |
+| [examples/phrases-v3.ss](examples/phrases-v3.ss) | Phrase engine v3 |
 | [examples/patterns.ss](examples/patterns.ss) | Arp, strum, rhythm |
 | [examples/orchestration.ss](examples/orchestration.ss) | Orchestration helpers |
 | [examples/full-v2-showcase.ss](examples/full-v2-showcase.ss) | Combined V2 demo |
@@ -162,6 +163,7 @@ Try SoundScript V2 in your browser:
 | [docs/humanization.md](docs/humanization.md) | Deterministic jitter |
 | [docs/advanced-chords.md](docs/advanced-chords.md) | Chord voicing |
 | [docs/phrases.md](docs/phrases.md) | Phrase engine v2 |
+| [docs/phrases-v3.md](docs/phrases-v3.md) | Phrase engine v3 |
 | [docs/patterns.md](docs/patterns.md) | Pattern engine |
 | [docs/orchestration.md](docs/orchestration.md) | Orchestration helpers |
 | [docs/pipeline.md](docs/pipeline.md) | Interpreter pipeline |

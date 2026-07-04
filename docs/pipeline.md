@@ -40,8 +40,9 @@ Tokenizer → Parser → ProgramNode (AST)
 NoteNode
     │
     ├─► MusicalIntelligence (OctaveSmoother, MelodicContour, PhraseSmoother)
+    ├─► PhraseTimingShaper              ← V3 swing / push / pull
     ├─► DynamicContext.Resolve (ramp)
-    ├─► PhraseShaper                    ← V2 phrase blocks
+    ├─► PhraseShaper                    ← V2/V3 phrase blocks
     ├─► PlaybackShaper.ShapeNote
     │       ├─ DynamicShaper
     │       ├─ ArticulationShaper
