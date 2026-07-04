@@ -72,7 +72,7 @@ DSL script
     ↓
 ProgramLoader (imports)
     ↓
-Tokenizer → Parser → AST
+Tokenizer → Parser → AST   ←── PhonemeComposer (V3.1: plain text → syllables → phonemes → gestures → AST)
     ↓
 Interpreter
     ├── PatternExpander (pattern play)
@@ -127,6 +127,34 @@ dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
 
 → [docs/whats-new-v1.2.md](docs/whats-new-v1.2.md)
 
+## Text-to-Melody (PhonemeComposer)
+
+V3.1 adds a deterministic **text-to-melody engine**: give the CLI a plain
+English string and it composes a melody from the sounds of the words — no
+script required, no randomness, no audio synthesis.
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
+```
+
+```
+Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
+```
+
+```
+Text → Syllables → Phonemes → Gestures → AST → MIDI
+       Syllabifier  PhonemeSplitter  PhonemeMapper  PhraseAssembler  MidiGenerator
+```
+
+Each syllable becomes a musical micro-phrase: plosives map to staccato notes,
+nasals to swells, fricatives to fades, liquids to accents, vowels to legato
+pitches. The composer builds a standard AST and reuses the existing interpreter
+and MIDI generator, so identical text always produces byte-identical MIDI —
+verified by SHA-256. Use `--append file.ss` to add the composed track to an
+existing script's output.
+
+→ [docs/text-to-melody.md](docs/text-to-melody.md) · [docs/phoneme-composer.md](docs/phoneme-composer.md) · [docs/cli.md](docs/cli.md)
+
 ## Vocal Track (New)
 
 SoundScript now has a parallel **voice engine**: write lyrics beside pitches and a
@@ -162,11 +190,12 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
     SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
-    SoundScript.Cli/        # CLI (ProgramLoader)
+    SoundScript.Compose/    # Text-to-melody: PhonemeComposer, PhonemeSplitter, PhonemeMapper
+    SoundScript.Cli/        # CLI (run + compose)
     SoundScript.Playground/ # Browser playground
 
-/docs                       # V2 documentation + website
-/examples                   # V2 example scripts
+/docs                       # Documentation + website
+/examples                   # Example scripts
 ```
 
 ## Getting Started
@@ -183,6 +212,15 @@ dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss
 Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, fully client-side:
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
+
+## What's New in V3.1
+
+- **PhonemeComposer** — deterministic text-to-melody engine (`SoundScript.Compose`)
+- **`compose` CLI verb** — `soundscript compose "Twinkle twinkle little star"`, with `--append file.ss`
+- **Playground Text-to-Melody** — type text, press *Compose from text*
+- No breaking changes; identical text → identical MIDI bytes (SHA-256 verified)
+
+→ [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) · [docs/text-to-melody.md](docs/text-to-melody.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
 ## What's New in V3
 
@@ -216,6 +254,10 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 |----------|-------------|
 | [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
+| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`) |
+| [docs/text-to-melody.md](docs/text-to-melody.md) | Text-to-melody pipeline (V3.1) |
+| [docs/phoneme-composer.md](docs/phoneme-composer.md) | PhonemeComposer module reference |
+| [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) | V3.1 changelog |
 | [docs/whats-new-v3.md](docs/whats-new-v3.md) | V3 changelog |
 | [docs/whats-new-v2.md](docs/whats-new-v2.md) | V2 changelog |
 | [docs/imports.md](docs/imports.md) | Import system |

@@ -144,9 +144,13 @@ public class NotationIntegrationTests
 
         foreach (var path in examplePaths)
         {
-            var source = File.ReadAllText(path);
-            var program = new SoundScriptParser(new SoundScript.Parser.Tokenizer(source).Tokenize()).Parse();
-            var interpreted = Interpreter.Interpret(program);
+            // shared import libraries (*-lib.ss) define blocks only;
+            // they are exercised through the example that imports them
+            if (Path.GetFileName(path).EndsWith("-lib.ss", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var loaded = SoundScript.Parser.ProgramLoader.Load(path);
+            var interpreted = Interpreter.Interpret(loaded.Program);
             Assert.True(interpreted.Tracks.Count > 0, $"Expected notes in {Path.GetFileName(path)}");
         }
     }

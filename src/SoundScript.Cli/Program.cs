@@ -19,14 +19,9 @@ return args[0].ToLowerInvariant() switch
 static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript run <script.ss> [output.mid]");
-    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid]");
+    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>]");
     return 1;
 }
-
-static string ResolveOutputPath(string[] args) =>
-    args.Length > 2
-        ? args[2]
-        : Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
 
 static int Run(string[] args)
 {
@@ -37,7 +32,9 @@ static int Run(string[] args)
         return 1;
     }
 
-    var outputPath = ResolveOutputPath(args);
+    var outputPath = args.Length > 2
+        ? args[2]
+        : Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
 
     try
     {
@@ -79,18 +76,65 @@ static int Compose(string[] args)
         return 1;
     }
 
-    var outputPath = ResolveOutputPath(args);
+    string? outputPath = null;
+    string? appendScriptPath = null;
+
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (string.Equals(args[i], "--append", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--append requires a script path: compose \"text\" --append file.ss");
+                return 1;
+            }
+
+            appendScriptPath = args[++i];
+        }
+        else
+        {
+            outputPath = args[i];
+        }
+    }
+
+    outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
 
     try
     {
-        var interpreted = PhonemeComposer.ComposeProgram(text);
+        SoundScript.Core.InterpretedProgram interpreted;
+        if (appendScriptPath is not null)
+        {
+            if (!File.Exists(appendScriptPath))
+            {
+                Console.Error.WriteLine($"Script not found: {appendScriptPath}");
+                return 1;
+            }
+
+            var loaded = ProgramLoader.Load(appendScriptPath);
+            interpreted = Interpreter.Interpret(loaded.Program, appendScriptPath);
+            VocalInterpreter.Apply(loaded.Program, interpreted);
+            foreach (var warning in loaded.Warnings)
+                interpreted.Warnings.Add(warning);
+
+            PhonemeComposer.AppendTo(interpreted, text);
+        }
+        else
+        {
+            interpreted = PhonemeComposer.ComposeProgram(text);
+        }
+
         MidiGenerator.Write(interpreted, outputPath);
+
+        foreach (var warning in interpreted.Warnings)
+            Console.Error.WriteLine($"warning: {warning}");
 
         var syllables = PhonemeComposer.SplitSyllables(text);
         var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
-        Console.WriteLine(
-            $"Composed {syllables.Count} syllable(s) into {noteCount} note(s) " +
-            $"to {outputPath} at {interpreted.Tempo} BPM.");
+        var summary = appendScriptPath is not null
+            ? $"Composed {syllables.Count} syllable(s) and appended the phoneme track to {appendScriptPath}: " +
+              $"{noteCount} note(s) across {interpreted.Tracks.Count} track(s)"
+            : $"Composed {syllables.Count} syllable(s) into {noteCount} note(s)";
+        Console.WriteLine($"{summary} to {outputPath} at {interpreted.Tempo} BPM.");
         return 0;
     }
     catch (Exception ex)

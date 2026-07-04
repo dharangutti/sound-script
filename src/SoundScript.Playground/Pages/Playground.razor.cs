@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using SoundScript.Compose;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Voice;
@@ -30,6 +31,7 @@ public partial class Playground
       """;
 
   private string ScriptText { get; set; } = DefaultScript;
+  private string ComposeText { get; set; } = "Twinkle twinkle little star";
   private string? ErrorMessage { get; set; }
   private string? StatusMessage { get; set; }
   private List<string> WarningMessages { get; set; } = [];
@@ -386,6 +388,44 @@ public partial class Playground
         }
         """;
     ClearState();
+  }
+
+  private async Task ComposeFromTextAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to compose: the text is empty.";
+        return;
+      }
+
+      var interpreted = PhonemeComposer.ComposeProgram(ComposeText);
+
+      using var stream = new MemoryStream();
+      MidiGenerator.Write(interpreted, stream);
+      MidiBytes = stream.ToArray();
+
+      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
+
+      var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
+      var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
+      StatusMessage = $"Composed {syllableCount} syllable(s) into {noteCount} note(s) at {interpreted.Tempo} BPM.";
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      MidiBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
   }
 
   private async Task RunAsync()

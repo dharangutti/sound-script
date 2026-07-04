@@ -47,7 +47,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, browser playground with spoken lyrics, cross-platform CLI",
+                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
                 "codeRepository": "https://github.com/dharangutti/sound-script",
                 "author": {
@@ -404,18 +404,19 @@
 <body>
     <div class="wrap">
         <header>
-            <div class="badge">Version: V3 — Expressive Industrial Audio Cues</div>
+            <div class="badge">Version: V3.1 — Text-to-Melody Engine</div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">
                 SoundScript is an open-source, deterministic music language — type a melody with notation,
                 dynamics, and articulations, get professional-sounding MIDI.
                 No DAW. No plugins. Just text → shaping → MIDI.
                 Runs on Windows, macOS, and Linux, and in any modern browser.
+                <strong style="color: var(--text);">SoundScript now composes music directly from text.</strong>
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Playground</a>
                 <a class="btn btn-secondary" href="doc.html?p=user-guide.md">User Guide</a>
-                <a class="btn btn-secondary" href="doc.html?p=whats-new-v3.md">What's New in V3</a>
+                <a class="btn btn-secondary" href="doc.html?p=whats-new-v3.1.md">What's New in V3.1</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
                 <a class="btn btn-secondary" href="doc.html?p=SoundScript.md">Documentation</a>
             </div>
@@ -551,6 +552,15 @@ tempo 120 → 140 over 4 bars</pre>
                         <a href="doc.html?p=vocal.md">Vocal track docs</a>
                     </p>
                 </div>
+                <div class="card">
+                    <h3>Text-to-Melody Engine — V3.1</h3>
+                    <pre>compose "Twinkle twinkle little star"</pre>
+                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
+                        Deterministic composition from plain English: text → syllables → phonemes →
+                        musical gestures → MIDI. Identical text yields identical MIDI bytes.
+                        <a href="doc.html?p=text-to-melody.md">Text-to-melody docs</a>
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -583,6 +593,14 @@ tempo 120 → 140 over 4 bars</pre>
                 <li>
                     <span class="step-num">4</span>
                     <div>
+                        <strong>Compose from plain text</strong><br>
+                        <code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"</code><br>
+                        <span style="color: var(--muted); font-size: 0.9rem;">The V3.1 PhonemeComposer turns the sounds of the words into a melody — or type text into the Playground's <em>Text-to-Melody</em> box and press <em>Compose from text</em>. <a href="doc.html?p=text-to-melody.md">Text-to-melody docs →</a></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="step-num">5</span>
+                    <div>
                         <strong>Make it sing</strong><br>
                         <code>dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss</code><br>
                         <span style="color: var(--muted); font-size: 0.9rem;">Or click the <em>Voice</em> preset in the Playground and press Run — the lyrics are spoken over the melody, and the downloaded MIDI carries them as karaoke lyric events. <a href="doc.html?p=vocal.md">Vocal track docs →</a></span>
@@ -594,6 +612,10 @@ tempo 120 → 140 over 4 bars</pre>
         <section>
             <h2>Examples</h2>
             <div class="grid-2">
+                <div class="card">
+                    <h3>compose — text-to-melody (V3.1)</h3>
+                    <pre>soundscript compose "Hello world"</pre>
+                </div>
                 <div class="card">
                     <h3>patterns.ss — arpeggios</h3>
                     <pre>pattern arp { up }
@@ -642,15 +664,17 @@ Cmaj w</pre>
                     <h3>Language &amp; Syntax</h3>
                     <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
                         <a href="doc.html?p=language-reference.md">Language reference</a><br>
+                        <a href="doc.html?p=cli.md">CLI reference — run &amp; compose</a><br>
                         <a href="doc.html?p=notation.md">Notation engine</a><br>
                         <a href="doc.html?p=expressive-notation.md">Expressive notation</a>
                     </p>
                 </div>
                 <div class="card">
-                    <h3>V2 Features</h3>
+                    <h3>V3.1 &amp; V2 Features</h3>
                     <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=whats-new-v2.md">What's new in V2</a><br>
-                        <a href="doc.html?p=imports.md">Imports</a> · <a href="doc.html?p=patterns.md">Patterns</a><br>
+                        <a href="doc.html?p=text-to-melody.md">Text-to-melody — compose from plain text</a><br>
+                        <a href="doc.html?p=phoneme-composer.md">PhonemeComposer module reference</a><br>
+                        <a href="doc.html?p=whats-new-v2.md">What's new in V2</a> · <a href="doc.html?p=imports.md">Imports</a><br>
                         <a href="doc.html?p=phrases.md">Phrases</a> · <a href="doc.html?p=orchestration.md">Orchestration</a><br>
                         <a href="doc.html?p=vocal.md">Vocal track — lyrics &amp; phonetics</a>
                     </p>
@@ -695,7 +719,7 @@ Cmaj w</pre>
                 <a href="playground/">Playground</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide</a> ·
                 <a href="/industrial">Industrial Applications</a> ·
-                <a href="doc.html?p=whats-new-v3.md">What's New</a> ·
+                <a href="doc.html?p=whats-new-v3.1.md">What's New</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>
