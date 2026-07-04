@@ -20,8 +20,8 @@ phrase {
 | Statement | Values | Effect |
 |-----------|--------|--------|
 | `mf` / `f` / etc. | Dynamic markings | Scoped to phrase; restored on exit |
-| `curve soft` | soft, hard, balanced | Velocity curve before playback shaping |
-| `transition smooth` | smooth, abrupt | Sine envelope across phrase (smooth) or flat (abrupt) |
+| `curve soft` | soft, hard, balanced (+ V3: gentle, strong, expressive, swell, fade) | Velocity curve before playback shaping |
+| `transition smooth` | smooth, abrupt (+ V3: sharp, soft, expressive) | Sine envelope across phrase (smooth) or flat (abrupt) |
 
 ## Pipeline Position
 
@@ -68,5 +68,6 @@ dotnet run --project src/SoundScript.Cli -- run examples/phrases.ss
 ## Related
 
 - [language-reference.md](language-reference.md) — Complete syntax
+- [phrases-v3.md](phrases-v3.md) — V3 phrase expansion
 - [blocks.md](blocks.md) — phrase boundaries with `play`
 - [musical-intelligence.md](musical-intelligence.md) — PhraseSmoother
