@@ -3,6 +3,7 @@ using Microsoft.JSInterop;
 using SoundScript.Compose;
 using SoundScript.Midi;
 using SoundScript.Parser;
+using SoundScript.Timbre;
 using SoundScript.Voice;
 
 namespace SoundScript.Playground.Pages;
@@ -36,6 +37,7 @@ public partial class Playground
   private string? StatusMessage { get; set; }
   private List<string> WarningMessages { get; set; } = [];
   private byte[]? MidiBytes { get; set; }
+  private byte[]? WavBytes { get; set; }
   private bool IsRunning { get; set; }
 
   private void LoadV2ShowcaseExample()
@@ -428,6 +430,48 @@ public partial class Playground
     }
   }
 
+  private async Task RenderAudioAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to render: the text is empty.";
+        return;
+      }
+
+      var interpreted = PhonemeComposer.ComposeProgram(ComposeText);
+      using var midiStream = new MemoryStream();
+      MidiGenerator.Write(interpreted, midiStream);
+      MidiBytes = midiStream.ToArray();
+
+      var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText };
+      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
+
+      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+      var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+
+      var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
+      StatusMessage =
+          $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre).";
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      WavBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
   private async Task RunAsync()
   {
     try
@@ -490,6 +534,7 @@ public partial class Playground
   {
     await Js.InvokeVoidAsync("SoundScriptMidi.stop");
     await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+    await Js.InvokeVoidAsync("SoundScriptAudio.stop");
     StatusMessage = "Stopped.";
     StateHasChanged();
   }
@@ -503,11 +548,21 @@ public partial class Playground
     await Js.InvokeVoidAsync("SoundScriptMidi.download", base64, "soundscript.mid");
   }
 
+  private async Task DownloadWavAsync()
+  {
+    if (WavBytes is null)
+      return;
+
+    var base64 = Convert.ToBase64String(WavBytes);
+    await Js.InvokeVoidAsync("SoundScriptAudio.download", base64, "soundscript.wav");
+  }
+
   private void ClearState()
   {
     ErrorMessage = null;
     StatusMessage = null;
     WarningMessages = [];
     MidiBytes = null;
+    WavBytes = null;
   }
 }

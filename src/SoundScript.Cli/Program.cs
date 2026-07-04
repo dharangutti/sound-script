@@ -1,6 +1,7 @@
 ﻿using SoundScript.Compose;
 using SoundScript.Midi;
 using SoundScript.Parser;
+using SoundScript.Timbre;
 using SoundScript.Voice;
 
 if (args.Length < 2)
@@ -13,6 +14,7 @@ return args[0].ToLowerInvariant() switch
 {
     "run" => Run(args),
     "compose" => Compose(args),
+    "render" => Render(args),
     _ => PrintUsage()
 };
 
@@ -20,6 +22,7 @@ static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript run <script.ss> [output.mid]");
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>]");
+    Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text \"<source text>\"]");
     return 1;
 }
 
@@ -135,6 +138,81 @@ static int Compose(string[] args)
               $"{noteCount} note(s) across {interpreted.Tracks.Count} track(s)"
             : $"Composed {syllables.Count} syllable(s) into {noteCount} note(s)";
         Console.WriteLine($"{summary} to {outputPath} at {interpreted.Tempo} BPM.");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static int Render(string[] args)
+{
+    var midiPath = args[1];
+    if (!File.Exists(midiPath))
+    {
+        Console.Error.WriteLine($"MIDI not found: {midiPath}");
+        return 1;
+    }
+
+    string? cssPath = null;
+    string? outputPath = null;
+    string? sourceText = null;
+
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (string.Equals(args[i], "--css", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--css requires a SoundCSS file path.");
+                return 1;
+            }
+
+            cssPath = args[++i];
+        }
+        else if (string.Equals(args[i], "--out", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--out requires an output audio path.");
+                return 1;
+            }
+
+            outputPath = args[++i];
+        }
+        else if (string.Equals(args[i], "--text", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--text requires the source plain text for phoneme alignment.");
+                return 1;
+            }
+
+            sourceText = args[++i];
+        }
+        else
+        {
+            Console.Error.WriteLine($"Unknown render argument: {args[i]}");
+            return 1;
+        }
+    }
+
+    if (cssPath is null || !File.Exists(cssPath))
+    {
+        Console.Error.WriteLine("Render requires --css <style.ssc> pointing to an existing SoundCSS file.");
+        return 1;
+    }
+
+    outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.wav");
+
+    try
+    {
+        var options = new OfflineRenderer.RenderOptions { SourceText = sourceText };
+        OfflineRenderer.RenderFile(midiPath, cssPath, outputPath, options);
+
+        Console.WriteLine($"Rendered {midiPath} with {cssPath} to {outputPath}.");
         return 0;
     }
     catch (Exception ex)

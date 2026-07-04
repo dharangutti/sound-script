@@ -14,6 +14,7 @@ dotnet run --project src/SoundScript.Cli -- <verb> <arguments>
 |------|---------|
 | `run` | Compile a `.ss` script to MIDI |
 | `compose` | Compose plain text to MIDI via the [PhonemeComposer](phoneme-composer.md) (V3.1) |
+| `render` | Offline timbre synthesis: MIDI + SoundCSS → WAV/OGG ([V4](whats-new-v4.md)) |
 
 ## `run` — compile a script
 
@@ -81,6 +82,34 @@ dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star
 sha256sum a.mid b.mid   # identical hashes
 ```
 
+## `render` — MIDI to audio (V4)
+
+```
+soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text "<source text>"]
+```
+
+Offline, deterministic timbre synthesis using [SoundCSS](soundcss.md):
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.mid
+dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
+  --css examples/default.ssc --out twinkle.wav \
+  --text "Twinkle twinkle little star"
+```
+
+```
+Rendered twinkle.mid with examples/default.ssc to twinkle.wav.
+```
+
+| Flag | Required | Purpose |
+|------|----------|---------|
+| `--css` | yes | SoundCSS (`.ssc`) stylesheet path |
+| `--out` | no | Output path (default: `output.wav` in cwd) |
+| `--text` | no | Source text for phoneme → MIDI note alignment |
+
+MIDI is never modified — the renderer **reads** note events and adds spectral
+envelopes via the [timbre engine](timbre-engine.md).
+
 ## Exit codes
 
 | Code | Meaning |
@@ -92,5 +121,7 @@ sha256sum a.mid b.mid   # identical hashes
 
 - [text-to-melody.md](text-to-melody.md) — how `compose` works
 - [phoneme-composer.md](phoneme-composer.md) — module reference
+- [soundcss.md](soundcss.md) — SoundCSS timbre language (V4)
+- [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`
 - [examples.md](examples.md) — example catalog

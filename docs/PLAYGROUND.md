@@ -36,6 +36,17 @@ The composed MIDI is byte-identical to the CLI output for the same text
 
 The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI (+ Voice + PhonemeComposer).
 
+## Render Audio (V4)
+
+| UI element | Behavior |
+|------------|----------|
+| **Render Audio** button | Composes text to MIDI, then runs offline `OfflineRenderer` (MIDI → SoundCSS → WAV) and plays the WAV via Web Audio |
+| **Download WAV** | Appears after a successful render; deterministic output for the same text |
+
+Rendering is **offline only** (slow-motion synthesis in WASM), not real-time timbre streaming.
+
+→ [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md)
+
 ## Build
 
 - [ ] `dotnet build` succeeds with no errors
