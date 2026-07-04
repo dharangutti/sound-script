@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SoundScript V3 — expressive, deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows.">
+    <title>SoundScript — Expressive Audio for Industrial Awareness</title>
+    <style>
+        :root {
+            --bg: #080a0f;
+            --surface: #11151c;
+            --surface-2: #181e28;
+            --surface-3: #1f2735;
+            --border: #2a3344;
+            --text: #e6eaf2;
+            --muted: #8b97ad;
+            --accent: #5eead4;
+            --accent-dim: rgba(94, 234, 212, 0.12);
+            --accent-2: #94a3f8;
+            --warm: #f59e0b;
+            --code-bg: #0c1018;
+            --radius: 10px;
+            --max: 920px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+            background:
+                radial-gradient(ellipse 70% 45% at 50% -5%, rgba(94, 234, 212, 0.08), transparent),
+                radial-gradient(ellipse 50% 30% at 100% 20%, rgba(148, 163, 248, 0.06), transparent),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            font-size: 1rem;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .wrap {
+            max-width: var(--max);
+            margin: 0 auto;
+            padding: 0 1.5rem 5rem;
+        }
+
+        /* —— Nav —— */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a { color: var(--muted); }
+        .nav-links a:hover { color: var(--accent); text-decoration: none; }
+
+        /* —— Hero —— */
+        .hero {
+            text-align: center;
+            padding: 4rem 0 3.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid rgba(94, 234, 212, 0.22);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5.5vw, 3rem);
+            font-weight: 800;
+            line-height: 1.12;
+            margin: 0 0 1.25rem;
+            letter-spacing: -0.035em;
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            color: var(--muted);
+            max-width: 34rem;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        /* —— Sections —— */
+        section {
+            margin-top: 4rem;
+        }
+
+        h2 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin: 0 0 1.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 0 0 0.6rem;
+            color: var(--text);
+        }
+
+        p { margin: 0 0 1rem; color: var(--muted); }
+        p:last-child { margin-bottom: 0; }
+
+        .prose p { font-size: 1.02rem; }
+
+        /* —— Journey steps —— */
+        .journey {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            counter-reset: step;
+        }
+
+        .journey li {
+            display: flex;
+            gap: 1.1rem;
+            padding: 1.15rem 0;
+            border-bottom: 1px solid var(--border);
+            counter-increment: step;
+        }
+
+        .journey li:last-child { border-bottom: none; }
+
+        .journey li::before {
+            content: counter(step);
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: var(--accent);
+        }
+
+        .journey strong { color: var(--text); display: block; margin-bottom: 0.2rem; }
+        .journey span { color: var(--muted); font-size: 0.95rem; }
+
+        /* —— Mapping grid —— */
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .mapping-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.4rem;
+        }
+
+        .mapping-card .domain {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--warm);
+            margin-bottom: 0.5rem;
+        }
+
+        .mapping-card .constructs {
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.82rem;
+            color: var(--accent);
+            line-height: 1.7;
+        }
+
+        /* —— Table —— */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        th, td {
+            padding: 0.85rem 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--surface-2);
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.8rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        td:first-child { color: var(--text); font-weight: 500; }
+
+        td:last-child {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.84rem;
+            color: var(--accent);
+        }
+
+        /* —— Script model —— */
+        .model-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .model-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem 1.35rem;
+        }
+
+        .model-card .keyword {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.9rem;
+            color: var(--accent-2);
+            margin-bottom: 0.45rem;
+        }
+
+        .model-card p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* —— Case studies —— */
+        .case-study {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .case-study:last-child { margin-bottom: 0; }
+
+        .case-header {
+            padding: 1.35rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .case-num {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+            margin-bottom: 0.35rem;
+        }
+
+        .case-header h3 {
+            font-size: 1.15rem;
+            margin: 0;
+        }
+
+        .case-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        @media (max-width: 700px) {
+            .case-body { grid-template-columns: 1fr; }
+        }
+
+        .case-mapping, .case-snippet {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .case-mapping {
+            border-right: 1px solid var(--border);
+        }
+
+        @media (max-width: 700px) {
+            .case-mapping { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+
+        .case-mapping h4, .case-snippet h4 {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 0.75rem;
+        }
+
+        .map-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .map-list li {
+            padding: 0.35rem 0;
+            color: var(--muted);
+            display: flex;
+            gap: 0.5rem;
+            align-items: baseline;
+        }
+
+        .map-list .arrow { color: var(--border); flex-shrink: 0; }
+
+        .map-list code {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.82rem;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .case-narrative {
+            padding: 0 1.5rem 1.35rem;
+            font-size: 0.95rem;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+        }
+
+        .case-narrative p { margin: 0; padding-top: 1.1rem; }
+
+        pre.snippet {
+            margin: 0;
+            padding: 1rem 1.15rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.78rem;
+            line-height: 1.75;
+            color: #b8c4dc;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .kw { color: var(--accent-2); }
+        .dyn { color: var(--warm); }
+        .note { color: var(--accent); }
+
+        /* —— Narrative —— */
+        .narrative {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem 2rem 1.75rem;
+        }
+
+        .narrative-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.25rem 0 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.75rem 1.5rem;
+        }
+
+        .narrative-list li {
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-left: 1.1rem;
+            position: relative;
+        }
+
+        .narrative-list li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* —— CTA —— */
+        .cta {
+            text-align: center;
+            margin-top: 4.5rem;
+            padding: 3rem 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .cta h2 { margin-bottom: 0.75rem; }
+
+        .cta p {
+            max-width: 32rem;
+            margin: 0 auto 1.75rem;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.7rem 1.35rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn:hover { text-decoration: none; }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #042f2e;
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        /* —— Footer —— */
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        footer a { color: var(--muted); }
+        footer a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <nav>
+            <div class="logo">Sound<span>Script</span> <span style="color:var(--muted);font-weight:400;">V3</span></div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="playground/">Playground</a>
+                <a href="phrases-v3.md">V3 Reference</a>
+                <a href="https://github.com/dharangutti/sound-script">GitHub</a>
+            </div>
+        </nav>
+
+        <!-- SECTION 1 — HERO -->
+        <header class="hero">
+            <div class="badge">V3 · Deterministic · Industrial Audio</div>
+            <h1>SoundScript — Expressive Audio for Industrial Awareness</h1>
+            <p class="subtitle">Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows.</p>
+        </header>
+
+        <!-- SECTION 2 — HOW USERS EXPLORE -->
+        <section>
+            <h2>How Users Explore SoundScript.net</h2>
+            <div class="prose">
+                <p>SoundScript.net is not a DAW and not a plugin stack. It is a precision surface where industrial teams prototype audible awareness — phrase by phrase, deterministically, before a single line reaches production.</p>
+            </div>
+            <ol class="journey">
+                <li>
+                    <div>
+                        <strong>Open the Playground</strong>
+                        <span>Navigate to SoundScript.net Playground. No install, no middleware — a live compiler and preview surface in the browser.</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Type a phrase or track</strong>
+                        <span>Begin with a single <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">phrase</code> block or a full <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">track</code>. A snippet is enough; no full solution required.</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Map process parameters to constructs</strong>
+                        <span>Translate machine state, motion rhythm, temperature trend, or spatial proximity into V3 phrase keywords — curve, articulation, transition, crescendo, swing.</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Preview expressive cues</strong>
+                        <span>Compile and hear the cue instantly. Every run is reproducible — the same script yields the same MIDI, every time.</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Refine timing, articulation, curves, transitions</strong>
+                        <span>Adjust <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">swing</code>, <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">push</code>, <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">pull</code>, dynamics (<code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">p</code> through <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">f</code>), and envelope shape until the cue reads clearly under factory noise.</span>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Export MIDI or integrate into workflow</strong>
+                        <span>Export compiled MIDI for downstream routing — HMI speakers, andon systems, wearable haptics paired with audio, or accessibility headsets on the floor.</span>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <!-- SECTION 3 — PARAMETER MAPPING -->
+        <section>
+            <h2>How Users Map Process Parameters to SoundScript</h2>
+            <div class="prose">
+                <p>Industrial awareness begins with a disciplined translation: real-world signals become phrase-level constructs. V3 gives engineers a compact vocabulary — no orchestration layer required for a working cue.</p>
+            </div>
+            <div class="mapping-grid">
+                <div class="mapping-card">
+                    <div class="domain">Machine State</div>
+                    <div class="constructs">curve + articulation + transition</div>
+                    <p style="margin-top:0.6rem;font-size:0.9rem;">Idle reads gentle and legato. Running reads strong with accent. Critical reads sharp and staccato — the ear knows before the dashboard updates.</p>
+                </div>
+                <div class="mapping-card">
+                    <div class="domain">Timing Drift</div>
+                    <div class="constructs">swing + push + pull</div>
+                    <p style="margin-top:0.6rem;font-size:0.9rem;">Normal rhythm holds swing. Delay creeps in with push. Backpressure arrives late with pull — conveyors speak their tempo health.</p>
+                </div>
+                <div class="mapping-card">
+                    <div class="domain">Temperature Trend</div>
+                    <div class="constructs">crescendo + decrescendo + curve</div>
+                    <p style="margin-top:0.6rem;font-size:0.9rem;">Rising heat swells with crescendo. Stable operation sits on a balanced curve. Cooling fades with decrescendo — thermal narrative without a graph.</p>
+                </div>
+                <div class="mapping-card">
+                    <div class="domain">Robotic Motion</div>
+                    <div class="constructs">swell + accent + fade</div>
+                    <p style="margin-top:0.6rem;font-size:0.9rem;">Approach phase breathes with swell. Grip lands on accent. Release dissolves through fade — motion phases become audible choreography.</p>
+                </div>
+                <div class="mapping-card">
+                    <div class="domain">Accessibility — Blind Assist</div>
+                    <div class="constructs">curve + transition + articulation + crescendo / decrescendo</div>
+                    <p style="margin-top:0.6rem;font-size:0.9rem;">Spatial awareness is sculpted: gentle curves for safe objects, sharp transitions for sudden movement, crescendo for approach, decrescendo for retreat — a sonic field model operators can trust.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 — TABLE -->
+        <section>
+            <h2>Parameter-to-Construct Reference</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Process Parameter</th>
+                            <th>SoundScript V3 Construct</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>State Change</td>
+                            <td>curve gentle / curve strong / transition sharp</td>
+                        </tr>
+                        <tr>
+                            <td>Motion Smoothness</td>
+                            <td>articulation legato / staccato / accent</td>
+                        </tr>
+                        <tr>
+                            <td>Timing Drift</td>
+                            <td>swing / push / pull</td>
+                        </tr>
+                        <tr>
+                            <td>Trend Direction</td>
+                            <td>crescendo / decrescendo / fade / swell</td>
+                        </tr>
+                        <tr>
+                            <td>Urgency Level</td>
+                            <td>p / mp / mf / f</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 5 — HOW TO WRITE -->
+        <section>
+            <h2>How Users Write a Script</h2>
+            <div class="prose">
+                <p>SoundScript V3 composes from the inside out. A few lines carry full expressive intent — engineers write snippets, not suites.</p>
+            </div>
+            <div class="model-row">
+                <div class="model-card">
+                    <div class="keyword">phrase</div>
+                    <p>A container for expressive shaping. Curve, transition, articulation, envelope, and timing modifiers live here — one industrial event, one audible gesture.</p>
+                </div>
+                <div class="model-card">
+                    <div class="keyword">track</div>
+                    <p>Groups phrases into a coherent cue sequence. A conveyor lane, a robot cycle, or a QC station checkpoint becomes a named track.</p>
+                </div>
+                <div class="model-card">
+                    <div class="keyword">block</div>
+                    <p>Reuses patterns across tracks. Define once, play everywhere — shared vocabulary for teams standardizing floor-wide audio language.</p>
+                </div>
+            </div>
+            <p style="margin-top:1.25rem;font-size:0.95rem;color:var(--muted);">A snippet is enough. Prospects and engineers alike can prototype a single phrase, hear it, and iterate — no full solution, no dependency chain, no plugin surface.</p>
+        </section>
+
+        <!-- SECTION 6 — CASE STUDIES -->
+        <section>
+            <h2>Case Studies — Artistic Form, Engineering Substance</h2>
+            <div class="prose">
+                <p>Five industrial scenarios, five compact scripts. Each maps a real process parameter to V3 constructs and produces a deterministic cue ready for the Playground.</p>
+            </div>
+
+            <!-- Case Study 1 -->
+            <article class="case-study">
+                <div class="case-header">
+                    <div class="case-num">Case Study 1</div>
+                    <h3>Blind Operator Spatial Awareness</h3>
+                </div>
+                <div class="case-body">
+                    <div class="case-mapping">
+                        <h4>Mapping</h4>
+                        <ul class="map-list">
+                            <li><code>curve gentle</code> <span class="arrow">→</span> safe object</li>
+                            <li><code>curve strong</code> <span class="arrow">→</span> obstacle</li>
+                            <li><code>transition sharp</code> <span class="arrow">→</span> sudden movement</li>
+                            <li><code>articulation legato / staccato</code> <span class="arrow">→</span> smooth vs abrupt</li>
+                            <li><code>swing / push / pull</code> <span class="arrow">→</span> motion rhythm</li>
+                            <li><code>crescendo / decrescendo</code> <span class="arrow">→</span> approaching vs moving away</li>
+                        </ul>
+                    </div>
+                    <div class="case-snippet">
+                        <h4>Snippet</h4>
+                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve gentle</span>; <span class="kw">articulation legato</span>; <span class="dyn">mp</span>; <span class="note">C4 q</span> }
+<span class="kw">phrase</span> { <span class="kw">curve strong</span>; <span class="kw">articulation accent</span>; <span class="dyn">mf</span>; <span class="note">G3 e</span> }
+<span class="kw">phrase</span> { <span class="kw">transition sharp</span>; <span class="kw">articulation staccato</span>; <span class="dyn">f</span>; <span class="note">C5 e</span> }
+<span class="kw">phrase</span> { <span class="kw">crescendo</span>; <span class="dyn">mf</span>; <span class="note">E4 q</span> }
+<span class="kw">phrase</span> { <span class="kw">decrescendo</span>; <span class="dyn">mp</span>; <span class="note">C3 q</span> }</pre>
+                    </div>
+                </div>
+                <div class="case-narrative">
+                    <p>A blind operator navigates a dynamic floor. Safe clearance hums gentle and legato at mezzo-piano — a soft boundary in sound. Obstacles arrive strong and accented, mf, impossible to ignore. Sudden forklift movement fires sharp and staccato at forte — an alarm with musical dignity. Approach is crescendo; retreat is decrescendo. Spatial data becomes a sonic field: not decoration, but orientation.</p>
+                </div>
+            </article>
+
+            <!-- Case Study 2 -->
+            <article class="case-study">
+                <div class="case-header">
+                    <div class="case-num">Case Study 2</div>
+                    <h3>Machine State Awareness</h3>
+                </div>
+                <div class="case-body">
+                    <div class="case-mapping">
+                        <h4>Mapping</h4>
+                        <ul class="map-list">
+                            <li><code>curve gentle</code> <span class="arrow">→</span> idle</li>
+                            <li><code>curve strong</code> <span class="arrow">→</span> running</li>
+                            <li><code>transition sharp + staccato</code> <span class="arrow">→</span> critical</li>
+                        </ul>
+                    </div>
+                    <div class="case-snippet">
+                        <h4>Snippet</h4>
+                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve gentle</span>; <span class="kw">articulation legato</span>; <span class="dyn">mp</span>; <span class="note">C4 q</span> }
+<span class="kw">phrase</span> { <span class="kw">curve strong</span>; <span class="kw">articulation accent</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
+<span class="kw">phrase</span> { <span class="kw">transition sharp</span>; <span class="kw">articulation staccato</span>; <span class="dyn">f</span>; <span class="note">G4 e</span> }</pre>
+                    </div>
+                </div>
+                <div class="case-narrative">
+                    <p>Three machine states, three phrases. Idle breathes — gentle, legato, mp — the line at rest. Running engages: strong curve, accented attack, mf energy. Critical is unmistakable: sharp transition, staccato articulation, forte. No color codes required. The HMI gains an auditory layer that operators perceive peripherally, reducing glance time and missed transitions.</p>
+                </div>
+            </article>
+
+            <!-- Case Study 3 -->
+            <article class="case-study">
+                <div class="case-header">
+                    <div class="case-num">Case Study 3</div>
+                    <h3>Conveyor Timing Drift Detection</h3>
+                </div>
+                <div class="case-body">
+                    <div class="case-mapping">
+                        <h4>Mapping</h4>
+                        <ul class="map-list">
+                            <li><code>swing</code> <span class="arrow">→</span> normal</li>
+                            <li><code>push</code> <span class="arrow">→</span> delay</li>
+                            <li><code>pull</code> <span class="arrow">→</span> backpressure</li>
+                        </ul>
+                    </div>
+                    <div class="case-snippet">
+                        <h4>Snippet</h4>
+                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">swing 0.67</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
+<span class="kw">phrase</span> { <span class="kw">push 0.02</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
+<span class="kw">phrase</span> { <span class="kw">pull 0.03</span>; <span class="dyn">f</span>; <span class="note">C3 e</span> }</pre>
+                    </div>
+                </div>
+                <div class="case-narrative">
+                    <p>Conveyors have rhythm. Normal operation swings at 0.67 — a familiar groove at mf. Delay arrives early: push 0.02 shifts the beat forward, a subtle tension. Backpressure pulls at 0.03, forte — the line is fighting itself. Engineers hear drift before the SCADA trend line confirms it. Timing modifiers turn pulse data into audible diagnostics.</p>
+                </div>
+            </article>
+
+            <!-- Case Study 4 -->
+            <article class="case-study">
+                <div class="case-header">
+                    <div class="case-num">Case Study 4</div>
+                    <h3>Temperature Trend Alerts</h3>
+                </div>
+                <div class="case-body">
+                    <div class="case-mapping">
+                        <h4>Mapping</h4>
+                        <ul class="map-list">
+                            <li><code>crescendo</code> <span class="arrow">→</span> rising</li>
+                            <li><code>balanced curve</code> <span class="arrow">→</span> stable</li>
+                            <li><code>fade + decrescendo</code> <span class="arrow">→</span> falling</li>
+                        </ul>
+                    </div>
+                    <div class="case-snippet">
+                        <h4>Snippet</h4>
+                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve expressive</span>; <span class="kw">crescendo</span>; <span class="dyn">mf</span>; <span class="note">C5 q</span> }
+<span class="kw">phrase</span> { <span class="kw">curve balanced</span>; <span class="dyn">mp</span>; <span class="note">E4 q</span> }
+<span class="kw">phrase</span> { <span class="kw">curve fade</span>; <span class="kw">decrescendo</span>; <span class="dyn">p</span>; <span class="note">C3 q</span> }</pre>
+                    </div>
+                </div>
+                <div class="case-narrative">
+                    <p>Temperature is a contour, not a number. Rising heat: expressive curve with crescendo at mf — urgency building in musical form. Stable operation: balanced curve, mp, centered and calm. Cooling: fade plus decrescendo at piano — release, resolution, all clear. Thermal telemetry becomes a phrase sequence operators feel in peripheral hearing, long before threshold alarms escalate.</p>
+                </div>
+            </article>
+
+            <!-- Case Study 5 -->
+            <article class="case-study">
+                <div class="case-header">
+                    <div class="case-num">Case Study 5</div>
+                    <h3>Robotic Arm Motion Phases</h3>
+                </div>
+                <div class="case-body">
+                    <div class="case-mapping">
+                        <h4>Mapping</h4>
+                        <ul class="map-list">
+                            <li><code>swell</code> <span class="arrow">→</span> approach</li>
+                            <li><code>accent</code> <span class="arrow">→</span> grip</li>
+                            <li><code>fade</code> <span class="arrow">→</span> release</li>
+                        </ul>
+                    </div>
+                    <div class="case-snippet">
+                        <h4>Snippet</h4>
+                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve swell</span>; <span class="dyn">mp</span>; <span class="note">C4 h</span> }
+<span class="kw">phrase</span> { <span class="kw">articulation accent</span>; <span class="dyn">f</span>; <span class="note">G4 e</span> }
+<span class="kw">phrase</span> { <span class="kw">curve fade</span>; <span class="dyn">p</span>; <span class="note">C3 q</span> }</pre>
+                    </div>
+                </div>
+                <div class="case-narrative">
+                    <p>A pick-and-place cycle in three phrases. Approach: swell curve over a half note at mp — the arm draws near with rising intent. Grip: accent at forte — contact, commitment, the moment of truth. Release: fade at piano — withdrawal, completion, safe clearance. Integrators map motion phases to audible choreography. Cobot cells gain expressiveness without adding visual clutter to an already dense workspace.</p>
+                </div>
+            </article>
+        </section>
+
+        <!-- SECTION 7 — NARRATIVE -->
+        <section>
+            <h2>The SoundScript Transformation</h2>
+            <div class="narrative">
+                <p>SoundScript V3 does not add noise to the factory floor. It adds language — a deterministic, phrase-level vocabulary that manufacturing leaders, automation engineers, robotics integrators, accessibility teams, and Industrial IoT prospects can prototype in minutes and deploy with confidence.</p>
+                <ul class="narrative-list">
+                    <li>Machines become audible.</li>
+                    <li>Robots become expressive.</li>
+                    <li>Conveyors reveal timing drift.</li>
+                    <li>QC stations speak clearly.</li>
+                    <li>Temperature trends become musical contours.</li>
+                    <li>Blind operators gain spatial awareness.</li>
+                </ul>
+                <p style="margin-top:1.5rem;">Every cue is a script. Every script is reproducible. Every construct maps to an existing V3 keyword — curve, transition, articulation, envelope, swing, push, pull, dynamic level. Artistic enough for human perception. Engineering-credible enough for production audit trails. This is expressive industrial audio: minimal surface, maximum clarity.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8 — CTA -->
+        <section class="cta">
+            <h2>Begin Exploring</h2>
+            <p>Map your process parameters. Write a phrase. Hear deterministic industrial awareness — in the Playground, on your terms.</p>
+            <div class="cta-row">
+                <a class="btn btn-primary" href="playground/">Explore SoundScript.net Playground</a>
+                <a class="btn btn-secondary" href="phrases-v3.md">V3 Phrase Reference</a>
+                <a class="btn btn-secondary" href="whats-new-v3.md">What's New in V3</a>
+            </div>
+        </section>
+
+        <footer>
+            <p>
+                <a href="index.html">Home</a> ·
+                <a href="playground/">Playground</a> ·
+                <a href="phrases-v3.md">V3 Reference</a> ·
+                <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
+                <a href="https://www.dharangutti.in">dharangutti.in</a>
+            </p>
+            <p style="margin-top:0.5rem;">SoundScript V3 · MIT License · Deterministic text to MIDI.</p>
+        </footer>
+    </div>
+</body>
+</html>
