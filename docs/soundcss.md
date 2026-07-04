@@ -1,4 +1,4 @@
-# SoundCSS — SoundScript Style Sheets (V4)
+# SoundCSS — SoundScript Style Sheets (V4.1)
 
 SoundCSS (`.ssc`) is a declarative timbre language for the offline
 **SoundScript.Timbre** engine. It styles phonemes the way CSS styles HTML
@@ -12,14 +12,20 @@ elements: pure data, deterministic, no randomness.
 
 p {
     burst: 12ms;
-    noise: 0.3;
-    brightness: 0.2;
+    noise-plosive: 0.4;
+    harmonic1: 0.2;
+    harmonic2: 0.1;
 }
 
 aa {
     formant1: 700Hz;
     formant2: 1100Hz;
     smoothness: 0.9;
+    harmonic1: 0.9;
+    harmonic2: 0.6;
+    harmonic3: 0.3;
+    noise-fricative: 0.2;
+    transient: 8ms;
 }
 ```
 
@@ -45,8 +51,21 @@ Each selector is a **phoneme symbol** from the
 | `nasal` | 0–1 | Nasal resonance amount |
 | `openness` | 0–1 | Vowel openness (spectral spacing) |
 
+### Cycle-level properties (V4.1)
+
+Applied per pitch cycle inside each 8 ms frame:
+
+| Property | Type | Meaning |
+|----------|------|---------|
+| `harmonic1` | 0–1 | Fundamental harmonic amplitude |
+| `harmonic2` | 0–1 | Second harmonic amplitude |
+| `harmonic3` | 0–1 | Third harmonic amplitude |
+| `noise-fricative` | 0–1 | Fricative noise per cycle |
+| `noise-plosive` | 0–1 | Plosive noise per cycle |
+| `transient` | ms | Consonant attack transient length |
+
 Units are optional for unitless values (`0.3`). Frequencies accept an `Hz`
-suffix; burst accepts `ms`.
+suffix; `burst` and `transient` accept `ms`.
 
 ### Directives
 
@@ -82,5 +101,6 @@ every platform. Regression tests assert SHA-256 hashes of rendered WAV output.
 ## See also
 
 - [Timbre engine](timbre-engine.md)
+- [Cycle synthesis (V4.1)](v4.1-cycle-synthesis.md)
 - [V4 architecture](v4-architecture.md)
 - [Text-to-melody pipeline](text-to-melody.md)

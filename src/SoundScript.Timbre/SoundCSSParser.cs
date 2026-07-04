@@ -152,6 +152,12 @@ public static class SoundCSSParser
         private double? _smoothness;
         private double? _nasal;
         private double? _openness;
+        private double? _harmonic1;
+        private double? _harmonic2;
+        private double? _harmonic3;
+        private double? _noiseFricative;
+        private double? _noisePlosive;
+        private double? _transientMs;
 
         public void Apply(string property, string rawValue)
         {
@@ -194,6 +200,24 @@ public static class SoundCSSParser
                 case "openness":
                     _openness = value;
                     break;
+                case "harmonic1":
+                    _harmonic1 = value;
+                    break;
+                case "harmonic2":
+                    _harmonic2 = value;
+                    break;
+                case "harmonic3":
+                    _harmonic3 = value;
+                    break;
+                case "noise-fricative":
+                    _noiseFricative = value;
+                    break;
+                case "noise-plosive":
+                    _noisePlosive = value;
+                    break;
+                case "transient":
+                    _transientMs = value;
+                    break;
                 default:
                     throw new FormatException($"Unknown SoundCSS property '{property}'.");
             }
@@ -213,7 +237,13 @@ public static class SoundCSSParser
                 Formant3BwHz = _formant3BwHz,
                 Smoothness = _smoothness,
                 Nasal = _nasal,
-                Openness = _openness
+                Openness = _openness,
+                Harmonic1 = _harmonic1,
+                Harmonic2 = _harmonic2,
+                Harmonic3 = _harmonic3,
+                NoiseFricative = _noiseFricative,
+                NoisePlosive = _noisePlosive,
+                TransientMs = _transientMs
             };
 
         private static double ParseValue(string raw)

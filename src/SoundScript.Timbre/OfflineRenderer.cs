@@ -5,7 +5,7 @@ namespace SoundScript.Timbre;
 /// <summary>
 /// Offline timbre rendering facade:
 ///
-///     MIDI → MidiToTimbreTimeline → SpectralEngine → AudioWriter
+///     MIDI → MidiToTimbreTimeline → SpectralEngine (cycle-accurate) → AudioWriter
 ///
 /// MIDI is the single source of truth for pitch, duration, timing, and
 /// articulation. SoundCSS supplies spectral styling; phoneme alignment uses
@@ -15,17 +15,23 @@ public static class OfflineRenderer
 {
   /// <summary>Default SoundCSS bundled with the timbre engine.</summary>
   public const string DefaultStylesheet = """
-    // SoundScript default timbre stylesheet (V4)
+    // SoundScript default timbre stylesheet (V4.1)
     p {
         burst: 12ms;
-        noise: 0.3;
-        brightness: 0.2;
+        noise-plosive: 0.4;
+        harmonic1: 0.2;
+        harmonic2: 0.1;
     }
 
     aa {
         formant1: 700Hz;
         formant2: 1100Hz;
         smoothness: 0.9;
+        harmonic1: 0.9;
+        harmonic2: 0.6;
+        harmonic3: 0.3;
+        noise-fricative: 0.2;
+        transient: 8ms;
     }
     """;
 
