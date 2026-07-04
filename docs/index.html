@@ -3,8 +3,62 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SoundScript — a tiny, deterministic music DSL that turns simple text into MIDI. Write melodies like code.">
-    <title>SoundScript — Text to MIDI</title>
+    <title>SoundScript — Write Music Like Code | Deterministic Text-to-MIDI Language</title>
+    <meta name="description" content="SoundScript is an open-source, deterministic music programming language that compiles plain text into professional-sounding MIDI. Write melodies, chords, phrases, and industrial audio cues as code — cross-platform CLI (.NET, Windows/macOS/Linux) and a playground that runs in any modern browser.">
+    <meta name="keywords" content="SoundScript, music DSL, music programming language, text to MIDI, MIDI generator, deterministic music, C# music library, music as code, industrial audio cues, browser MIDI playground">
+    <meta name="author" content="Anup Jayant Dharangutti">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://soundscript.net/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SoundScript">
+    <meta property="og:title" content="SoundScript — Write Music Like Code">
+    <meta property="og:description" content="An open-source, deterministic music language that turns plain text into professional-sounding MIDI. Cross-platform CLI and a playground for every modern browser — Chrome, Edge, Firefox, and Safari.">
+    <meta property="og:url" content="https://soundscript.net/">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="SoundScript — Write Music Like Code">
+    <meta name="twitter:description" content="An open-source, deterministic music language that turns plain text into professional-sounding MIDI. Cross-platform CLI and a browser playground — no DAW, no plugins.">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://soundscript.net/#website",
+                "url": "https://soundscript.net/",
+                "name": "SoundScript",
+                "description": "An open-source, deterministic music programming language that compiles plain text into MIDI."
+            },
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://soundscript.net/#software",
+                "name": "SoundScript",
+                "url": "https://soundscript.net/",
+                "applicationCategory": "MultimediaApplication",
+                "applicationSubCategory": "Music programming language",
+                "operatingSystem": "Windows, macOS, Linux, Web",
+                "browserRequirements": "Any modern browser with WebAssembly and Web Audio (Chrome, Edge, Firefox, Safari)",
+                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+                "license": "https://opensource.org/licenses/MIT",
+                "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
+                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, browser playground, cross-platform CLI",
+                "softwareHelp": "https://soundscript.net/SoundScript.md",
+                "codeRepository": "https://github.com/dharangutti/sound-script",
+                "author": {
+                    "@type": "Person",
+                    "name": "Anup Jayant Dharangutti",
+                    "url": "https://www.dharangutti.in"
+                }
+            }
+        ]
+    }
+    </script>
     <style>
         :root {
             --bg: #0b0d12;
@@ -321,13 +375,14 @@
             <div class="badge">Version: V3 — Expressive Industrial Audio Cues</div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">
-                SoundScript is a tiny, deterministic music DSL — type a melody with notation,
+                SoundScript is an open-source, deterministic music language — type a melody with notation,
                 dynamics, and articulations, get professional-sounding MIDI.
                 No DAW. No plugins. Just text → shaping → MIDI.
+                Runs on Windows, macOS, and Linux, and in any modern browser.
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Playground</a>
-                <a class="btn btn-secondary" href="whats-new-v2.md">What's New in V2</a>
+                <a class="btn btn-secondary" href="whats-new-v3.md">What's New in V3</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
                 <a class="btn btn-secondary" href="SoundScript.md">Documentation</a>
             </div>
@@ -351,6 +406,25 @@
 }</pre>
             </div>
         </header>
+
+        <section>
+            <h2>Our Vision</h2>
+            <div class="about">
+                <p><strong style="color: var(--text);">Music should be as writable, versionable, and reproducible as software.</strong>
+                SoundScript exists to make sound a first-class engineering artifact: you describe notes, chords,
+                dynamics, phrases, and orchestration in plain text, and the engine compiles it to a standard MIDI
+                file — the same script producing the same output, every time, on every platform.</p>
+                <p>That determinism is the foundation for everything the project is growing into: composers who want
+                their pieces in version control, developers who want to generate music programmatically, and
+                industrial teams who need auditable, expressive audio cues for machines, robots, and accessibility
+                workflows. SoundScript is not a classroom toy and not tied to any single browser — it is a
+                general-purpose text-to-MIDI language with a cross-platform CLI (built on .NET) and a WebAssembly
+                playground that runs in Chrome, Edge, Firefox, and Safari alike.</p>
+                <p>The long-term goal is simple: a minimal, dependable language where a few lines of text carry full
+                musical intent — from a melody sketch to a factory-floor awareness cue — with no DAW, no plugins,
+                and no vendor lock-in.</p>
+            </div>
+        </section>
 
         <section class="industrial-promo">
             <h2>Industrial Sound Augmentation</h2>
@@ -458,7 +532,7 @@ tempo 120 → 140 over 4 bars</pre>
                     <div>
                         <strong>Or try the browser playground</strong><br>
                         <a href="playground/">Open the Playground</a><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">Type SoundScript, compile to MIDI, and hear it instantly — runs entirely client-side at <code>/playground/</code>.</span>
+                        <span style="color: var(--muted); font-size: 0.9rem;">Type SoundScript, compile to MIDI, and hear it instantly — runs entirely client-side at <code>/playground/</code> in any modern browser (Chrome, Edge, Firefox, Safari — desktop and mobile).</span>
                     </div>
                 </li>
             </ul>
@@ -532,10 +606,13 @@ Cmaj w</pre>
         <section>
             <h2>About the Project</h2>
             <div class="about">
-                <p>SoundScript V2 is a tiny, deterministic music DSL that turns simple text into
-                professional-sounding MIDI. Imports, blocks, patterns, phrases, layers, and orchestration
-                extend the v1.2 engine — intentionally minimal, hobby‑grade, and designed for clarity,
+                <p>SoundScript is an open-source (MIT), deterministic music DSL that turns simple text into
+                professional-sounding MIDI. Imports, blocks, patterns, phrases, layers, orchestration, and
+                V3 expressive shaping extend the v1.2 engine — intentionally minimal and designed for clarity,
                 reproducibility, and joy.</p>
+                <p>It runs everywhere: the CLI is built on cross-platform .NET (Windows, macOS, Linux), and the
+                playground compiles to WebAssembly, so it works in any modern browser — Chrome, Edge, Firefox,
+                and Safari, on desktop and mobile — with no server, no account, and no installation.</p>
             </div>
         </section>
 
@@ -554,7 +631,7 @@ Cmaj w</pre>
             <p>
                 <a href="playground/">Playground</a> ·
                 <a href="/industrial">Industrial Applications</a> ·
-                <a href="whats-new-v2.md">What's New</a> ·
+                <a href="whats-new-v3.md">What's New</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="SoundScript.md">Documentation</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /playground/_framework/
+
+Sitemap: https://soundscript.net/sitemap.xml
