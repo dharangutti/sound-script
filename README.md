@@ -1,7 +1,7 @@
-# SoundScript V2
+# SoundScript
 
-A tiny, deterministic music DSL that turns simple text into professional-sounding MIDI.  
-Built in C# for curiosity, creativity, and play.
+An open-source, deterministic music language that turns simple text into professional-sounding MIDI.  
+Built in C# — runs on Windows, macOS, and Linux, with a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari).
 
 ```
 import "lib.ss"
@@ -28,7 +28,23 @@ track melody {
 
 ## What is SoundScript?
 
-SoundScript is a micro-language for writing music like code. Describe notes, chords, dynamics, patterns, and orchestration in plain text; the engine parses your script, applies musical intelligence and playback refinement, and emits a MIDI file.
+SoundScript is a micro-language for writing music like code. Describe notes, chords, dynamics, patterns, and orchestration in plain text; the engine parses your script, applies musical intelligence and playback refinement, and emits a standard MIDI file. The same script always produces the same MIDI — on every platform.
+
+## Vision
+
+Music should be as writable, versionable, and reproducible as software. SoundScript makes sound a first-class engineering artifact:
+
+- **Deterministic by design** — the same script yields bit-identical MIDI, every run, everywhere. Compositions belong in version control.
+- **General-purpose, not a toy** — from melody sketches and full arrangements to [expressive industrial audio cues](https://soundscript.net/industrial/) for machine states, robotics, and accessibility workflows.
+- **Runs everywhere** — a cross-platform .NET CLI (Windows, macOS, Linux) and a WebAssembly playground that works in any modern browser. SoundScript is not tied to any single browser or vendor.
+- **Minimal surface** — no DAW, no plugins, no server. Plain text in, standard MIDI out.
+
+## Platform Support
+
+| Surface | Requirements |
+|---------|--------------|
+| **CLI** (`SoundScript.Cli`) | .NET 8 SDK — Windows, macOS, Linux |
+| **Playground** (`SoundScript.Playground`) | Any modern browser with WebAssembly and Web Audio — Chrome, Edge, Firefox, Safari (desktop and mobile). Runs fully client-side; no account, no server, no installation. |
 
 ## V2 Overview
 
@@ -61,7 +77,7 @@ Tokenizer → Parser → AST
 Interpreter
     ├── PatternExpander (pattern play)
     ├── Chord: Voicing → AdvancedVoicing → Orchestration → Spacing
-    ├── Note: Intelligence → PhraseShaper → PlaybackShaper
+    ├── Note: Intelligence → PhraseTimingShaper (V3) → PhraseShaper → PlaybackShaper
     ├── Layers (per-channel shaping)
     └── HumanizeApplicator (post-pass)
     ↓
@@ -130,9 +146,20 @@ dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss
 
 ## Playground
 
-Try SoundScript V2 in your browser:
+Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, fully client-side:
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
+
+## What's New in V3
+
+- Curve and transition aliases (`curve gentle`, `transition sharp`)
+- New curves: `swell`, `fade`, `expressive`
+- Dynamic envelopes: `crescendo`, `decrescendo`
+- Phrase articulation: `articulation legato`
+- Timing modifiers: `swing`, `push`, `pull` (via `PhraseTimingShaper`)
+- Industrial audio cue showcase: [soundscript.net/industrial](https://soundscript.net/industrial/)
+
+→ [docs/whats-new-v3.md](docs/whats-new-v3.md) · [docs/phrases-v3.md](docs/phrases-v3.md)
 
 ## What's New in V2
 
@@ -154,6 +181,7 @@ Try SoundScript V2 in your browser:
 | Document | Description |
 |----------|-------------|
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
+| [docs/whats-new-v3.md](docs/whats-new-v3.md) | V3 changelog |
 | [docs/whats-new-v2.md](docs/whats-new-v2.md) | V2 changelog |
 | [docs/imports.md](docs/imports.md) | Import system |
 | [docs/blocks.md](docs/blocks.md) | Named blocks |
