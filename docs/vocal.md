@@ -23,12 +23,20 @@ DSL script
     ↓
 Tokenizer → Parser → AST
     ├── Interpreter (tracks)          → InterpretedTrack[]
-    └── VocalInterpreter (voices)     → InterpretedVocalTrack[]
-            ├── Syllabifier (phonetics)
-            └── LyricAligner (syllable ↔ note binding)
+    ├── VocalInterpreter (voices)     → InterpretedVocalTrack[]
+    │       ├── Syllabifier (phonetics)
+    │       └── LyricAligner (syllable ↔ note binding)
+    └── PhonemeComposer (plain text)  → InterpretedTrack   (V3.1)
     ↓
 MidiGenerator → output.mid  (notes + FF 05 lyric meta events)
 ```
+
+> **Voice vs. PhonemeComposer:** the vocal subsystem binds *lyrics you wrote*
+> to *pitches you wrote*; the V3.1 [PhonemeComposer](phoneme-composer.md)
+> *derives* a melody from the sounds of plain text. **PhonemeComposer generates
+> musical notes, not speech audio** — it shares the `Syllabifier` with the
+> voice engine but is otherwise a separate, parallel branch.
+> → [text-to-melody.md](text-to-melody.md)
 
 - Scripts without `voice` blocks compile byte-identically to before.
 - Vocal notes use reserved MIDI **channel 15**, so they never collide with

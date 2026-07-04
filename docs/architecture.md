@@ -1,4 +1,4 @@
-# SoundScript Architecture (V2)
+# SoundScript Architecture (V3.1)
 
 System overview for the SoundScript engine and documentation suite.
 
@@ -10,13 +10,14 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
     SoundScript.Midi/       # Interpreter, shaping, PatternExpander, ChordOrchestration
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
-    SoundScript.Cli/        # Command-line runner (ProgramLoader)
+    SoundScript.Compose/    # Text-to-melody: PhonemeComposer + submodules (V3.1)
+    SoundScript.Cli/        # Command-line runner (run + compose)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
     SoundScript.Tests/      # xUnit tests
 
-/docs                       # V2 documentation + website
-/examples                   # V2 example scripts
+/docs                       # Documentation + website
+/examples                   # Example scripts
 ```
 
 ## Component Map
@@ -37,8 +38,13 @@ System overview for the SoundScript engine and documentation suite.
 | `Syllabifier` | Voice | Deterministic phonetic syllabification |
 | `LyricAligner` | Voice | Syllable ↔ note binding (melisma, overflow) |
 | `VocalInterpreter` | Voice | VoiceNode → InterpretedVocalTrack |
+| `PhonemeComposer` | Compose | Facade: plain text → AST → InterpretedTrack (V3.1) |
+| `PhonemeSplitter` | Compose | Rule-based syllable → phoneme symbols |
+| `PhonemeMapper` | Compose | Pure-data phoneme → musical gesture table |
+| `GestureBuilder` | Compose | Gesture → existing AST nodes (articulation, envelope) |
+| `PhraseAssembler` | Compose | Gestures → per-syllable PhraseNodes → program AST |
 
-## Layer Diagram (V2)
+## Layer Diagram (V3.1)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -52,8 +58,33 @@ System overview for the SoundScript engine and documentation suite.
 │  V2 modules:                                             │
 │    PatternExpander │ PhraseShaper │ ChordOrchestration   │
 │    HumanizeApplicator │ TempoAutomationMap │ Layers      │
+│                                                          │
+│  V3.1: PhonemeComposer (text → AST, reuses Interpreter)  │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## Pipeline Branches (V3.1)
+
+Three branches share one AST format and one MIDI generator:
+
+```
+Tokenizer → Parser → AST
+    ├── Interpreter        (tracks)   → InterpretedTrack[]
+    ├── VocalInterpreter   (voices)   → InterpretedVocalTrack[]
+    └── PhonemeComposer    (text)     → AST → Interpreter → InterpretedTrack
+            ├── Syllabifier      (reused from SoundScript.Voice)
+            ├── PhonemeSplitter  (syllable → phonemes)
+            ├── PhonemeMapper    (phoneme → gesture, pure data)
+            ├── GestureBuilder   (gesture → NoteNode / PhraseEnvelopeNode)
+            └── PhraseAssembler  (per-syllable PhraseNodes → ProgramNode)
+    ↓
+MidiGenerator → output.mid
+```
+
+The PhonemeComposer branch starts from plain text rather than a script: it
+builds a standard `ProgramNode` in code, then feeds it through the unchanged
+`Interpreter` and `MidiGenerator`. → [text-to-melody.md](text-to-melody.md) ·
+[phoneme-composer.md](phoneme-composer.md)
 
 ## Engine Phases
 
@@ -72,11 +103,14 @@ System overview for the SoundScript engine and documentation suite.
 
 ## Deployment
 
-- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss`
+- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss` · `... -- compose "text"`
 - **Website:** `docs/` → GitHub Pages → soundscript.net
 - **Playground:** `dotnet publish` → `docs/playground/`
 
 ## Related
 
 - [pipeline.md](pipeline.md)
+- [text-to-melody.md](text-to-melody.md)
+- [phoneme-composer.md](phoneme-composer.md)
+- [whats-new-v3.1.md](whats-new-v3.1.md)
 - [whats-new-v2.md](whats-new-v2.md)

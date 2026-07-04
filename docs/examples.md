@@ -21,6 +21,25 @@ Runnable example scripts for every major feature.
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 | [vocal-song.ss](../examples/vocal-song.ss) | Vocal track — lyrics + phonetic syllable alignment | `... run examples/vocal-song.ss` |
 
+## Text-to-Melody Examples (V3.1)
+
+`compose` takes plain text instead of a script — no `.ss` file needed. Each
+command is deterministic: the same text always produces the same MIDI bytes.
+
+| Text | Run |
+|------|-----|
+| Twinkle twinkle little star | `dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"` |
+| Hello world | `dotnet run --project src/SoundScript.Cli -- compose "Hello world"` |
+| SoundScript makes music deterministic | `dotnet run --project src/SoundScript.Cli -- compose "SoundScript makes music deterministic"` |
+
+Append the composed track to an existing script's output:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "How I wonder what you are" out.mid --append examples/vocal-song.ss
+```
+
+→ [text-to-melody.md](text-to-melody.md) · [cli.md](cli.md)
+
 ## Industrial Audio Cue Examples (V3)
 
 Complete scripts backing the [Industrial Applications](https://soundscript.net/industrial/) case studies.
@@ -84,6 +103,7 @@ Complete scripts backing the [Industrial Applications](https://soundscript.net/i
 | Phrases | Phrase curves + transitions |
 | Patterns | Arp, strum, rhythm |
 | Orchestration | double octave, bass, top |
+| Text-to-Melody | `compose` input + *Compose from text* (V3.1) |
 | Melody | Basic melody (v1.2) |
 | Articulations | Staccato, legato, accent |
 | Dynamics | p → mf → f |

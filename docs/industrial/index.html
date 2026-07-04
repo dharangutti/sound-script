@@ -986,6 +986,39 @@
             </article>
         </section>
 
+        <!-- SECTION 6B — TEXT-DRIVEN COMPOSITION (V3.1) -->
+        <section>
+            <h2>Text-Driven Composition for Industrial Audio Pipelines</h2>
+            <div class="prose">
+                <p>V3.1 adds the <strong>PhonemeComposer</strong>: a deterministic text-to-melody engine that
+                turns plain strings — status labels, event names, operator messages — into audible cues
+                without writing a script. The text itself is the specification: syllables become musical
+                micro-phrases, phonemes become gestures (staccato, swell, fade, accent, legato), and the
+                existing engine renders them to MIDI.</p>
+            </div>
+            <pre class="snippet">soundscript compose "conveyor two running"     cue-running.mid
+soundscript compose "conveyor two blocked"     cue-blocked.mid
+soundscript compose "line clear"               cue-clear.mid</pre>
+            <div class="prose" style="margin-top:1rem;">
+                <p><strong>Deterministic guarantees.</strong> The phoneme-to-gesture mapping is a fixed data
+                table; there is no randomness, no locale-dependent behavior, and no external service. A given
+                string always yields the same syllables, the same gestures, and the same notes — the cue for
+                <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">"line clear"</code>
+                generated today is the cue generated in every future build.</p>
+                <p><strong>MIDI byte-stability.</strong> Identical input text produces byte-identical MIDI
+                output on every platform, verifiable with a checksum
+                (<code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">sha256sum a.mid b.mid</code>).
+                Generated cues can be committed to version control, diffed, and audited like any other build
+                artifact — if the text did not change, the bytes did not change. Distinct texts produce
+                distinct, consistently distinguishable cues.</p>
+                <p>Text-driven cues compose with scripted ones:
+                <code style="font-family:monospace;color:var(--accent);font-size:0.88rem;">compose "text" out.mid --append cue.ss</code>
+                appends the composed track to an existing script's output, so a hand-tuned state cue and a
+                text-derived label can share one MIDI file.
+                <a href="/doc.html?p=text-to-melody.md">Text-to-melody reference →</a></p>
+            </div>
+        </section>
+
         <!-- SECTION 7 — NARRATIVE -->
         <section>
             <h2>The SoundScript Transformation</h2>
