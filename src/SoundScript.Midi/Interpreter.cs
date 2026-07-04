@@ -241,6 +241,21 @@ public static class Interpreter
                 case PhraseTransitionNode transition:
                     ApplyPhraseTransition(track, transition);
                     break;
+                case PhraseArticulationNode articulation:
+                    ApplyPhraseArticulation(track, articulation);
+                    break;
+                case PhraseEnvelopeNode envelope:
+                    ApplyPhraseEnvelope(track, envelope);
+                    break;
+                case PhraseSwingNode swing:
+                    ApplyPhraseSwing(track, swing);
+                    break;
+                case PhrasePushNode push:
+                    ApplyPhrasePush(track, push);
+                    break;
+                case PhrasePullNode pull:
+                    ApplyPhrasePull(track, pull);
+                    break;
                 case RestNode rest:
                     EmitRest(track, rest, clock, result);
                     break;
@@ -522,6 +537,36 @@ public static class Interpreter
             track.ActivePhrase.Transition = transition.Mode;
     }
 
+    private static void ApplyPhraseArticulation(TrackBuilder track, PhraseArticulationNode articulation)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.DefaultArticulation = articulation.Articulation;
+    }
+
+    private static void ApplyPhraseEnvelope(TrackBuilder track, PhraseEnvelopeNode envelope)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.Envelope = envelope.Envelope;
+    }
+
+    private static void ApplyPhraseSwing(TrackBuilder track, PhraseSwingNode swing)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.SwingRatio = swing.Ratio;
+    }
+
+    private static void ApplyPhrasePush(TrackBuilder track, PhrasePushNode push)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.PushBeats = push.Beats;
+    }
+
+    private static void ApplyPhrasePull(TrackBuilder track, PhrasePullNode pull)
+    {
+        if (track.ActivePhrase is not null)
+            track.ActivePhrase.PullBeats = pull.Beats;
+    }
+
     private static void AddLayer(TrackBuilder track, LayerNode layer)
     {
         track.Layers.Add(new TrackLayer
@@ -576,10 +621,19 @@ public static class Interpreter
         notation.StartTime = globalBeat;
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
+        if (track.ActivePhrase is not null)
+        {
+            globalBeat = PhraseTimingShaper.Apply(
+                globalBeat,
+                notation.DurationBeats,
+                track.ActivePhrase);
+        }
+
         var (rampVelocity, _) = DynamicContext.Resolve(track.DynamicRamp);
         var (resolvedNoteVelocity, resolvedRampVelocity, effectiveDynamic) =
             ResolvePhraseVelocities(track, note.Velocity, rampVelocity, result);
         var midiNumber = notation.ResolvedMidiNumber;
+        var articulation = notation.Articulation ?? track.ActivePhrase?.DefaultArticulation;
         PlaybackShapeResult? lastShaped = null;
 
         foreach (var layer in GetPlaybackLayers(track))
@@ -590,7 +644,7 @@ public static class Interpreter
                 notation.Dynamic,
                 effectiveDynamic,
                 track.CurrentVelocity,
-                notation.Articulation,
+                articulation,
                 layer.InstrumentName,
                 notation.DurationBeats);
 
@@ -674,8 +728,18 @@ public static class Interpreter
         if (spacedAdjusted)
             AddWarning(result, "Harmonic spacing adjustment applied");
 
-        var durationMs = result.TempoMap.BeatsToMilliseconds(globalBeat, chord.DurationBeats);
         var durationBeats = BeatMath.RoundBeat(chord.DurationBeats);
+        var chordStartBeat = globalBeat;
+
+        if (track.ActivePhrase is not null)
+        {
+            chordStartBeat = PhraseTimingShaper.Apply(
+                globalBeat,
+                durationBeats,
+                track.ActivePhrase);
+        }
+
+        var durationMs = result.TempoMap.BeatsToMilliseconds(chordStartBeat, durationBeats);
 
         foreach (var layer in GetPlaybackLayers(track))
         {
@@ -698,7 +762,7 @@ public static class Interpreter
             {
                 track.Notes.Add(new TimedNote(
                     spacedNotes[i],
-                    globalBeat,
+                    chordStartBeat,
                     durationBeats,
                     durationMs,
                     ApplyTrackGain(balancedVelocities[i], track.Gain),

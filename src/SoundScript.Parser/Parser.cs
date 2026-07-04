@@ -315,6 +315,24 @@ public sealed class Parser
         if (Match(TokenType.Transition))
             return ParsePhraseTransitionStatement();
 
+        if (Match(TokenType.PhraseArticulation))
+            return ParsePhraseArticulationStatement();
+
+        if (Match(TokenType.Crescendo))
+            return new PhraseEnvelopeNode { Envelope = PhraseEnvelopeType.Crescendo };
+
+        if (Match(TokenType.Decrescendo))
+            return new PhraseEnvelopeNode { Envelope = PhraseEnvelopeType.Decrescendo };
+
+        if (Match(TokenType.Swing))
+            return ParsePhraseSwingStatement();
+
+        if (Match(TokenType.Push))
+            return ParsePhrasePushStatement();
+
+        if (Match(TokenType.Pull))
+            return ParsePhrasePullStatement();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -358,9 +376,12 @@ public sealed class Parser
         {
             Curve = token.Value.ToLowerInvariant() switch
             {
-                "soft" => PhraseCurveType.Soft,
-                "hard" => PhraseCurveType.Hard,
+                "soft" or "gentle" => PhraseCurveType.Soft,
+                "hard" or "strong" or "aggressive" => PhraseCurveType.Hard,
                 "balanced" => PhraseCurveType.Balanced,
+                "expressive" => PhraseCurveType.Expressive,
+                "swell" => PhraseCurveType.Swell,
+                "fade" => PhraseCurveType.Fade,
                 _ => throw Invalid(token, $"Unknown phrase curve '{token.Value}'.")
             }
         };
@@ -374,10 +395,61 @@ public sealed class Parser
             Mode = token.Value.ToLowerInvariant() switch
             {
                 "smooth" => PhraseTransitionMode.Smooth,
-                "abrupt" => PhraseTransitionMode.Abrupt,
+                "abrupt" or "sharp" => PhraseTransitionMode.Abrupt,
+                "soft" => PhraseTransitionMode.Soft,
+                "expressive" => PhraseTransitionMode.Expressive,
                 _ => throw Invalid(token, $"Unknown phrase transition '{token.Value}'.")
             }
         };
+    }
+
+    private PhraseArticulationNode ParsePhraseArticulationStatement()
+    {
+        if (!Check(TokenType.Articulation))
+        {
+            var token = Peek();
+            throw Invalid(token, "Expected articulation after 'articulation'.");
+        }
+
+        var articulationToken = Advance();
+        return new PhraseArticulationNode
+        {
+            Articulation = articulationToken.Value.ToLowerInvariant() switch
+            {
+                "staccato" => ArticulationType.Staccato,
+                "legato" => ArticulationType.Legato,
+                "accent" => ArticulationType.Accent,
+                "detached" => ArticulationType.Staccato,
+                _ => throw Invalid(articulationToken, $"Unknown phrase articulation '{articulationToken.Value}'.")
+            }
+        };
+    }
+
+    private PhraseSwingNode ParsePhraseSwingStatement()
+    {
+        var token = Expect(TokenType.Number, "swing ratio");
+        if (!double.TryParse(token.Value, out var swingValue) || swingValue < 0 || swingValue > 1)
+            throw Invalid(token, "Swing ratio must be between 0 and 1.");
+
+        return new PhraseSwingNode { Ratio = swingValue };
+    }
+
+    private PhrasePushNode ParsePhrasePushStatement()
+    {
+        var token = Expect(TokenType.Number, "push value");
+        if (!double.TryParse(token.Value, out var pushValue) || pushValue < 0)
+            throw Invalid(token, "Push value must be non-negative.");
+
+        return new PhrasePushNode { Beats = pushValue };
+    }
+
+    private PhrasePullNode ParsePhrasePullStatement()
+    {
+        var token = Expect(TokenType.Number, "pull value");
+        if (!double.TryParse(token.Value, out var pullValue) || pullValue < 0)
+            throw Invalid(token, "Pull value must be non-negative.");
+
+        return new PhrasePullNode { Beats = pullValue };
     }
 
     private OrchestrationNode ParseOrchestrationStatement()

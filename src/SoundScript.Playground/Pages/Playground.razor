@@ -18,6 +18,7 @@
         <button type="button" class="btn btn-secondary" @onclick="LoadHumanizeExample">Humanize</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadAdvancedChordsExample">Chords+</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadPhrasesExample">Phrases</button>
+        <button type="button" class="btn btn-secondary" @onclick="LoadV3PhrasesExample">Phrases V3</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadPatternsExample">Patterns</button>
         <button type="button" class="btn btn-secondary" @onclick="LoadOrchestrationExample">Orchestration</button>
     </div>
@@ -89,6 +90,8 @@
                 <span>Parser</span>
                 <span class="arrow">→</span>
                 <span>Interpreter</span>
+                <span class="arrow">→</span>
+                <span>PhraseTimingShaper</span>
                 <span class="arrow">→</span>
                 <span>PhraseShaper</span>
                 <span class="arrow">→</span>

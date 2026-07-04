@@ -20,4 +20,10 @@
     <ProjectReference Include="..\SoundScript.Cli\SoundScript.Cli.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Golden\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

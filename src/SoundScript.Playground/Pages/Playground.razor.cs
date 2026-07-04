@@ -181,6 +181,39 @@ public partial class Playground
     ClearState();
   }
 
+  private void LoadV3PhrasesExample()
+  {
+    ScriptText =
+        """
+        tempo 108
+        pattern arp { up }
+
+        block verse {
+            phrase {
+                curve gentle
+                transition sharp
+                crescendo
+                articulation legato
+                swing 0.67
+                mf
+                play arp Cmaj q
+            }
+        }
+
+        track melody {
+            instrument violin
+            phrase {
+                curve swell
+                transition expressive
+                mf
+                C4 q E4 q G4 q
+            }
+            play verse
+        }
+        """;
+    ClearState();
+  }
+
   private void LoadPatternsExample()
   {
     ScriptText =

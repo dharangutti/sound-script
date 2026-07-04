@@ -15,6 +15,7 @@ Runnable example scripts for every major feature.
 | [humanization.ss](../examples/humanization.ss) | Deterministic jitter | `... run examples/humanization.ss` |
 | [advanced-chords.ss](../examples/advanced-chords.ss) | drop2, inv1, spread | `... run examples/advanced-chords.ss` |
 | [phrases.ss](../examples/phrases.ss) | Phrase engine v2 | `... run examples/phrases.ss` |
+| [phrases-v3.ss](../examples/phrases-v3.ss) | Phrase engine v3 (aliases, envelopes, timing) | `... run examples/phrases-v3.ss` |
 | [patterns.ss](../examples/patterns.ss) | Arp, strum, rhythm | `... run examples/patterns.ss` |
 | [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
