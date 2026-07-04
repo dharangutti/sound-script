@@ -107,6 +107,7 @@ MidiGenerator → output.mid
 | [examples/industrial-conveyor-drift.ss](examples/industrial-conveyor-drift.ss) | Industrial cue — conveyor timing drift |
 | [examples/industrial-temperature-trend.ss](examples/industrial-temperature-trend.ss) | Industrial cue — temperature trend |
 | [examples/industrial-robotic-arm.ss](examples/industrial-robotic-arm.ss) | Industrial cue — robotic arm motion phases |
+| [examples/vocal-song.ss](examples/vocal-song.ss) | Vocal track — lyrics bound to pitches via phonetics |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -126,6 +127,23 @@ dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
 
 → [docs/whats-new-v1.2.md](docs/whats-new-v1.2.md)
 
+## Vocal Track (New)
+
+SoundScript now has a parallel **voice engine**: write lyrics beside pitches and a
+deterministic phonetics engine (syllabification + maximal-onset alignment) binds
+each syllable to a note, exporting karaoke-standard MIDI lyric events.
+
+```
+voice lead {
+    vocal choir
+    mf
+    sing "Twinkle twinkle little star" C4 q C4 q G4 q G4 q A4 q A4 q G4 h
+}
+```
+
+The instrumental pipeline is untouched — voices interpret in a separate branch and
+render onto a reserved MIDI channel. → [docs/vocal.md](docs/vocal.md)
+
 ## Architecture
 
 ```
@@ -133,6 +151,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
     SoundScript.Core/       # AST, TempoAutomationMap, InstrumentMap
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
     SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
+    SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Cli/        # CLI (ProgramLoader)
     SoundScript.Playground/ # Browser playground
 
@@ -200,6 +219,7 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 | [docs/phrases-v3.md](docs/phrases-v3.md) | Phrase engine v3 |
 | [docs/patterns.md](docs/patterns.md) | Pattern engine |
 | [docs/orchestration.md](docs/orchestration.md) | Orchestration helpers |
+| [docs/vocal.md](docs/vocal.md) | Vocal track + phonetics engine |
 | [docs/pipeline.md](docs/pipeline.md) | Interpreter pipeline |
 | [docs/architecture.md](docs/architecture.md) | System architecture |
 | [docs/examples.md](docs/examples.md) | Example catalog |

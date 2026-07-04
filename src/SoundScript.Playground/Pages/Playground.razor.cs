@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Midi;
 using SoundScript.Parser;
+using SoundScript.Voice;
 
 namespace SoundScript.Playground.Pages;
 
@@ -249,6 +250,27 @@ public partial class Playground
     ClearState();
   }
 
+  private void LoadVoiceExample()
+  {
+    ScriptText =
+        """
+        tempo 100
+
+        track accompaniment {
+            instrument piano
+            Cmaj h Fmaj h
+            Cmaj h Gmaj h
+        }
+
+        voice lead {
+            vocal choir
+            mf
+            sing "Twinkle twinkle little star" C4 q C4 q G4 q G4 q A4 q A4 q G4 h
+        }
+        """;
+    ClearState();
+  }
+
   private void LoadMelodyExample()
   {
     ScriptText =
@@ -382,6 +404,7 @@ public partial class Playground
       var tokens = new Tokenizer(ScriptText).Tokenize();
       var program = new SoundScript.Parser.Parser(tokens).Parse();
       var interpreted = Interpreter.Interpret(program, "playground.ss");
+      VocalInterpreter.Apply(program, interpreted);
 
       foreach (var warning in interpreted.Warnings)
       {
@@ -397,7 +420,10 @@ public partial class Playground
 
       await Js.InvokeVoidAsync("startPlayback", MidiBytes);
 
-      StatusMessage = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s) at {interpreted.Tempo} BPM.";
+      var status = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s)";
+      if (interpreted.VocalTracks.Count > 0)
+        status += $", {interpreted.VocalTracks.Sum(v => v.Syllables.Count)} sung syllable(s)";
+      StatusMessage = $"{status} at {interpreted.Tempo} BPM.";
     }
     catch (Exception ex)
     {

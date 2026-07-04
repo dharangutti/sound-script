@@ -51,5 +51,8 @@ public enum TokenType
     Orchestration,
     Import,
     StringLiteral,
+    Voice,
+    Sing,
+    Vocal,
     EndOfFile
 }

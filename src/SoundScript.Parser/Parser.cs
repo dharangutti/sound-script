@@ -37,6 +37,9 @@ public sealed class Parser
         if (Match(TokenType.Track))
             return ParseTrackBlock();
 
+        if (Match(TokenType.Voice))
+            return ParseVoiceBlock();
+
         if (Match(TokenType.Sequence))
             return ParseSequenceBlock();
 
@@ -131,6 +134,71 @@ public sealed class Parser
 
         Expect(TokenType.RightBrace, "}");
         return track;
+    }
+
+    private VoiceNode ParseVoiceBlock()
+    {
+        var name = ParseName("voice name");
+        Expect(TokenType.LeftBrace, "{");
+
+        var voice = new VoiceNode { Name = name };
+
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            voice.Body.Add(ParseVoiceBodyStatement());
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return voice;
+    }
+
+    private AstNode ParseVoiceBodyStatement()
+    {
+        if (Match(TokenType.Vocal))
+            return ParseVocalTimbreStatement();
+
+        if (Match(TokenType.Sing))
+            return ParseSingStatement();
+
+        if (Match(TokenType.Rest))
+            return ParseRestStatement();
+
+        if (Match(TokenType.Dynamic))
+            return ParseDynamicStatement();
+
+        if (Match(TokenType.Velocity))
+            return ParseVelocityStatement();
+
+        var unexpected = Peek();
+        throw Invalid(unexpected,
+            $"Unexpected token '{unexpected.Value}' in voice body. Voice blocks support: vocal, sing, rest, dynamics, velocity.");
+    }
+
+    private VocalTimbreNode ParseVocalTimbreStatement()
+    {
+        var nameToken = Expect(TokenType.Identifier, "vocal timbre name");
+        return new VocalTimbreNode
+        {
+            Name = nameToken.Value,
+            ProgramNumber = VocalTimbreMap.Resolve(nameToken.Value)
+        };
+    }
+
+    private SingNode ParseSingStatement()
+    {
+        var lyricToken = Expect(TokenType.StringLiteral, "lyric string after 'sing'");
+        var sing = new SingNode { Lyric = lyricToken.Value };
+
+        while (Check(TokenType.Note))
+        {
+            var noteToken = Advance();
+            sing.Notes.Add(BuildNoteNode(noteToken));
+        }
+
+        if (sing.Notes.Count == 0)
+            throw Invalid(lyricToken, "sing requires at least one note after the lyric.");
+
+        return sing;
     }
 
     private SequenceNode ParseSequenceBlock()
@@ -943,7 +1011,8 @@ public sealed class Parser
             or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
             or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
             or TokenType.Curve or TokenType.Transition or TokenType.Pattern
-            or TokenType.PatternRhythm or TokenType.Orchestration)
+            or TokenType.PatternRhythm or TokenType.Orchestration
+            or TokenType.Voice or TokenType.Sing or TokenType.Vocal)
         {
             Advance();
             return token.Value;

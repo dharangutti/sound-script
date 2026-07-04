@@ -18,6 +18,7 @@
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
     <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
+    <ProjectReference Include="..\SoundScript.Voice\SoundScript.Voice.csproj" />
   </ItemGroup>
 
   <Target Name="FlattenPlaygroundPublish" AfterTargets="Publish">

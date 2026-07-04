@@ -76,7 +76,10 @@ public sealed class Tokenizer
         ["rhythm"] = TokenType.PatternRhythm,
         ["double"] = TokenType.Orchestration,
         ["reinforce"] = TokenType.Orchestration,
-        ["brighten"] = TokenType.Orchestration
+        ["brighten"] = TokenType.Orchestration,
+        ["voice"] = TokenType.Voice,
+        ["sing"] = TokenType.Sing,
+        ["vocal"] = TokenType.Vocal
     };
 
     private static readonly string[] ChordSuffixes =
