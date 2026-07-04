@@ -47,7 +47,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, browser playground, cross-platform CLI",
+                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, browser playground with spoken lyrics, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
                 "codeRepository": "https://github.com/dharangutti/sound-script",
                 "author": {
@@ -539,6 +539,18 @@ tempo 120 → 140 over 4 bars</pre>
                         <a href="doc.html?p=advanced-chords.md">Advanced chords</a>
                     </p>
                 </div>
+                <div class="card">
+                    <h3>Vocal Track — New</h3>
+                    <pre>voice lead {
+    vocal choir
+    sing "Twinkle twinkle" C4 q C4 q G4 q G4 q
+}</pre>
+                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
+                        Lyrics bound to notes by a deterministic phonetics engine; spoken aloud in the
+                        <a href="playground/">Playground</a>, exported as karaoke lyric events.
+                        <a href="doc.html?p=vocal.md">Vocal track docs</a>
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -566,6 +578,14 @@ tempo 120 → 140 over 4 bars</pre>
                         <strong>Or try the browser playground</strong><br>
                         <a href="playground/">Open the Playground</a><br>
                         <span style="color: var(--muted); font-size: 0.9rem;">Type SoundScript, compile to MIDI, and hear it instantly — runs entirely client-side at <code>/playground/</code> in any modern browser (Chrome, Edge, Firefox, Safari — desktop and mobile).</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="step-num">4</span>
+                    <div>
+                        <strong>Make it sing</strong><br>
+                        <code>dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss</code><br>
+                        <span style="color: var(--muted); font-size: 0.9rem;">Or click the <em>Voice</em> preset in the Playground and press Run — the lyrics are spoken over the melody, and the downloaded MIDI carries them as karaoke lyric events. <a href="doc.html?p=vocal.md">Vocal track docs →</a></span>
                     </div>
                 </li>
             </ul>
@@ -631,7 +651,8 @@ Cmaj w</pre>
                     <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
                         <a href="doc.html?p=whats-new-v2.md">What's new in V2</a><br>
                         <a href="doc.html?p=imports.md">Imports</a> · <a href="doc.html?p=patterns.md">Patterns</a><br>
-                        <a href="doc.html?p=phrases.md">Phrases</a> · <a href="doc.html?p=orchestration.md">Orchestration</a>
+                        <a href="doc.html?p=phrases.md">Phrases</a> · <a href="doc.html?p=orchestration.md">Orchestration</a><br>
+                        <a href="doc.html?p=vocal.md">Vocal track — lyrics &amp; phonetics</a>
                     </p>
                 </div>
                 <div class="card">

@@ -142,7 +142,17 @@ voice lead {
 ```
 
 The instrumental pipeline is untouched — voices interpret in a separate branch and
-render onto a reserved MIDI channel. → [docs/vocal.md](docs/vocal.md)
+render onto a reserved MIDI channel. In the [Playground](https://soundscript.net/playground/),
+lyrics are **spoken aloud** over the melody via the browser's speech synthesis (click the
+*Voice* preset and press Run); the exported MIDI carries them as standard karaoke lyric
+events for DAWs and singing synthesizers.
+
+```bash
+# try it from the CLI
+dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-song.mid
+```
+
+→ [docs/vocal.md](docs/vocal.md)
 
 ## Architecture
 

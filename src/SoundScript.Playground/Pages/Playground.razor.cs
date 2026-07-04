@@ -422,7 +422,15 @@ public partial class Playground
 
       var status = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s)";
       if (interpreted.VocalTracks.Count > 0)
+      {
         status += $", {interpreted.VocalTracks.Sum(v => v.Syllables.Count)} sung syllable(s)";
+
+        var speechWords = VocalSpeechTimeline.Build(interpreted);
+        var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+        if (!speechSupported)
+          WarningMessages.Add("This browser has no speech synthesis — lyrics play as melody only. The downloaded MIDI still contains the lyric events.");
+      }
+
       StatusMessage = $"{status} at {interpreted.Tempo} BPM.";
     }
     catch (Exception ex)
@@ -441,6 +449,7 @@ public partial class Playground
   private async Task StopAsync()
   {
     await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+    await Js.InvokeVoidAsync("SoundScriptVoice.stop");
     StatusMessage = "Stopped.";
     StateHasChanged();
   }

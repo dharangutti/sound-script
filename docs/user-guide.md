@@ -22,7 +22,8 @@ SoundScript is a deterministic music language: you write plain text, the engine 
 10. [Phrases: Expressive Shaping (V2 + V3)](#10-phrases-expressive-shaping-v2--v3)
 11. [Production Polish: Gain, Humanize, Orchestration](#11-production-polish-gain-humanize-orchestration)
 12. [Putting It Together: An Industrial Audio Cue](#12-putting-it-together-an-industrial-audio-cue)
-13. [Quick Reference Card](#13-quick-reference-card)
+13. [Singing: The Vocal Track](#13-singing-the-vocal-track)
+14. [Quick Reference Card](#14-quick-reference-card)
 
 ---
 
@@ -440,7 +441,43 @@ The [Industrial Applications](https://soundscript.net/industrial/) page walks th
 dotnet run --project src/SoundScript.Cli -- run examples/industrial-machine-state.ss
 ```
 
-## 13. Quick Reference Card
+## 13. Singing: The Vocal Track
+
+A `voice` block runs parallel to your tracks and binds **lyrics to pitches**. Write the words in a string after `sing`, followed by the notes to sing them on:
+
+```
+tempo 100
+
+track accompaniment {
+    instrument piano
+    Cmaj h Fmaj h
+    Cmaj h Gmaj h
+}
+
+voice lead {
+    vocal choir
+    mf
+    sing "Twinkle twinkle little star" C4 q C4 q G4 q G4 q A4 q A4 q G4 h
+}
+```
+
+You don't align syllables by hand — a deterministic **phonetics engine** splits each word (*twin-kle*, *lit-tle*) and binds one syllable per note. Fewer syllables than notes produces a **melisma** (the vowel is held across the extra notes, as in real vocal writing); more syllables than notes merges the tail onto the final note with a warning.
+
+Inside a voice you can use `vocal` (timbre: `choir`, `oohs`, `synthvoice`), `sing`, `rest`, dynamics, and `velocity`. Instrumental statements are rejected — voices sing one pitch at a time.
+
+**Hearing the words.** In the [Playground](https://soundscript.net/playground/), press the *Voice* preset and **Run**: the lyrics are spoken over the melody using your browser's speech synthesis (change the string, run again, and the spoken words follow). The downloaded MIDI carries the lyrics as standard karaoke lyric events (`FF 05`), which DAWs display and singing synthesizers (VOCALOID, Synthesizer V, Sinsy) can render with an actual vocal model. From the CLI:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-song.mid
+```
+
+```
+Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vocal-song.mid at 100 BPM.
+```
+
+→ [vocal.md](vocal.md) for the full phonetics and export reference.
+
+## 14. Quick Reference Card
 
 | I want to… | Write |
 |------------|-------|
@@ -466,6 +503,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/industrial-machine-stat
 | Balance the mix | `gain 0.85` |
 | Sound human (reproducibly) | `humanize 0.02` |
 | Thicken chords | `double octave` · `reinforce bass` · `brighten top` |
+| Sing lyrics | `voice lead { vocal choir sing "Hello world" C4 q G4 q }` |
 
 ### Where next
 
