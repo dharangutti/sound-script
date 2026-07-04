@@ -399,6 +399,20 @@
         .dyn { color: var(--warm); }
         .note { color: var(--accent); }
 
+        .snippet-source {
+            margin: 0.75rem 0 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .snippet-source a {
+            color: var(--accent);
+            text-decoration: none;
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+        }
+
+        .snippet-source a:hover { text-decoration: underline; }
+
         /* —— Narrative —— */
         .narrative {
             background: var(--surface);
@@ -552,6 +566,7 @@
             <div class="nav-links">
                 <a href="/">Home</a>
                 <a href="/playground/">Playground</a>
+                <a href="/user-guide.md">User Guide</a>
                 <a href="/phrases-v3.md">V3 Reference</a>
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a>
             </div>
@@ -709,7 +724,7 @@
         <section>
             <h2>Case Studies — Artistic Form, Engineering Substance</h2>
             <div class="prose">
-                <p>Five industrial scenarios, five compact scripts. Each maps a real process parameter to V3 constructs and produces a deterministic cue ready for the Playground.</p>
+                <p>Five industrial scenarios, five complete scripts. Each maps a real process parameter to V3 constructs and produces a deterministic cue. Every snippet below is a full, runnable program — paste it into the <a href="/playground/" style="color:var(--accent);">Playground</a> or run it from the repository with <code style="font-family:monospace;color:var(--accent);font-size:0.85rem;">dotnet run --project src/SoundScript.Cli -- run examples/industrial-*.ss</code>.</p>
             </div>
 
             <!-- Case Study 1 -->
@@ -732,11 +747,40 @@
                     </div>
                     <div class="case-snippet">
                         <h4>Snippet</h4>
-                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve gentle</span>; <span class="kw">articulation legato</span>; <span class="dyn">mp</span>; <span class="note">C4 q</span> }
-<span class="kw">phrase</span> { <span class="kw">curve strong</span>; <span class="kw">articulation accent</span>; <span class="dyn">mf</span>; <span class="note">G3 e</span> }
-<span class="kw">phrase</span> { <span class="kw">transition sharp</span>; <span class="kw">articulation staccato</span>; <span class="dyn">f</span>; <span class="note">C5 e</span> }
-<span class="kw">phrase</span> { <span class="kw">crescendo</span>; <span class="dyn">mf</span>; <span class="note">E4 q</span> }
-<span class="kw">phrase</span> { <span class="kw">decrescendo</span>; <span class="dyn">mp</span>; <span class="note">C3 q</span> }</pre>
+                        <pre class="snippet"><span class="kw">tempo</span> 96
+<span class="kw">instrument</span> synth
+
+<span class="kw">track</span> spatial {
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> gentle
+        <span class="kw">articulation</span> legato
+        <span class="dyn">mp</span>
+        <span class="note">C4 q E4 q G4 h</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> strong
+        <span class="kw">articulation</span> accent
+        <span class="dyn">mf</span>
+        <span class="note">G3 e G3 e G3 q</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">transition</span> sharp
+        <span class="kw">articulation</span> staccato
+        <span class="dyn">f</span>
+        <span class="note">C5 e C5 e C5 e</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">crescendo</span>
+        <span class="dyn">mf</span>
+        <span class="note">E4 q E4 q E4 q E4 q</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">decrescendo</span>
+        <span class="dyn">mp</span>
+        <span class="note">C4 q A3 q F3 q C3 q</span>
+    }
+}</pre>
+                        <p class="snippet-source">Runnable script: <a href="https://github.com/dharangutti/sound-script/blob/main/examples/industrial-blind-assist.ss">examples/industrial-blind-assist.ss</a></p>
                     </div>
                 </div>
                 <div class="case-narrative">
@@ -761,13 +805,46 @@
                     </div>
                     <div class="case-snippet">
                         <h4>Snippet</h4>
-                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve gentle</span>; <span class="kw">articulation legato</span>; <span class="dyn">mp</span>; <span class="note">C4 q</span> }
-<span class="kw">phrase</span> { <span class="kw">curve strong</span>; <span class="kw">articulation accent</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
-<span class="kw">phrase</span> { <span class="kw">transition sharp</span>; <span class="kw">articulation staccato</span>; <span class="dyn">f</span>; <span class="note">G4 e</span> }</pre>
+                        <pre class="snippet"><span class="kw">tempo</span> 100
+<span class="kw">instrument</span> organ
+
+<span class="kw">block</span> idle {
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> gentle
+        <span class="kw">articulation</span> legato
+        <span class="dyn">mp</span>
+        <span class="note">C4 q E4 q G4 h</span>
+    }
+}
+
+<span class="kw">block</span> running {
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> strong
+        <span class="kw">articulation</span> accent
+        <span class="dyn">mf</span>
+        <span class="note">C3 e G3 e C4 e G3 e</span>
+    }
+}
+
+<span class="kw">block</span> critical {
+    <span class="kw">phrase</span> {
+        <span class="kw">transition</span> sharp
+        <span class="kw">articulation</span> staccato
+        <span class="dyn">f</span>
+        <span class="note">G4 e G4 e G4 e</span> <span class="kw">rest</span> <span class="note">e</span> <span class="note">G4 e G4 e G4 e</span>
+    }
+}
+
+<span class="kw">track</span> machine {
+    <span class="kw">play</span> idle
+    <span class="kw">play</span> running
+    <span class="kw">play</span> critical
+}</pre>
+                        <p class="snippet-source">Runnable script: <a href="https://github.com/dharangutti/sound-script/blob/main/examples/industrial-machine-state.ss">examples/industrial-machine-state.ss</a></p>
                     </div>
                 </div>
                 <div class="case-narrative">
-                    <p>Three machine states, three phrases. Idle breathes — gentle, legato, mp — the line at rest. Running engages: strong curve, accented attack, mf energy. Critical is unmistakable: sharp transition, staccato articulation, forte. No color codes required. The HMI gains an auditory layer that operators perceive peripherally, reducing glance time and missed transitions.</p>
+                    <p>Three machine states, three named blocks — <code style="font-family:monospace;">idle</code>, <code style="font-family:monospace;">running</code>, <code style="font-family:monospace;">critical</code> — sequenced by a single track. Idle breathes — gentle, legato, mp — the line at rest. Running engages: strong curve, accented attack, mf energy. Critical is unmistakable: sharp transition, staccato triplets split by a rest, forte. Because each state is a reusable block, teams standardize the vocabulary once and <code style="font-family:monospace;">play</code> it from any track. The HMI gains an auditory layer operators perceive peripherally, reducing glance time and missed transitions.</p>
                 </div>
             </article>
 
@@ -788,9 +865,27 @@
                     </div>
                     <div class="case-snippet">
                         <h4>Snippet</h4>
-                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">swing 0.67</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
-<span class="kw">phrase</span> { <span class="kw">push 0.02</span>; <span class="dyn">mf</span>; <span class="note">C3 e</span> }
-<span class="kw">phrase</span> { <span class="kw">pull 0.03</span>; <span class="dyn">f</span>; <span class="note">C3 e</span> }</pre>
+                        <pre class="snippet"><span class="kw">tempo</span> 120
+<span class="kw">instrument</span> synth
+
+<span class="kw">track</span> conveyor {
+    <span class="kw">phrase</span> {
+        <span class="kw">swing</span> 0.67
+        <span class="dyn">mf</span>
+        <span class="note">C3 e C3 e C3 e C3 e C3 e C3 e C3 e C3 e</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">push</span> 0.02
+        <span class="dyn">mf</span>
+        <span class="note">C3 e C3 e C3 e C3 e C3 e C3 e C3 e C3 e</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">pull</span> 0.03
+        <span class="dyn">f</span>
+        <span class="note">C3 e C3 e C3 e C3 e C3 e C3 e C3 e C3 e</span>
+    }
+}</pre>
+                        <p class="snippet-source">Runnable script: <a href="https://github.com/dharangutti/sound-script/blob/main/examples/industrial-conveyor-drift.ss">examples/industrial-conveyor-drift.ss</a></p>
                     </div>
                 </div>
                 <div class="case-narrative">
@@ -815,9 +910,29 @@
                     </div>
                     <div class="case-snippet">
                         <h4>Snippet</h4>
-                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve expressive</span>; <span class="kw">crescendo</span>; <span class="dyn">mf</span>; <span class="note">C5 q</span> }
-<span class="kw">phrase</span> { <span class="kw">curve balanced</span>; <span class="dyn">mp</span>; <span class="note">E4 q</span> }
-<span class="kw">phrase</span> { <span class="kw">curve fade</span>; <span class="kw">decrescendo</span>; <span class="dyn">p</span>; <span class="note">C3 q</span> }</pre>
+                        <pre class="snippet"><span class="kw">tempo</span> 90
+<span class="kw">instrument</span> flute
+
+<span class="kw">track</span> thermal {
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> expressive
+        <span class="kw">crescendo</span>
+        <span class="dyn">mf</span>
+        <span class="note">C4 q D4 q E4 q G4 q</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> balanced
+        <span class="dyn">mp</span>
+        <span class="note">E4 q E4 q E4 q E4 q</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> fade
+        <span class="kw">decrescendo</span>
+        <span class="dyn">p</span>
+        <span class="note">G4 q E4 q D4 q C4 q</span>
+    }
+}</pre>
+                        <p class="snippet-source">Runnable script: <a href="https://github.com/dharangutti/sound-script/blob/main/examples/industrial-temperature-trend.ss">examples/industrial-temperature-trend.ss</a></p>
                     </div>
                 </div>
                 <div class="case-narrative">
@@ -842,13 +957,31 @@
                     </div>
                     <div class="case-snippet">
                         <h4>Snippet</h4>
-                        <pre class="snippet"><span class="kw">phrase</span> { <span class="kw">curve swell</span>; <span class="dyn">mp</span>; <span class="note">C4 h</span> }
-<span class="kw">phrase</span> { <span class="kw">articulation accent</span>; <span class="dyn">f</span>; <span class="note">G4 e</span> }
-<span class="kw">phrase</span> { <span class="kw">curve fade</span>; <span class="dyn">p</span>; <span class="note">C3 q</span> }</pre>
+                        <pre class="snippet"><span class="kw">tempo</span> 104
+<span class="kw">instrument</span> piano
+
+<span class="kw">track</span> arm {
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> swell
+        <span class="dyn">mp</span>
+        <span class="note">C4 q E4 q G4 q C5 q</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">articulation</span> accent
+        <span class="dyn">f</span>
+        <span class="note">G4 e G4 e</span>
+    }
+    <span class="kw">phrase</span> {
+        <span class="kw">curve</span> fade
+        <span class="dyn">p</span>
+        <span class="note">C5 q G4 q E4 q C4 q</span>
+    }
+}</pre>
+                        <p class="snippet-source">Runnable script: <a href="https://github.com/dharangutti/sound-script/blob/main/examples/industrial-robotic-arm.ss">examples/industrial-robotic-arm.ss</a></p>
                     </div>
                 </div>
                 <div class="case-narrative">
-                    <p>A pick-and-place cycle in three phrases. Approach: swell curve over a half note at mp — the arm draws near with rising intent. Grip: accent at forte — contact, commitment, the moment of truth. Release: fade at piano — withdrawal, completion, safe clearance. Integrators map motion phases to audible choreography. Cobot cells gain expressiveness without adding visual clutter to an already dense workspace.</p>
+                    <p>A pick-and-place cycle in three phrases. Approach: a swell curve rising through an ascending arpeggio at mp — the arm draws near with rising intent. Grip: two accented eighth notes at forte — contact, commitment, the moment of truth. Release: a fade curve descending back home at piano — withdrawal, completion, safe clearance. Integrators map motion phases to audible choreography. Cobot cells gain expressiveness without adding visual clutter to an already dense workspace.</p>
                 </div>
             </article>
         </section>
@@ -876,6 +1009,7 @@
             <p>Map your process parameters. Write a phrase. Hear deterministic industrial awareness — in the Playground, on your terms.</p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="/playground/">Explore SoundScript.net Playground</a>
+                <a class="btn btn-secondary" href="/user-guide.md">User Guide</a>
                 <a class="btn btn-secondary" href="/phrases-v3.md">V3 Phrase Reference</a>
                 <a class="btn btn-secondary" href="/whats-new-v3.md">What's New in V3</a>
             </div>
@@ -885,6 +1019,7 @@
             <p>
                 <a href="/">Home</a> ·
                 <a href="/playground/">Playground</a> ·
+                <a href="/user-guide.md">User Guide</a> ·
                 <a href="/phrases-v3.md">V3 Reference</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>
