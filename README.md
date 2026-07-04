@@ -155,6 +155,20 @@ existing script's output.
 
 → [docs/text-to-melody.md](docs/text-to-melody.md) · [docs/phoneme-composer.md](docs/phoneme-composer.md) · [docs/cli.md](docs/cli.md)
 
+## V4: Offline timbre synthesis
+
+V4 adds **SoundScript.Timbre** — deterministic MIDI → WAV/OGG using
+[SoundCSS](docs/soundcss.md) stylesheets. MIDI remains the backbone; timbre is
+a read-only leaf branch.
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.mid
+dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
+  --css examples/default.ssc --out twinkle.wav --text "Twinkle twinkle little star"
+```
+
+→ [docs/v4-architecture.md](docs/v4-architecture.md) · [docs/timbre-engine.md](docs/timbre-engine.md) · [docs/whats-new-v4.md](docs/whats-new-v4.md)
+
 ## Vocal Track (New)
 
 SoundScript now has a parallel **voice engine**: write lyrics beside pitches and a

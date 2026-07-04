@@ -31,6 +31,7 @@
                spellcheck="false"
                placeholder="Type plain text to compose from" />
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="ComposeFromTextAsync">Compose from text</button>
+        <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderAudioAsync">Render Audio</button>
     </div>
 
     <div class="presets">
@@ -65,6 +66,10 @@
                 @if (MidiBytes is not null)
                 {
                     <button type="button" class="btn btn-secondary" @onclick="DownloadAsync">Download MIDI</button>
+                }
+                @if (WavBytes is not null)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="DownloadWavAsync">Download WAV</button>
                 }
             </div>
 
@@ -118,6 +123,10 @@
                 <span>Voice</span>
                 <span class="arrow">+</span>
                 <span>PhonemeComposer</span>
+                <span class="arrow">→</span>
+                <span>SoundCSS</span>
+                <span class="arrow">→</span>
+                <span>Timbre</span>
             </div>
 
             <p class="hint">
@@ -126,6 +135,7 @@
                 the downloaded MIDI carries the lyrics as standard karaoke events.
                 <strong>Compose from text</strong> runs the deterministic <code>PhonemeComposer</code>
                 (text → syllables → phonemes → gestures → MIDI): the same text always produces the same MIDI bytes.
+                <strong>Render Audio</strong> adds the V4 offline timbre pass (MIDI → SoundCSS → WAV) — slow-motion synthesis, not real-time playback.
             </p>
         </section>
     </div>

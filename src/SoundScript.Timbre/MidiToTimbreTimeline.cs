@@ -1,0 +1,198 @@
+using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
+using SoundScript.Compose;
+
+namespace SoundScript.Timbre;
+
+/// <summary>One note-aligned timbre segment on the offline render timeline.</summary>
+public sealed record TimbreSegment(
+    double StartMs,
+    double DurationMs,
+    double PitchHz,
+    int Velocity,
+    string Phoneme,
+    TimbreProfile Profile);
+
+/// <summary>Frame-rate timeline for offline spectral synthesis.</summary>
+public sealed class TimbreTimeline
+{
+    public required int SampleRate { get; init; }
+    public required double FrameMs { get; init; }
+    public required double TotalDurationMs { get; init; }
+    public required IReadOnlyList<TimbreSegment> Segments { get; init; }
+
+    public int FrameCount => (int)Math.Ceiling(TotalDurationMs / FrameMs);
+    public int SampleCount => (int)Math.Ceiling(TotalDurationMs * SampleRate / 1000.0);
+}
+
+/// <summary>
+/// Reads a MIDI file, extracts note events, aligns phonemes to note timing,
+/// and produces a deterministic frame timeline for the spectral engine.
+/// MIDI supplies pitch, duration, timing, and articulation; phoneme identity
+/// comes from an optional text/sequence hint or signature guessing.
+/// </summary>
+public static class MidiToTimbreTimeline
+{
+    public const int DefaultSampleRate = 44100;
+    public const double DefaultFrameMs = 8.0;
+    private const int TicksPerQuarterNote = 480;
+
+    /// <summary>Builds a timbre timeline from a MIDI file path.</summary>
+    public static TimbreTimeline Build(
+        string midiPath,
+        IReadOnlyDictionary<string, TimbreProfileOverrides>? cssOverrides = null,
+        IReadOnlyList<string>? phonemes = null,
+        int sampleRate = DefaultSampleRate,
+        double frameMs = DefaultFrameMs,
+        string? preferredTrackName = PhraseAssembler.TrackName)
+    {
+        var midiFile = MidiFile.Read(midiPath);
+        return Build(midiFile, cssOverrides, phonemes, sampleRate, frameMs, preferredTrackName);
+    }
+
+    /// <summary>Builds a timbre timeline from an in-memory MIDI file.</summary>
+    public static TimbreTimeline Build(
+        MidiFile midiFile,
+        IReadOnlyDictionary<string, TimbreProfileOverrides>? cssOverrides = null,
+        IReadOnlyList<string>? phonemes = null,
+        int sampleRate = DefaultSampleRate,
+        double frameMs = DefaultFrameMs,
+        string? preferredTrackName = PhraseAssembler.TrackName)
+    {
+        var tempoMicroseconds = GetInitialTempo(midiFile);
+        var notes = ExtractNotes(midiFile, tempoMicroseconds, preferredTrackName);
+        var segments = AlignPhonemes(notes, cssOverrides, phonemes);
+        var totalDurationMs = segments.Count == 0
+            ? 0
+            : segments.Max(segment => segment.StartMs + segment.DurationMs) + frameMs;
+
+        return new TimbreTimeline
+        {
+            SampleRate = sampleRate,
+            FrameMs = frameMs,
+            TotalDurationMs = totalDurationMs,
+            Segments = segments
+        };
+    }
+
+    private static List<NoteEvent> ExtractNotes(
+        MidiFile midiFile,
+        int tempoMicroseconds,
+        string? preferredTrackName)
+    {
+        var events = new List<NoteEvent>();
+        var trackIndex = 0;
+
+        foreach (var chunk in midiFile.Chunks.OfType<TrackChunk>())
+        {
+            var trackName = GetTrackName(chunk) ?? $"track-{trackIndex}";
+            trackIndex++;
+
+            if (preferredTrackName is not null
+                && !string.Equals(trackName, preferredTrackName, StringComparison.Ordinal)
+                && events.Count > 0)
+                continue;
+
+            using var notesManager = chunk.ManageNotes();
+            foreach (var note in notesManager.Objects.OrderBy(n => n.Time))
+            {
+                var startMs = TicksToMilliseconds(note.Time, tempoMicroseconds);
+                var durationMs = TicksToMilliseconds(note.Length, tempoMicroseconds);
+                var durationBeats = note.Length / (double)TicksPerQuarterNote;
+                events.Add(new NoteEvent(
+                    trackName,
+                    note.NoteNumber,
+                    note.Velocity,
+                    startMs,
+                    durationMs,
+                    durationBeats));
+            }
+
+            if (preferredTrackName is not null
+                && string.Equals(trackName, preferredTrackName, StringComparison.Ordinal)
+                && events.Count > 0)
+                break;
+        }
+
+        if (events.Count == 0)
+        {
+            foreach (var chunk in midiFile.Chunks.OfType<TrackChunk>())
+            {
+                using var notesManager = chunk.ManageNotes();
+                foreach (var note in notesManager.Objects.OrderBy(n => n.Time))
+                {
+                    var startMs = TicksToMilliseconds(note.Time, tempoMicroseconds);
+                    var durationMs = TicksToMilliseconds(note.Length, tempoMicroseconds);
+                    var durationBeats = note.Length / (double)TicksPerQuarterNote;
+                    events.Add(new NoteEvent(
+                        "all",
+                        note.NoteNumber,
+                        note.Velocity,
+                        startMs,
+                        durationMs,
+                        durationBeats));
+                }
+            }
+        }
+
+        return events.OrderBy(note => note.StartMs).ThenBy(note => note.MidiNumber).ToList();
+    }
+
+    private static List<TimbreSegment> AlignPhonemes(
+        IReadOnlyList<NoteEvent> notes,
+        IReadOnlyDictionary<string, TimbreProfileOverrides>? cssOverrides,
+        IReadOnlyList<string>? phonemes)
+    {
+        var segments = new List<TimbreSegment>(notes.Count);
+        for (var i = 0; i < notes.Count; i++)
+        {
+            var note = notes[i];
+            var phoneme = phonemes is not null && i < phonemes.Count
+                ? phonemes[i]
+                : PhonemeTimbreMapper.GuessPhoneme(note.MidiNumber, note.DurationBeats, note.Velocity);
+
+            segments.Add(new TimbreSegment(
+                note.StartMs,
+                note.DurationMs,
+                MidiToFrequency(note.MidiNumber),
+                note.Velocity,
+                phoneme,
+                PhonemeTimbreMapper.Map(phoneme, cssOverrides)));
+        }
+
+        return segments;
+    }
+
+    private static int GetInitialTempo(MidiFile midiFile)
+    {
+        foreach (var chunk in midiFile.Chunks.OfType<TrackChunk>())
+        {
+            foreach (var tempoEvent in chunk.Events.OfType<SetTempoEvent>())
+                return (int)tempoEvent.MicrosecondsPerQuarterNote;
+        }
+
+        return 625_000; // 96 BPM — PhonemeComposer default
+    }
+
+    private static string? GetTrackName(TrackChunk chunk)
+    {
+        foreach (var sequenceEvent in chunk.Events.OfType<SequenceTrackNameEvent>())
+            return sequenceEvent.Text;
+        return null;
+    }
+
+    private static double TicksToMilliseconds(long ticks, int microsecondsPerQuarterNote) =>
+        ticks * microsecondsPerQuarterNote / (double)TicksPerQuarterNote / 1000.0;
+
+    private static double MidiToFrequency(int midiNumber) =>
+        440.0 * Math.Pow(2.0, (midiNumber - 69) / 12.0);
+
+    private sealed record NoteEvent(
+        string TrackName,
+        int MidiNumber,
+        int Velocity,
+        double StartMs,
+        double DurationMs,
+        double DurationBeats);
+}
