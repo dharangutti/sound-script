@@ -21,7 +21,20 @@ The playground ships with **V2** and **Core** preset groups (see `Playground.raz
 
 **Note:** Imports require the CLI (`ProgramLoader`); they are not available in the browser playground.
 
-The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI.
+## Text-to-Melody (V3.1)
+
+The playground has a **Text-to-Melody** row above the editor:
+
+| UI element | Behavior |
+|------------|----------|
+| Example input box | Plain text to compose from (default: `Twinkle twinkle little star`) |
+| **Compose from text** button | Runs the deterministic `PhonemeComposer` (text → syllables → phonemes → gestures → MIDI), plays the result, and enables **Download MIDI** |
+| Output preview | The status line shows syllable count, note count, and BPM (e.g. `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`) |
+
+The composed MIDI is byte-identical to the CLI output for the same text
+(`soundscript compose "<text>"`). → [text-to-melody.md](text-to-melody.md)
+
+The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI (+ Voice + PhonemeComposer).
 
 ## Build
 
@@ -48,6 +61,9 @@ python3 -m http.server 8080
 - [ ] Invalid syntax shows an error in the error panel
 - [ ] V2 preset buttons (Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Patterns, Orchestration) load scripts
 - [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
+- [ ] **Compose from text** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`
+- [ ] **Download MIDI** after composing saves a file byte-identical to `soundscript compose "Twinkle twinkle little star"`
+- [ ] Composing with an empty input shows `Nothing to compose: the text is empty.`
 - [ ] Pipeline display shows PhraseShaper, PatternExpander, Orchestration, Layers, Humanize
 
 ## Offline test

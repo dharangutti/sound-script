@@ -353,6 +353,37 @@ track melody {
 }
 ```
 
+## Text-to-Melody: `compose` (V3.1)
+
+`compose` is a top-level **CLI verb** beside `run` — it takes plain text, not a
+script, so it adds nothing to the grammar above:
+
+```bash
+soundscript compose "Twinkle twinkle little star" [output.mid]
+soundscript compose "Twinkle twinkle little star" out.mid --append file.ss
+```
+
+The text is split into syllables (the vocal engine's `Syllabifier`), each
+syllable into phonemes, each phoneme mapped to a musical gesture, and the
+gestures assembled into ordinary AST nodes (`PhraseNode`, `NoteNode`,
+`PhraseEnvelopeNode`) that the existing interpreter turns into a track named
+`phonemes`.
+
+Programmatic equivalents in `SoundScript.Compose`:
+
+| API | Result |
+|-----|--------|
+| `PhonemeComposer.ComposeProgram(text, tempo = 96)` | Complete `InterpretedProgram` (tempo map included), ready for `MidiGenerator.Write` |
+| `PhonemeComposer.Compose(text, tempo = 96)` | Just the `InterpretedTrack` named `phonemes` |
+| `PhonemeComposer.AppendTo(program, text)` | Adds the composed track to an existing `InterpretedProgram`, using its tempo |
+| `PhonemeComposer.BuildAst(text, tempo = 96)` | The program AST without interpreting it |
+
+**Determinism:** the mapping tables are pure data, string handling is
+culture-independent, and there is no randomness — identical text produces
+identical MIDI bytes on every platform, the same contract as scripts.
+
+→ [text-to-melody.md](text-to-melody.md) · [phoneme-composer.md](phoneme-composer.md) · [cli.md](cli.md)
+
 ## AST Node Types
 
 | Node | Purpose |
@@ -381,5 +412,7 @@ track melody {
 - [notation.md](notation.md) — Notation engine (Phase 2)
 - [expressive-notation.md](expressive-notation.md) — Rests, ties, articulations (Phase 3)
 - [whats-new-v2.md](whats-new-v2.md) — V2 changelog
+- [cli.md](cli.md) — CLI reference (`run`, `compose`)
+- [text-to-melody.md](text-to-melody.md) — Text-to-melody engine (V3.1)
 - [pipeline.md](pipeline.md) — Interpreter pipeline
 - [examples.md](examples.md) — Example catalog

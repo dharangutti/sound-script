@@ -10,6 +10,14 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 |----------|-------------|
 | [user-guide.md](user-guide.md) | Hands-on user guide — from first note to industrial audio cues, with runnable examples |
 
+### V3.1 Features
+
+| Document | Description |
+|----------|-------------|
+| [whats-new-v3.1.md](whats-new-v3.1.md) | V3.1 changelog — PhonemeComposer |
+| [text-to-melody.md](text-to-melody.md) | Text-to-melody pipeline — compose from plain text |
+| [phoneme-composer.md](phoneme-composer.md) | PhonemeComposer module reference |
+
 ### V3 Features
 
 | Document | Description |
@@ -38,6 +46,7 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 | Document | Description |
 |----------|-------------|
 | [language-reference.md](language-reference.md) | Complete syntax |
+| [cli.md](cli.md) | CLI reference (`run`, `compose`) |
 | [pipeline.md](pipeline.md) | Interpreter pipeline |
 | [architecture.md](architecture.md) | System architecture |
 | [examples.md](examples.md) | Example catalog |
@@ -58,6 +67,7 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 ```bash
 dotnet build
 dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
 ```
 
 ## Playground
