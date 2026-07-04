@@ -6,6 +6,9 @@ using SoundScriptParser = SoundScript.Parser.Parser;
 
 namespace SoundScript.Tests;
 
+// HumanizeApplicator.SetSeed mutates process-wide state; every class that calls
+// it shares this collection so xUnit never runs them concurrently.
+[Collection("HumanizeSeed")]
 public class HumanizeSeedEdgeCaseTests
 {
     [Fact]

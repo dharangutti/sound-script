@@ -7,6 +7,8 @@ using SoundScriptParser = SoundScript.Parser.Parser;
 
 namespace SoundScript.Tests;
 
+// shares the HumanizeSeed collection: SetSeed mutates process-wide state
+[Collection("HumanizeSeed")]
 public class HumanizeTests
 {
     [Fact]
