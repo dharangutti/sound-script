@@ -296,3 +296,48 @@ a:hover { text-decoration: underline; }
         min-height: 16rem;
     }
 }
+
+@media (max-width: 600px) {
+    .playground {
+        padding: 1rem 0.85rem 2.5rem;
+    }
+
+    .playground-header {
+        margin-bottom: 1rem;
+    }
+
+    .presets {
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .presets .btn {
+        padding: 0.45rem 0.8rem;
+        font-size: 0.82rem;
+    }
+
+    .preset-label {
+        flex-basis: 100%;
+        font-size: 0.8rem;
+    }
+
+    .pane {
+        padding: 0.85rem;
+    }
+
+    /* 16px minimum prevents iOS Safari from zooming in when the editor gains focus */
+    .script-input {
+        font-size: 16px;
+        min-height: 14rem;
+        padding: 0.85rem;
+    }
+
+    .actions .btn {
+        flex: 1 1 auto;
+        min-height: 44px;
+    }
+
+    .pipeline {
+        font-size: 0.72rem;
+    }
+}
