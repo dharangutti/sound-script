@@ -20,6 +20,18 @@ Runnable example scripts for every major feature.
 | [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 
+## Industrial Audio Cue Examples (V3)
+
+Complete scripts backing the [Industrial Applications](https://soundscript.net/industrial/) case studies.
+
+| Example | Scenario | Run |
+|---------|----------|-----|
+| [industrial-blind-assist.ss](../examples/industrial-blind-assist.ss) | Blind operator spatial awareness | `... run examples/industrial-blind-assist.ss` |
+| [industrial-machine-state.ss](../examples/industrial-machine-state.ss) | Machine state (idle / running / critical) | `... run examples/industrial-machine-state.ss` |
+| [industrial-conveyor-drift.ss](../examples/industrial-conveyor-drift.ss) | Conveyor timing drift (swing / push / pull) | `... run examples/industrial-conveyor-drift.ss` |
+| [industrial-temperature-trend.ss](../examples/industrial-temperature-trend.ss) | Temperature trend (rising / stable / falling) | `... run examples/industrial-temperature-trend.ss` |
+| [industrial-robotic-arm.ss](../examples/industrial-robotic-arm.ss) | Robotic arm motion phases (approach / grip / release) | `... run examples/industrial-robotic-arm.ss` |
+
 ## Updated v1.2 Examples
 
 | Example | V2 updates |
