@@ -16,27 +16,27 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://soundscript.net/user-guide.md</loc>
+        <loc>https://soundscript.net/doc.html?p=user-guide.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://soundscript.net/SoundScript.md</loc>
+        <loc>https://soundscript.net/doc.html?p=SoundScript.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://soundscript.net/language-reference.md</loc>
+        <loc>https://soundscript.net/doc.html?p=language-reference.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://soundscript.net/whats-new-v3.md</loc>
+        <loc>https://soundscript.net/doc.html?p=whats-new-v3.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://soundscript.net/phrases-v3.md</loc>
+        <loc>https://soundscript.net/doc.html?p=phrases-v3.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
