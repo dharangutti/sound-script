@@ -167,7 +167,13 @@ dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
   --css examples/default.ssc --out twinkle.wav --text "Twinkle twinkle little star"
 ```
 
-→ [docs/v4-architecture.md](docs/v4-architecture.md) · [docs/timbre-engine.md](docs/timbre-engine.md) · [docs/whats-new-v4.md](docs/whats-new-v4.md)
+## V4.1: Cycle-accurate timbre synthesis
+
+V4.1 adds cycle-by-cycle waveform reconstruction inside each frame. MIDI and
+SoundCSS remain the backbone; synthesis quality improves via harmonic series
+per pitch period.
+
+→ [docs/v4.1-cycle-synthesis.md](docs/v4.1-cycle-synthesis.md) · [docs/whats-new-v4.1.md](docs/whats-new-v4.1.md)
 
 ## Vocal Track (New)
 

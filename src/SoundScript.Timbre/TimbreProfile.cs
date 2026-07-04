@@ -42,6 +42,24 @@ public sealed class TimbreProfile
     /// <summary>Vowel openness (0 = closed, 1 = open).</summary>
     public double Openness { get; init; } = 0.5;
 
+    /// <summary>Fundamental harmonic amplitude (cycle synthesis).</summary>
+    public double Harmonic1 { get; init; } = 0.9;
+
+    /// <summary>Second harmonic amplitude.</summary>
+    public double Harmonic2 { get; init; } = 0.5;
+
+    /// <summary>Third harmonic amplitude.</summary>
+    public double Harmonic3 { get; init; } = 0.25;
+
+    /// <summary>Fricative noise layer per cycle.</summary>
+    public double NoiseFricative { get; init; } = 0.1;
+
+    /// <summary>Plosive noise layer per cycle.</summary>
+    public double NoisePlosive { get; init; } = 0.05;
+
+    /// <summary>Consonant transient attack length in ms.</summary>
+    public double TransientMs { get; init; } = 6;
+
     /// <summary>Creates a copy with selective overrides.</summary>
     public TimbreProfile With(
         double? burstMs = null,
@@ -55,7 +73,13 @@ public sealed class TimbreProfile
         double? formant3BwHz = null,
         double? smoothness = null,
         double? nasal = null,
-        double? openness = null) =>
+        double? openness = null,
+        double? harmonic1 = null,
+        double? harmonic2 = null,
+        double? harmonic3 = null,
+        double? noiseFricative = null,
+        double? noisePlosive = null,
+        double? transientMs = null) =>
         new()
         {
             BurstMs = burstMs ?? BurstMs,
@@ -69,7 +93,13 @@ public sealed class TimbreProfile
             Formant3BwHz = formant3BwHz ?? Formant3BwHz,
             Smoothness = smoothness ?? Smoothness,
             Nasal = nasal ?? Nasal,
-            Openness = openness ?? Openness
+            Openness = openness ?? Openness,
+            Harmonic1 = harmonic1 ?? Harmonic1,
+            Harmonic2 = harmonic2 ?? Harmonic2,
+            Harmonic3 = harmonic3 ?? Harmonic3,
+            NoiseFricative = noiseFricative ?? NoiseFricative,
+            NoisePlosive = noisePlosive ?? NoisePlosive,
+            TransientMs = transientMs ?? TransientMs
         };
 
     /// <summary>Default timbre used when no phoneme-specific profile exists.</summary>
@@ -89,7 +119,13 @@ public sealed class TimbreProfile
             formant3BwHz: overrides.Formant3BwHz,
             smoothness: overrides.Smoothness,
             nasal: overrides.Nasal,
-            openness: overrides.Openness);
+            openness: overrides.Openness,
+            harmonic1: overrides.Harmonic1,
+            harmonic2: overrides.Harmonic2,
+            harmonic3: overrides.Harmonic3,
+            noiseFricative: overrides.NoiseFricative,
+            noisePlosive: overrides.NoisePlosive,
+            transientMs: overrides.TransientMs);
 }
 
 /// <summary>Partial timbre overrides parsed from SoundCSS (only set properties apply).</summary>
@@ -107,4 +143,10 @@ public sealed class TimbreProfileOverrides
     public double? Smoothness { get; init; }
     public double? Nasal { get; init; }
     public double? Openness { get; init; }
+    public double? Harmonic1 { get; init; }
+    public double? Harmonic2 { get; init; }
+    public double? Harmonic3 { get; init; }
+    public double? NoiseFricative { get; init; }
+    public double? NoisePlosive { get; init; }
+    public double? TransientMs { get; init; }
 }

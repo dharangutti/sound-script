@@ -23,6 +23,26 @@ public class SoundCSSParserTests
         """;
 
     [Fact]
+    public void Parse_ReadsCycleLevelAttributes()
+    {
+        var source = """
+            aa {
+                harmonic1: 0.9;
+                harmonic2: 0.6;
+                noise-fricative: 0.2;
+                transient: 8ms;
+            }
+            """;
+        var profiles = SoundCSSParser.ParseOverrides(source);
+        var mapped = PhonemeTimbreMapper.Map("aa", profiles);
+
+        Assert.Equal(0.9, mapped.Harmonic1, 3);
+        Assert.Equal(0.6, mapped.Harmonic2, 3);
+        Assert.Equal(0.2, mapped.NoiseFricative, 3);
+        Assert.Equal(8, mapped.TransientMs);
+    }
+
+    [Fact]
     public void Parse_ReadsPhonemeProfiles()
     {
         var profiles = SoundCSSParser.ParseOverrides(Sample);
@@ -146,6 +166,7 @@ public class MidiToTimbreTimelineTests
                 preferredTrackName: null);
 
             Assert.True(timeline.FrameCount >= 1);
+            Assert.NotEmpty(timeline.Frames);
             Assert.True(timeline.SampleCount >= timeline.FrameCount);
         }
         finally
@@ -190,17 +211,21 @@ public class SpectralEngineTests
         Assert.Equal(a, b);
     }
 
-    private static TimbreTimeline BuildShortTimeline() =>
-        new()
+    private static TimbreTimeline BuildShortTimeline()
+    {
+        var segments = new List<TimbreSegment>
+        {
+            new(0, 180, 440, 64, "aa", PhonemeTimbreMapper.Map("aa"))
+        };
+        return new TimbreTimeline
         {
             SampleRate = 44100,
             FrameMs = 8,
             TotalDurationMs = 200,
-            Segments =
-            [
-                new TimbreSegment(0, 180, 440, 64, "aa", PhonemeTimbreMapper.Map("aa"))
-            ]
+            Segments = segments,
+            Frames = MidiToTimbreTimeline.BuildFramePlans(segments, 8, 200)
         };
+    }
 
     private static byte[] RenderTestMidi(string text)
     {

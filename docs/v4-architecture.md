@@ -76,21 +76,36 @@ plays the resulting WAV through Web Audio.
 
 ### Tests
 
-`TimbreTests.cs` covers SoundCSS parsing, timeline alignment, spectral output,
-and SHA-256 determinism.
+`TimbreTests.cs` and `CycleSynthesisTests.cs` cover SoundCSS parsing, timeline
+alignment, cycle synthesis, spectral output, and SHA-256 determinism.
+
+## Cycle layer (V4.1)
+
+V4.0 applied one spectral envelope per 8 ms frame. V4.1 reconstructs **3–10
+pitch cycles** inside each frame:
+
+```
+Frame (8 ms) → Cycles → Harmonics → Formants → Noise → PCM
+```
+
+Cycle count derives from pitch: `clamp(round(frameMs / (1000/freq)), 3, 10)`.
+
+→ [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
 
 ## Version history
 
 | Version | Addition |
 |---------|----------|
 | V3.1 | PhonemeComposer — text → MIDI |
-| V4 | SoundScript.Timbre — MIDI → audio |
+| V4.0 | SoundScript.Timbre — MIDI → audio (frame-level) |
+| V4.1 | Cycle-accurate harmonic reconstruction per pitch period |
 
-→ [What's new in V4](whats-new-v4.md)
+→ [What's new in V4](whats-new-v4.md) · [What's new in V4.1](whats-new-v4.1.md)
 
 ## See also
 
 - [SoundCSS](soundcss.md)
 - [Timbre engine](timbre-engine.md)
+- [Cycle synthesis (V4.1)](v4.1-cycle-synthesis.md)
 - [Text-to-melody (V3.1)](text-to-melody.md)
 - [PhonemeComposer](phoneme-composer.md)

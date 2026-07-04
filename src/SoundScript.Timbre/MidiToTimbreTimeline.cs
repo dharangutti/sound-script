@@ -14,23 +14,22 @@ public sealed record TimbreSegment(
     string Phoneme,
     TimbreProfile Profile);
 
-/// <summary>Frame-rate timeline for offline spectral synthesis.</summary>
+/// <summary>Frame-rate timeline with cycle-accurate frame plans (V4.1).</summary>
 public sealed class TimbreTimeline
 {
     public required int SampleRate { get; init; }
     public required double FrameMs { get; init; }
     public required double TotalDurationMs { get; init; }
     public required IReadOnlyList<TimbreSegment> Segments { get; init; }
+    public required IReadOnlyList<TimbreFramePlan> Frames { get; init; }
 
-    public int FrameCount => (int)Math.Ceiling(TotalDurationMs / FrameMs);
+    public int FrameCount => Frames.Count;
     public int SampleCount => (int)Math.Ceiling(TotalDurationMs * SampleRate / 1000.0);
 }
 
 /// <summary>
 /// Reads a MIDI file, extracts note events, aligns phonemes to note timing,
-/// and produces a deterministic frame timeline for the spectral engine.
-/// MIDI supplies pitch, duration, timing, and articulation; phoneme identity
-/// comes from an optional text/sequence hint or signature guessing.
+/// and produces a deterministic frame timeline with per-frame cycle counts.
 /// </summary>
 public static class MidiToTimbreTimeline
 {
@@ -67,13 +66,77 @@ public static class MidiToTimbreTimeline
             ? 0
             : segments.Max(segment => segment.StartMs + segment.DurationMs) + frameMs;
 
+        var frames = BuildFramePlans(segments, frameMs, totalDurationMs);
+
         return new TimbreTimeline
         {
             SampleRate = sampleRate,
             FrameMs = frameMs,
             TotalDurationMs = totalDurationMs,
-            Segments = segments
+            Segments = segments,
+            Frames = frames
         };
+    }
+
+    /// <summary>Builds per-frame cycle plans from aligned segments.</summary>
+    public static IReadOnlyList<TimbreFramePlan> BuildFramePlans(
+        IReadOnlyList<TimbreSegment> segments,
+        double frameMs,
+        double totalDurationMs)
+    {
+        var frameCount = totalDurationMs <= 0 ? 0 : (int)Math.Ceiling(totalDurationMs / frameMs);
+        var frames = new List<TimbreFramePlan>(frameCount);
+
+        for (var frameIndex = 0; frameIndex < frameCount; frameIndex++)
+        {
+            var startMs = frameIndex * frameMs;
+            var segment = FindActiveSegment(segments, startMs);
+            if (segment is null)
+                continue;
+
+            var profile = InterpolateProfile(segment, startMs);
+            var cycleLengthMs = CycleGenerator.CycleLengthMs(segment.PitchHz);
+            var cycleCount = CyclePlanner.CycleCountForFrame(segment.PitchHz, frameMs);
+
+            frames.Add(new TimbreFramePlan(
+                frameIndex,
+                startMs,
+                segment.StartMs,
+                segment.DurationMs,
+                segment.PitchHz,
+                segment.Velocity,
+                segment.Phoneme,
+                profile,
+                cycleCount,
+                cycleLengthMs));
+        }
+
+        return frames;
+    }
+
+    private static TimbreProfile InterpolateProfile(TimbreSegment segment, double timeMs)
+    {
+        var position = (timeMs - segment.StartMs) / Math.Max(segment.DurationMs, 1.0);
+        var smooth = Math.Clamp(segment.Profile.Smoothness, 0, 1);
+        var blend = smooth > 0 ? Math.Pow(position, 1.0 + smooth * 3.0) : position;
+        var openness = segment.Profile.Openness * (0.6 + 0.4 * blend);
+
+        return segment.Profile.With(
+            formant1Hz: segment.Profile.Formant1Hz * (0.85 + 0.3 * openness),
+            formant2Hz: segment.Profile.Formant2Hz * (0.9 + 0.2 * openness),
+            formant3Hz: segment.Profile.Formant3Hz * (0.92 + 0.15 * openness));
+    }
+
+    private static TimbreSegment? FindActiveSegment(IReadOnlyList<TimbreSegment> segments, double timeMs)
+    {
+        for (var i = segments.Count - 1; i >= 0; i--)
+        {
+            var segment = segments[i];
+            if (timeMs >= segment.StartMs && timeMs < segment.StartMs + segment.DurationMs)
+                return segment;
+        }
+
+        return null;
     }
 
     private static List<NoteEvent> ExtractNotes(
