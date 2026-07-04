@@ -5,6 +5,7 @@
     <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
     <ProjectReference Include="..\SoundScript.Voice\SoundScript.Voice.csproj" />
+    <ProjectReference Include="..\SoundScript.Compose\SoundScript.Compose.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

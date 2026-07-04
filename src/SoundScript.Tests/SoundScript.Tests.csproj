@@ -19,6 +19,7 @@
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
     <ProjectReference Include="..\SoundScript.Cli\SoundScript.Cli.csproj" />
     <ProjectReference Include="..\SoundScript.Voice\SoundScript.Voice.csproj" />
+    <ProjectReference Include="..\SoundScript.Compose\SoundScript.Compose.csproj" />
   </ItemGroup>
 
   <ItemGroup>
