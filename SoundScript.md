@@ -4,6 +4,12 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 
 ## Documentation Index
 
+### Start Here
+
+| Document | Description |
+|----------|-------------|
+| [user-guide.md](user-guide.md) | Hands-on user guide — from first note to industrial audio cues, with runnable examples |
+
 ### V3 Features
 
 | Document | Description |
