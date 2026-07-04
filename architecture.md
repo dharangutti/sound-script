@@ -28,6 +28,7 @@ System overview for the SoundScript engine and documentation suite.
 | `PatternExpander` | Midi | Pattern → NoteNode[] |
 | `ChordOrchestration` | Midi | Orchestration helpers |
 | `PhraseShaper` | Midi | Phrase-level shaping |
+| `PhraseTimingShaper` | Midi | V3 swing / push / pull timing |
 | `AdvancedChordVoicing` | Midi | drop2, inv1, spread |
 | `HumanizeApplicator` | Midi | Deterministic jitter |
 | `TempoAutomationMap` | Core | Linear tempo ramps |

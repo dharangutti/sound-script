@@ -3,8 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SoundScript V3 — expressive, deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows.">
     <title>SoundScript — Expressive Audio for Industrial Awareness</title>
+    <meta name="description" content="SoundScript V3 — expressive, deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows. Map process parameters to phrase-level constructs and export reproducible MIDI.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://soundscript.net/industrial/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SoundScript">
+    <meta property="og:title" content="SoundScript — Expressive Audio for Industrial Awareness">
+    <meta property="og:description" content="Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows — prototyped in the browser, exported as reproducible MIDI.">
+    <meta property="og:url" content="https://soundscript.net/industrial/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="SoundScript — Expressive Audio for Industrial Awareness">
+    <meta name="twitter:description" content="Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows — prototyped in the browser, exported as reproducible MIDI.">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://soundscript.net/industrial/",
+        "url": "https://soundscript.net/industrial/",
+        "name": "SoundScript — Expressive Audio for Industrial Awareness",
+        "isPartOf": { "@id": "https://soundscript.net/#website" },
+        "description": "SoundScript V3 industrial applications: deterministic, expressive audio cues for machine states, conveyor timing drift, robotic motion phases, temperature trends, and blind-operator spatial awareness."
+    }
+    </script>
     <style>
         :root {
             --bg: #080a0f;
@@ -469,6 +490,59 @@
 
         footer a { color: var(--muted); }
         footer a:hover { color: var(--accent); }
+
+        /* —— Mobile —— */
+        @media (max-width: 640px) {
+            .wrap { padding: 0 1rem 3.5rem; }
+
+            nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.85rem 1.1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero { padding: 2.5rem 0 2rem; }
+
+            .subtitle { font-size: 1.05rem; }
+
+            section { margin-top: 2.75rem; }
+
+            h2 { font-size: 1.35rem; }
+
+            th, td { padding: 0.7rem 0.85rem; }
+
+            .map-list code { white-space: normal; overflow-wrap: anywhere; }
+
+            .map-list li { flex-wrap: wrap; }
+
+            .narrative { padding: 1.4rem 1.25rem; }
+
+            .cta {
+                margin-top: 3rem;
+                padding: 2rem 1.25rem;
+            }
+
+            .cta-row .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+                min-height: 44px;
+            }
+
+            .case-mapping, .case-snippet { padding: 1.1rem 1.15rem; }
+
+            .case-narrative { padding: 0 1.15rem 1.15rem; }
+
+            .case-header { padding: 1.15rem 1.15rem 0.9rem; }
+
+            footer p { line-height: 2; }
+        }
     </style>
 </head>
 <body>

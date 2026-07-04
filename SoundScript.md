@@ -1,8 +1,15 @@
-# SoundScript Documentation (V2)
+# SoundScript Documentation
 
-SoundScript is a tiny music DSL that compiles text to MIDI. This is the documentation hub for **V2**.
+SoundScript is an open-source, deterministic music DSL that compiles text to MIDI. It runs as a cross-platform .NET CLI (Windows, macOS, Linux) and as a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari). This is the documentation hub for **V3**.
 
 ## Documentation Index
+
+### V3 Features
+
+| Document | Description |
+|----------|-------------|
+| [whats-new-v3.md](whats-new-v3.md) | V3 changelog |
+| [phrases-v3.md](phrases-v3.md) | Phrase engine v3 — curves, envelopes, articulation, timing |
 
 ### V2 Features
 
@@ -50,6 +57,8 @@ dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
 ## Playground
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
+
+Runs fully client-side (Blazor WebAssembly + Web Audio) in any modern browser — Chrome, Edge, Firefox, and Safari, on desktop and mobile. No account, no server, no installation.
 
 ```bash
 dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
