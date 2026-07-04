@@ -1,4 +1,4 @@
-// Deterministic in-browser MIDI player using Web Audio + local soundfont samples.
+// Deterministic in-browser MIDI player using Web Audio + local GM soundfont samples.
 
 window.SoundScriptMidi = (function () {
     let audioContext = null;
@@ -35,14 +35,11 @@ window.SoundScriptMidi = (function () {
         }
 
         const headerLength = readUint32(data, 4);
-        const format = readUint16(data, 8);
         const trackCount = readUint16(data, 10);
         const division = readUint16(data, 12);
         let ticksPerBeat = division;
-        let smpte = false;
 
         if (division & 0x8000) {
-            smpte = true;
             ticksPerBeat = 480;
         }
 
@@ -95,7 +92,8 @@ window.SoundScriptMidi = (function () {
                     offset++; // release velocity
                     events.push({ tick, type: 'off', note, channel });
                 } else if (type === 0xc0) {
-                    offset += 1; // program
+                    const program = data[offset++];
+                    events.push({ tick, type: 'program', program, channel });
                 } else if (type === 0xb0) {
                     offset += 2;
                 } else if (type === 0xe0) {
@@ -123,21 +121,33 @@ window.SoundScriptMidi = (function () {
 
         events.sort((a, b) => a.tick - b.tick || (a.type === 'off' ? 1 : -1));
 
+        const channelPrograms = new Array(16).fill(0);
         const noteOn = new Map();
         const scheduled = [];
 
         for (const event of events) {
             const seconds = (event.tick / ticksPerBeat) * (tempo / 1_000_000);
+
+            if (event.type === 'program') {
+                channelPrograms[event.channel] = event.program;
+                continue;
+            }
+
             const key = event.channel + ':' + event.note;
 
             if (event.type === 'on') {
-                noteOn.set(key, { start: seconds, velocity: event.velocity });
+                noteOn.set(key, {
+                    start: seconds,
+                    velocity: event.velocity,
+                    program: channelPrograms[event.channel]
+                });
             } else if (event.type === 'off') {
                 const startInfo = noteOn.get(key);
                 if (startInfo) {
                     scheduled.push({
                         note: event.note,
                         velocity: startInfo.velocity,
+                        program: startInfo.program,
                         start: startInfo.start,
                         duration: Math.max(0.05, seconds - startInfo.start)
                     });
@@ -151,6 +161,7 @@ window.SoundScriptMidi = (function () {
             scheduled.push({
                 note,
                 velocity: startInfo.velocity,
+                program: startInfo.program,
                 start: startInfo.start,
                 duration: 0.5
             });
@@ -185,7 +196,8 @@ window.SoundScriptMidi = (function () {
                 note.velocity,
                 now + note.start,
                 note.duration,
-                masterGain
+                masterGain,
+                note.program
             );
             if (nodes) {
                 activeNodes.push(nodes);

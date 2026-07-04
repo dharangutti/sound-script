@@ -1,17 +1,43 @@
-// Local soundfont loader — fetches WAV samples from /playground/soundfont/samples/
+// Local GM soundfont loader — fetches per-program WAV samples from /playground/soundfont/samples/
 // No CDN, no external calls. Twelve pitch classes at octave 3, pitch-shifted per note.
 
 window.SoundScriptSoundfont = (function () {
     const PITCH_CLASSES = ['C', 'Cs', 'D', 'Ds', 'E', 'F', 'Fs', 'G', 'Gs', 'A', 'As', 'B'];
     const BASE_MIDI = 48; // C3
+    const DEFAULT_PROGRAM = 0;
+    const PROGRAMS = [0, 19, 24, 32, 40, 42, 56, 73, 80];
     const SAMPLE_ROOT = 'soundfont/samples/';
 
     let audioContext = null;
-    const buffers = new Array(12).fill(null);
+    const buffers = {};
     let loadPromise = null;
 
+    function programBuffers(program) {
+        if (!buffers[program]) {
+            buffers[program] = new Array(12).fill(null);
+        }
+        return buffers[program];
+    }
+
+    async function loadProgram(program) {
+        const samples = programBuffers(program);
+        if (samples[0]) {
+            return;
+        }
+
+        await Promise.all(PITCH_CLASSES.map(async (pitch, index) => {
+            const url = SAMPLE_ROOT + program + '/' + pitch + '.wav';
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to load soundfont sample: ' + url);
+            }
+            const data = await response.arrayBuffer();
+            samples[index] = await audioContext.decodeAudioData(data);
+        }));
+    }
+
     async function load(context) {
-        if (buffers[0]) {
+        if (buffers[DEFAULT_PROGRAM] && buffers[DEFAULT_PROGRAM][0]) {
             audioContext = context;
             return;
         }
@@ -23,24 +49,15 @@ window.SoundScriptSoundfont = (function () {
         }
 
         audioContext = context;
-        loadPromise = (async () => {
-            for (let i = 0; i < PITCH_CLASSES.length; i++) {
-                const url = SAMPLE_ROOT + PITCH_CLASSES[i] + '.wav';
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Failed to load soundfont sample: ' + url);
-                }
-                const data = await response.arrayBuffer();
-                buffers[i] = await audioContext.decodeAudioData(data);
-            }
-        })();
-
+        loadPromise = Promise.all(PROGRAMS.map(loadProgram));
         await loadPromise;
     }
 
-    function playNote(midiNote, velocity, startTime, duration, destination) {
+    function playNote(midiNote, velocity, startTime, duration, destination, program) {
+        const resolvedProgram = PROGRAMS.includes(program) ? program : DEFAULT_PROGRAM;
+        const samples = programBuffers(resolvedProgram);
         const pitchClass = ((midiNote % 12) + 12) % 12;
-        const buffer = buffers[pitchClass];
+        const buffer = samples[pitchClass];
         if (!buffer || !audioContext) {
             return null;
         }

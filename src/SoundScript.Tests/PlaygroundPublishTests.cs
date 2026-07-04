@@ -7,6 +7,8 @@ public class PlaygroundPublishTests
     private static readonly string[] RequiredPitchClasses =
         ["C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"];
 
+    private static readonly int[] RequiredPrograms = [0, 19, 24, 32, 40, 42, 56, 73, 80];
+
     [Fact]
     public void PublishedArtifacts_ContainRequiredPlaygroundFiles()
     {
@@ -15,15 +17,7 @@ public class PlaygroundPublishTests
         Assert.True(File.Exists(Path.Combine(playgroundDir, "_framework", "blazor.webassembly.js")),
             "Missing _framework/blazor.webassembly.js");
 
-        var samplesDir = Path.Combine(playgroundDir, "soundfont", "samples");
-        Assert.True(Directory.Exists(samplesDir), "Missing soundfont/samples directory");
-
-        foreach (var pitch in RequiredPitchClasses)
-        {
-            var samplePath = Path.Combine(samplesDir, $"{pitch}.wav");
-            Assert.True(File.Exists(samplePath), $"Missing soundfont sample: {pitch}.wav");
-            Assert.True(new FileInfo(samplePath).Length > 44, $"Invalid WAV file: {pitch}.wav");
-        }
+        AssertSoundfontSamples(Path.Combine(playgroundDir, "soundfont", "samples"));
     }
 
     [Fact]
@@ -33,13 +27,24 @@ public class PlaygroundPublishTests
             AppContext.BaseDirectory,
             "../../../../../src/SoundScript.Playground/wwwroot"));
 
-        var samplesDir = Path.Combine(wwwrootDir, "soundfont", "samples");
-        Assert.True(Directory.Exists(samplesDir), "Missing wwwroot soundfont/samples directory");
+        AssertSoundfontSamples(Path.Combine(wwwrootDir, "soundfont", "samples"));
+    }
 
-        foreach (var pitch in RequiredPitchClasses)
+    private static void AssertSoundfontSamples(string samplesRoot)
+    {
+        Assert.True(Directory.Exists(samplesRoot), "Missing soundfont/samples directory");
+
+        foreach (var program in RequiredPrograms)
         {
-            var samplePath = Path.Combine(samplesDir, $"{pitch}.wav");
-            Assert.True(File.Exists(samplePath), $"Missing source soundfont sample: {pitch}.wav");
+            var programDir = Path.Combine(samplesRoot, program.ToString());
+            Assert.True(Directory.Exists(programDir), $"Missing soundfont/samples/{program} directory");
+
+            foreach (var pitch in RequiredPitchClasses)
+            {
+                var samplePath = Path.Combine(programDir, $"{pitch}.wav");
+                Assert.True(File.Exists(samplePath), $"Missing soundfont sample: {program}/{pitch}.wav");
+                Assert.True(new FileInfo(samplePath).Length > 44, $"Invalid WAV file: {program}/{pitch}.wav");
+            }
         }
     }
 
