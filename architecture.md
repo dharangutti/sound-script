@@ -1,4 +1,4 @@
-# SoundScript Architecture (V3.1)
+# SoundScript Architecture (V4)
 
 System overview for the SoundScript engine and documentation suite.
 
@@ -11,7 +11,8 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Midi/       # Interpreter, shaping, PatternExpander, ChordOrchestration
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer + submodules (V3.1)
-    SoundScript.Cli/        # Command-line runner (run + compose)
+    SoundScript.Timbre/     # Offline timbre: SoundCSS + SpectralEngine (V4)
+    SoundScript.Cli/        # Command-line runner (run + compose + render)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
     SoundScript.Tests/      # xUnit tests
@@ -43,8 +44,13 @@ System overview for the SoundScript engine and documentation suite.
 | `PhonemeMapper` | Compose | Pure-data phoneme → musical gesture table |
 | `GestureBuilder` | Compose | Gesture → existing AST nodes (articulation, envelope) |
 | `PhraseAssembler` | Compose | Gestures → per-syllable PhraseNodes → program AST |
+| `SoundCSSParser` | Timbre | Parse `.ssc` timbre stylesheets (V4) |
+| `PhonemeTimbreMapper` | Timbre | Phoneme → TimbreProfile table + CSS merge |
+| `MidiToTimbreTimeline` | Timbre | MIDI notes → frame timeline |
+| `SpectralEngine` | Timbre | Deterministic formant/noise synthesis |
+| `OfflineRenderer` | Timbre | MIDI + SoundCSS → WAV/OGG |
 
-## Layer Diagram (V3.1)
+## Layer Diagram (V4)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -60,12 +66,13 @@ System overview for the SoundScript engine and documentation suite.
 │    HumanizeApplicator │ TempoAutomationMap │ Layers      │
 │                                                          │
 │  V3.1: PhonemeComposer (text → AST, reuses Interpreter)  │
+│  V4:   OfflineRenderer   (MIDI → SoundCSS → audio)       │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Pipeline Branches (V3.1)
+## Pipeline Branches (V4)
 
-Three branches share one AST format and one MIDI generator:
+Four stages share one MIDI backbone; V4 adds a read-only audio branch:
 
 ```
 Tokenizer → Parser → AST
@@ -79,12 +86,18 @@ Tokenizer → Parser → AST
             └── PhraseAssembler  (per-syllable PhraseNodes → ProgramNode)
     ↓
 MidiGenerator → output.mid
+    ↓
+OfflineRenderer (V4, read-only) → output.wav / output.ogg
+    ├── MidiToTimbreTimeline
+    ├── PhonemeTimbreMapper + SoundCSSParser
+    └── SpectralEngine → AudioWriter
 ```
 
 The PhonemeComposer branch starts from plain text rather than a script: it
 builds a standard `ProgramNode` in code, then feeds it through the unchanged
-`Interpreter` and `MidiGenerator`. → [text-to-melody.md](text-to-melody.md) ·
-[phoneme-composer.md](phoneme-composer.md)
+`Interpreter` and `MidiGenerator`. The V4 timbre branch reads that MIDI file
+and never modifies it. → [text-to-melody.md](text-to-melody.md) ·
+[phoneme-composer.md](phoneme-composer.md) · [v4-architecture.md](v4-architecture.md)
 
 ## Engine Phases
 

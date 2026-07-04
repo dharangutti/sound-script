@@ -158,9 +158,38 @@ PhonemeComposer.AppendTo(existingProgram, "Twinkle twinkle little star");
 downloaded. The browser output is byte-identical to the CLI output for the
 same text.
 
+## V4 extension: MIDI → audio
+
+V4 adds an offline timbre pass **after** MIDI generation. The MIDI file remains
+the backbone for pitch, duration, timing, and articulation; SoundCSS supplies
+spectral styling:
+
+```
+composed MIDI
+    ↓
+MidiToTimbreTimeline     align phonemes, build 8 ms frame grid
+    ↓
+SpectralEngine + SoundCSS    formants, noise, bursts
+    ↓
+WAV / OGG
+```
+
+```bash
+# compose, then render
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.mid
+dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
+  --css examples/default.ssc --out twinkle.wav \
+  --text "Twinkle twinkle little star"
+```
+
+The playground **Render Audio** button runs the same timbre pipeline in WASM.
+
+→ [v4-architecture.md](v4-architecture.md) · [soundcss.md](soundcss.md) · [timbre-engine.md](timbre-engine.md)
+
 ## Related
 
 - [phoneme-composer.md](phoneme-composer.md) — module documentation, mapping table, splitter rules
 - [cli.md](cli.md) — CLI reference
 - [architecture.md](architecture.md) — where the composer sits in the system
 - [whats-new-v3.1.md](whats-new-v3.1.md) — V3.1 changelog
+- [whats-new-v4.md](whats-new-v4.md) — V4 timbre synthesis changelog
