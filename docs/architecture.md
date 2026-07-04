@@ -9,6 +9,7 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Core/       # AST, NotatedNote, TempoAutomationMap, InstrumentMap
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
     SoundScript.Midi/       # Interpreter, shaping, PatternExpander, ChordOrchestration
+    SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Cli/        # Command-line runner (ProgramLoader)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
@@ -33,6 +34,9 @@ System overview for the SoundScript engine and documentation suite.
 | `HumanizeApplicator` | Midi | Deterministic jitter |
 | `TempoAutomationMap` | Core | Linear tempo ramps |
 | `MidiGenerator` | Midi | InterpretedProgram → .mid |
+| `Syllabifier` | Voice | Deterministic phonetic syllabification |
+| `LyricAligner` | Voice | Syllable ↔ note binding (melisma, overflow) |
+| `VocalInterpreter` | Voice | VoiceNode → InterpretedVocalTrack |
 
 ## Layer Diagram (V2)
 

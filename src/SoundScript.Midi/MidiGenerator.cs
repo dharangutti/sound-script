@@ -76,6 +76,8 @@ public static partial class MidiGenerator
             midiFile.Chunks.Add(trackChunk);
         }
 
+        AppendVocalTracks(midiFile, program);
+
         if (midiFile.Chunks.Count == 0)
             midiFile.Chunks.Add(new TrackChunk());
 

@@ -19,6 +19,7 @@ Runnable example scripts for every major feature.
 | [patterns.ss](../examples/patterns.ss) | Arp, strum, rhythm | `... run examples/patterns.ss` |
 | [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
+| [vocal-song.ss](../examples/vocal-song.ss) | Vocal track — lyrics + phonetic syllable alignment | `... run examples/vocal-song.ss` |
 
 ## Industrial Audio Cue Examples (V3)
 

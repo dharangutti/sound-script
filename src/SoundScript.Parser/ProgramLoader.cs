@@ -111,6 +111,7 @@ public static class ProgramLoader
         private static string? GetBlockName(AstNode statement) => statement switch
         {
             TrackNode track => track.Name,
+            VoiceNode voice => $"voice:{voice.Name}",
             SequenceNode sequence => sequence.Name,
             BlockNode block => block.Name,
             PatternNode pattern => pattern.Name,

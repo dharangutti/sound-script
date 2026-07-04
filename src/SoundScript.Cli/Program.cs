@@ -1,5 +1,6 @@
 ﻿using SoundScript.Midi;
 using SoundScript.Parser;
+using SoundScript.Voice;
 
 if (args.Length < 2 || !string.Equals(args[0], "run", StringComparison.OrdinalIgnoreCase))
 {
@@ -22,6 +23,7 @@ try
 {
     var loaded = ProgramLoader.Load(scriptPath);
     var interpreted = Interpreter.Interpret(loaded.Program, scriptPath);
+    VocalInterpreter.Apply(loaded.Program, interpreted);
     foreach (var warning in loaded.Warnings)
         interpreted.Warnings.Add(warning);
 
@@ -31,7 +33,14 @@ try
         Console.Error.WriteLine($"warning: {warning}");
 
     var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
-    Console.WriteLine($"Wrote {noteCount} notes across {interpreted.Tracks.Count} track(s) to {outputPath} at {interpreted.Tempo} BPM.");
+    var summary = $"Wrote {noteCount} notes across {interpreted.Tracks.Count} track(s)";
+    if (interpreted.VocalTracks.Count > 0)
+    {
+        var syllableCount = interpreted.VocalTracks.Sum(v => v.Syllables.Count);
+        summary += $" and {syllableCount} sung syllable(s) across {interpreted.VocalTracks.Count} voice(s)";
+    }
+
+    Console.WriteLine($"{summary} to {outputPath} at {interpreted.Tempo} BPM.");
     return 0;
 }
 catch (Exception ex)
