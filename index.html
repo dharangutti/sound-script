@@ -283,6 +283,33 @@
         footer a { color: var(--muted); }
         footer a:hover { color: var(--accent); }
 
+        .industrial-promo {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem 2.25rem 1.75rem;
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .industrial-promo h2 {
+            font-size: 1.35rem;
+            margin: 0 0 0.85rem;
+        }
+
+        .industrial-promo p {
+            color: var(--muted);
+            font-size: 0.98rem;
+            max-width: 38rem;
+            margin: 0 auto 1.1rem;
+            line-height: 1.65;
+        }
+
+        .industrial-promo a {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
         @media (max-width: 600px) {
             .pipeline { justify-content: center; }
         }
@@ -291,7 +318,7 @@
 <body>
     <div class="wrap">
         <header>
-            <div class="badge">V2 · Open Source · C# · MIDI</div>
+            <div class="badge">Version: V3 — Expressive Industrial Audio Cues</div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">
                 SoundScript is a tiny, deterministic music DSL — type a melody with notation,
@@ -324,6 +351,15 @@
 }</pre>
             </div>
         </header>
+
+        <section class="industrial-promo">
+            <h2>Industrial Sound Augmentation</h2>
+            <p>SoundScript V3 introduces expressive, deterministic audio cues for industrial workflows —
+            machine states, conveyor timing drift, robotic motion phases, temperature trends, and
+            accessibility (blind operator spatial awareness). Explore how expressive curves, transitions,
+            articulation, crescendos, and timing modifiers map directly to real-world processes.</p>
+            <a href="/industrial">Explore Industrial Applications →</a>
+        </section>
 
         <section>
             <h2>How it works</h2>
@@ -517,6 +553,7 @@ Cmaj w</pre>
         <footer>
             <p>
                 <a href="playground/">Playground</a> ·
+                <a href="/industrial">Industrial Applications</a> ·
                 <a href="whats-new-v2.md">What's New</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="SoundScript.md">Documentation</a> ·
