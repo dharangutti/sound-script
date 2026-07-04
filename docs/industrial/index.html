@@ -490,6 +490,59 @@
 
         footer a { color: var(--muted); }
         footer a:hover { color: var(--accent); }
+
+        /* —— Mobile —— */
+        @media (max-width: 640px) {
+            .wrap { padding: 0 1rem 3.5rem; }
+
+            nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 1rem 0;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.85rem 1.1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero { padding: 2.5rem 0 2rem; }
+
+            .subtitle { font-size: 1.05rem; }
+
+            section { margin-top: 2.75rem; }
+
+            h2 { font-size: 1.35rem; }
+
+            th, td { padding: 0.7rem 0.85rem; }
+
+            .map-list code { white-space: normal; overflow-wrap: anywhere; }
+
+            .map-list li { flex-wrap: wrap; }
+
+            .narrative { padding: 1.4rem 1.25rem; }
+
+            .cta {
+                margin-top: 3rem;
+                padding: 2rem 1.25rem;
+            }
+
+            .cta-row .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+                min-height: 44px;
+            }
+
+            .case-mapping, .case-snippet { padding: 1.1rem 1.15rem; }
+
+            .case-narrative { padding: 0 1.15rem 1.15rem; }
+
+            .case-header { padding: 1.15rem 1.15rem 0.9rem; }
+
+            footer p { line-height: 2; }
+        }
     </style>
 </head>
 <body>

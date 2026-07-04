@@ -312,7 +312,10 @@
             padding: 0.15rem 0.45rem;
             border-radius: 4px;
             color: var(--gold);
+            overflow-wrap: anywhere;
         }
+
+        .steps li > div { min-width: 0; }
 
         .about {
             background: var(--surface);
@@ -366,6 +369,35 @@
 
         @media (max-width: 600px) {
             .pipeline { justify-content: center; }
+
+            .wrap { padding: 1.25rem 1rem 3rem; }
+
+            header { padding: 2rem 0 1.75rem; }
+
+            section { margin-top: 2.5rem; }
+
+            .lead { font-size: 1.05rem; }
+
+            .cta-row .btn {
+                flex: 1 1 auto;
+                min-height: 44px;
+            }
+
+            .hero-code { margin-top: 1.75rem; }
+
+            .hero-code pre {
+                padding: 1rem 1.1rem;
+                font-size: 0.85rem;
+            }
+
+            .card { padding: 1.1rem 1.2rem; }
+
+            .about,
+            .industrial-promo { padding: 1.25rem 1.2rem; }
+
+            footer p {
+                line-height: 2;
+            }
         }
     </style>
 </head>
