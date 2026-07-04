@@ -16,6 +16,11 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>https://soundscript.net/user-guide.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>https://soundscript.net/SoundScript.md</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
