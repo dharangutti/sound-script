@@ -45,7 +45,10 @@ The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShape
 
 Rendering is **offline only** (slow-motion synthesis in WASM), not real-time timbre streaming.
 
-→ [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md)
+**V4.1** reconstructs 3–10 pitch cycles per 8 ms frame for richer timbre —
+the same text produces different (improved) WAV bytes compared to V4.0.
+
+→ [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md) · [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
 
 ## Build
 

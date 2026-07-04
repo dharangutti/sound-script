@@ -1,4 +1,4 @@
-# Timbre Engine (V4)
+# Timbre Engine (V4.1)
 
 The **SoundScript.Timbre** project implements offline, deterministic audio
 synthesis. MIDI remains the single source of truth for musical structure; the
@@ -11,8 +11,13 @@ timbre engine adds spectral colour on top without modifying MIDI generation.
 | `TimbreProfile` | Declarative timbre attributes per phoneme |
 | `SoundCSSParser` | Parse `.ssc` files into profiles |
 | `PhonemeTimbreMapper` | Built-in phoneme → profile table + CSS merge |
-| `MidiToTimbreTimeline` | Read MIDI, align phonemes, build frame timeline |
-| `SpectralEngine` | Formant + noise + burst synthesis per frame |
+| `MidiToTimbreTimeline` | Read MIDI, align phonemes, build frame + cycle plans |
+| `CycleGenerator` | Harmonic synthesis per pitch cycle (V4.1) |
+| `FormantFilter` | Vowel resonators per cycle (V4.1) |
+| `NoiseInjector` | Fricative/plosive noise per cycle (V4.1) |
+| `TransientModel` | Consonant attack shaping (V4.1) |
+| `CycleStitcher` | Stitch cycles into frame PCM (V4.1) |
+| `SpectralEngine` | Cycle-accurate frame orchestrator |
 | `OfflineRenderer` | Orchestrates MIDI → PCM → file |
 | `AudioWriter` | Writes WAV and OGG Vorbis |
 
@@ -21,36 +26,54 @@ timbre engine adds spectral colour on top without modifying MIDI generation.
 ```
 MIDI file
     ↓
-MidiToTimbreTimeline     extract notes, tempo, align phonemes
+MidiToTimbreTimeline     extract notes, tempo, align phonemes, plan cycles
     ↓
-TimbreTimeline           8 ms frames @ 44.1 kHz
+TimbreTimeline           8 ms frames with 3–10 cycles each @ 44.1 kHz
     ↓
-SpectralEngine           formants, noise, bursts, nasal resonance
+SpectralEngine           per-cycle harmonics → formants → noise → stitch
     ↓
 AudioWriter              WAV / OGG
 ```
 
+## Cycle-accurate synthesis (V4.1)
+
+V4.0 applied one spectral snapshot per frame. V4.1 reconstructs **3–10 pitch
+cycles** inside each 8 ms frame:
+
+```
+cycle_length_ms = 1000 / pitch_hz
+cycle_count     = clamp(round(frame_ms / cycle_length_ms), 3, 10)
+```
+
+Per cycle:
+
+1. **CycleGenerator** — `harmonic1`/`2`/`3` overtone series
+2. **FormantFilter** — three resonators + nasal pole (stateful across cycles)
+3. **NoiseInjector** — `noise-fricative` + `noise-plosive` layers
+4. **TransientModel** — attack envelope from `transient`
+5. **CycleStitcher** — concatenate cycles into frame PCM
+
+→ [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
+
 ## Frame timeline
 
-`MidiToTimbreTimeline` samples the note schedule at **8 ms** frames (within the
-5–10 ms design range). Each active frame carries:
+`MidiToTimbreTimeline` samples the note schedule at **8 ms** frames. Each
+`TimbreFramePlan` carries:
 
 - fundamental frequency from MIDI pitch
 - amplitude from MIDI velocity
+- `CycleCount` and `CycleLengthMs`
 - `TimbreProfile` from SoundCSS + built-in table
 - phoneme label for styling
 
-## Spectral algorithm
+## Spectral algorithm (V4.0 baseline)
 
-`SpectralEngine` is a deterministic additive/resonator synthesizer:
+Frame-level attributes still apply across all cycles in a frame:
 
-1. **Voiced source** — sine oscillator at MIDI pitch
-2. **Formants** — three parallel second-order resonators (`formant1`–`3`)
-3. **Noise layer** — deterministic hash noise mixed by `noise`
-4. **Burst** — short squared envelope at onset for plosives (`burst`)
-5. **Nasal pole** — complementary filter controlled by `nasal`
-6. **Brightness** — high-shelf emphasis
-7. **Note envelope** — attack/release shaped by `smoothness` and `openness`
+- **Brightness** — spectral tilt on harmonics
+- **Burst** — plosive onset weighting
+- **Smoothness / openness** — note envelope and vowel interpolation
+- **Nasal** — nasal resonance filter
 
 No neural nets, no random number generators, no real-time constraints.
 
@@ -84,4 +107,5 @@ and PhonemeComposer are unchanged.
 ## See also
 
 - [SoundCSS reference](soundcss.md)
+- [Cycle synthesis (V4.1)](v4.1-cycle-synthesis.md)
 - [V4 architecture](v4-architecture.md)
