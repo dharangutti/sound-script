@@ -292,6 +292,68 @@ public class VocalInterpreterTests
     }
 }
 
+public class VocalSpeechTimelineTests
+{
+    [Fact]
+    public void Build_ReassemblesSyllablesIntoWords()
+    {
+        var interpreted = Interpret(
+            """
+            tempo 120
+            voice lead {
+                sing "Twinkle little star" C4 q C4 q G4 q G4 q A4 h
+            }
+            """);
+
+        var words = VocalSpeechTimeline.Build(interpreted);
+
+        Assert.Equal(3, words.Count);
+        Assert.Equal("Twinkle", words[0].Text);
+        Assert.Equal("little", words[1].Text);
+        Assert.Equal("star", words[2].Text);
+
+        // at 120 BPM a quarter note is 500ms; words start at their first syllable
+        Assert.Equal(0.0, words[0].StartMs, 3);
+        Assert.Equal(1000.0, words[1].StartMs, 3);
+        Assert.Equal(2000.0, words[2].StartMs, 3);
+
+        // two quarter-note syllables per word → 1000ms word duration
+        Assert.Equal(1000.0, words[0].DurationMs, 3);
+        Assert.Equal(60, words[0].Midi);
+    }
+
+    [Fact]
+    public void Build_MelismaExtendsWordDuration()
+    {
+        var interpreted = Interpret(
+            """
+            tempo 120
+            voice lead {
+                sing "Ah" C4 q E4 q G4 q
+            }
+            """);
+
+        var word = Assert.Single(VocalSpeechTimeline.Build(interpreted));
+        Assert.Equal("Ah", word.Text);
+        Assert.Equal(1500.0, word.DurationMs, 3);
+    }
+
+    [Fact]
+    public void Build_NoVocalTracks_ReturnsEmpty()
+    {
+        var interpreted = Interpret("track melody { C4 q }");
+        Assert.Empty(VocalSpeechTimeline.Build(interpreted));
+    }
+
+    private static InterpretedProgram Interpret(string source)
+    {
+        var program = new SoundScriptParser(new Tokenizer(source).Tokenize()).Parse();
+        var interpreted = Interpreter.Interpret(program);
+        VocalInterpreter.Apply(program, interpreted);
+        return interpreted;
+    }
+}
+
 public class VocalMidiExportTests
 {
     [Fact]
