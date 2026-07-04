@@ -1,7 +1,10 @@
 {
-  "name": "SoundScript Piano",
+  "name": "FluidR3 GM",
   "format": "wav-samples",
+  "source": "FluidR3_GM.sf2 (MIT license, Frank Wen)",
   "baseMidi": 48,
+  "defaultProgram": 0,
+  "programs": [0, 19, 24, 32, 40, 42, 56, 73, 80],
   "pitchClasses": ["C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"],
-  "samplePath": "samples/{pitch}.wav"
+  "samplePath": "samples/{program}/{pitch}.wav"
 }
