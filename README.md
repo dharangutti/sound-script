@@ -102,6 +102,11 @@ MidiGenerator → output.mid
 | [examples/patterns.ss](examples/patterns.ss) | Arp, strum, rhythm |
 | [examples/orchestration.ss](examples/orchestration.ss) | Orchestration helpers |
 | [examples/full-v2-showcase.ss](examples/full-v2-showcase.ss) | Combined V2 demo |
+| [examples/industrial-blind-assist.ss](examples/industrial-blind-assist.ss) | Industrial cue — blind operator spatial awareness |
+| [examples/industrial-machine-state.ss](examples/industrial-machine-state.ss) | Industrial cue — machine states (idle / running / critical) |
+| [examples/industrial-conveyor-drift.ss](examples/industrial-conveyor-drift.ss) | Industrial cue — conveyor timing drift |
+| [examples/industrial-temperature-trend.ss](examples/industrial-temperature-trend.ss) | Industrial cue — temperature trend |
+| [examples/industrial-robotic-arm.ss](examples/industrial-robotic-arm.ss) | Industrial cue — robotic arm motion phases |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -180,6 +185,7 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 
 | Document | Description |
 |----------|-------------|
+| [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
 | [docs/whats-new-v3.md](docs/whats-new-v3.md) | V3 changelog |
 | [docs/whats-new-v2.md](docs/whats-new-v2.md) | V2 changelog |
