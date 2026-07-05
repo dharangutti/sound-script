@@ -67,15 +67,19 @@ the same syllable always yields the same phonemes, on every platform.
 data — a gesture kind, a pitch, and a duration:
 
 ```
-/s/  → fade     C5 e
-/t/  → staccato C4 e
-/aa/ → legato   C4 q
-/r/  → accent   G4 e
+/s/  → fade     D4 e
+/t/  → staccato B3 e
+/aa/ → legato   D4 q
+/r/  → accent   D4 e
 ```
 
 Plosives map to staccato, nasals to swell, fricatives to fade, liquids to
-accent, vowels to legato. The full table is in
-[phoneme-composer.md](phoneme-composer.md).
+accent, vowels to legato. Every pitch sits within a perfect fifth (A3–E4), so
+adjacent phonemes in a word move by a step or two instead of leaping across
+octaves — closer to how spoken pitch contour actually moves. (The fifth-wide
+band isn't arbitrary: the shared `MelodicContour` shaping step would octave-
+correct any wider leap, so anything much narrower or wider gets distorted.)
+The full table is in [phoneme-composer.md](phoneme-composer.md).
 
 ### 4. Gestures → phrases → AST
 
