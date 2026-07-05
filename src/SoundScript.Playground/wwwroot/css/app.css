@@ -130,6 +130,21 @@ a:hover { text-decoration: underline; }
     outline-offset: 2px;
 }
 
+.example-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-bg);
+    color: #c7d2e8;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+    min-width: 12rem;
+}
+
+.example-select:focus {
+    outline: 2px solid rgba(110, 231, 183, 0.35);
+    outline-offset: 2px;
+}
+
 .panes {
     display: grid;
     grid-template-columns: 1fr 1fr;

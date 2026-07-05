@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    Single source of truth for the SoundScript release version. Bump these
+    three properties to cut a release: every project under src/ inherits
+    them automatically (standard MSBuild Directory.Build.props discovery),
+    VersionInfo.cs (SoundScript.Core) reads them back at runtime, and
+    .github/workflows/deploy-pages.yml re-stamps the docs/index.html badge
+    from the same values on the next push to main.
+  -->
+  <PropertyGroup>
+    <Version>6.0.0</Version>
+    <SoundScriptVersionLabel>V6</SoundScriptVersionLabel>
+    <SoundScriptCodename>Editable .ss Export</SoundScriptCodename>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="SoundScriptVersionLabel" Value="$(SoundScriptVersionLabel)" />
+    <AssemblyMetadata Include="SoundScriptCodename" Value="$(SoundScriptCodename)" />
+  </ItemGroup>
+</Project>
