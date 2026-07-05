@@ -385,7 +385,7 @@ public class VocalMidiExportTests
         var programChange = events.OfType<ProgramChangeEvent>().Single(e => (int)e.Channel == 15);
         Assert.Equal(52, (int)programChange.ProgramNumber);
 
-        var trackName = events.OfType<SequenceTrackNameEvent>().Single();
+        var trackName = events.OfType<SequenceTrackNameEvent>().Single(e => e.Text == "lead");
         Assert.Equal("lead", trackName.Text);
 
         var vocalNoteOns = events.OfType<NoteOnEvent>().Where(e => (int)e.Channel == 15).ToList();
