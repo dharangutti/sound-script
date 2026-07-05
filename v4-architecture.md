@@ -92,6 +92,21 @@ Cycle count derives from pitch: `clamp(round(frameMs / (1000/freq)), 3, 10)`.
 
 → [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
 
+## Cycle tuning (V4.1.1)
+
+V4.1.1 tunes the cycle layer above without changing its shape — cycle
+count, timing, and the frame/cycle contract are untouched:
+
+```
+Harmonics (rolloff curve) → Formants (Q + drift) → Noise (band-shaped) → Transient (sharpened) → Stitch (crossfade)
+```
+
+Frame-to-frame parameter changes (formant gains, harmonic amplitudes, noise
+envelopes) are now eased via `TimbreProfile.Lerp` in `SpectralEngine`
+instead of snapping at each 8 ms frame boundary.
+
+→ [v4.1.1-timbre-tuning.md](v4.1.1-timbre-tuning.md)
+
 ## Version history
 
 | Version | Addition |
@@ -99,13 +114,15 @@ Cycle count derives from pitch: `clamp(round(frameMs / (1000/freq)), 3, 10)`.
 | V3.1 | PhonemeComposer — text → MIDI |
 | V4.0 | SoundScript.Timbre — MIDI → audio (frame-level) |
 | V4.1 | Cycle-accurate harmonic reconstruction per pitch period |
+| V4.1.1 | Timbre quality tuning — rolloff curves, formant Q/drift, noise shaping, crossfade |
 
-→ [What's new in V4](whats-new-v4.md) · [What's new in V4.1](whats-new-v4.1.md)
+→ [What's new in V4](whats-new-v4.md) · [What's new in V4.1](whats-new-v4.1.md) · [What's new in V4.1.1](whats-new-v4.1.1.md)
 
 ## See also
 
 - [SoundCSS](soundcss.md)
 - [Timbre engine](timbre-engine.md)
 - [Cycle synthesis (V4.1)](v4.1-cycle-synthesis.md)
+- [Timbre tuning (V4.1.1)](v4.1.1-timbre-tuning.md)
 - [Text-to-melody (V3.1)](text-to-melody.md)
 - [PhonemeComposer](phoneme-composer.md)

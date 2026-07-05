@@ -48,7 +48,7 @@ Rendering is **offline only** (slow-motion synthesis in WASM), not real-time tim
 **V4.1** reconstructs 3–10 pitch cycles per 8 ms frame for richer timbre —
 the same text produces different (improved) WAV bytes compared to V4.0.
 
-→ [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md) · [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
+→ [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md) · [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md) · [v4.1.1-timbre-tuning.md](v4.1.1-timbre-tuning.md)
 
 ## Build
 
