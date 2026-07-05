@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- UNDER DEVELOPMENT — v1 prototype. See WaveRenderer.cs for the module overview. -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      SoundScript.Core is the ONLY project reference: this module walks the
+      shared AST directly and must be addable/removable without touching
+      SoundScript.Midi, SoundScript.Timbre, or the parser.
+    -->
+    <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SoundScript.Tests" />
+  </ItemGroup>
+
+</Project>
