@@ -47,7 +47,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), browser playground, cross-platform CLI",
+                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), word-level prosody composition (ProsodyComposer), editable .ss DSL export from composed text (--emit-ss), browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
                 "codeRepository": "https://github.com/dharangutti/sound-script",
                 "author": {
@@ -601,6 +601,14 @@ tempo 120 → 140 over 4 bars</pre>
                 <li>
                     <span class="step-num">5</span>
                     <div>
+                        <strong>Export it as editable source (V6)</strong><br>
+                        <code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss</code><br>
+                        <span style="color: var(--muted); font-size: 0.9rem;">Add <code>--emit-ss &lt;path&gt;</code> to <code>compose</code>/<code>prosody</code> and get a human-readable <code>.ss</code> file alongside the MIDI — hand-tweak a note, then run it with <code>run twinkle.ss</code>. The Playground's compose buttons offer the same export inline. <a href="doc.html?p=whats-new-v6.md">What's new in V6 →</a></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="step-num">6</span>
+                    <div>
                         <strong>Make it sing</strong><br>
                         <code>dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss</code><br>
                         <span style="color: var(--muted); font-size: 0.9rem;">Or click the <em>Voice</em> preset in the Playground and press Run — the lyrics are spoken over the melody, and the downloaded MIDI carries them as karaoke lyric events. <a href="doc.html?p=vocal.md">Vocal track docs →</a></span>
@@ -677,6 +685,14 @@ Cmaj w</pre>
                         <a href="doc.html?p=whats-new-v2.md">What's new in V2</a> · <a href="doc.html?p=imports.md">Imports</a><br>
                         <a href="doc.html?p=phrases.md">Phrases</a> · <a href="doc.html?p=orchestration.md">Orchestration</a><br>
                         <a href="doc.html?p=vocal.md">Vocal track — lyrics &amp; phonetics</a>
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>V6 — Editable .ss Export</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                        <a href="doc.html?p=whats-new-v6.md">What's new in V6</a><br>
+                        <a href="doc.html?p=cli.md">CLI reference — <code>--emit-ss</code></a><br>
+                        <a href="doc.html?p=examples.md">Worked .ss export example</a>
                     </p>
                 </div>
                 <div class="card">

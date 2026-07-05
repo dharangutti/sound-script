@@ -28,6 +28,7 @@ System overview for the SoundScript engine and documentation suite.
 |-----------|---------|------|
 | `ProgramLoader` | Parser | Import resolution, AST merge |
 | `Tokenizer` / `Parser` | Parser | DSL → AST |
+| `SsPrinter` | Parser | AST → `.ss` DSL source text (V6) |
 | `Interpreter` | Midi | AST → InterpretedProgram |
 | `PatternExpander` | Midi | Pattern → NoteNode[] |
 | `ChordOrchestration` | Midi | Orchestration helpers |
@@ -117,6 +118,23 @@ branch produced it. → [text-to-melody.md](text-to-melody.md) ·
 [phoneme-composer.md](phoneme-composer.md) · [word-prosody.md](word-prosody.md) ·
 [v4-architecture.md](v4-architecture.md) · [v5-prosody-architecture.md](v5-prosody-architecture.md)
 
+### V6 addendum: optional `.ss` detour
+
+Both text branches expose their pre-interpretation `ProgramNode` via
+`BuildAst` before it ever reaches `Interpreter`. V6 adds `SsPrinter`, which
+taps that same `ProgramNode` and prints it back out as `.ss` source instead
+of continuing straight to `Interpreter`/`MidiGenerator`:
+
+```
+PhonemeComposer.BuildAst / ProsodyComposer.BuildAst → ProgramNode
+    ├── (default)      → Interpreter → MidiGenerator → output.mid
+    └── (--emit-ss)    → SsPrinter → melody.ss → (Tokenizer → Parser → Interpreter → MidiGenerator) → output.mid
+```
+
+The bottom path re-enters the DSL front end (`Tokenizer`/`Parser`) exactly as
+a hand-written script would — `SsPrinter` has no special-cased reader on the
+other end. → [whats-new-v6.md](whats-new-v6.md)
+
 ## Engine Phases
 
 | Phase | Modules | V2 additions |
@@ -146,5 +164,6 @@ branch produced it. → [text-to-melody.md](text-to-melody.md) ·
 - [word-prosody.md](word-prosody.md)
 - [v5-prosody-architecture.md](v5-prosody-architecture.md)
 - [whats-new-v5.md](whats-new-v5.md)
+- [whats-new-v6.md](whats-new-v6.md)
 - [whats-new-v3.1.md](whats-new-v3.1.md)
 - [whats-new-v2.md](whats-new-v2.md)

@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Compose;
@@ -39,6 +40,7 @@ public partial class Playground
   private List<string> WarningMessages { get; set; } = [];
   private byte[]? MidiBytes { get; set; }
   private byte[]? WavBytes { get; set; }
+  private string? SsText { get; set; }
   private bool IsRunning { get; set; }
 
   private void LoadV2ShowcaseExample()
@@ -406,7 +408,9 @@ public partial class Playground
         return;
       }
 
-      var interpreted = PhonemeComposer.ComposeProgram(ComposeText);
+      var ast = PhonemeComposer.BuildAst(ComposeText);
+      SsText = SsPrinter.Print(ast);
+      var interpreted = Interpreter.Interpret(ast);
 
       using var stream = new MemoryStream();
       MidiGenerator.Write(interpreted, stream);
@@ -423,6 +427,7 @@ public partial class Playground
       ErrorMessage = ex.Message;
       StatusMessage = null;
       MidiBytes = null;
+      SsText = null;
     }
     finally
     {
@@ -444,7 +449,9 @@ public partial class Playground
         return;
       }
 
-      var interpreted = ProsodyComposer.ComposeProgram(ComposeText);
+      var ast = ProsodyComposer.BuildAst(ComposeText);
+      SsText = SsPrinter.Print(ast);
+      var interpreted = Interpreter.Interpret(ast);
 
       using var stream = new MemoryStream();
       MidiGenerator.Write(interpreted, stream);
@@ -461,6 +468,7 @@ public partial class Playground
       ErrorMessage = ex.Message;
       StatusMessage = null;
       MidiBytes = null;
+      SsText = null;
     }
     finally
     {
@@ -641,6 +649,15 @@ public partial class Playground
     await Js.InvokeVoidAsync("SoundScriptAudio.download", base64, "soundscript.wav");
   }
 
+  private async Task DownloadSsAsync()
+  {
+    if (SsText is null)
+      return;
+
+    var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(SsText));
+    await Js.InvokeVoidAsync("SoundScriptText.download", base64, "soundscript.ss");
+  }
+
   private void ClearState()
   {
     ErrorMessage = null;
@@ -648,5 +665,6 @@ public partial class Playground
     WarningMessages = [];
     MidiBytes = null;
     WavBytes = null;
+    SsText = null;
   }
 }

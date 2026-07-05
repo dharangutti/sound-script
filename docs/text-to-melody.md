@@ -208,6 +208,28 @@ dotnet run --project src/SoundScript.Cli -- prosody  "Twinkle twinkle little sta
 
 → [word-prosody.md](word-prosody.md) · [v5-prosody-architecture.md](v5-prosody-architecture.md)
 
+## V6 extension: `--emit-ss` DSL export
+
+Both `compose` and `prosody` build a `ProgramNode` AST (`TempoNode` +
+`TrackNode` of `PhraseNode`s) before ever touching MIDI — `BuildAst` returns
+it directly, and `ComposeProgram`/ `Compose` are just `Interpreter.Interpret`
+applied to that AST. V6 adds a printer, `SoundScript.Parser.SsPrinter`, that
+turns that same AST back into `.ss` source text, and an opt-in `--emit-ss
+<path>` flag that writes it alongside the `.mid` file:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss
+dotnet run --project src/SoundScript.Cli -- run twinkle.ss twinkle-viass.mid
+```
+
+`twinkle-viass.mid` is byte-identical to what `compose "Twinkle twinkle
+little star" twinkle.mid` (no flag) would have produced directly — the
+detour through text changes nothing about the sound, only whether there's a
+human-editable checkpoint in between. Open `twinkle.ss`, change a pitch or a
+duration, `run` it again, and only that edit shows up in the resulting MIDI.
+
+→ [whats-new-v6.md](whats-new-v6.md)
+
 ## Related
 
 - [phoneme-composer.md](phoneme-composer.md) — module documentation, mapping table, splitter rules
@@ -217,3 +239,4 @@ dotnet run --project src/SoundScript.Cli -- prosody  "Twinkle twinkle little sta
 - [whats-new-v3.1.md](whats-new-v3.1.md) — V3.1 changelog
 - [whats-new-v4.md](whats-new-v4.md) — V4 timbre synthesis changelog
 - [whats-new-v5.md](whats-new-v5.md) — V5 word-level prosody changelog
+- [whats-new-v6.md](whats-new-v6.md) — V6 `.ss` export changelog

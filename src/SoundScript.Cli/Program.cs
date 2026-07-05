@@ -23,8 +23,8 @@ return args[0].ToLowerInvariant() switch
 static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript run <script.ss> [output.mid]");
-    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>]");
-    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>]");
+    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
+    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text \"<source text>\"]");
     return 1;
 }
@@ -84,6 +84,7 @@ static int Compose(string[] args)
 
     string? outputPath = null;
     string? appendScriptPath = null;
+    string? emitSsPath = null;
 
     for (var i = 2; i < args.Length; i++)
     {
@@ -97,10 +98,28 @@ static int Compose(string[] args)
 
             appendScriptPath = args[++i];
         }
+        else if (string.Equals(args[i], "--emit-ss", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--emit-ss requires an output path: compose \"text\" --emit-ss melody.ss");
+                return 1;
+            }
+
+            emitSsPath = args[++i];
+        }
         else
         {
             outputPath = args[i];
         }
+    }
+
+    if (emitSsPath is not null && appendScriptPath is not null)
+    {
+        Console.Error.WriteLine(
+            "--emit-ss and --append cannot be combined: --emit-ss exports only the standalone composed AST, " +
+            "which would not match the merged --append MIDI output.");
+        return 1;
     }
 
     outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
@@ -126,7 +145,11 @@ static int Compose(string[] args)
         }
         else
         {
-            interpreted = PhonemeComposer.ComposeProgram(text);
+            var ast = PhonemeComposer.BuildAst(text);
+            if (emitSsPath is not null)
+                File.WriteAllText(emitSsPath, SsPrinter.Print(ast));
+
+            interpreted = Interpreter.Interpret(ast);
         }
 
         MidiGenerator.Write(interpreted, outputPath);
@@ -140,6 +163,8 @@ static int Compose(string[] args)
             ? $"Composed {syllables.Count} syllable(s) and appended the phoneme track to {appendScriptPath}: " +
               $"{noteCount} note(s) across {interpreted.Tracks.Count} track(s)"
             : $"Composed {syllables.Count} syllable(s) into {noteCount} note(s)";
+        if (emitSsPath is not null)
+            summary += $" and .ss source to {emitSsPath}";
         Console.WriteLine($"{summary} to {outputPath} at {interpreted.Tempo} BPM.");
         return 0;
     }
@@ -161,6 +186,7 @@ static int Prosody(string[] args)
 
     string? outputPath = null;
     string? appendScriptPath = null;
+    string? emitSsPath = null;
 
     for (var i = 2; i < args.Length; i++)
     {
@@ -174,10 +200,28 @@ static int Prosody(string[] args)
 
             appendScriptPath = args[++i];
         }
+        else if (string.Equals(args[i], "--emit-ss", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--emit-ss requires an output path: prosody \"text\" --emit-ss melody.ss");
+                return 1;
+            }
+
+            emitSsPath = args[++i];
+        }
         else
         {
             outputPath = args[i];
         }
+    }
+
+    if (emitSsPath is not null && appendScriptPath is not null)
+    {
+        Console.Error.WriteLine(
+            "--emit-ss and --append cannot be combined: --emit-ss exports only the standalone composed AST, " +
+            "which would not match the merged --append MIDI output.");
+        return 1;
     }
 
     outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
@@ -203,7 +247,11 @@ static int Prosody(string[] args)
         }
         else
         {
-            interpreted = ProsodyComposer.ComposeProgram(text);
+            var ast = ProsodyComposer.BuildAst(text);
+            if (emitSsPath is not null)
+                File.WriteAllText(emitSsPath, SsPrinter.Print(ast));
+
+            interpreted = Interpreter.Interpret(ast);
         }
 
         MidiGenerator.Write(interpreted, outputPath);
@@ -217,6 +265,8 @@ static int Prosody(string[] args)
             ? $"Composed {syllableCount} syllable(s) and appended the prosody track to {appendScriptPath}: " +
               $"{noteCount} note(s) across {interpreted.Tracks.Count} track(s)"
             : $"Composed {syllableCount} syllable(s) into {noteCount} note(s)";
+        if (emitSsPath is not null)
+            summary += $" and .ss source to {emitSsPath}";
         Console.WriteLine($"{summary} to {outputPath} at {interpreted.Tempo} BPM.");
         return 0;
     }
