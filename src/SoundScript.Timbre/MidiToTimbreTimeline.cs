@@ -157,9 +157,16 @@ public static class MidiToTimbreTimeline
             var trackName = GetTrackName(chunk) ?? $"track-{trackIndex}";
             trackIndex++;
 
+            // A preferred name filters to that track only, full stop — no matter
+            // whether we've collected notes from an earlier chunk yet. Gating this
+            // on events.Count > 0 (the old bug) meant the very first chunk was
+            // always let through unfiltered, so a non-preferred track's notes
+            // could bleed into the render whenever a file held more than one
+            // named track (e.g. a PhonemeComposer + ProsodyComposer combo via
+            // `--append`). If no chunk matches, events stays empty here and the
+            // blanket fallback below takes over.
             if (preferredTrackName is not null
-                && !string.Equals(trackName, preferredTrackName, StringComparison.Ordinal)
-                && events.Count > 0)
+                && !string.Equals(trackName, preferredTrackName, StringComparison.Ordinal))
                 continue;
 
             using var notesManager = chunk.ManageNotes();
@@ -177,9 +184,7 @@ public static class MidiToTimbreTimeline
                     durationBeats));
             }
 
-            if (preferredTrackName is not null
-                && string.Equals(trackName, preferredTrackName, StringComparison.Ordinal)
-                && events.Count > 0)
+            if (preferredTrackName is not null)
                 break;
         }
 

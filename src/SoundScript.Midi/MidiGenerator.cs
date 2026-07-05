@@ -23,6 +23,7 @@ public static partial class MidiGenerator
         foreach (var track in program.Tracks)
         {
             var trackChunk = new TrackChunk();
+            trackChunk.Events.Add(new SequenceTrackNameEvent(track.Name));
 
             if (program.TimeSignatureNumerator is not null && program.TimeSignatureDenominator is not null)
             {

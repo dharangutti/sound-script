@@ -12,12 +12,12 @@ public static class WordPitchTable
 
     private static readonly Dictionary<(WordCategory, PhrasePosition), int> Offsets = new()
     {
-        [(WordCategory.Content, PhrasePosition.Start)] = 2,
+        [(WordCategory.Content, PhrasePosition.Start)] = 4,
         [(WordCategory.Content, PhrasePosition.Middle)] = 0,
-        [(WordCategory.Content, PhrasePosition.End)] = -2,
-        [(WordCategory.Function, PhrasePosition.Start)] = -4,
-        [(WordCategory.Function, PhrasePosition.Middle)] = -4,
-        [(WordCategory.Function, PhrasePosition.End)] = -4,
+        [(WordCategory.Content, PhrasePosition.End)] = -3,
+        [(WordCategory.Function, PhrasePosition.Start)] = -7,
+        [(WordCategory.Function, PhrasePosition.Middle)] = -7,
+        [(WordCategory.Function, PhrasePosition.End)] = -7,
     };
 
     /// <summary>Base MIDI number for a word of the given category and phrase position.</summary>

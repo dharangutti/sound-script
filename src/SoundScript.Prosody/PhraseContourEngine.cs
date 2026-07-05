@@ -31,9 +31,9 @@ public static class PhraseContourEngine
         {
             deltas[i] = type switch
             {
-                SentenceType.Question => Ramp(i, wordCount, from: -1, to: 3),
+                SentenceType.Question => Ramp(i, wordCount, from: -3, to: 5),
                 SentenceType.ListItem => Math.Min(i, 3),
-                _ => Ramp(i, wordCount, from: 1, to: -2),
+                _ => Ramp(i, wordCount, from: 2, to: -4),
             };
         }
 

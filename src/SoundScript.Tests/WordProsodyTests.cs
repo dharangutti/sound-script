@@ -1,3 +1,4 @@
+using SoundScript.Compose;
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Midi;
@@ -33,9 +34,9 @@ public class WordProsodyPlannerTests
         var plans = WordProsodyPlanner.Plan(WordTokenizer.Tokenize("Hello world"));
 
         Assert.Equal(WordCategory.Content, plans[0].Category);
-        Assert.Equal(62, plans[0].BaseMidi); // Start: C4 + 2
+        Assert.Equal(64, plans[0].BaseMidi); // Start: C4 + 4
         Assert.Equal(WordCategory.Content, plans[1].Category);
-        Assert.Equal(58, plans[1].BaseMidi); // End: C4 - 2
+        Assert.Equal(57, plans[1].BaseMidi); // End: C4 - 3
     }
 
     [Fact]
@@ -52,7 +53,7 @@ public class WordProsodyPlannerTests
         var plans = WordProsodyPlanner.Plan(WordTokenizer.Tokenize("the cat sat"));
 
         Assert.Equal(WordCategory.Function, plans[0].Category);
-        Assert.Equal(56, plans[0].BaseMidi); // Function: C4 - 4, regardless of position
+        Assert.Equal(53, plans[0].BaseMidi); // Function: C4 - 7, regardless of position
         Assert.True(plans[0].BaseMidi < plans[1].BaseMidi);
     }
 }
@@ -106,7 +107,7 @@ public class PhraseContourEngineTests
     {
         var deltas = PhraseContourEngine.ComputeDeltas(4, SentenceType.Statement);
 
-        Assert.Equal([1, 0, -1, -2], deltas);
+        Assert.Equal([2, 0, -2, -4], deltas);
     }
 
     [Fact]
@@ -137,9 +138,9 @@ public class ProsodyClampTests
     [Fact]
     public void Clamp_BoundsPhraseRange()
     {
-        var clamped = ProsodyClamp.Clamp([60, 63, 66, 69, 72]);
+        var clamped = ProsodyClamp.Clamp([60, 65, 70, 75, 80, 85, 90]);
 
-        Assert.True(clamped.Max() - clamped.Min() <= 7);
+        Assert.True(clamped.Max() - clamped.Min() <= 14);
     }
 
     [Fact]
@@ -167,7 +168,7 @@ public class ProsodyComposerTests
         Assert.Equal("prosody", track.Name);
         Assert.Equal(7, track.Body.Count);
 
-        int[] expectedMidi = [65, 63, 62, 60, 61, 59, 58];
+        int[] expectedMidi = [68, 66, 62, 60, 60, 58, 55];
         for (var i = 0; i < track.Body.Count; i++)
         {
             var phrase = Assert.IsType<PhraseNode>(track.Body[i]);
@@ -189,7 +190,7 @@ public class ProsodyComposerTests
             .Select(phrase => phrase.Body.OfType<NoteNode>().First().Notation.ToMidiNumber())
             .ToList();
 
-        Assert.True(pitches.Max() - pitches.Min() <= 7);
+        Assert.True(pitches.Max() - pitches.Min() <= 14);
         for (var i = 1; i < pitches.Count; i++)
             Assert.True(Math.Abs(pitches[i] - pitches[i - 1]) <= 5);
     }
@@ -286,6 +287,46 @@ public class ProsodyRenderTests
                 preferredTrackName: "prosody");
 
             Assert.NotEmpty(timeline.Frames);
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Fact]
+    public void Timeline_PreferredTrackNameSelectsProsodyTrackAmongMultipleNamedTracks()
+    {
+        // Reproduces the multi-track shape docs/word-prosody.md describes for
+        // `--append`: a PhonemeComposer ("phonemes") track alongside a
+        // ProsodyComposer ("prosody") track in the same file. Before
+        // MidiGenerator wrote a SequenceTrackNameEvent for ordinary tracks,
+        // PreferredTrackName had no track names to match against, so it only
+        // "worked" by always picking whichever track chunk came first —
+        // invisible with the single-track files the other tests here use.
+        const string PhonemeText = "hello";
+        const string ProsodyText = "star";
+
+        var program = PhonemeComposer.ComposeProgram(PhonemeText);
+        ProsodyComposer.AppendTo(program, ProsodyText);
+
+        using var stream = new MemoryStream();
+        MidiGenerator.Write(program, stream);
+        var temp = Path.Combine(Path.GetTempPath(), $"ss-prosody-multi-{Guid.NewGuid():N}.mid");
+        File.WriteAllBytes(temp, stream.ToArray());
+
+        try
+        {
+            var timeline = MidiToTimbreTimeline.Build(
+                temp,
+                phonemes: PhonemeTimbreMapper.PhonemesFromText(ProsodyText),
+                preferredTrackName: "prosody");
+
+            var expectedNoteCount = ProsodyComposer.Compose(ProsodyText).Notes.Count;
+            var phonemeTrackNoteCount = PhonemeComposer.Compose(PhonemeText).Notes.Count;
+
+            Assert.NotEqual(phonemeTrackNoteCount, expectedNoteCount);
+            Assert.Equal(expectedNoteCount, timeline.Segments.Count);
         }
         finally
         {
