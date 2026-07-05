@@ -1,9 +1,16 @@
 ﻿using SoundScript.Compose;
+using SoundScript.Core;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
+
+if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
+{
+    Console.WriteLine($"soundscript {VersionInfo.Number} ({VersionInfo.Display})");
+    return 0;
+}
 
 if (args.Length < 2)
 {
@@ -22,7 +29,8 @@ return args[0].ToLowerInvariant() switch
 
 static int PrintUsage()
 {
-    Console.Error.WriteLine("Usage: soundscript run <script.ss> [output.mid]");
+    Console.Error.WriteLine("Usage: soundscript --version");
+    Console.Error.WriteLine("       soundscript run <script.ss> [output.mid]");
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text \"<source text>\"]");
