@@ -93,6 +93,22 @@ public class NoiseInjectorTests
             NoiseInjector.DeterministicNoise(12345),
             NoiseInjector.DeterministicNoise(12345));
     }
+
+    [Fact]
+    public void DeterministicNoise_StaysWithinDocumentedRange()
+    {
+        // Regression: `x - Math.Floor(x) * 2.0 - 1.0` is `x - (Math.Floor(x) * 2.0) - 1.0`,
+        // not `(x - Math.Floor(x)) * 2.0 - 1.0` — operator precedence left the result
+        // dominated by -Math.Floor(x), which grows with the ~43758.5 scale constant, so
+        // output could reach the tens of thousands instead of staying in [-1, 1]. That fed
+        // both the formant micro-drift and the raw noise layers with occasional huge spikes,
+        // producing the large, note-boundary-unrelated audio clicks found in the renderer.
+        for (long i = 0; i < 5000; i++)
+        {
+            var value = NoiseInjector.DeterministicNoise(i);
+            Assert.InRange(value, -1.0, 1.0);
+        }
+    }
 }
 
 public class CycleStitcherTests

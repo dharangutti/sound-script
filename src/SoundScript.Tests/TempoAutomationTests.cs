@@ -66,6 +66,55 @@ public class TempoAutomationTests
     }
 
     [Fact]
+    public void GetTempoMapPoints_ReflectsAConstantTempoSetAtBeatZero()
+    {
+        // Regression: GetTempoMapPoints() used to hard-code a (0, InitialBpm) point
+        // ahead of the loop and only emitted a segment's own beat-0 point for ramps,
+        // so a plain `tempo N` statement (a ConstantTempoSegment starting at beat 0)
+        // was silently dropped in favor of the stale 120 BPM default — every MIDI
+        // file the composers wrote played back at 120 BPM regardless of the
+        // requested tempo, unless a beat-0 ramp happened to overwrite it too.
+        var map = new TempoAutomationMap();
+        map.SetTempo(0, 96);
+
+        var points = map.GetTempoMapPoints().ToList();
+
+        Assert.Single(points);
+        Assert.Equal(0, points[0].Beat);
+        Assert.Equal(96, points[0].Bpm);
+    }
+
+    [Fact]
+    public void MidiGenerator_ExportsTheComposedTempoNotTheStaleDefault()
+    {
+        // End-to-end version of the regression above, through the real MIDI writer.
+        const string source = """
+            tempo 96
+            track melody {
+                C4 q
+            }
+            """;
+
+        var interpreted = Interpret(source);
+        var path = Path.Combine(Path.GetTempPath(), $"soundscript-tempo-beat0-{Guid.NewGuid():N}.mid");
+
+        try
+        {
+            MidiGenerator.Write(interpreted, path);
+            var midiFile = Melanchall.DryWetMidi.Core.MidiFile.Read(path);
+            var tempoChanges = midiFile.GetTempoMap().GetTempoChanges().ToList();
+
+            Assert.Single(tempoChanges);
+            Assert.Equal(96, tempoChanges[0].Value.BeatsPerMinute, 3);
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void MidiGenerator_ExportsTempoMapChanges()
     {
         const string source = """

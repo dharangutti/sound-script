@@ -100,13 +100,11 @@ public sealed class TempoAutomationMap
 
     public IEnumerable<TempoMapPoint> GetTempoMapPoints()
     {
-        yield return new TempoMapPoint(0, InitialBpm);
-
         foreach (var segment in _segments.OrderBy(s => s.StartBeat))
         {
             switch (segment)
             {
-                case ConstantTempoSegment constant when constant.StartBeat > 0:
+                case ConstantTempoSegment constant:
                     yield return new TempoMapPoint(constant.StartBeat, constant.Bpm);
                     break;
                 case RampTempoSegment ramp:

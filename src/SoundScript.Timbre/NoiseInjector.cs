@@ -61,7 +61,7 @@ public static class NoiseInjector
     public static double DeterministicNoise(long index)
     {
         var x = Math.Sin(index * 12.9898 + 78.233) * 43758.5453;
-        return x - Math.Floor(x) * 2.0 - 1.0;
+        return (x - Math.Floor(x)) * 2.0 - 1.0;
     }
 
     /// <summary>Deterministic resonant band-pass, shaping fricative white noise around a centre frequency.</summary>

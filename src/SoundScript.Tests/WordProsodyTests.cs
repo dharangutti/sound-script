@@ -271,6 +271,37 @@ public class ProsodyRenderTests
         Assert.True(wav.Length > 44); // header plus actual sample data
     }
 
+    [Theory]
+    [InlineData("Twinkle twinkle little star")]
+    [InlineData("The quick brown fox jumps over the lazy dog and sings a happy melody")]
+    public void RenderToWavBytes_HasNoLargeSampleToSampleDiscontinuities(string text)
+    {
+        // Automated click detector: a real audible click is a sample-to-sample jump far
+        // bigger than any smooth oscillator or envelope can produce in one 1/44100s step.
+        // This caught (and now guards against regressions of) three compounding synthesis
+        // bugs: a phase/cycle-length mismatch in CycleGenerator/CycleStitcher, an unbounded
+        // NoiseInjector.DeterministicNoise, and a cycle-boundary crossfade that blended
+        // already-continuous audio against a stale, out-of-phase tail.
+        using var stream = new MemoryStream();
+        MidiGenerator.Write(ProsodyComposer.ComposeProgram(text), stream);
+
+        var wav = OfflineRenderer.RenderToWavBytes(
+            stream.ToArray(),
+            options: new OfflineRenderer.RenderOptions { SourceText = text, PreferredTrackName = "prosody" });
+
+        const int HeaderBytes = 44;
+        const short JumpThreshold = 8000;
+        var sampleCount = (wav.Length - HeaderBytes) / 2;
+
+        short Sample(int i) => BitConverter.ToInt16(wav, HeaderBytes + i * 2);
+
+        var maxJump = 0;
+        for (var i = 1; i < sampleCount; i++)
+            maxJump = Math.Max(maxJump, Math.Abs(Sample(i) - Sample(i - 1)));
+
+        Assert.True(maxJump < JumpThreshold, $"Found a sample-to-sample jump of {maxJump} (>= {JumpThreshold}), indicating an audible click.");
+    }
+
     [Fact]
     public void Timeline_AlignsNotesFromTheProsodyTrackByName()
     {

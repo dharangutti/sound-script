@@ -52,7 +52,7 @@ public static class CycleStitcher
                 sampleRate,
                 phaseOffset);
 
-            phaseOffset += (double)cycleSamples / CycleGenerator.SamplesPerCycle(frame.PitchHz, sampleRate);
+            phaseOffset += cycleSamples * frame.PitchHz / sampleRate;
             if (phaseOffset >= 1.0)
                 phaseOffset -= Math.Floor(phaseOffset);
 
@@ -81,10 +81,30 @@ public static class CycleStitcher
         }
     }
 
+    /// <summary>
+    /// How far the new cycle's first sample may deviate from the tail's own linear trend
+    /// before it counts as a genuine discontinuity (e.g. independently-reseeded fricative
+    /// noise) rather than a phase-continuous oscillator's ordinary curvature.
+    /// </summary>
+    private const double ExtrapolationTolerance = 1.2;
+
     private static void ApplyCrossfadeIn(double[] cycle, CrossfadeState state, int sampleRate)
     {
         if (state.Tail is not { Length: > 0 } tail)
             return;
+
+        // A phase-continuous oscillator's next sample closely follows the tail's own local
+        // linear trend (deviating only by its small per-sample curvature); an independently
+        // reseeded noise cycle does not, regardless of either signal's absolute amplitude.
+        // Blending an already-continuous cycle against the tail's mismatched absolute phase
+        // would introduce a new discontinuity rather than remove one, so only blend when the
+        // jump actually looks unrelated to that trend.
+        if (cycle.Length > 0 && tail.Length >= 2)
+        {
+            var predicted = 2.0 * tail[^1] - tail[^2];
+            if (Math.Abs(cycle[0] - predicted) < ExtrapolationTolerance)
+                return;
+        }
 
         var crossfadeSamples = Math.Min(Math.Min(tail.Length, cycle.Length / 2), CrossfadeSampleCount(sampleRate));
         for (var i = 0; i < crossfadeSamples; i++)

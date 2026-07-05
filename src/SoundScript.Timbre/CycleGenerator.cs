@@ -35,7 +35,7 @@ public static class CycleGenerator
 
         for (var i = 0; i < sampleCount; i++)
         {
-            var t = phaseOffset + i / (double)sampleCount;
+            var t = phaseOffset + i * pitchHz / sampleRate;
             var angle = TwoPi * t;
             var fundamental = Math.Sin(angle) * h1;
             var second = Math.Sin(angle * 2.0) * h2;
