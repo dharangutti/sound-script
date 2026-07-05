@@ -43,8 +43,38 @@ internal static class HumanizeApplicator
 
     private static double SampleUnit(int noteIndex, byte channel)
     {
-        var seed = HashCode.Combine(_seedOverride ?? DefaultSeed, noteIndex, channel);
+        var seed = StableHash(_seedOverride ?? DefaultSeed, noteIndex, channel);
         var random = new Random(seed);
         return random.NextDouble() * 2 - 1;
+    }
+
+    // HashCode.Combine deliberately randomizes its internal seed per process (anti hash-flooding),
+    // so identical (seed, noteIndex, channel) inputs produced a different jitter value on every
+    // process run — this class's own contract promises deterministic humanization, so a stable,
+    // non-randomized combine is required here instead. Uses the "triple32" integer finalizer for
+    // strong avalanche behavior, since a weak combine leaves small inputs like these prone to
+    // collisions that would make distinct notes land on the same jitter value.
+    private static int StableHash(int seed, int noteIndex, byte channel)
+    {
+        unchecked
+        {
+            var h = (uint)seed;
+            h = Mix(h ^ (uint)noteIndex);
+            h = Mix(h ^ channel);
+            return (int)h;
+        }
+    }
+
+    private static uint Mix(uint x)
+    {
+        unchecked
+        {
+            x ^= x >> 16;
+            x *= 0x7feb352du;
+            x ^= x >> 15;
+            x *= 0x846ca68bu;
+            x ^= x >> 16;
+            return x;
+        }
     }
 }

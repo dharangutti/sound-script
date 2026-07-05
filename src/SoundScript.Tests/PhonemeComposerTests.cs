@@ -47,20 +47,20 @@ public class PhonemeSplitterTests
 public class PhonemeMapperTests
 {
     [Theory]
-    [InlineData("p", GestureKind.Staccato, PitchClass.C, 3, NoteDuration.Eighth)]
-    [InlineData("t", GestureKind.Staccato, PitchClass.C, 4, NoteDuration.Eighth)]
-    [InlineData("k", GestureKind.Staccato, PitchClass.C, 4, NoteDuration.Eighth)]
-    [InlineData("m", GestureKind.Swell, PitchClass.C, 3, NoteDuration.Quarter)]
-    [InlineData("n", GestureKind.Swell, PitchClass.C, 3, NoteDuration.Quarter)]
-    [InlineData("s", GestureKind.Fade, PitchClass.C, 5, NoteDuration.Eighth)]
-    [InlineData("sh", GestureKind.Fade, PitchClass.C, 5, NoteDuration.Eighth)]
-    [InlineData("r", GestureKind.Accent, PitchClass.G, 4, NoteDuration.Eighth)]
-    [InlineData("l", GestureKind.Accent, PitchClass.E, 4, NoteDuration.Eighth)]
-    [InlineData("aa", GestureKind.Legato, PitchClass.C, 4, NoteDuration.Quarter)]
+    [InlineData("p", GestureKind.Staccato, PitchClass.A, 3, NoteDuration.Eighth)]
+    [InlineData("t", GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth)]
+    [InlineData("k", GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth)]
+    [InlineData("m", GestureKind.Swell, PitchClass.C, 4, NoteDuration.Quarter)]
+    [InlineData("n", GestureKind.Swell, PitchClass.C, 4, NoteDuration.Quarter)]
+    [InlineData("s", GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth)]
+    [InlineData("sh", GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth)]
+    [InlineData("r", GestureKind.Accent, PitchClass.D, 4, NoteDuration.Eighth)]
+    [InlineData("l", GestureKind.Accent, PitchClass.C, 4, NoteDuration.Eighth)]
+    [InlineData("aa", GestureKind.Legato, PitchClass.D, 4, NoteDuration.Quarter)]
     [InlineData("ee", GestureKind.Legato, PitchClass.E, 4, NoteDuration.Quarter)]
-    [InlineData("oo", GestureKind.Legato, PitchClass.G, 3, NoteDuration.Quarter)]
-    [InlineData("ai", GestureKind.Legato, PitchClass.D, 4, NoteDuration.Quarter)]
-    [InlineData("au", GestureKind.Legato, PitchClass.F, 4, NoteDuration.Quarter)]
+    [InlineData("oo", GestureKind.Legato, PitchClass.B, 3, NoteDuration.Quarter)]
+    [InlineData("ai", GestureKind.Legato, PitchClass.E, 4, NoteDuration.Quarter)]
+    [InlineData("au", GestureKind.Legato, PitchClass.C, 4, NoteDuration.Quarter)]
     public void Map_MatchesSpecificationTable(
         string phoneme, GestureKind kind, PitchClass pitch, int octave, NoteDuration duration)
     {
