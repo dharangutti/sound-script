@@ -97,6 +97,15 @@ public static class SoundCSSParser
             builder.Apply(property, value);
     }
 
+    private static HarmonicRolloffCurve ParseRolloffCurve(string raw) => raw.Trim().ToLowerInvariant() switch
+    {
+        "exp" or "exponential" => HarmonicRolloffCurve.Exponential,
+        "linear" => HarmonicRolloffCurve.Linear,
+        "polynomial" or "poly" => HarmonicRolloffCurve.Polynomial,
+        "default" or "none" => HarmonicRolloffCurve.Default,
+        _ => throw new FormatException($"Unknown harmonic-rolloff value '{raw}'.")
+    };
+
     /// <summary>Loads and parses a SoundCSS file from disk.</summary>
     public static IReadOnlyDictionary<string, TimbreProfile> ParseFile(string path)
     {
@@ -158,9 +167,19 @@ public static class SoundCSSParser
         private double? _noiseFricative;
         private double? _noisePlosive;
         private double? _transientMs;
+        private HarmonicRolloffCurve? _harmonicRolloff;
+        private double? _formantQ;
+        private double? _noiseBandHz;
+        private double? _frameSmoothing;
 
         public void Apply(string property, string rawValue)
         {
+            if (property.Trim().ToLowerInvariant() == "harmonic-rolloff")
+            {
+                _harmonicRolloff = ParseRolloffCurve(rawValue);
+                return;
+            }
+
             var value = ParseValue(rawValue);
             switch (property.ToLowerInvariant())
             {
@@ -218,6 +237,15 @@ public static class SoundCSSParser
                 case "transient":
                     _transientMs = value;
                     break;
+                case "formant-q":
+                    _formantQ = value;
+                    break;
+                case "noise-band":
+                    _noiseBandHz = value;
+                    break;
+                case "smoothing":
+                    _frameSmoothing = value;
+                    break;
                 default:
                     throw new FormatException($"Unknown SoundCSS property '{property}'.");
             }
@@ -243,7 +271,11 @@ public static class SoundCSSParser
                 Harmonic3 = _harmonic3,
                 NoiseFricative = _noiseFricative,
                 NoisePlosive = _noisePlosive,
-                TransientMs = _transientMs
+                TransientMs = _transientMs,
+                HarmonicRolloff = _harmonicRolloff,
+                FormantQ = _formantQ,
+                NoiseBandHz = _noiseBandHz,
+                FrameSmoothing = _frameSmoothing
             };
 
         private static double ParseValue(string raw)

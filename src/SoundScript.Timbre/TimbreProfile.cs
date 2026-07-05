@@ -1,5 +1,15 @@
 namespace SoundScript.Timbre;
 
+/// <summary>Harmonic amplitude rolloff shape applied above the fundamental (V4.1.1).</summary>
+public enum HarmonicRolloffCurve
+{
+    /// <summary>Legacy brightness-tilt behavior (V4.1 default, unchanged).</summary>
+    Default,
+    Exponential,
+    Linear,
+    Polynomial
+}
+
 /// <summary>
 /// Declarative timbre attributes for a single phoneme. Pure data — every
 /// property has a deterministic default so synthesis never branches on null.
@@ -60,6 +70,18 @@ public sealed class TimbreProfile
     /// <summary>Consonant transient attack length in ms.</summary>
     public double TransientMs { get; init; } = 6;
 
+    /// <summary>Harmonic amplitude rolloff shape above the fundamental (V4.1.1).</summary>
+    public HarmonicRolloffCurve HarmonicRolloff { get; init; } = HarmonicRolloffCurve.Default;
+
+    /// <summary>Formant Q multiplier — higher narrows bandwidth (sharper vowels), lower widens it (V4.1.1).</summary>
+    public double FormantQ { get; init; } = 1.0;
+
+    /// <summary>Fricative noise band-pass centre frequency in Hz; 0 = engine default (V4.1.1).</summary>
+    public double NoiseBandHz { get; init; } = 0;
+
+    /// <summary>Frame-to-frame parameter smoothing hint, 0 = snap, 1 = max smoothing (V4.1.1).</summary>
+    public double FrameSmoothing { get; init; } = 0.2;
+
     /// <summary>Creates a copy with selective overrides.</summary>
     public TimbreProfile With(
         double? burstMs = null,
@@ -79,7 +101,11 @@ public sealed class TimbreProfile
         double? harmonic3 = null,
         double? noiseFricative = null,
         double? noisePlosive = null,
-        double? transientMs = null) =>
+        double? transientMs = null,
+        HarmonicRolloffCurve? harmonicRolloff = null,
+        double? formantQ = null,
+        double? noiseBandHz = null,
+        double? frameSmoothing = null) =>
         new()
         {
             BurstMs = burstMs ?? BurstMs,
@@ -99,8 +125,45 @@ public sealed class TimbreProfile
             Harmonic3 = harmonic3 ?? Harmonic3,
             NoiseFricative = noiseFricative ?? NoiseFricative,
             NoisePlosive = noisePlosive ?? NoisePlosive,
-            TransientMs = transientMs ?? TransientMs
+            TransientMs = transientMs ?? TransientMs,
+            HarmonicRolloff = harmonicRolloff ?? HarmonicRolloff,
+            FormantQ = formantQ ?? FormantQ,
+            NoiseBandHz = noiseBandHz ?? NoiseBandHz,
+            FrameSmoothing = frameSmoothing ?? FrameSmoothing
         };
+
+    /// <summary>Linearly interpolates numeric fields between two profiles (frame continuity, V4.1.1).</summary>
+    public static TimbreProfile Lerp(TimbreProfile from, TimbreProfile to, double t)
+    {
+        t = Math.Clamp(t, 0, 1);
+        return new TimbreProfile
+        {
+            BurstMs = Lerp(from.BurstMs, to.BurstMs, t),
+            Noise = Lerp(from.Noise, to.Noise, t),
+            Brightness = Lerp(from.Brightness, to.Brightness, t),
+            Formant1Hz = Lerp(from.Formant1Hz, to.Formant1Hz, t),
+            Formant2Hz = Lerp(from.Formant2Hz, to.Formant2Hz, t),
+            Formant3Hz = Lerp(from.Formant3Hz, to.Formant3Hz, t),
+            Formant1BwHz = Lerp(from.Formant1BwHz, to.Formant1BwHz, t),
+            Formant2BwHz = Lerp(from.Formant2BwHz, to.Formant2BwHz, t),
+            Formant3BwHz = Lerp(from.Formant3BwHz, to.Formant3BwHz, t),
+            Smoothness = to.Smoothness,
+            Nasal = Lerp(from.Nasal, to.Nasal, t),
+            Openness = Lerp(from.Openness, to.Openness, t),
+            Harmonic1 = Lerp(from.Harmonic1, to.Harmonic1, t),
+            Harmonic2 = Lerp(from.Harmonic2, to.Harmonic2, t),
+            Harmonic3 = Lerp(from.Harmonic3, to.Harmonic3, t),
+            NoiseFricative = Lerp(from.NoiseFricative, to.NoiseFricative, t),
+            NoisePlosive = Lerp(from.NoisePlosive, to.NoisePlosive, t),
+            TransientMs = to.TransientMs,
+            HarmonicRolloff = to.HarmonicRolloff,
+            FormantQ = Lerp(from.FormantQ, to.FormantQ, t),
+            NoiseBandHz = Lerp(from.NoiseBandHz, to.NoiseBandHz, t),
+            FrameSmoothing = to.FrameSmoothing
+        };
+    }
+
+    private static double Lerp(double from, double to, double t) => from + (to - from) * t;
 
     /// <summary>Default timbre used when no phoneme-specific profile exists.</summary>
     public static TimbreProfile Default { get; } = new();
@@ -125,7 +188,11 @@ public sealed class TimbreProfile
             harmonic3: overrides.Harmonic3,
             noiseFricative: overrides.NoiseFricative,
             noisePlosive: overrides.NoisePlosive,
-            transientMs: overrides.TransientMs);
+            transientMs: overrides.TransientMs,
+            harmonicRolloff: overrides.HarmonicRolloff,
+            formantQ: overrides.FormantQ,
+            noiseBandHz: overrides.NoiseBandHz,
+            frameSmoothing: overrides.FrameSmoothing);
 }
 
 /// <summary>Partial timbre overrides parsed from SoundCSS (only set properties apply).</summary>
@@ -149,4 +216,8 @@ public sealed class TimbreProfileOverrides
     public double? NoiseFricative { get; init; }
     public double? NoisePlosive { get; init; }
     public double? TransientMs { get; init; }
+    public HarmonicRolloffCurve? HarmonicRolloff { get; init; }
+    public double? FormantQ { get; init; }
+    public double? NoiseBandHz { get; init; }
+    public double? FrameSmoothing { get; init; }
 }

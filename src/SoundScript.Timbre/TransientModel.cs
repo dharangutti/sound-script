@@ -5,7 +5,14 @@ namespace SoundScript.Timbre;
 /// </summary>
 public static class TransientModel
 {
-    /// <summary>Applies transient envelope to a cycle buffer in-place.</summary>
+    private const double TwoPi = Math.PI * 2.0;
+
+    /// <summary>
+    /// Applies transient envelope to a cycle buffer in-place. Plosive-heavy profiles
+    /// (p, t, k) get a steeper attack curve; voiced plosives (b, d, g — high
+    /// <see cref="TimbreProfile.Harmonic1"/> alongside plosive noise) get a subtle
+    /// deterministic micro-transient ripple to simulate the voice bar (V4.1.1).
+    /// </summary>
     public static void Apply(
         double[] cycle,
         TimbreProfile profile,
@@ -21,6 +28,11 @@ public static class TransientModel
             return;
 
         var noteElapsedSamples = (int)Math.Round(noteElapsedMs * sampleRate / 1000.0);
+        var plosiveness = Math.Clamp(profile.NoisePlosive, 0, 1);
+        var sharpness = 2.0 + plosiveness * 3.0;
+        var floor = 0.15 - plosiveness * 0.08;
+        var voicedMicroTransient = profile.Harmonic1 > 0.15 && plosiveness > 0.15;
+        var pulsePeriod = Math.Max(1.0, transientSamples / 3.0);
 
         for (var i = 0; i < cycle.Length; i++)
         {
@@ -29,23 +41,30 @@ public static class TransientModel
                 continue;
 
             var t = globalSample / (double)transientSamples;
-            var attack = t * t;
-            cycle[i] *= 0.15 + 0.85 * attack;
+            var attack = Math.Pow(t, sharpness);
+            cycle[i] *= floor + (1.0 - floor) * attack;
+
+            if (voicedMicroTransient)
+                cycle[i] += Math.Sin(TwoPi * globalSample / pulsePeriod) * 0.05 * profile.Harmonic1 * (1.0 - t);
         }
     }
 
-    /// <summary>Note-level ADSR envelope for the frame.</summary>
+    /// <summary>Note-level ADSR envelope for the frame, shaped by <paramref name="smoothness"/>.</summary>
     public static double NoteEnvelope(double position, double smoothness)
     {
         position = Math.Clamp(position, 0, 1);
+        smoothness = Math.Clamp(smoothness, 0, 1);
         var attack = 0.05 + smoothness * 0.15;
         var release = 0.1 + smoothness * 0.2;
 
         if (position < attack)
-            return position / attack;
+            return Math.Pow(position / attack, 1.0 + smoothness);
 
         if (position > 1.0 - release)
-            return Math.Max(0, (1.0 - position) / release);
+        {
+            var t = Math.Max(0, (1.0 - position) / release);
+            return Math.Pow(t, 1.0 + (1.0 - smoothness) * 0.5);
+        }
 
         return 1.0;
     }

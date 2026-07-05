@@ -28,23 +28,37 @@ public static class CycleGenerator
         if (sampleCount <= 0 || pitchHz <= 0)
             return output;
 
-        var h1 = profile.Harmonic1;
-        var h2 = profile.Harmonic2;
-        var h3 = profile.Harmonic3;
         var tilt = 1.0 - profile.Brightness * 0.35;
+        var h1 = profile.Harmonic1;
+        var h2 = profile.Harmonic2 * Rolloff(profile.HarmonicRolloff, 2, profile.Brightness, tilt);
+        var h3 = profile.Harmonic3 * Rolloff(profile.HarmonicRolloff, 3, profile.Brightness, tilt);
 
         for (var i = 0; i < sampleCount; i++)
         {
             var t = phaseOffset + i / (double)sampleCount;
             var angle = TwoPi * t;
             var fundamental = Math.Sin(angle) * h1;
-            var second = Math.Sin(angle * 2.0) * h2 * tilt;
-            var third = Math.Sin(angle * 3.0) * h3 * tilt * tilt;
+            var second = Math.Sin(angle * 2.0) * h2;
+            var third = Math.Sin(angle * 3.0) * h3;
             output[i] = fundamental + second + third;
         }
 
         return output;
     }
+
+    /// <summary>
+    /// Amplitude multiplier for the given overtone above the fundamental, shaped by the
+    /// phoneme's rolloff curve (V4.1.1). <see cref="HarmonicRolloffCurve.Default"/>
+    /// reproduces the original V4.1 brightness-tilt behavior exactly.
+    /// </summary>
+    private static double Rolloff(HarmonicRolloffCurve curve, int harmonicNumber, double brightness, double legacyTilt) =>
+        curve switch
+        {
+            HarmonicRolloffCurve.Exponential => Math.Exp(-(harmonicNumber - 1) * (1.3 - brightness * 0.6)),
+            HarmonicRolloffCurve.Linear => Math.Clamp(1.0 - (harmonicNumber - 1) * (0.4 - brightness * 0.15), 0, 1),
+            HarmonicRolloffCurve.Polynomial => 1.0 / Math.Pow(harmonicNumber, 1.1 + (1.0 - brightness) * 0.7),
+            _ => Math.Pow(legacyTilt, harmonicNumber - 1)
+        };
 
     /// <summary>Sample count for one pitch period at the given rate.</summary>
     public static int SamplesPerCycle(double pitchHz, int sampleRate) =>

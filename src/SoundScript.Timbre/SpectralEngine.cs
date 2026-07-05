@@ -12,8 +12,10 @@ public static class SpectralEngine
         var samples = new float[timeline.SampleCount];
         var frameSampleCount = (int)Math.Round(timeline.SampleRate * timeline.FrameMs / 1000.0);
         var formantFilter = new FormantFilter();
+        var crossfade = new CycleStitcher.CrossfadeState();
         var phaseOffset = 0.0;
         long noiseSeed = 0;
+        TimbreProfile? previousProfile = null;
 
         foreach (var frame in timeline.Frames)
         {
@@ -24,8 +26,16 @@ public static class SpectralEngine
             var frameLength = Math.Min(frameSampleCount, samples.Length - outputOffset);
             var amplitude = VelocityToAmplitude(frame.Velocity);
 
+            // Frame-to-frame continuity: ease formant gains, harmonic amplitudes, and noise
+            // envelopes toward the target profile instead of snapping (V4.1.1).
+            var smoothing = Math.Clamp(frame.Profile.FrameSmoothing, 0, 0.95);
+            var effectiveProfile = previousProfile is null
+                ? frame.Profile
+                : TimbreProfile.Lerp(previousProfile, frame.Profile, 1.0 - smoothing);
+            previousProfile = effectiveProfile;
+
             CycleStitcher.StitchFrame(
-                frame,
+                frame with { Profile = effectiveProfile },
                 frameLength,
                 timeline.SampleRate,
                 amplitude,
@@ -33,7 +43,8 @@ public static class SpectralEngine
                 formantFilter,
                 samples,
                 outputOffset,
-                ref phaseOffset);
+                ref phaseOffset,
+                crossfade);
 
             noiseSeed += frame.CycleCount * 1024 + frame.FrameIndex;
         }

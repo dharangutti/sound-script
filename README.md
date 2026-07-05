@@ -175,6 +175,14 @@ per pitch period.
 
 → [docs/v4.1-cycle-synthesis.md](docs/v4.1-cycle-synthesis.md) · [docs/whats-new-v4.1.md](docs/whats-new-v4.1.md)
 
+## V4.1.1: Timbre quality tuning
+
+V4.1.1 tunes harmonic balance, formant Q, noise shaping, transients, and
+cycle/frame continuity on top of the V4.1 engine — additive and
+deterministic, no new modules.
+
+→ [docs/v4.1.1-timbre-tuning.md](docs/v4.1.1-timbre-tuning.md) · [docs/whats-new-v4.1.1.md](docs/whats-new-v4.1.1.md)
+
 ## Vocal Track (New)
 
 SoundScript now has a parallel **voice engine**: write lyrics beside pitches and a
