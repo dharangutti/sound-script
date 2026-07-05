@@ -1,4 +1,4 @@
-# SoundScript Playground — Verification Checklist (V2)
+# SoundScript Playground — Verification Checklist (V6)
 
 Use this checklist after building or deploying the playground.
 
@@ -63,6 +63,27 @@ the CLI verbs:
 soundscript prosody "Twinkle twinkle little star" twinkle.mid
 soundscript render twinkle.mid --css examples/default.ssc --out twinkle.wav --text "Twinkle twinkle little star"
 ```
+
+## `.ss` Export (V6)
+
+Both compose buttons (**Compose from text** and **Compose with Prosody**)
+also populate a `.ss` export from the same input, using the new
+`SoundScript.Parser.SsPrinter`:
+
+| UI element | Behavior |
+|------------|----------|
+| **View .ss source** (collapsible panel) | Shows the printed `.ss` text for the most recent compose run, formatted with 4-space indentation and one statement per line |
+| **Download .ss** button | Downloads the same text as `soundscript.ss`, via the `SoundScriptText.download` JS interop helper (`js/text-download.js`) |
+
+The downloaded `.ss` file is valid input to the CLI's `run` verb and
+byte-identical in resulting MIDI to what the compose button itself produced,
+as long as it's run unedited:
+
+```bash
+soundscript run soundscript.ss soundscript-viass.mid
+```
+
+→ [whats-new-v6.md](whats-new-v6.md)
 
 ## Render Audio (V4)
 
