@@ -2,26 +2,39 @@
     <header class="playground-header">
         <div class="header-top">
             <a class="home-link" href="/">← SoundScript</a>
-            <span class="badge">Playground · V6</span>
+            <span class="badge">Playground · @VersionInfo.Label</span>
         </div>
         <h1>SoundScript Playground</h1>
         <p class="lead">Type SoundScript V2, compile to MIDI, and hear it in your browser — fully client-side.</p>
     </header>
 
     <div class="presets">
-        <span class="preset-label">V2:</span>
-        <button type="button" class="btn btn-secondary" @onclick="LoadV2ShowcaseExample">Showcase</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadBlocksExample">Blocks</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadMetadataExample">Metadata</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadTempoExample">Tempo</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadLayersExample">Layers</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadHumanizeExample">Humanize</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadAdvancedChordsExample">Chords+</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadPhrasesExample">Phrases</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadV3PhrasesExample">Phrases V3</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadPatternsExample">Patterns</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadOrchestrationExample">Orchestration</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadVoiceExample">Voice</button>
+        <span class="preset-label">Example:</span>
+        <select class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExample">
+            <optgroup label="V2">
+                <option value="v2-showcase">Showcase</option>
+                <option value="v2-blocks">Blocks</option>
+                <option value="v2-metadata">Metadata</option>
+                <option value="v2-tempo">Tempo</option>
+                <option value="v2-layers">Layers</option>
+                <option value="v2-humanize">Humanize</option>
+                <option value="v2-chords">Chords+</option>
+                <option value="v2-phrases">Phrases</option>
+                <option value="v2-phrases-v3">Phrases V3</option>
+                <option value="v2-patterns">Patterns</option>
+                <option value="v2-orchestration">Orchestration</option>
+                <option value="v2-voice">Voice</option>
+            </optgroup>
+            <optgroup label="Core">
+                <option value="core-melody">Melody</option>
+                <option value="core-articulations">Articulations</option>
+                <option value="core-dynamics">Dynamics</option>
+                <option value="core-chords">Chords</option>
+                <option value="core-intelligence">Intelligence</option>
+                <option value="core-multitrack">Multi-track</option>
+                <option value="core-playback">Playback</option>
+            </optgroup>
+        </select>
     </div>
 
     <div class="presets">
@@ -34,17 +47,6 @@
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="ComposeWithProsodyAsync">Compose with Prosody</button>
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderAudioAsync">Render Audio</button>
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderAudioWithProsodyAsync">Render Audio (Prosody)</button>
-    </div>
-
-    <div class="presets">
-        <span class="preset-label">Core:</span>
-        <button type="button" class="btn btn-secondary" @onclick="LoadMelodyExample">Melody</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadArticulationsExample">Articulations</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadDynamicsExample">Dynamics</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadChordsExample">Chords</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadIntelligenceExample">Intelligence</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadMultitrackExample">Multi-track</button>
-        <button type="button" class="btn btn-secondary" @onclick="LoadPlaybackExample">Playback</button>
     </div>
 
     <div class="panes">

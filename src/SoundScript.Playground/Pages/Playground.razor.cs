@@ -34,6 +34,7 @@ public partial class Playground
       """;
 
   private string ScriptText { get; set; } = DefaultScript;
+  private string SelectedExampleKey { get; set; } = "v2-showcase";
   private string ComposeText { get; set; } = "Twinkle twinkle little star";
   private string? ErrorMessage { get; set; }
   private string? StatusMessage { get; set; }
@@ -42,6 +43,32 @@ public partial class Playground
   private byte[]? WavBytes { get; set; }
   private string? SsText { get; set; }
   private bool IsRunning { get; set; }
+
+  private void LoadSelectedExample()
+  {
+    switch (SelectedExampleKey)
+    {
+      case "v2-showcase": LoadV2ShowcaseExample(); break;
+      case "v2-blocks": LoadBlocksExample(); break;
+      case "v2-metadata": LoadMetadataExample(); break;
+      case "v2-tempo": LoadTempoExample(); break;
+      case "v2-layers": LoadLayersExample(); break;
+      case "v2-humanize": LoadHumanizeExample(); break;
+      case "v2-chords": LoadAdvancedChordsExample(); break;
+      case "v2-phrases": LoadPhrasesExample(); break;
+      case "v2-phrases-v3": LoadV3PhrasesExample(); break;
+      case "v2-patterns": LoadPatternsExample(); break;
+      case "v2-orchestration": LoadOrchestrationExample(); break;
+      case "v2-voice": LoadVoiceExample(); break;
+      case "core-melody": LoadMelodyExample(); break;
+      case "core-articulations": LoadArticulationsExample(); break;
+      case "core-dynamics": LoadDynamicsExample(); break;
+      case "core-chords": LoadChordsExample(); break;
+      case "core-intelligence": LoadIntelligenceExample(); break;
+      case "core-multitrack": LoadMultitrackExample(); break;
+      case "core-playback": LoadPlaybackExample(); break;
+    }
+  }
 
   private void LoadV2ShowcaseExample()
   {

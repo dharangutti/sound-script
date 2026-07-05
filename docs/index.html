@@ -367,6 +367,39 @@
             font-size: 0.95rem;
         }
 
+        .industrial-list {
+            text-align: left;
+            max-width: 38rem;
+            margin: 0 auto 1.25rem;
+            padding-left: 1.25rem;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .industrial-list strong { color: var(--text); }
+
+        .industrial-list code {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 0.82rem;
+            background: var(--code-bg);
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            color: var(--gold);
+        }
+
+        .cat-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent-2);
+            margin-bottom: 0.35rem;
+        }
+
+        .compare-grid .card h3 { color: var(--text); }
+
         @media (max-width: 600px) {
             .pipeline { justify-content: center; }
 
@@ -404,19 +437,20 @@
 <body>
     <div class="wrap">
         <header>
-            <div class="badge">Version: V3.1 — Text-to-Melody Engine</div>
+            <div class="badge"><!--VERSION_BADGE-->Version: V6 — Editable .ss Export<!--/VERSION_BADGE--></div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">
                 SoundScript is an open-source, deterministic music language — type a melody with notation,
                 dynamics, and articulations, get professional-sounding MIDI.
                 No DAW. No plugins. Just text → shaping → MIDI.
                 Runs on Windows, macOS, and Linux, and in any modern browser.
-                <strong style="color: var(--text);">SoundScript now composes music directly from text.</strong>
+                <strong style="color: var(--text);">SoundScript composes music directly from text — and can
+                export the result as editable <code>.ss</code> source you can hand-tweak and re-run.</strong>
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Playground</a>
                 <a class="btn btn-secondary" href="doc.html?p=user-guide.md">User Guide</a>
-                <a class="btn btn-secondary" href="doc.html?p=whats-new-v3.1.md">What's New in V3.1</a>
+                <a class="btn btn-secondary" href="doc.html?p=whats-new-v6.md">What's New in V6</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
                 <a class="btn btn-secondary" href="doc.html?p=SoundScript.md">Documentation</a>
             </div>
@@ -444,28 +478,44 @@
         <section>
             <h2>Our Vision</h2>
             <div class="about">
-                <p><strong style="color: var(--text);">Music should be as writable, versionable, and reproducible as software.</strong>
-                SoundScript exists to make sound a first-class engineering artifact: you describe notes, chords,
-                dynamics, phrases, and orchestration in plain text, and the engine compiles it to a standard MIDI
-                file — the same script producing the same output, every time, on every platform.</p>
-                <p>That determinism is the foundation for everything the project is growing into: composers who want
-                their pieces in version control, developers who want to generate music programmatically, and
-                industrial teams who need auditable, expressive audio cues for machines, robots, and accessibility
-                workflows. SoundScript is not a classroom toy and not tied to any single browser — it is a
-                general-purpose text-to-MIDI language with a cross-platform CLI (built on .NET) and a WebAssembly
-                playground that runs in Chrome, Edge, Firefox, and Safari alike.</p>
-                <p>The long-term goal is simple: a minimal, dependable language where a few lines of text carry full
-                musical intent — from a melody sketch to a factory-floor awareness cue — with no DAW, no plugins,
-                and no vendor lock-in.</p>
+                <p>SoundScript is an open-source micro-language for writing music like code. You describe notes,
+                chords, dynamics, patterns, and orchestration in plain text; the engine parses your script, applies
+                musical intelligence and playback refinement, and emits a standard MIDI file. Written in C# on
+                .NET, it runs on Windows, macOS, and Linux — plus a WebAssembly playground that runs fully
+                client-side in any modern browser.</p>
+                <p>What sets it apart is determinism. There is no randomness anywhere in the pipeline: the same
+                script produces byte-identical MIDI on every run, on every platform — a guarantee verified by
+                SHA-256 comparisons in the test suite. Even "humanization" (the subtle timing and velocity jitter
+                that makes playback feel natural) is computed deterministically, so it reproduces exactly.</p>
+                <p>The surface is deliberately minimal: <strong style="color: var(--text);">no DAW, no plugins, no
+                server, no account.</strong> Plain text in, standard MIDI out. That makes compositions behave like
+                software — you can version them in git, diff them, review them, and rebuild them identically
+                anywhere.</p>
             </div>
         </section>
 
         <section class="industrial-promo">
             <h2>Industrial Sound Augmentation</h2>
-            <p>SoundScript V3 introduces expressive, deterministic audio cues for industrial workflows —
-            machine states, conveyor timing drift, robotic motion phases, temperature trends, and
-            accessibility (blind operator spatial awareness). Explore how expressive curves, transitions,
-            articulation, crescendos, and timing modifiers map directly to real-world processes.</p>
+            <p>SoundScript is not just for songs. The same phrase engine — curves, articulations, dynamic
+            envelopes, and timing modifiers — turns machine data into non-speech audio cues an operator can
+            understand without looking at a screen. Because every cue is a short deterministic script, the sound
+            for "critical alarm" is byte-identical in the test lab and on the factory floor, and the cue library
+            lives in version control alongside the rest of the system.</p>
+            <p>The repository ships five complete, runnable industrial examples:</p>
+            <ul class="industrial-list">
+                <li><strong>Machine state sonification</strong> — idle, running, and critical rendered as distinct
+                    blocks with contrasting curve, articulation, and dynamics
+                    (<code>industrial-machine-state.ss</code>).</li>
+                <li><strong>Conveyor timing drift</strong> — swing, push, and pull modifiers make on-time versus
+                    drifting rhythm audibly different (<code>industrial-conveyor-drift.ss</code>).</li>
+                <li><strong>Robotic arm motion phases</strong> — approach, grip, and release as a rising swell,
+                    accented hits, and a falling fade (<code>industrial-robotic-arm.ss</code>).</li>
+                <li><strong>Temperature trend cues</strong> — rising, stable, and falling readings mapped to a
+                    crescendo climb, a level hold, and a decrescendo descent
+                    (<code>industrial-temperature-trend.ss</code>).</li>
+                <li><strong>Blind operator spatial awareness</strong> — an accessibility cue set of contrasting
+                    phrases, from gentle legato to sharp staccato alerts (<code>industrial-blind-assist.ss</code>).</li>
+            </ul>
             <a href="/industrial">Explore Industrial Applications →</a>
         </section>
 
@@ -494,6 +544,31 @@
                 V2 adds imports, blocks, patterns, phrases, orchestration, layers, and deterministic humanization.
                 <a href="doc.html?p=pipeline.md">Full pipeline reference →</a>
             </p>
+        </section>
+
+        <section>
+            <h2>Cycle-Accurate Timbre Engine <span style="color: var(--muted); font-weight: 500; font-size: 0.95rem;">— V4.1.1</span></h2>
+            <div class="about">
+                <p>Beyond MIDI, SoundScript can render actual audio — deterministic WAV or OGG — with no neural
+                networks and no cloud service. V4 introduced the timbre engine: you pair a MIDI file with a
+                SoundCSS stylesheet, a small CSS-like language that describes how each speech sound should be
+                voiced (its resonances, its noise, its attack).</p>
+                <p>V4.1 changed how that audio is built. The first version painted sound in 8-millisecond slices,
+                each one an averaged snapshot — accurate on paper, but flat to the ear. V4.1 instead rebuilds the
+                waveform one vibration at a time: at 440 Hz a single vibration lasts about 2.27 ms, so each slice
+                contains several complete cycles, and the engine constructs every one individually — layering its
+                overtones, shaping it through vowel-like resonances, adding the hiss or burst of consonants — then
+                stitches them seamlessly together.</p>
+                <p>V4.1.1 tuned that engine for realism: overtones now taper naturally per sound rather than all
+                ringing equally (harmonic rolloff), resonances have controllable sharpness with a slight per-cycle
+                drift (formant filtering), noise is filtered into the frequency bands real fricatives and plosives
+                occupy (noise shaping), and consonant attacks are sharpened (transient modeling). Every stage
+                remains fully deterministic — rendered audio is verified stable by SHA-256 regression tests.</p>
+                <p style="margin-top: 0.75rem;">
+                    <a href="doc.html?p=whats-new-v4.1.1.md">What's new in V4.1.1 →</a> ·
+                    <a href="doc.html?p=timbre-engine.md">Timbre engine reference →</a>
+                </p>
+            </div>
         </section>
 
         <section>
@@ -565,6 +640,44 @@ tempo 120 → 140 over 4 bars</pre>
         </section>
 
         <section>
+            <h2>How SoundScript Compares</h2>
+            <p style="color: var(--muted); font-size: 0.95rem; margin-top: -0.5rem; margin-bottom: 1.25rem;">
+                SoundScript overlaps with several categories of tools without belonging to any of them. The
+                differences below are architectural, not marketing claims.
+            </p>
+            <div class="grid-2 compare-grid">
+                <div class="card">
+                    <h3>vs. TTS engines</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                        Modern text-to-speech systems are probabilistic — neural models whose output can vary
+                        between versions and runs. SoundScript's text pipelines (phoneme-based melody in V3.1,
+                        word-level prosody in V5, timbre rendering in V4) are rule-based and deterministic:
+                        identical text produces byte-identical output, with no model downloads and no cloud
+                        inference.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>vs. DAWs</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                        A DAW is a GUI environment built around project files, plugins, and manual arrangement.
+                        SoundScript is code: compositions are plain-text scripts you can diff, review, and version
+                        in git, compiled to standard MIDI by a CLI or in the browser — no audio workstation
+                        installation required.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>vs. MIDI tools</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                        Typical MIDI utilities edit or transform existing MIDI event data. SoundScript is a
+                        language above MIDI: you write musical intent — phrases, patterns, chord voicings, tempo
+                        automation, orchestration — and the interpreter compiles it to MIDI, with an optional
+                        deterministic MIDI-to-audio renderer on top.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
             <h2>Try it now</h2>
             <ul class="steps">
                 <li>
@@ -618,42 +731,142 @@ tempo 120 → 140 over 4 bars</pre>
         </section>
 
         <section>
-            <h2>Examples</h2>
+            <h2>Showcase Examples</h2>
             <div class="grid-2">
                 <div class="card">
-                    <h3>compose — text-to-melody (V3.1)</h3>
-                    <pre>soundscript compose "Hello world"</pre>
-                </div>
-                <div class="card">
-                    <h3>patterns.ss — arpeggios</h3>
-                    <pre>pattern arp { up }
-play arp Cmaj q</pre>
-                </div>
-                <div class="card">
-                    <h3>phrases.ss — phrase shaping</h3>
-                    <pre>phrase {
-    curve soft
-    mf
-    C4 q E4 q
+                    <span class="cat-tag">General</span>
+                    <h3>full-v2-showcase.ss</h3>
+                    <pre>tempo 120 → 140 over 2 bars
+
+block verse {
+    phrase {
+        curve balanced
+        play arp Cmaj q
+    }
+}
+track melody {
+    layer flute
+    layer cello
+    play verse
 }</pre>
                 </div>
                 <div class="card">
-                    <h3>metadata.ss — gain + humanize</h3>
-                    <pre>gain 0.85
-humanize 0.02
-C4 q</pre>
+                    <span class="cat-tag">Vocal</span>
+                    <h3>vocal-song.ss</h3>
+                    <pre>track accompaniment {
+    instrument piano
+    Cmaj h Fmaj h
+}
+
+voice lead {
+    vocal choir
+    sing "Twinkle twinkle little star"
+         C4 q C4 q G4 q G4 q
+}</pre>
                 </div>
                 <div class="card">
-                    <h3>orchestration.ss — helpers</h3>
-                    <pre>double octave
-reinforce bass
-Cmaj w</pre>
+                    <span class="cat-tag">Industrial cue</span>
+                    <h3>industrial-machine-state.ss</h3>
+                    <pre>block idle {
+    phrase { curve gentle articulation legato
+        mp C4 q E4 q G4 h }
+}
+block critical {
+    phrase { transition sharp articulation staccato
+        f G4 e G4 e G4 e rest e }
+}
+track machine { play idle · play running · play critical }</pre>
+                </div>
+                <div class="card">
+                    <span class="cat-tag">Industrial cue</span>
+                    <h3>industrial-blind-assist.ss</h3>
+                    <pre>track spatial {
+    phrase { curve gentle articulation legato
+        mp C4 q E4 q G4 h }
+    phrase { transition sharp articulation staccato
+        f C5 e C5 e C5 e }
+}</pre>
+                </div>
+                <div class="card">
+                    <span class="cat-tag">Timbre / expressive</span>
+                    <h3>phrases-v3.ss</h3>
+                    <pre>phrase {
+    curve swell
+    transition expressive
+    mf
+    C4 q E4 q G4 q
+}
+phrase {
+    curve fade
+    decrescendo
+    f
+    C5 q G4 q E4 q
+}</pre>
+                </div>
+                <div class="card">
+                    <span class="cat-tag">General</span>
+                    <h3>patterns.ss</h3>
+                    <pre>pattern arp { up }
+pattern strumPat { strum }
+pattern rhythm8 { rhythm e e q }
+
+track melody {
+    instrument guitar
+    play arp Cmaj q
+    play strumPat Cmaj q
+}</pre>
                 </div>
             </div>
             <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
                 39 runnable example scripts in the repository, including five industrial audio cues.
                 <a href="doc.html?p=examples.md">Full example catalog →</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide →</a>
+            </p>
+        </section>
+
+        <section>
+            <h2>Version History</h2>
+            <ul class="steps">
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V2</span>
+                    <div>Composition and production features: multi-file imports, named blocks, patterns,
+                    phrases, orchestration helpers, track metadata, tempo automation, instrument layers,
+                    deterministic humanization, and advanced chord voicing.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V3.1</span>
+                    <div>Text-to-melody: the deterministic PhonemeComposer engine and <code>compose</code> CLI
+                    verb turn plain text into melody via syllables, phonemes, and musical gestures.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4</span>
+                    <div>Offline timbre synthesis: deterministic MIDI-to-WAV/OGG rendering driven by SoundCSS
+                    stylesheets, via the new <code>render</code> verb.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4.1</span>
+                    <div>Cycle-accurate synthesis: audio is reconstructed per pitch cycle (3–10 cycles per
+                    frame) with per-cycle harmonics, formants, and noise instead of flat per-frame snapshots.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4.1.1</span>
+                    <div>Timbre quality tuning: harmonic rolloff curves, formant Q and drift, band-shaped noise,
+                    sharpened transients, and cycle/frame crossfading — additive, no new modules.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V5</span>
+                    <div>Word-level prosody: the ProsodyComposer plans pitch top-down (phrase → word → syllable)
+                    with stress detection, adding the <code>prosody</code> CLI verb alongside <code>compose</code>.</div>
+                </li>
+                <li>
+                    <span class="step-num" style="width: auto; padding: 0 0.6rem; background: rgba(110, 231, 183, 0.2); color: var(--accent);">V6</span>
+                    <div><strong style="color: var(--text);">Current.</strong> Editable <code>.ss</code> export:
+                    <code>--emit-ss</code> serializes composed output back to hand-editable SoundScript source
+                    that round-trips to byte-identical MIDI.</div>
+                </li>
+            </ul>
+            <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
+                <a href="https://github.com/dharangutti/sound-script/blob/main/RELEASE_NOTES.md">Full release notes →</a>
             </p>
         </section>
 
@@ -735,7 +948,7 @@ Cmaj w</pre>
                 <a href="playground/">Playground</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide</a> ·
                 <a href="/industrial">Industrial Applications</a> ·
-                <a href="doc.html?p=whats-new-v3.1.md">What's New</a> ·
+                <a href="doc.html?p=whats-new-v6.md">What's New</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>

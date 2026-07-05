@@ -28,6 +28,28 @@ jobs:
       - name: Publish Playground to docs/playground
         run: dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
 
+      - name: Stamp homepage version badge from Directory.Build.props
+        shell: pwsh
+        run: |
+          $props = Get-Content Directory.Build.props -Raw
+          $label = [regex]::Match($props, '<SoundScriptVersionLabel>(.*?)</SoundScriptVersionLabel>').Groups[1].Value
+          $codename = [regex]::Match($props, '<SoundScriptCodename>(.*?)</SoundScriptCodename>').Groups[1].Value
+          if ([string]::IsNullOrEmpty($label)) {
+            Write-Warning "SoundScriptVersionLabel not found in Directory.Build.props; leaving docs/index.html badge as-is."
+            exit 0
+          }
+          $badgeText = if ($codename) { "Version: $label — $codename" } else { "Version: $label" }
+          $pattern = '(?s)(<!--VERSION_BADGE-->).*?(<!--/VERSION_BADGE-->)'
+          $index = Get-Content docs/index.html -Raw
+          if (-not [regex]::IsMatch($index, $pattern)) {
+            Write-Warning "VERSION_BADGE markers not found in docs/index.html; leaving it unchanged."
+            exit 0
+          }
+          $replacement = '${1}' + $badgeText + '${2}'
+          $updated = [regex]::Replace($index, $pattern, $replacement)
+          Set-Content docs/index.html $updated -NoNewline
+          Write-Host "Stamped homepage badge: $badgeText"
+
       - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
