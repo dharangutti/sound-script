@@ -87,20 +87,23 @@ keyed by category and phrase position:
 
 | Category | Position | Offset | Pitch |
 |----------|----------|--------|-------|
-| Content | Start | +2 | D4 |
+| Content | Start | +4 | E4 |
 | Content | Middle | 0 | C4 |
-| Content | End | −2 | A#3 |
-| Function | any | −4 | G#3 |
+| Content | End | −3 | A3 |
+| Function | any | −7 | F3 |
 
 `WordProsodyPlanner` resolves each word's `PhrasePosition` from its index and
-looks up this table.
+looks up this table. These offsets are wide enough that the word/phrase
+contour reads as a real melodic arc rather than collapsing into the same
+narrow band V3.1's fixed `PhonemeMapper` table occupies — see the note on
+`ProsodyClamp` below.
 
 ### 4. Sentence → phrase contour
 
 `PhraseContourEngine` detects sentence type from trailing punctuation
 (`?` → question, else statement) and computes one semitone delta per word as
-a linear ramp: statements fall from +1 to −2 across the phrase, questions
-rise from −1 to +3. This delta is added on top of each word's base pitch.
+a linear ramp: statements fall from +2 to −4 across the phrase, questions
+rise from −3 to +5. This delta is added on top of each word's base pitch.
 
 ### 5. Syllable → micro-pitch
 
@@ -112,9 +115,15 @@ secondary, 0 for unstressed — always within the required ±3 semitone bound.
 
 `ProsodyClamp` walks the full per-syllable pitch sequence once, left to
 right, and pulls back any adjacent jump over 5 semitones or any running
-phrase range over 7 semitones. The table constants above are tuned to stay
-within these bounds on their own — for "Twinkle twinkle little star" the
-clamp is a no-op — but it's there as a backstop.
+phrase range over 14 semitones. The 5-semitone adjacent-jump bound is what
+keeps the shared Interpreter's `MelodicContour` step (which octave-corrects
+leaps over 7 semitones) from ever firing on prosody-composed pitch; the
+14-semitone range bound is a much looser backstop for pathological inputs —
+it's deliberately wide enough to let the word/phrase/syllable contour above
+produce its full natural range (worst case around 13 semitones) instead of
+collapsing every phrase into the same narrow band as V3.1's fixed
+`PhonemeMapper` table. For "Twinkle twinkle little star" the clamp is a
+no-op either way.
 
 ### 7. Syllable → phonemes (timbre/rhythm only)
 
