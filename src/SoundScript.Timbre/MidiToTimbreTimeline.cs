@@ -121,10 +121,15 @@ public static class MidiToTimbreTimeline
         var blend = smooth > 0 ? Math.Pow(position, 1.0 + smooth * 3.0) : position;
         var openness = segment.Profile.Openness * (0.6 + 0.4 * blend);
 
+        // Phoneme-specific smoothing hint: onsets adapt faster than held mid-note frames,
+        // so consonant attacks stay crisp while sustained vowels blend smoothly (V4.1.1).
+        var smoothingHint = segment.Profile.FrameSmoothing * (0.5 + 0.5 * blend);
+
         return segment.Profile.With(
             formant1Hz: segment.Profile.Formant1Hz * (0.85 + 0.3 * openness),
             formant2Hz: segment.Profile.Formant2Hz * (0.9 + 0.2 * openness),
-            formant3Hz: segment.Profile.Formant3Hz * (0.92 + 0.15 * openness));
+            formant3Hz: segment.Profile.Formant3Hz * (0.92 + 0.15 * openness),
+            frameSmoothing: smoothingHint);
     }
 
     private static TimbreSegment? FindActiveSegment(IReadOnlyList<TimbreSegment> segments, double timeMs)

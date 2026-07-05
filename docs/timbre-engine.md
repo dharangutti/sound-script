@@ -1,4 +1,4 @@
-# Timbre Engine (V4.1)
+# Timbre Engine (V4.1.1)
 
 The **SoundScript.Timbre** project implements offline, deterministic audio
 synthesis. MIDI remains the single source of truth for musical structure; the
@@ -55,6 +55,27 @@ Per cycle:
 
 → [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md)
 
+## Timbre quality tuning (V4.1.1)
+
+V4.1.1 tunes the same cycle pipeline without adding stages:
+
+- **CycleGenerator** applies a per-phoneme `HarmonicRolloff` curve
+  (`exp`/`linear`/`polynomial`) instead of one fixed brightness tilt.
+- **FormantFilter** takes a `FormantQ` bandwidth divisor (tighter for
+  vowels, looser for consonants) and adds deterministic ±3.5 Hz per-cycle
+  formant drift.
+- **NoiseInjector** band-passes fricative noise around
+  `NoiseBandHz`, high-frequency-emphasizes plosive bursts, and damps
+  broadband noise for strongly-voiced profiles.
+- **TransientModel** scales attack sharpness with plosive energy and adds a
+  voiced micro-transient ripple for `b`/`d`/`g`.
+- **CycleStitcher** optionally crossfades ~1.5 ms across cycle (and frame)
+  boundaries via a `CrossfadeState` to remove micro-clicks.
+- **SpectralEngine** blends each frame's profile toward the previous
+  frame's (`TimbreProfile.Lerp`) for frame-to-frame continuity.
+
+→ [v4.1.1-timbre-tuning.md](v4.1.1-timbre-tuning.md)
+
 ## Frame timeline
 
 `MidiToTimbreTimeline` samples the note schedule at **8 ms** frames. Each
@@ -108,4 +129,5 @@ and PhonemeComposer are unchanged.
 
 - [SoundCSS reference](soundcss.md)
 - [Cycle synthesis (V4.1)](v4.1-cycle-synthesis.md)
+- [Timbre tuning (V4.1.1)](v4.1.1-timbre-tuning.md)
 - [V4 architecture](v4-architecture.md)

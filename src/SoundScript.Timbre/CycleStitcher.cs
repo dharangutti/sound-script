@@ -6,8 +6,19 @@ namespace SoundScript.Timbre;
 /// </summary>
 public static class CycleStitcher
 {
+    private const double CrossfadeMs = 1.5;
+
+    /// <summary>Carries the tail of the previous cycle across calls for boundary crossfading (V4.1.1).</summary>
+    public sealed class CrossfadeState
+    {
+        internal double[]? Tail;
+    }
+
     /// <summary>
-    /// Synthesizes one frame by generating and stitching individual pitch cycles.
+    /// Synthesizes one frame by generating and stitching individual pitch cycles. When
+    /// <paramref name="crossfade"/> is supplied, a short equal-power crossfade is blended
+    /// across each cycle boundary (and across frame boundaries, if the same state instance
+    /// persists) to remove micro-clicks (V4.1.1).
     /// </summary>
     public static void StitchFrame(
         TimbreFramePlan frame,
@@ -18,7 +29,8 @@ public static class CycleStitcher
         FormantFilter formantFilter,
         float[] output,
         int outputOffset,
-        ref double phaseOffset)
+        ref double phaseOffset,
+        CrossfadeState? crossfade = null)
     {
         if (frame.CycleCount <= 0 || frameSampleCount <= 0)
             return;
@@ -44,9 +56,13 @@ public static class CycleStitcher
             if (phaseOffset >= 1.0)
                 phaseOffset -= Math.Floor(phaseOffset);
 
-            formantFilter.Apply(harmonics, frame.Profile, sampleRate);
-            NoiseInjector.Inject(harmonics, frame.Profile, noiseSeed, cycle, noteElapsedMs);
+            var formantCycleIndex = frame.FrameIndex * 997 + cycle;
+            formantFilter.Apply(harmonics, frame.Profile, sampleRate, formantCycleIndex);
+            NoiseInjector.Inject(harmonics, frame.Profile, noiseSeed, cycle, noteElapsedMs, sampleRate);
             TransientModel.Apply(harmonics, frame.Profile, noteElapsedMs, sampleRate);
+
+            if (crossfade is not null)
+                ApplyCrossfadeIn(harmonics, crossfade, sampleRate);
 
             var position = (frame.StartMs + cycle * frame.CycleLengthMs - frame.NoteStartMs)
                 / Math.Max(frame.NoteDurationMs, 1.0);
@@ -58,7 +74,36 @@ public static class CycleStitcher
                 samplesWritten++;
             }
 
+            if (crossfade is not null)
+                SaveCrossfadeTail(harmonics, crossfade, sampleRate);
+
             noteElapsedMs += cycleSamples * 1000.0 / sampleRate;
         }
     }
+
+    private static void ApplyCrossfadeIn(double[] cycle, CrossfadeState state, int sampleRate)
+    {
+        if (state.Tail is not { Length: > 0 } tail)
+            return;
+
+        var crossfadeSamples = Math.Min(Math.Min(tail.Length, cycle.Length / 2), CrossfadeSampleCount(sampleRate));
+        for (var i = 0; i < crossfadeSamples; i++)
+        {
+            var t = (i + 1) / (double)(crossfadeSamples + 1);
+            var fadeIn = Math.Sin(t * Math.PI / 2.0);
+            var fadeOut = Math.Cos(t * Math.PI / 2.0);
+            cycle[i] = cycle[i] * fadeIn + tail[tail.Length - crossfadeSamples + i] * fadeOut;
+        }
+    }
+
+    private static void SaveCrossfadeTail(double[] cycle, CrossfadeState state, int sampleRate)
+    {
+        var tailSamples = Math.Min(cycle.Length, CrossfadeSampleCount(sampleRate));
+        var tail = new double[tailSamples];
+        Array.Copy(cycle, cycle.Length - tailSamples, tail, 0, tailSamples);
+        state.Tail = tail;
+    }
+
+    private static int CrossfadeSampleCount(int sampleRate) =>
+        Math.Max(1, (int)Math.Round(CrossfadeMs * sampleRate / 1000.0));
 }

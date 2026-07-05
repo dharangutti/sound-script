@@ -13,14 +13,16 @@ namespace SoundScript.Timbre;
 /// </summary>
 public static class OfflineRenderer
 {
-  /// <summary>Default SoundCSS bundled with the timbre engine.</summary>
+  /// <summary>Default SoundCSS bundled with the timbre engine (v1.1 tuning attributes).</summary>
   public const string DefaultStylesheet = """
-    // SoundScript default timbre stylesheet (V4.1)
+    // SoundScript default timbre stylesheet (V4.1.1)
     p {
         burst: 12ms;
-        noise-plosive: 0.4;
+        noise-plosive: 0.5;
         harmonic1: 0.2;
         harmonic2: 0.1;
+        harmonic-rolloff: linear;
+        transient: 6ms;
     }
 
     aa {
@@ -30,8 +32,12 @@ public static class OfflineRenderer
         harmonic1: 0.9;
         harmonic2: 0.6;
         harmonic3: 0.3;
-        noise-fricative: 0.2;
-        transient: 8ms;
+        noise-fricative: 0.1;
+        noise-band: 6000Hz;
+        transient: 4ms;
+        harmonic-rolloff: exp;
+        formant-q: 1.4;
+        smoothing: 0.3;
     }
     """;
 
