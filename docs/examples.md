@@ -1,4 +1,4 @@
-# SoundScript Examples (V2)
+# SoundScript Examples (V6)
 
 Runnable example scripts for every major feature.
 
@@ -39,6 +39,43 @@ dotnet run --project src/SoundScript.Cli -- compose "How I wonder what you are" 
 ```
 
 → [text-to-melody.md](text-to-melody.md) · [cli.md](cli.md)
+
+## Text-to-Melody: `.ss` Export (V6)
+
+Add `--emit-ss <path>` to `compose`/`prosody` to also write the composed AST
+as human-editable `.ss` source, alongside the `.mid` file:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss
+```
+
+```
+tempo 96
+
+track phonemes {
+    phrase {
+        crescendo
+        B3 e staccato
+        C4 e v58
+        E4 q legato
+        C4 q v58
+    }
+    ...
+}
+```
+
+Hand-edit a note (change a pitch, a duration, a velocity) and run it through
+the existing parser to hear exactly that edit and nothing else:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- run twinkle.ss twinkle-viass.mid
+```
+
+`twinkle-viass.mid` is byte-identical to what `compose "Twinkle twinkle
+little star" twinkle.mid` (no flag) produces directly, as long as no hand
+edits were made — tempo, pitches, durations, and velocities all round-trip.
+
+→ [whats-new-v6.md](whats-new-v6.md) · [cli.md](cli.md#--emit-ss--export-the-composed-ast-as-ss-source-v6)
 
 ## Industrial Audio Cue Examples (V3)
 
@@ -115,4 +152,5 @@ Complete scripts backing the [Industrial Applications](https://soundscript.net/i
 ## Related
 
 - [whats-new-v2.md](whats-new-v2.md)
+- [whats-new-v6.md](whats-new-v6.md) — `.ss` export
 - [language-reference.md](language-reference.md)

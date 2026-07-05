@@ -14,6 +14,7 @@ dotnet run --project src/SoundScript.Cli -- <verb> <arguments>
 |------|---------|
 | `run` | Compile a `.ss` script to MIDI |
 | `compose` | Compose plain text to MIDI via the [PhonemeComposer](phoneme-composer.md) (V3.1) |
+| `prosody` | Compose plain text to MIDI via the word-level [ProsodyComposer](word-prosody.md) (V5) |
 | `render` | Offline timbre synthesis: MIDI + SoundCSS → WAV/OGG ([V4](whats-new-v4.md)) |
 
 ## `run` — compile a script
@@ -40,7 +41,7 @@ Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vo
 ## `compose` — text to melody (V3.1)
 
 ```
-soundscript compose "<text>" [output.mid] [--append <script.ss>]
+soundscript compose "<text>" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]
 ```
 
 ### Standalone
@@ -72,6 +73,30 @@ Composed 7 syllable(s) and appended the phoneme track to examples/vocal-song.ss:
 The script itself is not modified — the composed track exists only in the
 generated MIDI.
 
+### `--emit-ss` — export the composed AST as `.ss` source (V6)
+
+Writes the pre-interpretation AST that `compose` would otherwise feed
+straight into the MIDI generator out as human-formatted `.ss` DSL source, in
+addition to the `.mid` file (default behavior without the flag is
+unchanged):
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss
+dotnet run --project src/SoundScript.Cli -- run twinkle.ss twinkle-viass.mid
+```
+
+`twinkle-viass.mid` is byte-identical to what `compose "Twinkle twinkle
+little star" twinkle.mid` (no flag) produces directly — tempo, pitches,
+durations, and velocities all round-trip. Hand-edit `twinkle.ss` before the
+`run` step to change exactly what you edited and nothing else.
+
+`--emit-ss` and `--append` cannot be combined: `--append` never keeps a
+single AST representing "existing script + composed track" (it merges the
+composed track into an already-interpreted program), so there's no correct
+program to print. Passing both flags together is a usage error.
+
+See [whats-new-v6.md](whats-new-v6.md) for the full design rationale.
+
 ### Determinism
 
 Identical text produces identical MIDI bytes on every platform:
@@ -81,6 +106,49 @@ dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" b.mid
 sha256sum a.mid b.mid   # identical hashes
 ```
+
+## `prosody` — word-level text to melody (V5)
+
+```
+soundscript prosody "<text>" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]
+```
+
+Same shape as `compose`, but pitch is planned top-down (phrase → word →
+syllable) by the [`ProsodyComposer`](word-prosody.md) instead of per phoneme
+category — the melody follows spoken stress and sentence contour rather than
+a fixed pitch per phoneme. `compose`/`PhonemeComposer` are unaffected;
+`prosody` is a separate, independent verb.
+
+### Standalone
+
+```bash
+dotnet run --project src/SoundScript.Cli -- prosody "Twinkle twinkle little star"
+```
+
+```
+Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
+```
+
+### `--append` — add the composed track to a script
+
+Same behavior as `compose --append`, but appends a `prosody` track instead of
+a `phonemes` track:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- prosody "How I wonder what you are" out.mid --append examples/vocal-song.ss
+```
+
+### `--emit-ss` — export the composed AST as `.ss` source (V6)
+
+Identical in shape and guarantees to `compose --emit-ss` (see above), just
+sourced from the `ProsodyComposer`'s AST instead:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- prosody "Twinkle twinkle little star" --emit-ss twinkle-prosody.ss
+dotnet run --project src/SoundScript.Cli -- run twinkle-prosody.ss twinkle-prosody-viass.mid
+```
+
+Also mutually exclusive with `--append`, for the same reason.
 
 ## `render` — MIDI to audio (V4)
 
@@ -119,8 +187,10 @@ envelopes via the [timbre engine](timbre-engine.md).
 
 ## Related
 
-- [text-to-melody.md](text-to-melody.md) — how `compose` works
+- [text-to-melody.md](text-to-melody.md) — how `compose`/`prosody` work, including the `--emit-ss` detour (V6)
 - [phoneme-composer.md](phoneme-composer.md) — module reference
+- [word-prosody.md](word-prosody.md) — `ProsodyComposer` module reference (V5)
+- [whats-new-v6.md](whats-new-v6.md) — `--emit-ss` design and guarantees (V6)
 - [soundcss.md](soundcss.md) — SoundCSS timbre language (V4)
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`

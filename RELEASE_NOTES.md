@@ -1,5 +1,27 @@
 # SoundScript Release Notes
 
+## V6 — Editable .ss Export (`--emit-ss`)
+
+- **New library API:** `SoundScript.Parser.SsPrinter.Print(ProgramNode)` —
+  serializes a pre-interpretation AST back into `.ss` DSL source text that
+  the existing `Tokenizer`/`Parser` can re-parse, with no second informal
+  reader.
+- **New CLI flag:** `--emit-ss <path>` on both `compose` and `prosody`,
+  alongside the existing `--append` (the two are mutually exclusive — see
+  [docs/whats-new-v6.md](docs/whats-new-v6.md) for why).
+- **Playground:** both compose buttons now also produce a `.ss` export — an
+  inline **View .ss source** panel and a **Download .ss** button.
+- **No breaking changes:** default `compose`/`prosody` output is unchanged;
+  `run`'s existing `.ss` → `.mid` path is unchanged; SoundCSS/`.ssc` handling
+  is unchanged.
+- **Determinism verified:** `compose --emit-ss` → `run` produces MIDI
+  byte-identical to the direct `compose` path, including the composed tempo
+  at beat 0.
+
+Details: [docs/whats-new-v6.md](docs/whats-new-v6.md) ·
+[docs/text-to-melody.md](docs/text-to-melody.md) ·
+[docs/cli.md](docs/cli.md)
+
 ## V5 — Word-Level Prosody (ProsodyComposer)
 
 - **New subsystem:** `SoundScript.Prosody` — pitch is planned top-down

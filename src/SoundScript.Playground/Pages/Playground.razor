@@ -2,7 +2,7 @@
     <header class="playground-header">
         <div class="header-top">
             <a class="home-link" href="/">← SoundScript</a>
-            <span class="badge">Playground · V2</span>
+            <span class="badge">Playground · V6</span>
         </div>
         <h1>SoundScript Playground</h1>
         <p class="lead">Type SoundScript V2, compile to MIDI, and hear it in your browser — fully client-side.</p>
@@ -73,7 +73,19 @@
                 {
                     <button type="button" class="btn btn-secondary" @onclick="DownloadWavAsync">Download WAV</button>
                 }
+                @if (SsText is not null)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="DownloadSsAsync">Download .ss</button>
+                }
             </div>
+
+            @if (SsText is not null)
+            {
+                <details class="ss-preview">
+                    <summary>View .ss source</summary>
+                    <pre>@SsText</pre>
+                </details>
+            }
 
             @if (!string.IsNullOrEmpty(StatusMessage))
             {
@@ -145,6 +157,8 @@
                 <strong>Render Audio</strong> adds the V4 offline timbre pass (MIDI → SoundCSS → WAV) — slow-motion synthesis, not real-time playback.
                 <strong>Render Audio (Prosody)</strong> runs the same offline timbre pass over the <code>ProsodyComposer</code> MIDI instead —
                 same phoneme timbre, word/syllable-shaped pitch.
+                Both compose buttons also produce an editable <strong>.ss</strong> export (V6) — view it inline,
+                download it, hand-tweak a note, and run it through <code>soundscript run</code> to hear exactly your edit.
             </p>
         </section>
     </div>
