@@ -3,6 +3,7 @@ using Microsoft.JSInterop;
 using SoundScript.Compose;
 using SoundScript.Midi;
 using SoundScript.Parser;
+using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
 
@@ -430,6 +431,44 @@ public partial class Playground
     }
   }
 
+  private async Task ComposeWithProsodyAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to compose: the text is empty.";
+        return;
+      }
+
+      var interpreted = ProsodyComposer.ComposeProgram(ComposeText);
+
+      using var stream = new MemoryStream();
+      MidiGenerator.Write(interpreted, stream);
+      MidiBytes = stream.ToArray();
+
+      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
+
+      var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
+      var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
+      StatusMessage = $"Composed {syllableCount} syllable(s) into {noteCount} note(s) at {interpreted.Tempo} BPM (word-level prosody).";
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      MidiBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
   private async Task RenderAudioAsync()
   {
     try
@@ -458,6 +497,51 @@ public partial class Playground
       var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
       StatusMessage =
           $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre).";
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      WavBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task RenderAudioWithProsodyAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to render: the text is empty.";
+        return;
+      }
+
+      var interpreted = ProsodyComposer.ComposeProgram(ComposeText);
+      using var midiStream = new MemoryStream();
+      MidiGenerator.Write(interpreted, midiStream);
+      MidiBytes = midiStream.ToArray();
+
+      // ProsodyComposer emits its track as "prosody" rather than PhonemeComposer's
+      // "phonemes", so the timeline builder is told which track to align phonemes
+      // against explicitly instead of relying on the default.
+      var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText, PreferredTrackName = "prosody" };
+      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
+
+      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+      var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+
+      var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
+      StatusMessage =
+          $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre, word-level prosody).";
     }
     catch (Exception ex)
     {

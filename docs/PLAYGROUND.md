@@ -34,7 +34,35 @@ The playground has a **Text-to-Melody** row above the editor:
 The composed MIDI is byte-identical to the CLI output for the same text
 (`soundscript compose "<text>"`). → [text-to-melody.md](text-to-melody.md)
 
-The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI (+ Voice + PhonemeComposer).
+The pipeline display shows: Tokenizer → Parser → Interpreter → PhraseShaper → PatternExpander → Orchestration → Layers → Humanize → MIDI (+ Voice + PhonemeComposer + ProsodyComposer).
+
+## Word-Level Prosody (V5)
+
+The same **Text-to-Melody** row has a second compose button, using the same
+input box:
+
+| UI element | Behavior |
+|------------|----------|
+| **Compose with Prosody** button | Runs the deterministic `ProsodyComposer` (text → words → word/phrase pitch → syllables → phonemes for rhythm/timbre only → MIDI), plays the result, and enables **Download MIDI** |
+| Output preview | The status line shows syllable count, note count, and BPM, tagged `(word-level prosody)` (e.g. `Composed 7 syllable(s) into 24 note(s) at 96 BPM (word-level prosody).`) |
+
+The composed MIDI is byte-identical to the CLI output for the same text
+(`soundscript prosody "<text>"`). Unlike **Compose from text**, pitch follows
+word stress and sentence contour instead of one fixed pitch per phoneme
+category — for "Twinkle twinkle little star" the melody falls gently from
+F4 to A#3 across the phrase instead of arpeggiating per phoneme.
+→ [word-prosody.md](word-prosody.md)
+
+The output pane also has a **Render Audio (Prosody)** button (next to
+**Render Audio**) that runs the same V4 offline timbre pass over the
+`ProsodyComposer` MIDI instead of `PhonemeComposer`'s — same SoundCSS timbre
+per phoneme, word/syllable-shaped pitch underneath it. Equivalent to chaining
+the CLI verbs:
+
+```bash
+soundscript prosody "Twinkle twinkle little star" twinkle.mid
+soundscript render twinkle.mid --css examples/default.ssc --out twinkle.wav --text "Twinkle twinkle little star"
+```
 
 ## Render Audio (V4)
 
@@ -77,8 +105,11 @@ python3 -m http.server 8080
 - [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
 - [ ] **Compose from text** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`
 - [ ] **Download MIDI** after composing saves a file byte-identical to `soundscript compose "Twinkle twinkle little star"`
-- [ ] Composing with an empty input shows `Nothing to compose: the text is empty.`
-- [ ] Pipeline display shows PhraseShaper, PatternExpander, Orchestration, Layers, Humanize
+- [ ] **Compose with Prosody** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM (word-level prosody).`
+- [ ] **Download MIDI** after composing with prosody saves a file byte-identical to `soundscript prosody "Twinkle twinkle little star"`
+- [ ] **Render Audio (Prosody)** with the default text plays and reports `Rendered 7 syllable(s) offline to ...s of audio at 96 BPM (SoundCSS timbre, word-level prosody).`
+- [ ] Composing/rendering (any button) with an empty input shows `Nothing to compose: the text is empty.` / `Nothing to render: the text is empty.`
+- [ ] Pipeline display shows PhraseShaper, PatternExpander, Orchestration, Layers, Humanize, PhonemeComposer, ProsodyComposer
 
 ## Offline test
 

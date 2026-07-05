@@ -12,7 +12,8 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer + submodules (V3.1)
     SoundScript.Timbre/     # Offline timbre: SoundCSS + SpectralEngine (V4)
-    SoundScript.Cli/        # Command-line runner (run + compose + render)
+    SoundScript.Prosody/    # Word-level prosody: ProsodyComposer + submodules (V5)
+    SoundScript.Cli/        # Command-line runner (run + compose + prosody + render)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
     SoundScript.Tests/      # xUnit tests
@@ -49,6 +50,11 @@ System overview for the SoundScript engine and documentation suite.
 | `MidiToTimbreTimeline` | Timbre | MIDI notes → frame timeline |
 | `SpectralEngine` | Timbre | Deterministic formant/noise synthesis |
 | `OfflineRenderer` | Timbre | MIDI + SoundCSS → WAV/OGG |
+| `WordTokenizer` | Prosody | Text → words + syllables (V5) |
+| `WordProsodyPlanner` | Prosody | Word → base pitch (category, position, stress) |
+| `PhraseContourEngine` | Prosody | Sentence → phrase-level pitch ramp |
+| `SyllableContourGenerator` | Prosody | Syllable → stress-driven micro-pitch |
+| `ProsodyComposer` | Prosody | Facade: plain text → AST → InterpretedTrack (V5) |
 
 ## Layer Diagram (V4)
 
@@ -67,23 +73,33 @@ System overview for the SoundScript engine and documentation suite.
 │                                                          │
 │  V3.1: PhonemeComposer (text → AST, reuses Interpreter)  │
 │  V4:   OfflineRenderer   (MIDI → SoundCSS → audio)       │
+│  V5:   ProsodyComposer   (text → AST, word/syllable pitch)│
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Pipeline Branches (V4)
+## Pipeline Branches (V5)
 
-Four stages share one MIDI backbone; V4 adds a read-only audio branch:
+Five stages share one MIDI backbone; V4 adds a read-only audio branch and V5
+adds a second text-to-AST branch alongside `PhonemeComposer`:
 
 ```
 Tokenizer → Parser → AST
     ├── Interpreter        (tracks)   → InterpretedTrack[]
     ├── VocalInterpreter   (voices)   → InterpretedVocalTrack[]
-    └── PhonemeComposer    (text)     → AST → Interpreter → InterpretedTrack
-            ├── Syllabifier      (reused from SoundScript.Voice)
-            ├── PhonemeSplitter  (syllable → phonemes)
-            ├── PhonemeMapper    (phoneme → gesture, pure data)
-            ├── GestureBuilder   (gesture → NoteNode / PhraseEnvelopeNode)
-            └── PhraseAssembler  (per-syllable PhraseNodes → ProgramNode)
+    ├── PhonemeComposer    (text, V3.1) → AST → Interpreter → InterpretedTrack
+    │       ├── Syllabifier      (reused from SoundScript.Voice)
+    │       ├── PhonemeSplitter  (syllable → phonemes)
+    │       ├── PhonemeMapper    (phoneme → gesture, pure data)
+    │       ├── GestureBuilder   (gesture → NoteNode / PhraseEnvelopeNode)
+    │       └── PhraseAssembler  (per-syllable PhraseNodes → ProgramNode)
+    └── ProsodyComposer    (text, V5)   → AST → Interpreter → InterpretedTrack
+            ├── WordTokenizer          (text → words + syllables)
+            ├── WordProsodyPlanner     (word → base pitch)
+            ├── PhraseContourEngine    (sentence → contour delta)
+            ├── SyllableContourGenerator (syllable → micro-pitch)
+            ├── ProsodyClamp           (bound the sequence)
+            ├── PhonemeSplitter + PhonemeMapper.Kind/Duration (reused, timbre/rhythm only)
+            └── ProsodyNoteBuilder + ProsodyPhraseAssembler (per-syllable PhraseNodes → ProgramNode)
     ↓
 MidiGenerator → output.mid
     ↓
@@ -93,11 +109,13 @@ OfflineRenderer (V4, read-only) → output.wav / output.ogg
     └── SpectralEngine → AudioWriter
 ```
 
-The PhonemeComposer branch starts from plain text rather than a script: it
-builds a standard `ProgramNode` in code, then feeds it through the unchanged
-`Interpreter` and `MidiGenerator`. The V4 timbre branch reads that MIDI file
-and never modifies it. → [text-to-melody.md](text-to-melody.md) ·
-[phoneme-composer.md](phoneme-composer.md) · [v4-architecture.md](v4-architecture.md)
+The PhonemeComposer and ProsodyComposer branches both start from plain text
+rather than a script: each builds a standard `ProgramNode` in code, then feeds
+it through the unchanged `Interpreter` and `MidiGenerator`. The V4 timbre
+branch reads that MIDI file and never modifies it, regardless of which text
+branch produced it. → [text-to-melody.md](text-to-melody.md) ·
+[phoneme-composer.md](phoneme-composer.md) · [word-prosody.md](word-prosody.md) ·
+[v4-architecture.md](v4-architecture.md) · [v5-prosody-architecture.md](v5-prosody-architecture.md)
 
 ## Engine Phases
 
@@ -116,7 +134,7 @@ and never modifies it. → [text-to-melody.md](text-to-melody.md) ·
 
 ## Deployment
 
-- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss` · `... -- compose "text"`
+- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss` · `... -- compose "text"` · `... -- prosody "text"`
 - **Website:** `docs/` → GitHub Pages → soundscript.net
 - **Playground:** `dotnet publish` → `docs/playground/`
 
@@ -125,5 +143,8 @@ and never modifies it. → [text-to-melody.md](text-to-melody.md) ·
 - [pipeline.md](pipeline.md)
 - [text-to-melody.md](text-to-melody.md)
 - [phoneme-composer.md](phoneme-composer.md)
+- [word-prosody.md](word-prosody.md)
+- [v5-prosody-architecture.md](v5-prosody-architecture.md)
+- [whats-new-v5.md](whats-new-v5.md)
 - [whats-new-v3.1.md](whats-new-v3.1.md)
 - [whats-new-v2.md](whats-new-v2.md)
