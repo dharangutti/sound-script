@@ -86,29 +86,40 @@ Every phoneme maps to a `MusicalGesture` — a gesture kind, pitch, octave, and
 duration (`e` = eighth, `q` = quarter). The table is pure data; extending it
 means adding rows.
 
+Every gesture's pitch sits within a perfect fifth — A3 to E4 (7 semitones) —
+rather than spanning multiple octaves. Two things make this width the right
+one, not just "narrower": real speech F0 moves in small steps around a
+baseline pitch, so a wide-ranging table (an earlier version spanned C3–D5,
+over two octaves) made adjacent phonemes in a word leap across octaves and
+read as an arpeggiated tune instead of spoken prosody; and the shared
+Interpreter step `MelodicContour` octave-shifts any note-to-note leap over 7
+semitones to smooth "wide" melodic jumps in hand-written music — a table
+with gaps wider than a fifth would get silently re-widened by that shared
+correction. Keeping every entry within A3–E4 avoids triggering it:
+
 | Phoneme | Gesture | Phoneme | Gesture |
 |---------|---------|---------|---------|
-| /p/ | staccato C3 e | /s/ | fade C5 e |
-| /t/ | staccato C4 e | /sh/ | fade C5 e |
-| /k/ | staccato C4 e | /th/ | fade D5 e |
-| /b/ | staccato E3 e | /f/ | fade A4 e |
-| /d/ | staccato D4 e | /v/ | fade F4 e |
-| /g/ | staccato G3 e | /z/ | fade B4 e |
-| /ch/ | staccato D4 e | /h/ | fade A3 e |
-| /m/ | swell C3 q | /r/ | accent G4 e |
-| /n/ | swell C3 q | /l/ | accent E4 e |
-| /ng/ | swell D3 q | /j/ | accent D4 e |
-| /w/ | swell F3 e | | |
+| /p/ | staccato A3 e | /s/ | fade D4 e |
+| /t/ | staccato B3 e | /sh/ | fade D4 e |
+| /k/ | staccato B3 e | /th/ | fade D4 e |
+| /b/ | staccato A3 e | /f/ | fade C4 e |
+| /d/ | staccato B3 e | /v/ | fade D4 e |
+| /g/ | staccato B3 e | /z/ | fade D4 e |
+| /ch/ | staccato B3 e | /h/ | fade C4 e |
+| /m/ | swell C4 q | /r/ | accent D4 e |
+| /n/ | swell C4 q | /l/ | accent C4 e |
+| /ng/ | swell C4 q | /j/ | accent D4 e |
+| /w/ | swell C4 e | | |
 
 Vowels map to legato notes:
 
 | Phoneme | Gesture |
 |---------|---------|
-| /aa/ | legato C4 q |
+| /aa/ | legato D4 q |
 | /ee/ | legato E4 q |
-| /oo/ | legato G3 q |
-| /ai/ | legato D4 q |
-| /au/ | legato F4 q |
+| /oo/ | legato B3 q |
+| /ai/ | legato E4 q |
+| /au/ | legato C4 q |
 
 Phonemes without a row fall back to a default gesture (legato C4 e), so the
 mapping is total — any input text composes.
@@ -141,10 +152,10 @@ ProgramNode
 └── TrackNode { Name = "phonemes" }
     └── PhraseNode                                    ← syllable "star"
         ├── PhraseEnvelopeNode { Decrescendo }        ← from /s/ (fade)
-        ├── NoteNode C5 e  velocity 52                ← /s/  fade
-        ├── NoteNode C4 e  staccato                   ← /t/  staccato
-        ├── NoteNode C4 q  legato                     ← /aa/ legato
-        └── NoteNode G4 e  accent                     ← /r/  accent
+        ├── NoteNode D4 e  velocity 52                ← /s/  fade
+        ├── NoteNode B3 e  staccato                   ← /t/  staccato
+        ├── NoteNode D4 q  legato                     ← /aa/ legato
+        └── NoteNode D4 e  accent                     ← /r/  accent
 ```
 
 The interpreter then applies its normal deterministic shaping (articulation

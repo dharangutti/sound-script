@@ -35,43 +35,53 @@ public static class PhonemeMapper
     public static readonly MusicalGesture DefaultGesture =
         new(GestureKind.Legato, PitchClass.C, 4, NoteDuration.Eighth);
 
+    // Every phoneme sits within a perfect fifth — A3 to E4 (7 semitones) — instead
+    // of spanning multiple octaves. Two things make this the right width, not just
+    // "narrower": (1) natural speech F0 moves in small steps around a baseline
+    // pitch, so a wide-ranging table (the original spanned C3-D5, over two octaves)
+    // reads as an arpeggiated tune rather than spoken prosody; (2) the shared
+    // Interpreter step MelodicContour (SoundScript.Midi/MelodicContour.cs) octave-
+    // shifts any note-to-note leap over 7 semitones to smooth "wide" melodic jumps —
+    // useful for hand-written music, but it would silently re-widen a phoneme
+    // table that still had gaps over a fifth, undoing the narrowing here. Keeping
+    // every entry within A3-E4 guarantees no pair of phonemes can trigger it.
     private static readonly Dictionary<string, MusicalGesture> Table = new(StringComparer.Ordinal)
     {
         // plosives → staccato
-        ["p"] = new(GestureKind.Staccato, PitchClass.C, 3, NoteDuration.Eighth),
-        ["t"] = new(GestureKind.Staccato, PitchClass.C, 4, NoteDuration.Eighth),
-        ["k"] = new(GestureKind.Staccato, PitchClass.C, 4, NoteDuration.Eighth),
-        ["b"] = new(GestureKind.Staccato, PitchClass.E, 3, NoteDuration.Eighth),
-        ["d"] = new(GestureKind.Staccato, PitchClass.D, 4, NoteDuration.Eighth),
-        ["g"] = new(GestureKind.Staccato, PitchClass.G, 3, NoteDuration.Eighth),
-        ["ch"] = new(GestureKind.Staccato, PitchClass.D, 4, NoteDuration.Eighth),
+        ["p"] = new(GestureKind.Staccato, PitchClass.A, 3, NoteDuration.Eighth),
+        ["t"] = new(GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth),
+        ["k"] = new(GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth),
+        ["b"] = new(GestureKind.Staccato, PitchClass.A, 3, NoteDuration.Eighth),
+        ["d"] = new(GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth),
+        ["g"] = new(GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth),
+        ["ch"] = new(GestureKind.Staccato, PitchClass.B, 3, NoteDuration.Eighth),
 
         // nasals and glides → swell
-        ["m"] = new(GestureKind.Swell, PitchClass.C, 3, NoteDuration.Quarter),
-        ["n"] = new(GestureKind.Swell, PitchClass.C, 3, NoteDuration.Quarter),
-        ["ng"] = new(GestureKind.Swell, PitchClass.D, 3, NoteDuration.Quarter),
-        ["w"] = new(GestureKind.Swell, PitchClass.F, 3, NoteDuration.Eighth),
+        ["m"] = new(GestureKind.Swell, PitchClass.C, 4, NoteDuration.Quarter),
+        ["n"] = new(GestureKind.Swell, PitchClass.C, 4, NoteDuration.Quarter),
+        ["ng"] = new(GestureKind.Swell, PitchClass.C, 4, NoteDuration.Quarter),
+        ["w"] = new(GestureKind.Swell, PitchClass.C, 4, NoteDuration.Eighth),
 
         // fricatives → fade
-        ["s"] = new(GestureKind.Fade, PitchClass.C, 5, NoteDuration.Eighth),
-        ["sh"] = new(GestureKind.Fade, PitchClass.C, 5, NoteDuration.Eighth),
-        ["th"] = new(GestureKind.Fade, PitchClass.D, 5, NoteDuration.Eighth),
-        ["f"] = new(GestureKind.Fade, PitchClass.A, 4, NoteDuration.Eighth),
-        ["v"] = new(GestureKind.Fade, PitchClass.F, 4, NoteDuration.Eighth),
-        ["z"] = new(GestureKind.Fade, PitchClass.B, 4, NoteDuration.Eighth),
-        ["h"] = new(GestureKind.Fade, PitchClass.A, 3, NoteDuration.Eighth),
+        ["s"] = new(GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth),
+        ["sh"] = new(GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth),
+        ["th"] = new(GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth),
+        ["f"] = new(GestureKind.Fade, PitchClass.C, 4, NoteDuration.Eighth),
+        ["v"] = new(GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth),
+        ["z"] = new(GestureKind.Fade, PitchClass.D, 4, NoteDuration.Eighth),
+        ["h"] = new(GestureKind.Fade, PitchClass.C, 4, NoteDuration.Eighth),
 
         // liquids and affricate-like onsets → accent
-        ["r"] = new(GestureKind.Accent, PitchClass.G, 4, NoteDuration.Eighth),
-        ["l"] = new(GestureKind.Accent, PitchClass.E, 4, NoteDuration.Eighth),
+        ["r"] = new(GestureKind.Accent, PitchClass.D, 4, NoteDuration.Eighth),
+        ["l"] = new(GestureKind.Accent, PitchClass.C, 4, NoteDuration.Eighth),
         ["j"] = new(GestureKind.Accent, PitchClass.D, 4, NoteDuration.Eighth),
 
         // vowels → legato
-        ["aa"] = new(GestureKind.Legato, PitchClass.C, 4, NoteDuration.Quarter),
+        ["aa"] = new(GestureKind.Legato, PitchClass.D, 4, NoteDuration.Quarter),
         ["ee"] = new(GestureKind.Legato, PitchClass.E, 4, NoteDuration.Quarter),
-        ["oo"] = new(GestureKind.Legato, PitchClass.G, 3, NoteDuration.Quarter),
-        ["ai"] = new(GestureKind.Legato, PitchClass.D, 4, NoteDuration.Quarter),
-        ["au"] = new(GestureKind.Legato, PitchClass.F, 4, NoteDuration.Quarter),
+        ["oo"] = new(GestureKind.Legato, PitchClass.B, 3, NoteDuration.Quarter),
+        ["ai"] = new(GestureKind.Legato, PitchClass.E, 4, NoteDuration.Quarter),
+        ["au"] = new(GestureKind.Legato, PitchClass.C, 4, NoteDuration.Quarter),
     };
 
     /// <summary>Maps a phoneme symbol to its gesture, falling back to <see cref="DefaultGesture"/>.</summary>

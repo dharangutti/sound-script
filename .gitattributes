@@ -1,0 +1,7 @@
+# Test sources compare their output against embedded raw-string-literal
+# expectations and golden snapshot files using LF-joined serialization
+# (string.Join('\n', ...)). Without this, Windows checkouts with
+# core.autocrlf=true convert these files to CRLF, breaking the comparison
+# even though nothing about the code's behavior changed.
+src/SoundScript.Tests/*.cs text eol=lf
+src/SoundScript.Tests/Golden/*.txt text eol=lf
