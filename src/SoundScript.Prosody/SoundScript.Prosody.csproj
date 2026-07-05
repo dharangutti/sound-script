@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript.Voice\SoundScript.Voice.csproj" />
+    <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
+    <ProjectReference Include="..\SoundScript.Compose\SoundScript.Compose.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -31,7 +31,9 @@
                spellcheck="false"
                placeholder="Type plain text to compose from" />
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="ComposeFromTextAsync">Compose from text</button>
+        <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="ComposeWithProsodyAsync">Compose with Prosody</button>
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderAudioAsync">Render Audio</button>
+        <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderAudioWithProsodyAsync">Render Audio (Prosody)</button>
     </div>
 
     <div class="presets">
@@ -123,6 +125,8 @@
                 <span>Voice</span>
                 <span class="arrow">+</span>
                 <span>PhonemeComposer</span>
+                <span class="arrow">+</span>
+                <span>ProsodyComposer</span>
                 <span class="arrow">→</span>
                 <span>SoundCSS</span>
                 <span class="arrow">→</span>
@@ -135,7 +139,12 @@
                 the downloaded MIDI carries the lyrics as standard karaoke events.
                 <strong>Compose from text</strong> runs the deterministic <code>PhonemeComposer</code>
                 (text → syllables → phonemes → gestures → MIDI): the same text always produces the same MIDI bytes.
+                <strong>Compose with Prosody</strong> runs the V5 <code>ProsodyComposer</code> instead — pitch is
+                planned top-down (phrase → word → syllable) so the melody follows spoken stress and sentence
+                contour rather than a fixed pitch per phoneme.
                 <strong>Render Audio</strong> adds the V4 offline timbre pass (MIDI → SoundCSS → WAV) — slow-motion synthesis, not real-time playback.
+                <strong>Render Audio (Prosody)</strong> runs the same offline timbre pass over the <code>ProsodyComposer</code> MIDI instead —
+                same phoneme timbre, word/syllable-shaped pitch.
             </p>
         </section>
     </div>

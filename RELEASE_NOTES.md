@@ -1,5 +1,27 @@
 # SoundScript Release Notes
 
+## V5 — Word-Level Prosody (ProsodyComposer)
+
+- **New subsystem:** `SoundScript.Prosody` — pitch is planned top-down
+  (phrase → word → syllable) instead of per phoneme category:
+  `WordTokenizer`, `StressDetector`, `WordPitchTable`/`WordProsodyPlanner`,
+  `PhraseContourEngine`, `SyllableContourGenerator`, `ProsodyClamp`,
+  `ProsodyComposer`. Runs entirely alongside V3.1's `PhonemeComposer`.
+- **New CLI verb:** `soundscript prosody "<text>" [output.mid]`, with the
+  same `--append <script.ss>` support as `compose`.
+- **New library API:** `ProsodyComposer.ComposeProgram(text)`,
+  `Compose(text)`, `AppendTo(program, text)`, `BuildAst(text)`.
+- **Playground:** new **Compose with Prosody** button next to **Compose from
+  text**, using the same text input.
+- **No breaking changes:** Core, Parser, Interpreter, Voice, MIDI generator,
+  and `PhonemeComposer` (plus its Compose siblings) are unmodified.
+- **Determinism verified:** identical text produces identical MIDI bytes,
+  confirmed by byte-equality tests, the same guarantee `PhonemeComposer` makes.
+
+Details: [docs/whats-new-v5.md](docs/whats-new-v5.md) ·
+[docs/word-prosody.md](docs/word-prosody.md) ·
+[docs/v5-prosody-architecture.md](docs/v5-prosody-architecture.md)
+
 ## V3.1 — Text-to-Melody (PhonemeComposer)
 
 - **New subsystem:** `SoundScript.Compose` — a deterministic text-to-melody

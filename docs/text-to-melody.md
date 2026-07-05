@@ -190,10 +190,30 @@ The playground **Render Audio** button runs the same timbre pipeline in WASM.
 
 → [v4-architecture.md](v4-architecture.md) · [soundcss.md](soundcss.md) · [timbre-engine.md](timbre-engine.md)
 
+## V5 extension: word-level prosody
+
+This engine assigns pitch **per phoneme category** — the same `/aa/` is
+always D4, wherever it occurs. That's rhythmically solid but not speech-like:
+real pitch contour is shaped by word stress and sentence position, not by
+which vowel happens to occur. V5 adds a second, independent text engine,
+`ProsodyComposer` (`SoundScript.Prosody`), that computes pitch top-down —
+phrase → word → syllable — and only then hands phonemes to rhythm/timbre.
+`PhonemeComposer` itself is unchanged; the two engines run side by side,
+reached through separate CLI verbs:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose  "Twinkle twinkle little star" v3.mid   # phoneme-level pitch
+dotnet run --project src/SoundScript.Cli -- prosody  "Twinkle twinkle little star" v5.mid    # word-level pitch
+```
+
+→ [word-prosody.md](word-prosody.md) · [v5-prosody-architecture.md](v5-prosody-architecture.md)
+
 ## Related
 
 - [phoneme-composer.md](phoneme-composer.md) — module documentation, mapping table, splitter rules
+- [word-prosody.md](word-prosody.md) — V5 word-level prosody engine
 - [cli.md](cli.md) — CLI reference
 - [architecture.md](architecture.md) — where the composer sits in the system
 - [whats-new-v3.1.md](whats-new-v3.1.md) — V3.1 changelog
 - [whats-new-v4.md](whats-new-v4.md) — V4 timbre synthesis changelog
+- [whats-new-v5.md](whats-new-v5.md) — V5 word-level prosody changelog
