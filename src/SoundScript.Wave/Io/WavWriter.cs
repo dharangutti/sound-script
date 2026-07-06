@@ -1,4 +1,5 @@
 // UNDER DEVELOPMENT — v2
+using System.Buffers.Binary;
 using System.Text;
 
 namespace SoundScript.Wave.Io;
@@ -14,6 +15,7 @@ public static class WavWriter
 {
     public const int SampleRate = 44_100;
     private const short BitsPerSample = 16;
+    private const int BytesPerSample = BitsPerSample / 8;
     private const short MonoChannels = 1;
     private const short StereoChannels = 2;
 
@@ -32,8 +34,11 @@ public static class WavWriter
 
         WriteHeader(writer, MonoChannels, sampleRate, frameCount: samples.Length);
 
-        foreach (var sample in samples)
-            WriteSample(writer, sample);
+        var buffer = new byte[samples.Length * BytesPerSample];
+        for (var i = 0; i < samples.Length; i++)
+            WriteSampleTo(buffer, i * BytesPerSample, samples[i]);
+
+        writer.Write(buffer);
     }
 
     public static void WriteStereo(string outputPath, float[] left, float[] right) =>
@@ -58,11 +63,15 @@ public static class WavWriter
 
         WriteHeader(writer, StereoChannels, sampleRate, frameCount: left.Length);
 
+        var buffer = new byte[left.Length * StereoChannels * BytesPerSample];
         for (var i = 0; i < left.Length; i++)
         {
-            WriteSample(writer, left[i]);
-            WriteSample(writer, right[i]);
+            var frameOffset = i * StereoChannels * BytesPerSample;
+            WriteSampleTo(buffer, frameOffset, left[i]);
+            WriteSampleTo(buffer, frameOffset + BytesPerSample, right[i]);
         }
+
+        writer.Write(buffer);
     }
 
     private static FileStream CreateFile(string outputPath)
@@ -74,14 +83,27 @@ public static class WavWriter
         return File.Create(outputPath);
     }
 
-    private static void WriteHeader(BinaryWriter writer, short channels, int sampleRate, int frameCount)
+    internal static void WriteHeader(BinaryWriter writer, short channels, int sampleRate, int frameCount)
     {
         var byteRate = sampleRate * channels * BitsPerSample / 8;
         var blockAlign = (short)(channels * BitsPerSample / 8);
-        var dataSize = frameCount * blockAlign;
+
+        // Widen to long before multiplying: frameCount * blockAlign can
+        // exceed Int32.MaxValue for long enough renders, and the classic
+        // RIFF/WAV format's size fields are hard-coded to 32 bits on disk —
+        // there's no wider field to widen into, so a render that doesn't fit
+        // must fail loudly instead of silently wrapping into a corrupt header.
+        var dataSize = (long)frameCount * blockAlign;
+        if (dataSize > int.MaxValue - 36)
+        {
+            throw new InvalidOperationException(
+                $"WAV render is too long to fit in a classic RIFF/WAV header: {frameCount} frames at " +
+                $"{blockAlign} bytes/frame would need a {dataSize}-byte data chunk, but the format's " +
+                "32-bit size fields cap this at just under 2 GiB. Render a shorter buffer.");
+        }
 
         writer.Write(Encoding.ASCII.GetBytes("RIFF"));
-        writer.Write(36 + dataSize);
+        writer.Write((int)(36 + dataSize));
         writer.Write(Encoding.ASCII.GetBytes("WAVE"));
         writer.Write(Encoding.ASCII.GetBytes("fmt "));
         writer.Write(16);
@@ -92,12 +114,13 @@ public static class WavWriter
         writer.Write(blockAlign);
         writer.Write(BitsPerSample);
         writer.Write(Encoding.ASCII.GetBytes("data"));
-        writer.Write(dataSize);
+        writer.Write((int)dataSize);
     }
 
-    private static void WriteSample(BinaryWriter writer, float sample)
+    private static void WriteSampleTo(byte[] buffer, int byteOffset, float sample)
     {
         var clamped = Math.Clamp(sample, -1.0f, 1.0f);
-        writer.Write((short)Math.Round(clamped * short.MaxValue));
+        var pcm = (short)Math.Round(clamped * short.MaxValue);
+        BinaryPrimitives.WriteInt16LittleEndian(buffer.AsSpan(byteOffset, BytesPerSample), pcm);
     }
 }

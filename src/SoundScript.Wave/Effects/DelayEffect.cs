@@ -19,7 +19,14 @@ internal static class DelayEffect
     // Echoes below this amplitude are considered inaudible for tail sizing
     // (well under one 16-bit LSB, 1/32768 ≈ 3.1e-5, after normalization).
     private const double TailFloor = 1e-4;
-    private const int MaxTailRepeats = 64;
+
+    // Hard cap on repeats, since output buffer size grows as
+    // delaySamples * repeats and feedback approaching 1 would otherwise
+    // require an unbounded tail. At this cap, feedback up to ~0.98 fully
+    // decays below TailFloor before truncating (previously the cap was 64,
+    // which truncated any feedback above ~0.82 — an unremarkable creative
+    // setting, not a pathological one — leaving an audible click).
+    private const int MaxTailRepeats = 512;
 
     internal static double[] Process(double[] input, DelaySettings settings, int sampleRate)
     {
@@ -54,14 +61,13 @@ internal static class DelayEffect
         if (settings.Mix <= 0.0)
             return 0; // fully dry — no audible tail to preserve
 
-        var amplitude = settings.Mix;
-        var repeats = 1;
-        while (repeats < MaxTailRepeats && amplitude * settings.Feedback >= TailFloor)
-        {
-            amplitude *= settings.Feedback;
-            repeats++;
-        }
+        if (settings.Feedback <= 0.0)
+            return 1; // one echo, nothing left to feed back
 
-        return repeats;
+        // Closed-form solve for the smallest repeat count R such that
+        // mix * feedback^R < TailFloor (equivalent to the previous
+        // iterative loop, without needing up to MaxTailRepeats iterations).
+        var repeatsNeeded = Math.Log(TailFloor / settings.Mix) / Math.Log(settings.Feedback);
+        return Math.Clamp((int)Math.Ceiling(repeatsNeeded), 1, MaxTailRepeats);
     }
 }

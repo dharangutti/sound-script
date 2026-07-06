@@ -137,6 +137,27 @@ public class TrackMetadataTests
         Assert.Contains("Gain must be between 0.0 and 1.0", ex.Message);
     }
 
+    [Fact]
+    public void Interpret_RejectsMelodyShorthandCollidingWithExplicitTrackNamedMelody()
+    {
+        // Regression: the `melody { }` shorthand claims the reserved track
+        // name "melody"; a later `track melody { }` (or `Melody`/`MELODY`,
+        // since track lookup is case-insensitive) used to silently resolve
+        // to the same TrackBuilder, merging beat-cursor/velocity state
+        // instead of erroring.
+        const string source = """
+            melody {
+                C4 q
+            }
+            track melody {
+                D4 q
+            }
+            """;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => Interpret(source));
+        Assert.Contains("Duplicate track name", ex.Message);
+    }
+
     private static InterpretedProgram Interpret(string source)
     {
         var program = new SoundScriptParser(new Tokenizer(source).Tokenize()).Parse();

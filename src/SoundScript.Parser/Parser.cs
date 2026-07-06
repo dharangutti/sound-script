@@ -84,8 +84,10 @@ public sealed class Parser
         if (Match(TokenType.Orchestration))
             return ParseOrchestrationStatement();
 
-        // v3 wave-only directives (master-level, so top-level only; the MIDI
-        // interpreter rejects the resulting nodes with a clear error).
+        // v3 wave-only 'effect': master-level (applies to the final mix-down),
+        // so top-level only. The MIDI interpreter rejects the resulting node
+        // with a clear error. 'speak' is per-track, not master-level — see
+        // ParseBodyStatement for the track/sequence/block/loop-body form.
         if (Match(TokenType.Effect))
             return ParseEffectStatement();
 
@@ -582,6 +584,11 @@ public sealed class Parser
         if (Match(TokenType.Velocity))
             return ParseVelocityStatement();
 
+        // v3 wave-only 'speak': per-track (unlike 'effect', which is
+        // master-level and top-level only — see ParseTopLevelStatement).
+        if (Match(TokenType.Speak))
+            return ParseSpeakStatement();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -679,8 +686,9 @@ public sealed class Parser
 
         return new HumanizeNode
         {
-            // Value carries Timing so the MIDI backend's existing single-value
-            // semantics keep working unmodified — see HumanizeNode's summary.
+            // Value is unused by the named form (consumers call Resolve()
+            // instead); kept populated only so the required member always
+            // has a defined value.
             Value = timing ?? 0.0,
             Timing = timing,
             VelocityAmount = velocityAmount,
@@ -696,14 +704,14 @@ public sealed class Parser
         if (kind == "reverb")
         {
             throw Invalid(kindToken,
-                "Effect 'reverb' is deferred (v3 parking lot) — supported effects: delay, filter.");
+                $"Effect 'reverb' is deferred (v3 parking lot) — supported effects: {EffectKinds.SupportedListText}.");
         }
 
         var parameters = ParseKeyValueParameters($"effect {kind}");
 
         switch (kind)
         {
-            case "delay":
+            case EffectKinds.Delay:
             {
                 RequireParameter(parameters, kindToken, "effect delay", "time");
                 RejectUnknownParameters(parameters, "effect delay", "time", "feedback", "mix");
@@ -729,7 +737,7 @@ public sealed class Parser
                 break;
             }
 
-            case "filter":
+            case EffectKinds.Filter:
             {
                 RequireParameter(parameters, kindToken, "effect filter", "type");
                 RequireParameter(parameters, kindToken, "effect filter", "cutoff");
@@ -748,7 +756,7 @@ public sealed class Parser
             }
 
             default:
-                throw Invalid(kindToken, $"Unknown effect '{kind}'. Supported effects: delay, filter.");
+                throw Invalid(kindToken, $"Unknown effect '{kind}'. Supported effects: {EffectKinds.SupportedListText}.");
         }
 
         var rawParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

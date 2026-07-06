@@ -41,7 +41,8 @@ public static class Interpreter
         public int PhraseIndex { get; set; }
         public DynamicRampState? DynamicRamp { get; set; }
         public double Gain { get; set; } = 1.0;
-        public double Humanize { get; set; }
+        public double HumanizeTimingSeconds { get; set; }
+        public double HumanizeVelocityAmount { get; set; }
         public PhraseScope? ActivePhrase { get; set; }
         public OrchestrationSettings Orchestration { get; } = new();
     }
@@ -62,6 +63,7 @@ public static class Interpreter
         var result = new InterpretedProgram();
         var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackBuilder>(StringComparer.OrdinalIgnoreCase);
+        var declaredTrackNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var clock = new GlobalBeatClock();
         TrackBuilder? defaultTrack = null;
         var globalTempoBeat = 0.0;
@@ -94,9 +96,11 @@ public static class Interpreter
                     context.Sequences[sequence.Name] = sequence.Body;
                     break;
                 case TrackNode track:
+                    RequireUniqueTrackName(declaredTrackNames, track.Name);
                     ExecuteStatements(GetOrCreateTrack(tracks, track.Name), track.Body, context, result, clock);
                     break;
                 case MelodyNode melody:
+                    RequireUniqueTrackName(declaredTrackNames, "melody");
                     defaultTrack ??= GetOrCreateTrack(tracks, "melody");
                     ExecuteStatements(defaultTrack, melody.Body, context, result, clock);
                     break;
@@ -167,13 +171,13 @@ public static class Interpreter
             {
                 var startBeat = HumanizeApplicator.ApplyToStartBeat(
                     note.StartBeat,
-                    track.Humanize,
+                    track.HumanizeTimingSeconds,
                     (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)),
                     noteIndex,
                     note.Channel);
                 var velocity = HumanizeApplicator.ApplyVelocity(
                     note.Velocity,
-                    track.Humanize,
+                    track.HumanizeVelocityAmount,
                     noteIndex,
                     note.Channel);
                 interpretedTrack.Notes.Add(note with { StartBeat = startBeat, Velocity = velocity });
@@ -196,6 +200,26 @@ public static class Interpreter
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Rejects a second top-level `track NAME { }`/`melody { }` declaration
+    /// reusing a name already claimed (case-insensitively — track lookup is
+    /// case-insensitive throughout). Without this, e.g. a `melody { }`
+    /// shorthand block (which claims the reserved name "melody") followed by
+    /// an unrelated `track melody { }` would silently resolve to the same
+    /// TrackBuilder, merging their beat cursor/velocity/humanize state
+    /// instead of erroring.
+    /// </summary>
+    private static void RequireUniqueTrackName(HashSet<string> declaredTrackNames, string name)
+    {
+        if (!declaredTrackNames.Add(name))
+        {
+            throw new InvalidOperationException(
+                $"Duplicate track name '{name}': a 'track {name} {{ }}' block or the 'melody {{ }}' " +
+                "shorthand (which uses the reserved name 'melody') already declared this track in " +
+                "this file. Track names must be unique.");
+        }
     }
 
     private static TrackBuilder GetOrCreateTrack(Dictionary<string, TrackBuilder> tracks, string name)
@@ -243,16 +267,16 @@ public static class Interpreter
                     track.Gain = gain.Value;
                     break;
                 case HumanizeNode humanize:
-                    // Both humanize forms flow through the single Value here
-                    // (for the v3 named form the parser sets Value = Timing ?? 0,
-                    // the closest match to this backend's existing seconds-based
-                    // semantics). Seed is deliberately ignored on the MIDI path:
-                    // HumanizeApplicator has its own process-level seed
-                    // (SetSeed/DefaultSeed) that predates grammar-level seeds,
-                    // and changing which seed it honors would alter existing
-                    // .ss output — a backward-compat violation. The wave
-                    // backend consumes Timing/VelocityAmount/Seed directly.
-                    track.Humanize = humanize.Value;
+                    // Resolve() gives independent timing/velocity magnitudes
+                    // for both the bare-number and named forms (see
+                    // HumanizeNode.Resolve). Seed is deliberately ignored on
+                    // the MIDI path: HumanizeApplicator has its own
+                    // process-level seed (SetSeed/DefaultSeed) that predates
+                    // grammar-level seeds, and changing which seed it honors
+                    // would alter existing .ss output — a backward-compat
+                    // violation. The wave backend consumes Timing/VelocityAmount/Seed
+                    // directly.
+                    (track.HumanizeTimingSeconds, track.HumanizeVelocityAmount) = humanize.Resolve();
                     break;
                 case VelocityNode velocity:
                     track.CurrentVelocity = velocity.Velocity;
@@ -305,6 +329,16 @@ public static class Interpreter
                 case BarNode bar:
                     CloseMeasure(track, bar.Line);
                     break;
+
+                // Mirrors the top-level switch's rejection of wave-only
+                // grammar (see the class-level comment): 'speak' can appear
+                // inside a track/melody/loop body (ParseBodyStatement), so
+                // this case is reachable, not just defensive.
+                case SpeakNode:
+                    throw new NotSupportedException(
+                        "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
+                        "phoneme-level frequency mapping. Render this file through the wave backend instead.");
             }
         }
     }

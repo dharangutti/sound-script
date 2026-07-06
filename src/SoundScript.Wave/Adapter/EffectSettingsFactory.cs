@@ -35,17 +35,17 @@ public static class EffectSettingsFactory
 
     private static EffectSettings Convert(EffectNode effect) => effect.Kind.ToLowerInvariant() switch
     {
-        "delay" => new DelaySettings(
+        EffectKinds.Delay => new DelaySettings(
             TimeSeconds: GetRequiredDouble(effect, "time"),
             Feedback: GetOptionalDouble(effect, "feedback", DefaultFeedback),
             Mix: GetOptionalDouble(effect, "mix", DefaultMix)),
 
-        "filter" => new FilterSettings(
+        EffectKinds.Filter => new FilterSettings(
             Kind: GetFilterKind(effect),
             CutoffHz: GetRequiredDouble(effect, "cutoff")),
 
         _ => throw new NotSupportedException(
-            $"Unknown effect kind '{effect.Kind}' — supported in v3: delay, filter.")
+            $"Unknown effect kind '{effect.Kind}' — supported in v3: {EffectKinds.SupportedListText}.")
     };
 
     private static FilterKind GetFilterKind(EffectNode effect)

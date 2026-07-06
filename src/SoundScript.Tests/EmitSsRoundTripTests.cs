@@ -105,7 +105,10 @@ public class EmitSsRoundTripTests
     public void Print_ThrowsOnTiedNote()
     {
         var program = new ProgramNode();
-        var track = new TrackNode { Name = "melody" };
+        // "lead" (not "melody" — a keyword the printer now correctly rejects
+        // as a track name; see Print_ThrowsOnKeywordShapedTrackName) so this
+        // test still exercises the tied-note check it's named for.
+        var track = new TrackNode { Name = "lead" };
         var phrase = new PhraseNode();
         phrase.Body.Add(new NoteNode
         {
@@ -114,20 +117,50 @@ public class EmitSsRoundTripTests
         track.Body.Add(phrase);
         program.Statements.Add(track);
 
-        Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        var ex = Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        Assert.Contains("tied", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void Print_ThrowsOnNoneEnvelope()
     {
         var program = new ProgramNode();
-        var track = new TrackNode { Name = "melody" };
+        // "lead" (not "melody" — see Print_ThrowsOnTiedNote) so this test
+        // still exercises the None-envelope check it's named for.
+        var track = new TrackNode { Name = "lead" };
         var phrase = new PhraseNode();
         phrase.Body.Add(new PhraseEnvelopeNode { Envelope = PhraseEnvelopeType.None });
         track.Body.Add(phrase);
         program.Statements.Add(track);
 
-        Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        var ex = Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        Assert.Contains("None", ex.Message);
+    }
+
+    [Fact]
+    public void Print_ThrowsOnKeywordShapedTrackName()
+    {
+        // Regression: IsValidBareIdentifier used to accept any
+        // letter-then-letter-or-digit string, including keywords like
+        // "melody" — which the Tokenizer actually lexes as TokenType.Melody,
+        // not an Identifier, breaking the printer's round-trip guarantee.
+        var program = new ProgramNode();
+        program.Statements.Add(new TrackNode { Name = "melody" });
+
+        var ex = Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        Assert.Contains("melody", ex.Message);
+    }
+
+    [Fact]
+    public void Print_ThrowsOnNoteShapedTrackName()
+    {
+        // Regression: "C4" passed the old letter/letter-or-digit check but
+        // the Tokenizer lexes it as a Note token, not an Identifier.
+        var program = new ProgramNode();
+        program.Statements.Add(new TrackNode { Name = "C4" });
+
+        var ex = Assert.Throws<NotSupportedException>(() => SsPrinter.Print(program));
+        Assert.Contains("C4", ex.Message);
     }
 
     [Fact]

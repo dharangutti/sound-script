@@ -13,10 +13,11 @@ namespace SoundScript.Wave.Effects;
 /// master chain is sufficient to prove the grammar + deterministic-DSP
 /// mechanism that per-track routing would later reuse.
 ///
-/// After the chain runs, the buffer is peak-normalized DOWN only (same
-/// policy as Mixer: never boosted, no compression) because feedback echoes
-/// summed onto the dry signal can exceed the mixer's already-normalized peak.
-/// Stereo channels are processed with independent effect state but share one
+/// After the chain runs, the buffer is peak-normalized DOWN only (via the
+/// shared <see cref="BufferMath"/>, same policy as <see cref="Mixing.Mixer"/>:
+/// never boosted, no compression) because feedback echoes summed onto the
+/// dry signal can exceed the mixer's already-normalized peak. Stereo
+/// channels are processed with independent effect state but share one
 /// normalization scale, computed from the combined peak, so the stereo image
 /// is preserved (same rationale as Mixer.MixTracksStereo).
 /// </summary>
@@ -27,9 +28,9 @@ public static class MasterEffectChain
         if (effects.Count == 0 || buffer.Length == 0)
             return buffer;
 
-        var processed = ApplyChain(ToDouble(buffer), effects, sampleRate);
-        var scale = NormalizationScale(Peak(processed));
-        return ToFloat(processed, scale);
+        var processed = ApplyChain(BufferMath.ToDouble(buffer), effects, sampleRate);
+        var scale = BufferMath.NormalizationScale(BufferMath.Peak(processed));
+        return BufferMath.ToFloat(processed, scale);
     }
 
     public static (float[] Left, float[] Right) ApplyStereo(
@@ -41,13 +42,20 @@ public static class MasterEffectChain
         // Independent state per channel (each gets its own delay line /
         // filter memory); identical chain + identical lengths in, so the
         // channels stay sample-aligned.
-        var processedLeft = ApplyChain(ToDouble(left), effects, sampleRate);
-        var processedRight = ApplyChain(ToDouble(right), effects, sampleRate);
+        var processedLeft = ApplyChain(BufferMath.ToDouble(left), effects, sampleRate);
+        var processedRight = ApplyChain(BufferMath.ToDouble(right), effects, sampleRate);
 
-        var scale = NormalizationScale(Math.Max(Peak(processedLeft), Peak(processedRight)));
-        return (ToFloat(processedLeft, scale), ToFloat(processedRight, scale));
+        var scale = BufferMath.NormalizationScale(BufferMath.Peak(processedLeft, processedRight));
+        return (BufferMath.ToFloat(processedLeft, scale), BufferMath.ToFloat(processedRight, scale));
     }
 
+    // Dispatches on EffectSettings' runtime type rather than the
+    // SoundScript.Core.Ast.EffectKinds name (this layer never sees EffectNode
+    // or its string Kind — see the class summary), so it can't share that
+    // enum directly. WaveV3Tests iterates EffectKinds.All through the full
+    // pipeline (parse -> EffectSettingsFactory -> here) as a synchronization
+    // check: forgetting a case here for a kind the factory already produces
+    // fails that test immediately instead of only at render time.
     private static double[] ApplyChain(double[] buffer, IReadOnlyList<EffectSettings> effects, int sampleRate)
     {
         foreach (var effect in effects)
@@ -62,37 +70,5 @@ public static class MasterEffectChain
         }
 
         return buffer;
-    }
-
-    private static double Peak(double[] buffer)
-    {
-        var peak = 0.0;
-        foreach (var sample in buffer)
-            peak = Math.Max(peak, Math.Abs(sample));
-
-        return peak;
-    }
-
-    // Scale down only when the chain would otherwise clip — same policy as
-    // Mixer.NormalizePeak (quiet output is left alone).
-    private static double NormalizationScale(double peak) =>
-        peak > 1.0 ? 1.0 / peak : 1.0;
-
-    private static double[] ToDouble(float[] buffer)
-    {
-        var result = new double[buffer.Length];
-        for (var i = 0; i < buffer.Length; i++)
-            result[i] = buffer[i];
-
-        return result;
-    }
-
-    private static float[] ToFloat(double[] buffer, double scale)
-    {
-        var result = new float[buffer.Length];
-        for (var i = 0; i < buffer.Length; i++)
-            result[i] = (float)(buffer[i] * scale);
-
-        return result;
     }
 }

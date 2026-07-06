@@ -20,6 +20,8 @@ using SoundScriptParser = SoundScript.Parser.Parser;
 
 namespace SoundScript.Tests;
 
+// shares the HumanizeSeed collection: SetSeed mutates process-wide state
+[Collection("HumanizeSeed")]
 public class WaveV3Tests
 {
     private const int SampleRate = 44_100;
@@ -190,10 +192,72 @@ public class WaveV3Tests
     }
 
     [Fact]
+    public void Parse_SpeakInsideTrackBody_IsAllowed()
+    {
+        // Regression: 'speak' is per-track (unlike the genuinely master-level
+        // 'effect'), so it must parse inside track/sequence/block/loop bodies,
+        // not just at the top level.
+        const string source = """
+            track vocals {
+                speak "hello" seed=1
+            }
+            """;
+
+        var track = Assert.IsType<TrackNode>(ParseSsw(source).Statements[0]);
+        Assert.IsType<SpeakNode>(track.Body[0]);
+    }
+
+    [Fact]
+    public void WaveAdapter_SpeakInsideTrackBody_EmitsIntoThatTrack()
+    {
+        const string source = """
+            track vocals {
+                speak "hi" seed=1
+            }
+            """;
+
+        var tracks = AstToNoteEventAdapter.Convert(ParseSsw(source));
+        Assert.True(tracks.ContainsKey("vocals"));
+        Assert.NotEmpty(tracks["vocals"]);
+    }
+
+    [Fact]
+    public void MidiInterpreter_RejectsSpeakInsideTrackBody_WithWaveBackendError()
+    {
+        var program = ParseSsw("""
+            track vocals {
+                speak "hello" seed=1
+            }
+            """);
+
+        var ex = Assert.Throws<NotSupportedException>(() => Midi.Interpreter.Interpret(program));
+        Assert.Contains("wave", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void WaveAdapter_RejectsMelodyShorthandCollidingWithExplicitTrackNamedMelody()
+    {
+        // Regression: same collision as the MIDI-side test in
+        // TrackMetadataTests, verified on the wave rail's AstToNoteEventAdapter.
+        const string source = """
+            melody {
+                C4 q
+            }
+            track melody {
+                D4 q
+            }
+            """;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => AstToNoteEventAdapter.Convert(ParseSsw(source)));
+        Assert.Contains("Duplicate track name", ex.Message);
+    }
+
+    [Fact]
     public void MidiInterpreter_AcceptsHumanizeNamedForm()
     {
-        // The named form must not crash the MIDI path: Value carries the
-        // timing magnitude, seed is deliberately ignored there.
+        // The named form must not crash the MIDI path: timing/velocity are
+        // resolved independently via HumanizeNode.Resolve, seed is
+        // deliberately ignored there.
         const string source = """
             tempo 120
             track piano {
@@ -205,6 +269,86 @@ public class WaveV3Tests
         var interpreted = Midi.Interpreter.Interpret(ParseSsw(source));
         Assert.Single(interpreted.Tracks);
         Assert.Single(interpreted.Tracks[0].Notes);
+    }
+
+    [Fact]
+    public void MidiInterpreter_HumanizeVelocityOnly_StillJittersVelocity()
+    {
+        // Regression: velocity=-only named form used to resolve to Value=0.0
+        // (Timing was null), silently zeroing out the requested velocity
+        // jitter on the MIDI backend.
+        const string source = """
+            track piano {
+                humanize velocity=0.5
+                mf
+                C4 q
+            }
+            """;
+
+        Midi.HumanizeApplicator.SetSeed(42);
+        var humanized = Midi.Interpreter.Interpret(ParseSsw(source)).Tracks.Single().Notes.Single();
+        var dry = Midi.Interpreter.Interpret(ParseSsw("""
+            track piano {
+                mf
+                C4 q
+            }
+            """)).Tracks.Single().Notes.Single();
+
+        Assert.NotEqual(dry.Velocity, humanized.Velocity);
+    }
+
+    [Fact]
+    public void MidiInterpreter_HumanizeTimingOnly_DoesNotJitterVelocity()
+    {
+        // Regression: timing=-only named form used to leak the timing
+        // magnitude into the velocity channel via the shared Value fallback,
+        // jittering velocity even though only timing was requested.
+        const string source = """
+            track piano {
+                humanize timing=0.5
+                mf
+                C4 q
+            }
+            """;
+
+        Midi.HumanizeApplicator.SetSeed(42);
+        var humanized = Midi.Interpreter.Interpret(ParseSsw(source)).Tracks.Single().Notes.Single();
+        var dry = Midi.Interpreter.Interpret(ParseSsw("""
+            track piano {
+                mf
+                C4 q
+            }
+            """)).Tracks.Single().Notes.Single();
+
+        Assert.Equal(dry.Velocity, humanized.Velocity);
+    }
+
+    [Fact]
+    public void WaveAdapter_HumanizeTimingOnly_DoesNotJitterVelocity()
+    {
+        // Same regression as the MIDI-side test above, verified on the wave
+        // rail's AstToNoteEventAdapter: timing=-only must not leak into velocity.
+        const string source = """
+            track piano {
+                humanize timing=0.5 seed=1
+                C4 q
+                E4 q
+                G4 q
+            }
+            """;
+        const string dry = """
+            track piano {
+                C4 q
+                E4 q
+                G4 q
+            }
+            """;
+
+        var notes = AstToNoteEventAdapter.Convert(ParseSsw(source))["piano"];
+        var dryNotes = AstToNoteEventAdapter.Convert(ParseSsw(dry))["piano"];
+
+        for (var i = 0; i < notes.Count; i++)
+            Assert.Equal(dryNotes[i].Velocity, notes[i].Velocity);
     }
 
     // ---- Effects chain: determinism + DSP behavior ----
@@ -228,6 +372,41 @@ public class WaveV3Tests
 
         Assert.Equal(first, second);
     }
+
+    [Theory]
+    [MemberData(nameof(SupportedEffectKinds))]
+    public void Effect_EachSupportedKind_RendersThroughTheFullPipeline(string kind)
+    {
+        // Safety net for the effect-kind duplication across Parser,
+        // EffectSettingsFactory, and MasterEffectChain (three independent
+        // switches with no shared source of truth beyond EffectKinds.All):
+        // this iterates every kind the grammar claims to support through the
+        // full parse -> adapt -> DSP pipeline, so adding a kind to
+        // EffectKinds.All without wiring it all the way through fails here
+        // immediately instead of only failing at render time for whoever
+        // happens to use the new kind first.
+        var effectStatement = kind switch
+        {
+            "delay" => "effect delay time=0.1 feedback=0.3 mix=0.4",
+            "filter" => "effect filter type=lowpass cutoff=2000",
+            _ => throw new NotSupportedException(
+                $"Test doesn't know how to build a minimal '{kind}' effect statement — " +
+                "add a case here when EffectKinds.All grows.")
+        };
+        var source = $$"""
+            melody {
+                C4 q
+            }
+            {{effectStatement}}
+            """;
+
+        var bytes = WaveRenderer.RenderToBytes(ParseSsw(source));
+
+        Assert.NotEmpty(bytes);
+    }
+
+    public static IEnumerable<object[]> SupportedEffectKinds() =>
+        EffectKinds.All.Select(kind => new object[] { kind });
 
     [Fact]
     public void Delay_ExtendsOutputWithAnEchoTail()
@@ -259,6 +438,26 @@ public class WaveV3Tests
 
         Assert.Equal(dryBuffer.Length, wet.Length);
         Assert.Equal(dryBuffer, wet);
+    }
+
+    [Fact]
+    public void Delay_WithHighFeedback_TailDecaysBelowFloorInsteadOfTruncatingAbruptly()
+    {
+        // Regression: a 64-repeat hard cap used to stop the tail well before
+        // it decayed below the audible floor for any feedback above ~0.82
+        // (e.g. 0.95 left the last echo at ~4% of full scale), producing an
+        // abrupt discontinuity/click instead of a smooth fade-out.
+        var impulse = new double[] { 1.0 };
+        var settings = new DelaySettings(TimeSeconds: 0.01, Feedback: 0.95, Mix: 1.0);
+
+        var output = DelayEffect.Process(impulse, settings, sampleRate: 1000);
+        var lastEchoAmplitude = Math.Abs(output[^1]);
+
+        // The old 64-repeat cap left the last echo around 0.0395 for this
+        // feedback; the fix should land within roughly an order of
+        // magnitude of the 1e-4 floor rather than 400x above it.
+        Assert.True(lastEchoAmplitude < 0.001,
+            $"Expected the tail to decay close to the audible floor, but the last echo was {lastEchoAmplitude}");
     }
 
     [Fact]

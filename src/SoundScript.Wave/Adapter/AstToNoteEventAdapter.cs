@@ -56,6 +56,7 @@ public static class AstToNoteEventAdapter
         }
 
         var globalTempoBeat = 0.0;
+        var declaredTrackNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var statement in program.Statements)
         {
@@ -87,9 +88,11 @@ public static class AstToNoteEventAdapter
                     context.PatternNames.Add(pattern.Name);
                     break;
                 case TrackNode track:
+                    RequireUniqueTrackName(declaredTrackNames, track.Name);
                     ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, track.Name), track.Body, context);
                     break;
                 case MelodyNode melody:
+                    RequireUniqueTrackName(declaredTrackNames, "melody");
                     ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, "melody"), melody.Body, context);
                     break;
                 case PlayNode play:
@@ -180,6 +183,9 @@ public static class AstToNoteEventAdapter
                 case PlayNode play:
                     ExecutePlay(track, play, context);
                     break;
+                case SpeakNode speak:
+                    EmitSpeech(track, speak, context);
+                    break;
 
                 // See class summary for the full list of intentionally-skipped node types.
             }
@@ -269,9 +275,9 @@ public static class AstToNoteEventAdapter
     /// Perturbs a note's start time and velocity inside the humanize bounds
     /// using the shared stateless PRNG, keyed by (seed, note index, salt):
     /// the explicit seed= if present, otherwise a stable hash of the track
-    /// name (file content — never wall-clock, never unseeded Random). The
-    /// bare-number form uses Value as both bounds, mirroring the MIDI
-    /// backend's single-magnitude semantics.
+    /// name (file content — never wall-clock, never unseeded Random).
+    /// Timing/velocity bounds are resolved via <see cref="HumanizeNode.Resolve"/>,
+    /// which keeps the bare-number-form vs. named-form fallback in one place.
     /// </summary>
     private static (double StartSeconds, double Velocity) ApplyHumanize(
         TrackState track, double startSeconds, double velocity)
@@ -280,8 +286,7 @@ public static class AstToNoteEventAdapter
         if (humanize is null)
             return (startSeconds, velocity);
 
-        var timingSeconds = humanize.Timing ?? humanize.Value;
-        var velocityAmount = humanize.VelocityAmount ?? humanize.Value;
+        var (timingSeconds, velocityAmount) = humanize.Resolve();
         if (timingSeconds <= 0 && velocityAmount <= 0)
             return (startSeconds, velocity);
 
@@ -363,6 +368,26 @@ public static class AstToNoteEventAdapter
     {
         var durationBeats = ramp.Bars * GetBeatsPerBar(context);
         context.TempoMap.AddRamp(startBeat, durationBeats, ramp.StartBpm, ramp.EndBpm);
+    }
+
+    /// <summary>
+    /// Rejects a second top-level `track NAME { }`/`melody { }` declaration
+    /// reusing a name already claimed (case-insensitively — track lookup is
+    /// case-insensitive throughout). Without this, e.g. a `melody { }`
+    /// shorthand block (which claims the reserved name "melody") followed by
+    /// an unrelated `track melody { }` would silently resolve to the same
+    /// TrackState, merging their beat cursor/velocity/humanize state instead
+    /// of erroring.
+    /// </summary>
+    private static void RequireUniqueTrackName(HashSet<string> declaredTrackNames, string name)
+    {
+        if (!declaredTrackNames.Add(name))
+        {
+            throw new InvalidOperationException(
+                $"Duplicate track name '{name}': a 'track {name} {{ }}' block or the 'melody {{ }}' " +
+                "shorthand (which uses the reserved name 'melody') already declared this track in " +
+                "this file. Track names must be unique.");
+        }
     }
 
     private static TrackState GetOrCreateTrack(Dictionary<string, TrackState> tracks, List<string> order, string name)
