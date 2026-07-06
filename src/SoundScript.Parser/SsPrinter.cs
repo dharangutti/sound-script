@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
 
@@ -197,18 +198,26 @@ public static class SsPrinter
         _ => throw new NotSupportedException($"SsPrinter cannot emit unknown ArticulationType '{articulation}'.")
     };
 
+    /// <summary>
+    /// Delegates to the real <see cref="Tokenizer"/> instead of re-deriving
+    /// the identifier grammar, so this can never drift from what the
+    /// Tokenizer/Parser pair actually accepts as a bare name. A hand-rolled
+    /// "letter then letter-or-digit" check previously accepted keywords
+    /// (e.g. "melody", "track") and note/chord-shaped names (e.g. "C4", "Cm")
+    /// as valid, even though the Tokenizer lexes those as keyword/Note/Chord
+    /// tokens rather than a single Identifier — breaking the round-trip
+    /// guarantee this class promises.
+    /// </summary>
     private static bool IsValidBareIdentifier(string name)
     {
-        if (string.IsNullOrEmpty(name) || !char.IsLetter(name[0]))
+        if (string.IsNullOrEmpty(name))
             return false;
 
-        for (var i = 1; i < name.Length; i++)
-        {
-            if (!char.IsLetterOrDigit(name[i]))
-                return false;
-        }
-
-        return true;
+        var tokens = new Tokenizer(name).Tokenize();
+        return tokens.Count == 2
+            && tokens[0].Type == TokenType.Identifier
+            && tokens[0].Value == name
+            && tokens[1].Type == TokenType.EndOfFile;
     }
 
     private static void AppendLine(StringBuilder sb, int indentLevel, string text)

@@ -195,6 +195,27 @@ public class WaveV2Tests
     }
 
     [Fact]
+    public void WriteHeader_RejectsFrameCountThatOverflowsThe32BitDataSize()
+    {
+        // Regression: frameCount * blockAlign was computed with 32-bit int
+        // arithmetic and written unchecked into the RIFF/data chunk sizes,
+        // silently wrapping to a negative/garbage value for long enough
+        // renders instead of failing loudly. WriteHeader takes frameCount as
+        // a plain int (no array to allocate), so the overflow threshold can
+        // be exercised directly without needing a multi-gigabyte buffer.
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream);
+
+        // Stereo 16-bit: blockAlign = 4 bytes/frame. int.MaxValue / 4 + 1
+        // frames pushes frameCount * blockAlign just past Int32.MaxValue.
+        var frameCount = int.MaxValue / 4 + 1;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            WavWriter.WriteHeader(writer, channels: 2, sampleRate: SampleRate, frameCount));
+        Assert.Contains("too long", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void PanGains_AreConstantPowerAcrossTheWholeRange()
     {
         for (var i = -10; i <= 10; i++)

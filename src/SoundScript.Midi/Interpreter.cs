@@ -1,3 +1,8 @@
+// UNDER DEVELOPMENT — v3 (scoped change): the wave-only 'effect'/'speak'
+// nodes are now rejected here with a clear NotSupportedException instead of
+// falling through silently (per the wave safeguards doc: "clear error, not a
+// crash" when wave-only grammar hits the MIDI path). No existing .ss behavior
+// changed.
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
@@ -36,7 +41,8 @@ public static class Interpreter
         public int PhraseIndex { get; set; }
         public DynamicRampState? DynamicRamp { get; set; }
         public double Gain { get; set; } = 1.0;
-        public double Humanize { get; set; }
+        public double HumanizeTimingSeconds { get; set; }
+        public double HumanizeVelocityAmount { get; set; }
         public PhraseScope? ActivePhrase { get; set; }
         public OrchestrationSettings Orchestration { get; } = new();
     }
@@ -57,6 +63,7 @@ public static class Interpreter
         var result = new InterpretedProgram();
         var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackBuilder>(StringComparer.OrdinalIgnoreCase);
+        var declaredTrackNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var clock = new GlobalBeatClock();
         TrackBuilder? defaultTrack = null;
         var globalTempoBeat = 0.0;
@@ -89,9 +96,11 @@ public static class Interpreter
                     context.Sequences[sequence.Name] = sequence.Body;
                     break;
                 case TrackNode track:
+                    RequireUniqueTrackName(declaredTrackNames, track.Name);
                     ExecuteStatements(GetOrCreateTrack(tracks, track.Name), track.Body, context, result, clock);
                     break;
                 case MelodyNode melody:
+                    RequireUniqueTrackName(declaredTrackNames, "melody");
                     defaultTrack ??= GetOrCreateTrack(tracks, "melody");
                     ExecuteStatements(defaultTrack, melody.Body, context, result, clock);
                     break;
@@ -131,6 +140,20 @@ public static class Interpreter
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     CloseMeasure(defaultTrack, bar.Line);
                     break;
+
+                // v3 wave-only grammar: reject with a clear, descriptive error
+                // rather than silently skipping (safeguards doc) — these
+                // directives have no MIDI equivalent by design.
+                case EffectNode effect:
+                    throw new NotSupportedException(
+                        $"'effect {effect.Kind}' is a wave-backend directive (SoundScript.Wave, .ssw files): " +
+                        "the MIDI backend has no post-mix audio buffer to apply effects to. " +
+                        "Render this file through the wave backend instead.");
+                case SpeakNode:
+                    throw new NotSupportedException(
+                        "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
+                        "phoneme-level frequency mapping. Render this file through the wave backend instead.");
             }
         }
 
@@ -148,13 +171,13 @@ public static class Interpreter
             {
                 var startBeat = HumanizeApplicator.ApplyToStartBeat(
                     note.StartBeat,
-                    track.Humanize,
+                    track.HumanizeTimingSeconds,
                     (int)Math.Round(result.TempoMap.GetBpmAt(note.StartBeat)),
                     noteIndex,
                     note.Channel);
                 var velocity = HumanizeApplicator.ApplyVelocity(
                     note.Velocity,
-                    track.Humanize,
+                    track.HumanizeVelocityAmount,
                     noteIndex,
                     note.Channel);
                 interpretedTrack.Notes.Add(note with { StartBeat = startBeat, Velocity = velocity });
@@ -177,6 +200,26 @@ public static class Interpreter
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Rejects a second top-level `track NAME { }`/`melody { }` declaration
+    /// reusing a name already claimed (case-insensitively — track lookup is
+    /// case-insensitive throughout). Without this, e.g. a `melody { }`
+    /// shorthand block (which claims the reserved name "melody") followed by
+    /// an unrelated `track melody { }` would silently resolve to the same
+    /// TrackBuilder, merging their beat cursor/velocity/humanize state
+    /// instead of erroring.
+    /// </summary>
+    private static void RequireUniqueTrackName(HashSet<string> declaredTrackNames, string name)
+    {
+        if (!declaredTrackNames.Add(name))
+        {
+            throw new InvalidOperationException(
+                $"Duplicate track name '{name}': a 'track {name} {{ }}' block or the 'melody {{ }}' " +
+                "shorthand (which uses the reserved name 'melody') already declared this track in " +
+                "this file. Track names must be unique.");
+        }
     }
 
     private static TrackBuilder GetOrCreateTrack(Dictionary<string, TrackBuilder> tracks, string name)
@@ -224,7 +267,16 @@ public static class Interpreter
                     track.Gain = gain.Value;
                     break;
                 case HumanizeNode humanize:
-                    track.Humanize = humanize.Value;
+                    // Resolve() gives independent timing/velocity magnitudes
+                    // for both the bare-number and named forms (see
+                    // HumanizeNode.Resolve). Seed is deliberately ignored on
+                    // the MIDI path: HumanizeApplicator has its own
+                    // process-level seed (SetSeed/DefaultSeed) that predates
+                    // grammar-level seeds, and changing which seed it honors
+                    // would alter existing .ss output — a backward-compat
+                    // violation. The wave backend consumes Timing/VelocityAmount/Seed
+                    // directly.
+                    (track.HumanizeTimingSeconds, track.HumanizeVelocityAmount) = humanize.Resolve();
                     break;
                 case VelocityNode velocity:
                     track.CurrentVelocity = velocity.Velocity;
@@ -277,6 +329,16 @@ public static class Interpreter
                 case BarNode bar:
                     CloseMeasure(track, bar.Line);
                     break;
+
+                // Mirrors the top-level switch's rejection of wave-only
+                // grammar (see the class-level comment): 'speak' can appear
+                // inside a track/melody/loop body (ParseBodyStatement), so
+                // this case is reachable, not just defensive.
+                case SpeakNode:
+                    throw new NotSupportedException(
+                        "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
+                        "phoneme-level frequency mapping. Render this file through the wave backend instead.");
             }
         }
     }

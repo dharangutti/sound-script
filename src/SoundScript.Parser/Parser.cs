@@ -1,3 +1,8 @@
+// UNDER DEVELOPMENT — v3: adds generic key=value parameter parsing and the
+// wave-only 'effect'/'speak' directives, and extends 'humanize' with a named
+// parameter form (timing=/velocity=/seed=). The v1 bare-number humanize path
+// and all pre-existing grammar are byte-for-byte unchanged.
+using System.Globalization;
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
@@ -78,6 +83,16 @@ public sealed class Parser
 
         if (Match(TokenType.Orchestration))
             return ParseOrchestrationStatement();
+
+        // v3 wave-only 'effect': master-level (applies to the final mix-down),
+        // so top-level only. The MIDI interpreter rejects the resulting node
+        // with a clear error. 'speak' is per-track, not master-level — see
+        // ParseBodyStatement for the track/sequence/block/loop-body form.
+        if (Match(TokenType.Effect))
+            return ParseEffectStatement();
+
+        if (Match(TokenType.Speak))
+            return ParseSpeakStatement();
 
         if (Check(TokenType.Articulation))
         {
@@ -569,6 +584,11 @@ public sealed class Parser
         if (Match(TokenType.Velocity))
             return ParseVelocityStatement();
 
+        // v3 wave-only 'speak': per-track (unlike 'effect', which is
+        // master-level and top-level only — see ParseTopLevelStatement).
+        if (Match(TokenType.Speak))
+            return ParseSpeakStatement();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -613,11 +633,252 @@ public sealed class Parser
 
     private HumanizeNode ParseHumanizeStatement()
     {
-        var token = Expect(TokenType.Number, "humanize value");
-        if (!double.TryParse(token.Value, out var value) || value < 0)
-            throw Invalid(token, "Humanize must be a non-negative number.");
+        // v1 bare-number form — unchanged, no migration required:
+        //   humanize 0.02
+        if (Check(TokenType.Number))
+        {
+            var token = Advance();
+            if (!double.TryParse(token.Value, out var value) || value < 0)
+                throw Invalid(token, "Humanize must be a non-negative number.");
 
-        return new HumanizeNode { Value = value };
+            return new HumanizeNode { Value = value };
+        }
+
+        // v3 named-parameter form:
+        //   humanize timing=0.02 velocity=0.1 seed=42
+        var humanizeToken = Previous();
+        var parameters = ParseKeyValueParameters("humanize");
+        if (parameters.Count == 0)
+        {
+            throw Invalid(Peek(),
+                "Expected humanize value (e.g. 'humanize 0.02') or named parameters " +
+                "(e.g. 'humanize timing=0.02 velocity=0.1 seed=42').");
+        }
+
+        RejectUnknownParameters(parameters, "humanize", "timing", "velocity", "seed");
+
+        double? timing = null;
+        if (parameters.TryGetValue("timing", out var timingToken))
+        {
+            timing = ParseDoubleParameter(timingToken, "humanize timing");
+            if (timing < 0)
+                throw Invalid(timingToken, "humanize timing must be a non-negative number of seconds.");
+        }
+
+        double? velocityAmount = null;
+        if (parameters.TryGetValue("velocity", out var velocityToken))
+        {
+            velocityAmount = ParseDoubleParameter(velocityToken, "humanize velocity");
+            if (velocityAmount < 0 || velocityAmount > 1)
+                throw Invalid(velocityToken, "humanize velocity must be between 0.0 and 1.0.");
+        }
+
+        int? seed = null;
+        if (parameters.TryGetValue("seed", out var seedToken))
+            seed = ParseNonNegativeIntParameter(seedToken, "humanize seed");
+
+        if (timing is null && velocityAmount is null)
+        {
+            throw Invalid(humanizeToken,
+                "humanize named form requires at least one of timing= or velocity= " +
+                "(seed= alone has nothing to vary).");
+        }
+
+        return new HumanizeNode
+        {
+            // Value is unused by the named form (consumers call Resolve()
+            // instead); kept populated only so the required member always
+            // has a defined value.
+            Value = timing ?? 0.0,
+            Timing = timing,
+            VelocityAmount = velocityAmount,
+            Seed = seed
+        };
+    }
+
+    private EffectNode ParseEffectStatement()
+    {
+        var kindToken = Peek();
+        var kind = ParseName("effect kind ('delay' or 'filter')").ToLowerInvariant();
+
+        if (kind == "reverb")
+        {
+            throw Invalid(kindToken,
+                $"Effect 'reverb' is deferred (v3 parking lot) — supported effects: {EffectKinds.SupportedListText}.");
+        }
+
+        var parameters = ParseKeyValueParameters($"effect {kind}");
+
+        switch (kind)
+        {
+            case EffectKinds.Delay:
+            {
+                RequireParameter(parameters, kindToken, "effect delay", "time");
+                RejectUnknownParameters(parameters, "effect delay", "time", "feedback", "mix");
+
+                var time = ParseDoubleParameter(parameters["time"], "effect delay time");
+                if (time <= 0)
+                    throw Invalid(parameters["time"], "effect delay time must be a positive number of seconds.");
+
+                if (parameters.TryGetValue("feedback", out var feedbackToken))
+                {
+                    var feedback = ParseDoubleParameter(feedbackToken, "effect delay feedback");
+                    if (feedback < 0 || feedback >= 1)
+                        throw Invalid(feedbackToken, "effect delay feedback must be at least 0.0 and below 1.0.");
+                }
+
+                if (parameters.TryGetValue("mix", out var mixToken))
+                {
+                    var mix = ParseDoubleParameter(mixToken, "effect delay mix");
+                    if (mix < 0 || mix > 1)
+                        throw Invalid(mixToken, "effect delay mix must be between 0.0 and 1.0.");
+                }
+
+                break;
+            }
+
+            case EffectKinds.Filter:
+            {
+                RequireParameter(parameters, kindToken, "effect filter", "type");
+                RequireParameter(parameters, kindToken, "effect filter", "cutoff");
+                RejectUnknownParameters(parameters, "effect filter", "type", "cutoff");
+
+                var typeToken = parameters["type"];
+                var type = typeToken.Value.ToLowerInvariant();
+                if (type is not ("lowpass" or "highpass"))
+                    throw Invalid(typeToken, $"Unknown filter type '{typeToken.Value}'. Supported: lowpass, highpass.");
+
+                var cutoff = ParseDoubleParameter(parameters["cutoff"], "effect filter cutoff");
+                if (cutoff <= 0)
+                    throw Invalid(parameters["cutoff"], "effect filter cutoff must be a positive frequency in Hz.");
+
+                break;
+            }
+
+            default:
+                throw Invalid(kindToken, $"Unknown effect '{kind}'. Supported effects: {EffectKinds.SupportedListText}.");
+        }
+
+        var rawParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, valueToken) in parameters)
+            rawParameters[key] = valueToken.Value;
+
+        return new EffectNode { Kind = kind, Parameters = rawParameters };
+    }
+
+    private SpeakNode ParseSpeakStatement()
+    {
+        var textToken = Expect(TokenType.StringLiteral, "text to speak (a quoted string)");
+
+        var hasLetter = false;
+        foreach (var ch in textToken.Value)
+        {
+            if (char.IsLetter(ch))
+            {
+                hasLetter = true;
+                break;
+            }
+        }
+
+        if (!hasLetter)
+            throw Invalid(textToken, "speak text must contain at least one letter.");
+
+        var parameters = ParseKeyValueParameters("speak");
+        RejectUnknownParameters(parameters, "speak", "voice", "seed");
+
+        var voice = parameters.TryGetValue("voice", out var voiceToken)
+            ? voiceToken.Value
+            : "default";
+
+        int? seed = null;
+        if (parameters.TryGetValue("seed", out var seedToken))
+            seed = ParseNonNegativeIntParameter(seedToken, "speak seed");
+
+        return new SpeakNode { Text = textToken.Value, Voice = voice, Seed = seed };
+    }
+
+    /// <summary>
+    /// Parses a run of <c>key=value</c> pairs (e.g. <c>time=0.25 feedback=0.4</c>)
+    /// into a key → value-token map. Keys are keyword-agnostic: any name-like
+    /// token's raw text is accepted (same trick as <see cref="ParseName"/>), so
+    /// e.g. <c>voice=</c> works even though 'voice' is a registered keyword.
+    /// Two-token lookahead (name followed by '=') means the run never swallows
+    /// the following statement. Keys are lower-cased; values keep raw text.
+    /// </summary>
+    private Dictionary<string, Token> ParseKeyValueParameters(string directive)
+    {
+        var parameters = new Dictionary<string, Token>(StringComparer.OrdinalIgnoreCase);
+
+        while (IsNameLikeToken(Peek().Type) && PeekNext().Type == TokenType.Assign)
+        {
+            var keyToken = Advance();
+            Advance(); // '='
+
+            var valueToken = Peek();
+            if (!IsParameterValueToken(valueToken.Type))
+                throw Invalid(valueToken, $"Expected a value after '{keyToken.Value}=' in {directive}.");
+
+            Advance();
+
+            if (!parameters.TryAdd(keyToken.Value.ToLowerInvariant(), valueToken))
+                throw Invalid(keyToken, $"Duplicate parameter '{keyToken.Value.ToLowerInvariant()}' in {directive}.");
+        }
+
+        return parameters;
+    }
+
+    private static bool IsParameterValueToken(TokenType type) =>
+        type is TokenType.Number or TokenType.StringLiteral or TokenType.Note or TokenType.Chord
+            or TokenType.Duration or TokenType.Dynamic
+        || IsNameLikeToken(type);
+
+    private static void RequireParameter(
+        Dictionary<string, Token> parameters, Token directiveToken, string directive, string key)
+    {
+        if (!parameters.ContainsKey(key))
+            throw Invalid(directiveToken, $"Missing required parameter '{key}=' in {directive}.");
+    }
+
+    private static void RejectUnknownParameters(
+        Dictionary<string, Token> parameters, string directive, params string[] allowedKeys)
+    {
+        foreach (var (key, valueToken) in parameters)
+        {
+            var allowed = false;
+            foreach (var candidate in allowedKeys)
+            {
+                if (string.Equals(key, candidate, StringComparison.OrdinalIgnoreCase))
+                {
+                    allowed = true;
+                    break;
+                }
+            }
+
+            if (!allowed)
+            {
+                throw Invalid(valueToken,
+                    $"Unknown parameter '{key}' in {directive}. Supported: {string.Join(", ", allowedKeys)}.");
+            }
+        }
+    }
+
+    // InvariantCulture on purpose: number tokens are always digits and '.',
+    // and parameter values must parse identically on every machine/locale
+    // (determinism safeguard).
+    private static double ParseDoubleParameter(Token token, string label)
+    {
+        if (!double.TryParse(token.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            throw Invalid(token, $"{label} must be a number.");
+
+        return value;
+    }
+
+    private static int ParseNonNegativeIntParameter(Token token, string label)
+    {
+        if (!int.TryParse(token.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) || value < 0)
+            throw Invalid(token, $"{label} must be a non-negative integer.");
+
+        return value;
     }
 
     private static double ParseUnitInterval(Token token, string label)
@@ -1005,14 +1266,7 @@ public sealed class Parser
     private string ParseName(string description)
     {
         var token = Peek();
-        if (token.Type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
-            or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
-            or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars or TokenType.Layer
-            or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
-            or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
-            or TokenType.Curve or TokenType.Transition or TokenType.Pattern
-            or TokenType.PatternRhythm or TokenType.Orchestration
-            or TokenType.Voice or TokenType.Sing or TokenType.Vocal)
+        if (IsNameLikeToken(token.Type))
         {
             Advance();
             return token.Value;
@@ -1020,6 +1274,24 @@ public sealed class Parser
 
         throw Invalid(token, $"Expected {description}.");
     }
+
+    /// <summary>
+    /// True for tokens whose raw text can serve as a plain name: identifiers
+    /// plus every word-shaped keyword. Extracted from <see cref="ParseName"/>
+    /// (identical set, plus the v3 Effect/Speak keywords so files that used
+    /// 'effect' or 'speak' as names keep parsing) and shared with the v3
+    /// key=value parameter scanner.
+    /// </summary>
+    private static bool IsNameLikeToken(TokenType type) =>
+        type is TokenType.Identifier or TokenType.Melody or TokenType.Bpm or TokenType.Tempo
+            or TokenType.Time or TokenType.Play or TokenType.For or TokenType.Instrument
+            or TokenType.Gain or TokenType.Humanize or TokenType.Over or TokenType.Bars or TokenType.Layer
+            or TokenType.Sequence or TokenType.Block or TokenType.Loop or TokenType.Velocity or TokenType.Track
+            or TokenType.Rest or TokenType.Articulation or TokenType.Dynamic or TokenType.Phrase
+            or TokenType.Curve or TokenType.Transition or TokenType.Pattern
+            or TokenType.PatternRhythm or TokenType.Orchestration
+            or TokenType.Voice or TokenType.Sing or TokenType.Vocal
+            or TokenType.Effect or TokenType.Speak;
 
     private static int ParsePositiveInt(Token token, string label)
     {
@@ -1051,6 +1323,11 @@ public sealed class Parser
     private Token Advance() => _tokens[_position++];
 
     private Token Peek() => _tokens[_position];
+
+    // Safe past-the-end lookahead: the token list always ends with EndOfFile,
+    // so clamping to the last token degrades to "next is EOF".
+    private Token PeekNext() =>
+        _position + 1 < _tokens.Count ? _tokens[_position + 1] : _tokens[^1];
 
     private Token Previous() => _tokens[_position - 1];
 

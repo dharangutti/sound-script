@@ -41,7 +41,7 @@ public static class Mixer
                 buffer[startSample + i] += samples[i];
         }
 
-        return ToFloatArray(buffer);
+        return BufferMath.ToFloat(buffer);
     }
 
     public static float[] MixTracks(IReadOnlyList<float[]> trackBuffers)
@@ -57,7 +57,7 @@ public static class Mixer
                 mixed[i] += track[i];
         }
 
-        return NormalizePeak(mixed);
+        return BufferMath.ToFloat(mixed, BufferMath.NormalizationScale(BufferMath.Peak(mixed)));
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public static class Mixer
             }
         }
 
-        return (ToFloatArray(left), ToFloatArray(right));
+        return (BufferMath.ToFloat(left), BufferMath.ToFloat(right));
     }
 
     /// <summary>
@@ -134,23 +134,9 @@ public static class Mixer
 
         // Only scale down when the mix would otherwise clip, same policy as
         // the mono path (no dynamic range compression).
-        var peak = 0.0;
-        foreach (var sample in mixedLeft)
-            peak = Math.Max(peak, Math.Abs(sample));
-        foreach (var sample in mixedRight)
-            peak = Math.Max(peak, Math.Abs(sample));
+        var scale = BufferMath.NormalizationScale(BufferMath.Peak(mixedLeft, mixedRight));
 
-        var scale = peak > 1.0 ? 1.0 / peak : 1.0;
-
-        var resultLeft = new float[totalLength];
-        var resultRight = new float[totalLength];
-        for (var i = 0; i < totalLength; i++)
-        {
-            resultLeft[i] = (float)(mixedLeft[i] * scale);
-            resultRight[i] = (float)(mixedRight[i] * scale);
-        }
-
-        return (resultLeft, resultRight);
+        return (BufferMath.ToFloat(mixedLeft, scale), BufferMath.ToFloat(mixedRight, scale));
     }
 
     /// <summary>
@@ -166,35 +152,5 @@ public static class Mixer
     {
         var clamped = Math.Clamp(pan, -1.0, 1.0);
         return (Math.Sqrt((1.0 - clamped) / 2.0), Math.Sqrt((1.0 + clamped) / 2.0));
-    }
-
-    private static float[] NormalizePeak(double[] buffer)
-    {
-        if (buffer.Length == 0)
-            return [];
-
-        var peak = 0.0;
-        foreach (var sample in buffer)
-            peak = Math.Max(peak, Math.Abs(sample));
-
-        // Only scale down when the mix would otherwise clip — quiet passages
-        // are left alone rather than maximized (that's dynamic range
-        // compression, an explicit v1 non-goal).
-        var scale = peak > 1.0 ? 1.0 / peak : 1.0;
-
-        var result = new float[buffer.Length];
-        for (var i = 0; i < buffer.Length; i++)
-            result[i] = (float)(buffer[i] * scale);
-
-        return result;
-    }
-
-    private static float[] ToFloatArray(double[] buffer)
-    {
-        var result = new float[buffer.Length];
-        for (var i = 0; i < buffer.Length; i++)
-            result[i] = (float)buffer[i];
-
-        return result;
     }
 }
