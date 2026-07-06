@@ -1,4 +1,4 @@
-// UNDER DEVELOPMENT — v1 prototype
+// UNDER DEVELOPMENT — v2
 using SoundScript.Core.Ast;
 using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Io;
@@ -7,7 +7,7 @@ using SoundScript.Wave.Mixing;
 namespace SoundScript.Wave;
 
 /// <summary>
-/// SoundScript.Wave — v1 prototype. Renders directly from the shared AST to
+/// SoundScript.Wave — v2. Renders directly from the shared AST to
 /// raw WAV audio, with no MIDI step at any point:
 ///
 /// <code>
@@ -58,6 +58,36 @@ public static class WaveRenderer
         WavWriter.WriteTo(destination, mixed, WavWriter.SampleRate);
     }
 
+    /// <summary>
+    /// Stereo (interleaved L/R 16-bit PCM) counterpart of
+    /// <see cref="RenderToBytes"/>. Because no .ss/.ssw grammar directive for
+    /// pan exists (adding one would require modifying SoundScript.Core or
+    /// SoundScript.Parser, which the safeguards forbid), the adapter still
+    /// assigns Pan = 0.0 to every note — a parsed program renders dead-center,
+    /// as a mono image duplicated to both channels. The pan plumbing below the
+    /// adapter (Mixer → stereo WAV writer) is fully live, so direct API
+    /// callers constructing NoteEvents with non-zero Pan get true stereo
+    /// today; see Mixer.RenderTrackStereo for the full scope rationale.
+    /// </summary>
+    public static byte[] RenderStereoToBytes(ProgramNode program)
+    {
+        using var stream = new MemoryStream();
+        RenderStereoTo(program, stream);
+        return stream.ToArray();
+    }
+
+    public static void RenderStereo(ProgramNode program, string outputWavPath)
+    {
+        var (left, right) = MixProgramStereo(program);
+        WavWriter.WriteStereo(outputWavPath, left, right);
+    }
+
+    public static void RenderStereoTo(ProgramNode program, Stream destination)
+    {
+        var (left, right) = MixProgramStereo(program);
+        WavWriter.WriteStereoTo(destination, left, right, WavWriter.SampleRate);
+    }
+
     private static float[] MixProgram(ProgramNode program)
     {
         var tracks = AstToNoteEventAdapter.Convert(program);
@@ -70,5 +100,19 @@ public static class WaveRenderer
         }
 
         return Mixer.MixTracks(trackBuffers);
+    }
+
+    private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program)
+    {
+        var tracks = AstToNoteEventAdapter.Convert(program);
+
+        var trackBuffers = new List<(float[] Left, float[] Right)>(tracks.Count);
+        foreach (var notes in tracks.Values)
+        {
+            if (notes.Count > 0)
+                trackBuffers.Add(Mixer.RenderTrackStereo(notes, WavWriter.SampleRate));
+        }
+
+        return Mixer.MixTracksStereo(trackBuffers);
     }
 }
