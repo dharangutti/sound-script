@@ -1,4 +1,4 @@
-// UNDER DEVELOPMENT — v1 prototype
+// UNDER DEVELOPMENT — v1 prototype (legacy — retained for v2 A/B determinism testing only, see WaveEngineOptions)
 using SoundScript.Wave.Model;
 
 namespace SoundScript.Wave.Synthesis;
@@ -7,10 +7,15 @@ namespace SoundScript.Wave.Synthesis;
 /// Pure, phase-based sample generation — one function per waveform,
 /// <c>phase</c> given as a fraction of a cycle (wrapped to [0,1) internally).
 ///
+/// No longer the default path: v2 renders through <see cref="Wavetable"/>;
+/// this exists only for transition-period A/B comparison behind
+/// <see cref="WaveEngineOptions.UseLegacyTrigOscillator"/> and is slated for
+/// removal, not a permanent dual implementation.
+///
 /// These are naive (non-band-limited) waveforms: Saw, Square, and Triangle
 /// contain harmonics above the Nyquist frequency for high fundamental
-/// pitches, which will alias. Anti-aliased (e.g. PolyBLEP) oscillators are a
-/// documented v1 non-goal, not a blocker — flagged here rather than fixed.
+/// pitches, which will alias (fixed in the v2 wavetable path via per-octave
+/// band-limited tables).
 /// </summary>
 public static class Oscillator
 {

@@ -1,4 +1,4 @@
-// UNDER DEVELOPMENT — v1 prototype
+// UNDER DEVELOPMENT — v2
 using SoundScript.Wave.Model;
 
 namespace SoundScript.Wave.Synthesis;
@@ -9,10 +9,25 @@ namespace SoundScript.Wave.Synthesis;
 /// plus its release tail. Purely sequential phase accumulation — no
 /// randomness, no parallelism, so identical input always yields identical
 /// output.
+///
+/// v2 default path: band-limited wavetable lookup driven by a 32-bit
+/// fixed-point phase accumulator (see <see cref="Wavetable"/>), replacing
+/// v1's per-sample Math.Sin and float phase. The v1 path survives behind
+/// <see cref="WaveEngineOptions.UseLegacyTrigOscillator"/> for transition-
+/// period A/B comparison only.
 /// </summary>
 public static class NoteRenderer
 {
-    public static float[] Render(NoteEvent note, int sampleRate)
+    public static float[] Render(NoteEvent note, int sampleRate) =>
+        Render(note, sampleRate, WaveEngineOptions.UseLegacyTrigOscillator);
+
+    /// <summary>
+    /// Internal overload taking the engine choice explicitly so tests can
+    /// A/B the two paths without mutating shared static state (xUnit runs
+    /// test classes in parallel — flipping the global flag mid-suite could
+    /// race against unrelated rendering tests).
+    /// </summary>
+    internal static float[] Render(NoteEvent note, int sampleRate, bool useLegacyTrigOscillator)
     {
         var release = Math.Max(0.0, note.Timbre.Envelope.Release);
         var totalSeconds = Math.Max(0.0, note.DurationSeconds) + release;
@@ -24,11 +39,44 @@ public static class NoteRenderer
 
         var detuneRatio = Math.Pow(2.0, note.Timbre.DetuneCents / 1200.0);
         var frequency = note.FrequencyHz * detuneRatio;
-        var phaseIncrement = frequency / sampleRate;
         var velocity = Math.Clamp(note.Velocity, 0.0, 1.0);
 
+        if (useLegacyTrigOscillator)
+            RenderLegacyTrig(note, sampleRate, frequency, velocity, buffer);
+        else
+            RenderWavetable(note, sampleRate, frequency, velocity, buffer);
+
+        return buffer;
+    }
+
+    private static void RenderWavetable(NoteEvent note, int sampleRate, double frequency, double velocity, float[] buffer)
+    {
+        var table = Wavetable.GetTable(note.Timbre.Oscillator, frequency);
+        var phaseIncrement = Wavetable.PhaseIncrement(frequency, sampleRate);
+
+        // uint addition wraps modulo 2^32 by definition (C# default unchecked
+        // context) — deterministic cycle wrapping with zero float drift,
+        // replacing v1's `phase -= Math.Floor(phase)` trick.
+        var phase = 0u;
+        for (var i = 0; i < buffer.Length; i++)
+        {
+            var t = i / (double)sampleRate;
+            var amplitude = Envelope.Amplitude(note.Timbre.Envelope, t, note.DurationSeconds);
+            buffer[i] = (float)(Wavetable.Sample(table, phase) * amplitude * velocity);
+
+            phase += phaseIncrement;
+        }
+    }
+
+    // The v1 loop, byte-for-byte behavior — kept only for A/B comparison
+    // against the wavetable path (see WaveEngineOptions), not as a permanent
+    // dual implementation.
+    private static void RenderLegacyTrig(NoteEvent note, int sampleRate, double frequency, double velocity, float[] buffer)
+    {
+        var phaseIncrement = frequency / sampleRate;
+
         var phase = 0.0;
-        for (var i = 0; i < sampleCount; i++)
+        for (var i = 0; i < buffer.Length; i++)
         {
             var t = i / (double)sampleRate;
             var amplitude = Envelope.Amplitude(note.Timbre.Envelope, t, note.DurationSeconds);
@@ -37,7 +85,5 @@ public static class NoteRenderer
             phase += phaseIncrement;
             phase -= Math.Floor(phase);
         }
-
-        return buffer;
     }
 }
