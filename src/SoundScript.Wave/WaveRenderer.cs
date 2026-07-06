@@ -1,6 +1,7 @@
-// UNDER DEVELOPMENT — v2
+// UNDER DEVELOPMENT — v3
 using SoundScript.Core.Ast;
 using SoundScript.Wave.Adapter;
+using SoundScript.Wave.Effects;
 using SoundScript.Wave.Io;
 using SoundScript.Wave.Mixing;
 
@@ -88,6 +89,11 @@ public static class WaveRenderer
         WavWriter.WriteStereoTo(destination, left, right, WavWriter.SampleRate);
     }
 
+    // v3: the master effects chain runs post-mix, as the final stage before
+    // the WAV writer — master-only by design (see MasterEffectChain for the
+    // full rationale; per-track routing stays in the parking lot). Programs
+    // without effect directives take the identical pre-v3 path: an empty
+    // chain returns the mixed buffer untouched.
     private static float[] MixProgram(ProgramNode program)
     {
         var tracks = AstToNoteEventAdapter.Convert(program);
@@ -99,7 +105,8 @@ public static class WaveRenderer
                 trackBuffers.Add(Mixer.RenderTrack(notes, WavWriter.SampleRate));
         }
 
-        return Mixer.MixTracks(trackBuffers);
+        var mixed = Mixer.MixTracks(trackBuffers);
+        return MasterEffectChain.Apply(mixed, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
     }
 
     private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program)
@@ -113,6 +120,7 @@ public static class WaveRenderer
                 trackBuffers.Add(Mixer.RenderTrackStereo(notes, WavWriter.SampleRate));
         }
 
-        return Mixer.MixTracksStereo(trackBuffers);
+        var (left, right) = Mixer.MixTracksStereo(trackBuffers);
+        return MasterEffectChain.ApplyStereo(left, right, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
     }
 }

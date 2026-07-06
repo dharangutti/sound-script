@@ -1,3 +1,8 @@
+// UNDER DEVELOPMENT — v3 (scoped change): the wave-only 'effect'/'speak'
+// nodes are now rejected here with a clear NotSupportedException instead of
+// falling through silently (per the wave safeguards doc: "clear error, not a
+// crash" when wave-only grammar hits the MIDI path). No existing .ss behavior
+// changed.
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
@@ -131,6 +136,20 @@ public static class Interpreter
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
                     CloseMeasure(defaultTrack, bar.Line);
                     break;
+
+                // v3 wave-only grammar: reject with a clear, descriptive error
+                // rather than silently skipping (safeguards doc) — these
+                // directives have no MIDI equivalent by design.
+                case EffectNode effect:
+                    throw new NotSupportedException(
+                        $"'effect {effect.Kind}' is a wave-backend directive (SoundScript.Wave, .ssw files): " +
+                        "the MIDI backend has no post-mix audio buffer to apply effects to. " +
+                        "Render this file through the wave backend instead.");
+                case SpeakNode:
+                    throw new NotSupportedException(
+                        "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
+                        "phoneme-level frequency mapping. Render this file through the wave backend instead.");
             }
         }
 
@@ -224,6 +243,15 @@ public static class Interpreter
                     track.Gain = gain.Value;
                     break;
                 case HumanizeNode humanize:
+                    // Both humanize forms flow through the single Value here
+                    // (for the v3 named form the parser sets Value = Timing ?? 0,
+                    // the closest match to this backend's existing seconds-based
+                    // semantics). Seed is deliberately ignored on the MIDI path:
+                    // HumanizeApplicator has its own process-level seed
+                    // (SetSeed/DefaultSeed) that predates grammar-level seeds,
+                    // and changing which seed it honors would alter existing
+                    // .ss output — a backward-compat violation. The wave
+                    // backend consumes Timing/VelocityAmount/Seed directly.
                     track.Humanize = humanize.Value;
                     break;
                 case VelocityNode velocity:

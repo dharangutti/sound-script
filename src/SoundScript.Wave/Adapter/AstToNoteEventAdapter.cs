@@ -1,8 +1,10 @@
-// UNDER DEVELOPMENT — v1 prototype
+// UNDER DEVELOPMENT — v3
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
 using SoundScript.Wave.Model;
+using SoundScript.Wave.Prosody;
+using SoundScript.Wave.Synthesis;
 
 namespace SoundScript.Wave.Adapter;
 
@@ -17,13 +19,26 @@ namespace SoundScript.Wave.Adapter;
 /// (via "play"), loops, tempo (including ramps), and time signature, with
 /// velocity/dynamic markings mapped to 0.0-1.0. Directives that only make
 /// sense for MIDI-oriented playback shaping — instrument program changes,
-/// gain, humanize, orchestration, phrase shaping, chord voicing/balancing
+/// gain, orchestration, phrase shaping, chord voicing/balancing
 /// intelligence, arpeggio/strum patterns, and vocal (voice/sing) tracks —
 /// are not yet implemented. They are silently skipped rather than failing,
 /// so a MIDI-only .ss file can still be pushed through this rail and
 /// produce a flat, default-timbre rendering instead of an error. Every
 /// track gets <see cref="TimbreParams.Default"/> (sine + neutral ADSR)
 /// since the grammar has no per-track timbre directive yet.
+///
+/// v3 additions:
+/// <list type="bullet">
+/// <item><c>humanize</c> (both forms) now jitters NoteEvent start time and
+/// velocity at emit time via the shared seeded PRNG — deterministic, seeded
+/// from the directive's seed= or (when omitted) a hash of the track name.
+/// This is independent of the MIDI backend's own HumanizeApplicator.</item>
+/// <item><c>speak "..."</c> emits a deterministic phoneme-tone NoteEvent
+/// sequence into the default track (see Prosody.ProsodyToneGenerator).</item>
+/// <item><c>effect ...</c> nodes are deliberately NOT handled here: the
+/// effects chain is a master-only post-mix stage consumed by WaveRenderer
+/// through EffectSettingsFactory — not a per-track/per-note concern.</item>
+/// </list>
 /// </summary>
 public static class AstToNoteEventAdapter
 {
@@ -98,10 +113,17 @@ public static class AstToNoteEventAdapter
                 case ChordNode chord:
                     EmitChord(GetDefaultTrack(), chord, context);
                     break;
+                case SpeakNode speak:
+                    EmitSpeech(GetDefaultTrack(), speak, context);
+                    break;
 
-                // InstrumentNode, GainNode, HumanizeNode, OrchestrationNode,
-                // Phrase*Node, VoiceNode, SingNode, BarNode, ImportNode: out
-                // of scope for v1 (see class summary). Skipped, not failed.
+                // EffectNode: master-only post-mix stage — consumed by
+                // WaveRenderer via EffectSettingsFactory, intentionally no
+                // per-track handling here (see class summary).
+                //
+                // InstrumentNode, GainNode, OrchestrationNode, Phrase*Node,
+                // VoiceNode, SingNode, BarNode, ImportNode: out of scope
+                // (see class summary). Skipped, not failed.
             }
         }
 
@@ -136,6 +158,12 @@ public static class AstToNoteEventAdapter
                     break;
                 case DynamicNode dynamic:
                     track.CurrentDynamic = dynamic.Level;
+                    break;
+                case HumanizeNode humanize:
+                    // v3: humanize is honored on the wave rail from here on —
+                    // it applies to every note the track emits after the
+                    // directive (same positional semantics as velocity/dynamic).
+                    track.Humanize = humanize;
                     break;
                 case RestNode rest:
                     AdvanceBeat(track, rest.Rest.DurationBeats);
@@ -193,11 +221,16 @@ public static class AstToNoteEventAdapter
         var startBeat = track.CurrentBeat;
         var durationBeats = note.DurationBeats;
 
+        var (startSeconds, velocity) = ApplyHumanize(
+            track,
+            BeatsToSeconds(context, 0, startBeat),
+            ResolveVelocity(track, note.Velocity));
+
         track.Notes.Add(new NoteEvent(
             FrequencyHz: MidiToHz(note.ToMidiNumber()),
-            StartTimeSeconds: BeatsToSeconds(context, 0, startBeat),
+            StartTimeSeconds: startSeconds,
             DurationSeconds: BeatsToSeconds(context, startBeat, durationBeats),
-            Velocity: ResolveVelocity(track, note.Velocity),
+            Velocity: velocity,
             Timbre: TimbreParams.Default));
 
         AdvanceBeat(track, durationBeats);
@@ -215,16 +248,91 @@ public static class AstToNoteEventAdapter
         // v1 stacks the chord's raw intervals — no voicing/balancing intelligence yet.
         foreach (var midiNumber in chord.ToMidiNumbers())
         {
+            // Each chord tone jitters independently (its own note index) —
+            // same policy as the MIDI backend's per-note HumanizeApplicator,
+            // and what a human strum actually does.
+            var (toneStart, toneVelocity) = ApplyHumanize(track, startSeconds, velocity);
+
             track.Notes.Add(new NoteEvent(
                 FrequencyHz: MidiToHz(midiNumber),
-                StartTimeSeconds: startSeconds,
+                StartTimeSeconds: toneStart,
                 DurationSeconds: durationSeconds,
-                Velocity: velocity,
+                Velocity: toneVelocity,
                 Timbre: TimbreParams.Default));
         }
 
         AdvanceBeat(track, durationBeats);
     }
+
+    /// <summary>
+    /// v3 seeded jitter (see the wave safeguards doc's determinism rules).
+    /// Perturbs a note's start time and velocity inside the humanize bounds
+    /// using the shared stateless PRNG, keyed by (seed, note index, salt):
+    /// the explicit seed= if present, otherwise a stable hash of the track
+    /// name (file content — never wall-clock, never unseeded Random). The
+    /// bare-number form uses Value as both bounds, mirroring the MIDI
+    /// backend's single-magnitude semantics.
+    /// </summary>
+    private static (double StartSeconds, double Velocity) ApplyHumanize(
+        TrackState track, double startSeconds, double velocity)
+    {
+        var humanize = track.Humanize;
+        if (humanize is null)
+            return (startSeconds, velocity);
+
+        var timingSeconds = humanize.Timing ?? humanize.Value;
+        var velocityAmount = humanize.VelocityAmount ?? humanize.Value;
+        if (timingSeconds <= 0 && velocityAmount <= 0)
+            return (startSeconds, velocity);
+
+        var seed = humanize.Seed ?? DeterministicRandom.DeriveSeed(track.Name.ToLowerInvariant());
+        var noteIndex = track.Notes.Count;
+
+        if (timingSeconds > 0)
+        {
+            startSeconds = Math.Max(0.0,
+                startSeconds + DeterministicRandom.Unit(seed, noteIndex, TimingJitterSalt) * timingSeconds);
+        }
+
+        if (velocityAmount > 0)
+        {
+            velocity = Math.Clamp(
+                velocity + DeterministicRandom.Unit(seed, noteIndex, VelocityJitterSalt) * velocityAmount,
+                0.0, 1.0);
+        }
+
+        return (startSeconds, velocity);
+    }
+
+    /// <summary>
+    /// v3 prosody: expands a <c>speak</c> directive into a deterministic
+    /// NoteEvent sequence on the default track, advancing its beat cursor so
+    /// speech composes sequentially with any surrounding top-level notes.
+    /// Beats convert to seconds through the same tempo map as everything else.
+    /// </summary>
+    private static void EmitSpeech(TrackState track, SpeakNode speak, ExecutionContext context)
+    {
+        foreach (var tone in ProsodyToneGenerator.Generate(speak.Text, speak.Voice, speak.Seed))
+        {
+            if (!tone.IsRest)
+            {
+                var startBeat = track.CurrentBeat;
+                track.Notes.Add(new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz,
+                    StartTimeSeconds: BeatsToSeconds(context, 0, startBeat),
+                    DurationSeconds: BeatsToSeconds(context, startBeat, tone.DurationBeats),
+                    Velocity: tone.Velocity,
+                    Timbre: TimbreParams.Default));
+            }
+
+            AdvanceBeat(track, tone.DurationBeats);
+        }
+    }
+
+    // Distinct salts keep the two jitter streams (and prosody's PitchSalt=100)
+    // uncorrelated even when they share a seed.
+    private const int TimingJitterSalt = 1;
+    private const int VelocityJitterSalt = 2;
 
     private static double ResolveVelocity(TrackState track, int? explicitVelocity)
     {
@@ -262,17 +370,24 @@ public static class AstToNoteEventAdapter
         if (tracks.TryGetValue(name, out var track))
             return track;
 
-        track = new TrackState();
+        track = new TrackState(name);
         tracks[name] = track;
         order.Add(name);
         return track;
     }
 
-    private sealed class TrackState
+    private sealed class TrackState(string name)
     {
+        /// <summary>Used to derive the default humanize seed (v3).</summary>
+        public string Name { get; } = name;
+
         public double CurrentBeat { get; set; }
         public int CurrentVelocity { get; set; } = 64;
         public DynamicLevel? CurrentDynamic { get; set; }
+
+        /// <summary>Active humanize directive (v3); null = no jitter.</summary>
+        public HumanizeNode? Humanize { get; set; }
+
         public List<NoteEvent> Notes { get; } = [];
     }
 

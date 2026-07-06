@@ -1,3 +1,6 @@
+// UNDER DEVELOPMENT — v3: adds Assign ('='), Effect, and Speak for the
+// wave-backend grammar extensions (effects chain, seeded humanize parameters,
+// phoneme/prosody tone mapping). Pure additions — no existing token changed.
 namespace SoundScript.Core;
 
 public enum TokenType
@@ -54,5 +57,9 @@ public enum TokenType
     Voice,
     Sing,
     Vocal,
+    // v3 (wave-motivated grammar; see SoundScript.Wave):
+    Assign,     // '=' in key=value directive parameters
+    Effect,     // 'effect' — master effects chain (wave backend only)
+    Speak,      // 'speak' — phoneme/prosody tone mapping (wave backend only)
     EndOfFile
 }

@@ -1,3 +1,8 @@
+// UNDER DEVELOPMENT — v3: adds '=' (Assign) and the wave-only 'effect'/'speak'
+// keywords for key=value directive parameters. Pure additions — '=' previously
+// tokenized as an "Unexpected character" error, so no existing file changes
+// meaning, and the two new keywords are accepted as plain names by
+// Parser.ParseName wherever an identifier was previously valid.
 using SoundScript.Core;
 
 namespace SoundScript.Parser;
@@ -79,7 +84,9 @@ public sealed class Tokenizer
         ["brighten"] = TokenType.Orchestration,
         ["voice"] = TokenType.Voice,
         ["sing"] = TokenType.Sing,
-        ["vocal"] = TokenType.Vocal
+        ["vocal"] = TokenType.Vocal,
+        ["effect"] = TokenType.Effect,
+        ["speak"] = TokenType.Speak
     };
 
     private static readonly string[] ChordSuffixes =
@@ -132,7 +139,7 @@ public sealed class Tokenizer
                 continue;
             }
 
-            if (current is '{' or '}' or '|' or ':' or '/' or '~')
+            if (current is '{' or '}' or '|' or ':' or '/' or '~' or '=')
             {
                 var type = current switch
                 {
@@ -142,6 +149,7 @@ public sealed class Tokenizer
                     ':' => TokenType.Colon,
                     '/' => TokenType.Slash,
                     '~' => TokenType.Tie,
+                    '=' => TokenType.Assign,
                     _ => throw new InvalidOperationException()
                 };
 
