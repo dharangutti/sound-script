@@ -677,7 +677,7 @@ public partial class Playground
       MidiGenerator.Write(interpreted, stream);
       MidiBytes = stream.ToArray();
 
-      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
+      await TryPlayAsync(() => Js.InvokeVoidAsync("startPlayback", MidiBytes).AsTask());
 
       var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
       var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
@@ -718,7 +718,7 @@ public partial class Playground
       MidiGenerator.Write(interpreted, stream);
       MidiBytes = stream.ToArray();
 
-      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
+      await TryPlayAsync(() => Js.InvokeVoidAsync("startPlayback", MidiBytes).AsTask());
 
       var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
       var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
@@ -759,13 +759,21 @@ public partial class Playground
       var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText };
       WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
 
-      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
-      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
-      var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
-
       var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
-      StatusMessage =
-          $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre).";
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre).";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) offline at {interpreted.Tempo} BPM (SoundCSS timbre). Playback failed on this device, but you can still download the WAV.";
+      }
     }
     catch (Exception ex)
     {
@@ -804,13 +812,21 @@ public partial class Playground
       var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText, PreferredTrackName = "prosody" };
       WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
 
-      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
-      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
-      var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
-
       var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
-      StatusMessage =
-          $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre, word-level prosody).";
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) offline to {duration:F1}s of audio at {interpreted.Tempo} BPM (SoundCSS timbre, word-level prosody).";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) offline at {interpreted.Tempo} BPM (SoundCSS timbre, word-level prosody). Playback failed on this device, but you can still download the WAV.";
+      }
     }
     catch (Exception ex)
     {
@@ -868,20 +884,34 @@ public partial class Playground
 
       var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
 
-      await Js.InvokeVoidAsync("startPlayback", MidiBytes);
-
       var status = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s)";
       if (interpreted.VocalTracks.Count > 0)
-      {
         status += $", {interpreted.VocalTracks.Sum(v => v.Syllables.Count)} sung syllable(s)";
 
-        var speechWords = VocalSpeechTimeline.Build(interpreted);
-        var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
-        if (!speechSupported)
-          WarningMessages.Add("This browser has no speech synthesis — lyrics play as melody only. The downloaded MIDI still contains the lyric events.");
-      }
+      // Playback is decoupled from compilation: MidiBytes is already computed
+      // above, so a playback failure (common on mobile — AudioContext autoplay
+      // restrictions, no speech synthesis, WebAudio quirks) must not wipe the
+      // bytes the user can still download. Warn instead of erroring, and never
+      // rethrow — the outer catch is for real compile/parse failures only.
+      try
+      {
+        await Js.InvokeVoidAsync("startPlayback", MidiBytes);
 
-      StatusMessage = $"{status} at {interpreted.Tempo} BPM.";
+        if (interpreted.VocalTracks.Count > 0)
+        {
+          var speechWords = VocalSpeechTimeline.Build(interpreted);
+          var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+          if (!speechSupported)
+            WarningMessages.Add("This browser has no speech synthesis — lyrics play as melody only. The downloaded MIDI still contains the lyric events.");
+        }
+
+        StatusMessage = $"{status} at {interpreted.Tempo} BPM.";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage = $"Compiled {noteCount} note(s) across {interpreted.Tracks.Count} track(s) at {interpreted.Tempo} BPM. Playback failed on this device, but you can still download the MIDI.";
+      }
     }
     catch (Exception ex)
     {
@@ -918,28 +948,40 @@ public partial class Playground
     WavBytes = wav;
     UsedWaveBackend = true;
 
-    await Js.InvokeVoidAsync("SoundScriptMidi.stop");
-    await Js.InvokeVoidAsync("SoundScriptVoice.stop");
-    var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
-
-    var status = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step)";
-
     // Playback-only speech overlay: `speak "..."` still renders as deterministic
     // prosody tones baked into the WAV above (untouched — WAV bytes are
     // identical), but we ALSO trigger real browser speech synthesis in parallel
     // so the phrase is actually spoken aloud. Invoked AFTER startWavPlayback so
     // the Run click stays the audio-unlock gesture on mobile Safari/Chrome.
     var speechWords = WaveSpeechTimeline.Build(program);
-    if (speechWords.Count > 0)
+
+    // Decoupled from the render above: WavBytes is already set, so a playback
+    // failure on this device must not cost the user the downloadable WAV. Warn
+    // and swallow — do not rethrow into RunAsync's outer catch, which nulls bytes.
+    try
     {
-      status += $", speaking {speechWords.Count} phrase(s)";
+      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+      var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
 
-      var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
-      if (!speechSupported)
-        WarningMessages.Add("This browser has no speech synthesis — 'speak' text plays as prosody tones only.");
+      var status = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step)";
+
+      if (speechWords.Count > 0)
+      {
+        status += $", speaking {speechWords.Count} phrase(s)";
+
+        var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+        if (!speechSupported)
+          WarningMessages.Add("This browser has no speech synthesis — 'speak' text plays as prosody tones only.");
+      }
+
+      StatusMessage = $"{status}.";
     }
-
-    StatusMessage = $"{status}.";
+    catch (Exception)
+    {
+      WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+      StatusMessage = "Rendered audio via SoundScript.Wave (deterministic, no MIDI step). Playback failed on this device, but you can still download the WAV.";
+    }
   }
 
   // UNDER DEVELOPMENT — v3: grammar-isolation check (safeguards doc) —
@@ -1014,6 +1056,91 @@ public partial class Playground
 
     var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(SsText));
     await Js.InvokeVoidAsync("SoundScriptText.download", base64, "soundscript.ss");
+  }
+
+  // Playback wrapper: runs the given JS audio call and, on failure (common on
+  // mobile — autoplay restrictions, missing speech synthesis, WebAudio quirks),
+  // warns instead of surfacing an error and NEVER nulls the already-computed
+  // bytes. The user keeps the file they just compiled and can still download it.
+  private async Task TryPlayAsync(Func<Task> play)
+  {
+    try
+    {
+      await play();
+    }
+    catch (Exception)
+    {
+      WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+    }
+  }
+
+  // Always-available download for whatever is currently in the editor, whether
+  // or not Run/Compose has been clicked or succeeded. Compiles fresh from
+  // ScriptText with no playback step, so mobile users get a file even when audio
+  // fails. Routes wave-only grammar through SoundScript.Wave (WAV), everything
+  // else through the MIDI rail — the same split RunAsync uses.
+  private async Task DownloadCurrentScriptAsync()
+  {
+    if (string.IsNullOrWhiteSpace(ScriptText))
+    {
+      ErrorMessage = "Nothing to download: the script is empty.";
+      return;
+    }
+
+    try
+    {
+      ErrorMessage = null;
+
+      var tokens = new Tokenizer(ScriptText).Tokenize();
+      var program = new SoundScript.Parser.Parser(tokens).Parse();
+
+      if (ContainsWaveOnlyDirectives(program.Statements))
+      {
+        var wav = WaveRenderer.RenderStereoToBytes(program);
+        var wavBase64 = Convert.ToBase64String(wav);
+        await Js.InvokeVoidAsync("SoundScriptAudio.download", wavBase64, "soundscript.wav");
+        StatusMessage = "Downloaded current script as WAV.";
+        return;
+      }
+
+      var interpreted = Interpreter.Interpret(program, "playground.ss");
+      VocalInterpreter.Apply(program, interpreted);
+
+      using var stream = new MemoryStream();
+      MidiGenerator.Write(interpreted, stream);
+      var midiBase64 = Convert.ToBase64String(stream.ToArray());
+      await Js.InvokeVoidAsync("SoundScriptMidi.download", midiBase64, "soundscript.mid");
+      StatusMessage = "Downloaded current script as MIDI.";
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+    }
+  }
+
+  private void ClearEditor()
+  {
+    ScriptText = "";
+    ClearState();
+  }
+
+  private void ResetEditor()
+  {
+    ScriptText = DefaultScript;
+    ClearState();
+  }
+
+  private async Task CopyScriptAsync()
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("navigator.clipboard.writeText", ScriptText);
+      StatusMessage = "Copied to clipboard.";
+    }
+    catch (Exception)
+    {
+      WarningMessages.Add("Couldn't copy to clipboard — your browser blocked clipboard access.");
+    }
   }
 
   private void ClearState()
