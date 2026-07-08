@@ -32,4 +32,10 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Run tests
-        run: dotnet test src/SoundScript.Tests -c Release --logger "console;verbosity=normal"
+        # Debug, not Release: a couple of pre-existing tests (ImportTests.
+        # Cli_RunsMultiFileProject, MeasureValidationUxTests.
+        # Cli_PrintsInterpretWarnings) shell out to a Debug build of
+        # SoundScript.Cli specifically (one hardcodes bin/Debug/net8.0/
+        # soundscript.dll) — Release here would build the suite fine but
+        # leave that Debug output missing, failing both on every OS.
+        run: dotnet test src/SoundScript.Tests -c Debug --logger "console;verbosity=normal"
