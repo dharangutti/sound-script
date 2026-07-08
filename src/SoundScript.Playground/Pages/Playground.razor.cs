@@ -84,6 +84,8 @@ public partial class Playground
       case "core-intelligence": LoadIntelligenceExample(); break;
       case "core-multitrack": LoadMultitrackExample(); break;
       case "core-playback": LoadPlaybackExample(); break;
+      case "showcase-jingle-bells": LoadJingleBellsExample(); break;
+      case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
       case "wave-effects": LoadWaveEffectsExample(); break;
       case "wave-speak": LoadWaveSpeakExample(); break;
       case "wave-humanize": LoadWaveHumanizeExample(); break;
@@ -438,6 +440,174 @@ public partial class Playground
             f
             C5 h
         }
+        """;
+    ClearState();
+  }
+
+  // A full-arrangement showcase: a genuinely melodious "Jingle Bells" that
+  // weaves together most of the MIDI-rail surface — tempo automation, time
+  // signature, reusable blocks + play, phrases (curve/transition/crescendo),
+  // staccato articulation, numeric/dotted durations, chords with orchestration
+  // (double octave + reinforce bass), a strum pattern, layers, gain, named-form
+  // humanize (a V7 directive that stays on the MIDI rail), multi-track melody +
+  // harmony + bass, and a sung voice track with lyrics aligned to the melody.
+  private void LoadJingleBellsExample()
+  {
+    ScriptText =
+        """
+        tempo 132 -> 132 over 8 bars
+        tempo 132 -> 112 over 4 bars
+        time 4/4
+
+        pattern strumPat { strum }
+
+        block hook {
+            staccato E4 q staccato E4 q E4 h
+            staccato E4 q staccato E4 q E4 h
+            staccato E4 q G4 q C4:1.5 D4 e
+            E4 h rest h
+        }
+
+        block funline {
+            F4 q F4 q F4 q F4 q
+            F4 q E4 q E4 q E4 q
+            E4 q G4 q G4 q F4 q
+            D4 q C4 for 3
+        }
+
+        track melody {
+            layer flute
+            layer piano
+            gain 0.9
+            humanize timing=0.012 velocity=0.06
+            phrase {
+                curve soft
+                transition smooth
+                crescendo
+                mf
+                play hook
+            }
+            phrase {
+                curve swell
+                transition expressive
+                f
+                play funline
+            }
+            phrase {
+                curve fade
+                decrescendo
+                mf
+                play hook
+            }
+        }
+
+        track harmony {
+            instrument piano
+            double octave
+            reinforce bass
+            gain 0.6
+            p
+            Cmaj w Cmaj w Cmaj w Cmaj w
+            Fmaj w Cmaj w Cmaj w
+            G7 q Cmaj for 3
+            Cmaj w Cmaj w Cmaj w
+            play strumPat Cmaj w
+        }
+
+        track bass {
+            instrument bass
+            gain 0.75
+            mf
+            C2 w | C2 w | C2 w | C2 w |
+            F2 w | C2 w | C2 w |
+            G2 h C2 h |
+            C2 w | C2 w | C2 w | C2 w |
+        }
+
+        voice lead {
+            vocal choir
+            mf
+            sing "Jingle bells jingle bells jingle all the way" E4 q E4 q E4 h E4 q E4 q E4 h E4 q G4 q C4:1.5 D4 e E4 h
+            rest h
+            sing "Oh what fun it is to ride in a one horse open sleigh" F4 q F4 q F4 q F4 q F4 q E4 q E4 q E4 q E4 q G4 q G4 q F4 q D4 q C4 for 3
+            sing "Jingle bells jingle bells jingle all the way" E4 q E4 q E4 h E4 q E4 q E4 h E4 q G4 q C4:1.5 D4 e E4 h
+        }
+        """;
+    ClearState();
+  }
+
+  // The Wave-rail (.ssw) counterpart of LoadJingleBellsExample. Same tune and
+  // rhythm, but authored strictly against grammar SoundScript.Wave actually
+  // honors (verified against AstToNoteEventAdapter): tempo/time, reusable
+  // blocks + play, multi-track (melody + chord harmony + root bass), chords
+  // (Cmaj/Fmaj/G7 render as stacked tones via EmitChord), the named-form
+  // humanize with an explicit seed= (wave-native jitter), and the wave-only
+  // effect chain (a light delay for sleigh-bell shimmer, plus a gentle
+  // lowpass). Wave has no voice/sing rail, so the lyrics are carried by
+  // `speak "..."` directives instead: each phrase renders as deterministic
+  // prosody tones baked into the WAV AND, in the Playground, fires real
+  // browser speechSynthesis as a playback-only overlay (see RunWaveProgramAsync
+  // / WaveSpeechTimeline). The three speak phrases sit on the top-level
+  // (default) track with a `rest w` pad so their onsets line up with the
+  // melody phrases (~beats 0 / 16 / 32); speech beat-length is independent of
+  // the melody's, so this is deliberately "reasonably close," not sample-exact.
+  //
+  // Intentionally NOT used here because the wave adapter silently drops them
+  // (would look rich in source, sound thin): layer/instrument (no per-track
+  // timbre), gain, phrase { curve/transition/crescendo } (phrase bodies are
+  // skipped — their notes would never sound), voice/sing, orchestration/
+  // double/reinforce, and pattern/strum (a `play <pattern>` actively throws on
+  // this rail). Melody notes therefore live directly in blocks, not phrases.
+  private void LoadJingleBellsWaveExample()
+  {
+    ScriptText =
+        """
+        tempo 132
+        time 4/4
+
+        block hook {
+            E4 q E4 q E4 h
+            E4 q E4 q E4 h
+            E4 q G4 q C4:1.5 D4 e
+            E4 h rest h
+        }
+
+        block funline {
+            F4 q F4 q F4 q F4 q
+            F4 q E4 q E4 q E4 q
+            E4 q G4 q G4 q F4 q
+            D4 q C4 for 3
+        }
+
+        track melody {
+            humanize timing=0.012 velocity=0.06 seed=7
+            mf
+            play hook
+            play funline
+            play hook
+        }
+
+        track harmony {
+            p
+            Cmaj w Cmaj w Cmaj w Cmaj w
+            Fmaj w Fmaj w G7 w Cmaj w
+            Cmaj w Cmaj w G7 w Cmaj w
+        }
+
+        track bass {
+            mf
+            C2 w C2 w C2 w C2 w
+            F2 w F2 w G2 w C2 w
+            C2 w C2 w G2 w C2 w
+        }
+
+        speak "Jingle bells jingle bells jingle all the way" seed=13
+        rest w
+        speak "Oh what fun it is to ride in a one horse open sleigh" seed=13
+        speak "Jingle bells jingle bells jingle all the way" seed=13
+
+        effect delay time=0.18 feedback=0.25 mix=0.2
+        effect filter type=lowpass cutoff=3200
         """;
     ClearState();
   }
