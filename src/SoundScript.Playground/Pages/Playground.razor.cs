@@ -9,6 +9,7 @@ using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
 using SoundScript.Wave;
+using SoundScript.Wave.Prosody;
 
 namespace SoundScript.Playground.Pages;
 
@@ -751,7 +752,24 @@ public partial class Playground
     await Js.InvokeVoidAsync("SoundScriptVoice.stop");
     var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
 
-    StatusMessage = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step).";
+    var status = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step)";
+
+    // Playback-only speech overlay: `speak "..."` still renders as deterministic
+    // prosody tones baked into the WAV above (untouched — WAV bytes are
+    // identical), but we ALSO trigger real browser speech synthesis in parallel
+    // so the phrase is actually spoken aloud. Invoked AFTER startWavPlayback so
+    // the Run click stays the audio-unlock gesture on mobile Safari/Chrome.
+    var speechWords = WaveSpeechTimeline.Build(program);
+    if (speechWords.Count > 0)
+    {
+      status += $", speaking {speechWords.Count} phrase(s)";
+
+      var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+      if (!speechSupported)
+        WarningMessages.Add("This browser has no speech synthesis — 'speak' text plays as prosody tones only.");
+    }
+
+    StatusMessage = $"{status}.";
   }
 
   // UNDER DEVELOPMENT — v3: grammar-isolation check (safeguards doc) —
