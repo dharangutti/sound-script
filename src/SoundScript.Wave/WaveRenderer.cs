@@ -1,4 +1,5 @@
 // UNDER DEVELOPMENT — v3
+using System.Security.Cryptography;
 using SoundScript.Core.Ast;
 using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Effects;
@@ -88,6 +89,20 @@ public static class WaveRenderer
         var (left, right) = MixProgramStereo(program);
         WavWriter.WriteStereoTo(destination, left, right, WavWriter.SampleRate);
     }
+
+    /// <summary>
+    /// SHA-256 of <see cref="RenderToBytes"/>, hex-encoded. Mirrors
+    /// SoundScript.Timbre.OfflineRenderer.RenderSha256 — the checksum
+    /// determinism suite hashes the render instead of asserting on raw WAV
+    /// bytes directly, so a mismatch reports a 64-char digest rather than
+    /// dumping the buffer (see WaveDeterminismTests).
+    /// </summary>
+    public static string RenderSha256(ProgramNode program) =>
+        Convert.ToHexString(SHA256.HashData(RenderToBytes(program)));
+
+    /// <summary>Stereo counterpart of <see cref="RenderSha256"/>.</summary>
+    public static string RenderStereoSha256(ProgramNode program) =>
+        Convert.ToHexString(SHA256.HashData(RenderStereoToBytes(program)));
 
     // v3: the master effects chain runs post-mix, as the final stage before
     // the WAV writer — master-only by design (see MasterEffectChain for the

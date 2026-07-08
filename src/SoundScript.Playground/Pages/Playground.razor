@@ -34,6 +34,14 @@
                 <option value="core-multitrack">Multi-track</option>
                 <option value="core-playback">Playback</option>
             </optgroup>
+            <!-- UNDER DEVELOPMENT — v3: these examples use wave-only grammar
+                 (effect/speak, humanize's named form); Run detects it in the
+                 AST and renders via SoundScript.Wave instead of MIDI. -->
+            <optgroup label="Wave (.ssw)">
+                <option value="wave-effects">Effects (delay + filter)</option>
+                <option value="wave-speak">Speak (prosody tone)</option>
+                <option value="wave-humanize">Seeded humanize + speak</option>
+            </optgroup>
         </select>
     </div>
 
@@ -61,6 +69,14 @@
 
         <section class="pane pane-output">
             <label class="pane-label">Output</label>
+
+            @* UNDER DEVELOPMENT — v3: grammar-isolation rule — only rendered
+               when the last Run actually took the SoundScript.Wave rail
+               (AST contained an EffectNode/SpeakNode), never unconditionally. *@
+            @if (UsedWaveBackend)
+            {
+                <span class="badge">SoundScript.Wave · no MIDI step</span>
+            }
 
             <div class="actions">
                 <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunAsync">
@@ -147,6 +163,25 @@
                 <span>Timbre</span>
             </div>
 
+            @* UNDER DEVELOPMENT — v3: shown only when Run actually took the
+               wave rail (grammar-isolation rule — see the badge above). *@
+            @if (UsedWaveBackend)
+            {
+                <div class="pipeline">
+                    <span>Tokenizer</span>
+                    <span class="arrow">→</span>
+                    <span>Parser</span>
+                    <span class="arrow">→</span>
+                    <span>SoundScript.Wave</span>
+                    <span class="arrow">+</span>
+                    <span>MasterEffectChain</span>
+                    <span class="arrow">+</span>
+                    <span>ProsodyToneGenerator</span>
+                    <span class="arrow">→</span>
+                    <span>WAV</span>
+                </div>
+            }
+
             <p class="hint">
                 No server, no API calls. Imports use the CLI (<code>ProgramLoader</code>); all other V2 features run here.
                 <code>voice</code> blocks speak their lyrics through your browser's speech synthesis while the melody plays —
@@ -161,6 +196,14 @@
                 same phoneme timbre, word/syllable-shaped pitch.
                 Both compose buttons also produce an editable <strong>.ss</strong> export (V6) — view it inline,
                 download it, hand-tweak a note, and run it through <code>soundscript run</code> to hear exactly your edit.
+                <strong>Run</strong> also understands wave-only grammar (<code>effect delay/filter</code>, <code>speak</code>,
+                and <code>humanize</code>'s named <code>timing=/velocity=/seed=</code> form) — a script using any of it
+                skips MIDI entirely and renders straight to WAV through <strong>SoundScript.Wave</strong>, byte-identical
+                for the same script text every time. Everything else still plays through MIDI, unchanged.
+                <code>seed=</code> is optional on both <code>humanize</code> and <code>speak</code> — leaving it out
+                doesn't mean random, it means the seed is derived from the track name or spoken text instead of an
+                explicit number, so the render still reproduces exactly the same way every time.
+                → <a href="/doc.html?p=wave-grammar.md" target="_blank" rel="noopener">.ssw grammar reference</a>.
             </p>
         </section>
     </div>

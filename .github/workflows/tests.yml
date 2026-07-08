@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # Multi-OS matrix: SoundScript.Wave's determinism suite claims
+    # byte-identical WAV checksums "across machines/OS/CPU" — this is that
+    # claim's regression check, not just an ubuntu-only smoke test. Reuses
+    # the checkout/setup-dotnet steps deploy-pages.yml already established
+    # rather than introducing a different CI mechanism.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Run tests
+        # Debug, not Release: a couple of pre-existing tests (ImportTests.
+        # Cli_RunsMultiFileProject, MeasureValidationUxTests.
+        # Cli_PrintsInterpretWarnings) shell out to a Debug build of
+        # SoundScript.Cli specifically (one hardcodes bin/Debug/net8.0/
+        # soundscript.dll) — Release here would build the suite fine but
+        # leave that Debug output missing, failing both on every OS.
+        run: dotnet test src/SoundScript.Tests -c Debug --logger "console;verbosity=normal"

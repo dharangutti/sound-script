@@ -1,0 +1,14 @@
+tempo 110
+
+track lead {
+    humanize timing=0.01 velocity=0.05 seed=42
+    mf
+    C4 q
+    E4 q
+    G4 h
+}
+
+speak "hello from soundscript wave" voice=default seed=7
+
+effect delay time=0.2 feedback=0.4 mix=0.35
+effect filter type=lowpass cutoff=3000
