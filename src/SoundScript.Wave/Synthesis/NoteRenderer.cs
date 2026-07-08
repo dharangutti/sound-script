@@ -51,6 +51,12 @@ public static class NoteRenderer
 
     private static void RenderWavetable(NoteEvent note, int sampleRate, double frequency, double velocity, float[] buffer)
     {
+        if (note.Timbre.Oscillator == OscillatorType.Noise)
+        {
+            RenderNoise(note, sampleRate, frequency, velocity, buffer);
+            return;
+        }
+
         var table = Wavetable.GetTable(note.Timbre.Oscillator, frequency);
         var phaseIncrement = Wavetable.PhaseIncrement(frequency, sampleRate);
 
@@ -65,6 +71,41 @@ public static class NoteRenderer
             buffer[i] = (float)(Wavetable.Sample(table, phase) * amplitude * velocity);
 
             phase += phaseIncrement;
+        }
+    }
+
+    // Distinct seed derivation per note (start time + frequency) rather than a
+    // shared salt on a passed-in seed — Noise has no NoteEvent-level seed
+    // field, so this keeps two notes at different times/pitches decorrelated
+    // without any schema change.
+    private const int NoiseSalt = 0;
+
+    /// <summary>
+    /// Deterministic filtered white noise for <see cref="OscillatorType.Noise"/>
+    /// (prosody plosives/fricatives — see PhonemeFrequencyTable): draws a
+    /// fresh uniform sample per output sample from
+    /// <see cref="DeterministicRandom"/>, then shapes it with the same
+    /// one-pole low-pass recurrence as <c>Effects.OnePoleFilter</c>
+    /// (alpha = w/(1+w), cutoff = <paramref name="frequency"/>) applied
+    /// inline so noise-class prosody tones need no separate post-processing
+    /// pass through the mixer.
+    /// </summary>
+    private static void RenderNoise(NoteEvent note, int sampleRate, double frequency, double velocity, float[] buffer)
+    {
+        var seed = DeterministicRandom.DeriveSeed(
+            note.StartTimeSeconds.ToString("R") + "|" + frequency.ToString("R"));
+        var w = 2.0 * Math.PI * frequency / sampleRate;
+        var alpha = w / (1.0 + w);
+        var y = 0.0;
+
+        for (var i = 0; i < buffer.Length; i++)
+        {
+            var raw = DeterministicRandom.Unit(seed, i, NoiseSalt);
+            y += alpha * (raw - y);
+
+            var t = i / (double)sampleRate;
+            var amplitude = Envelope.Amplitude(note.Timbre.Envelope, t, note.DurationSeconds);
+            buffer[i] = (float)(y * amplitude * velocity);
         }
     }
 
