@@ -200,6 +200,10 @@
                 and <code>humanize</code>'s named <code>timing=/velocity=/seed=</code> form) — a script using any of it
                 skips MIDI entirely and renders straight to WAV through <strong>SoundScript.Wave</strong>, byte-identical
                 for the same script text every time. Everything else still plays through MIDI, unchanged.
+                <code>seed=</code> is optional on both <code>humanize</code> and <code>speak</code> — leaving it out
+                doesn't mean random, it means the seed is derived from the track name or spoken text instead of an
+                explicit number, so the render still reproduces exactly the same way every time.
+                → <a href="/doc.html?p=wave-grammar.md" target="_blank" rel="noopener">.ssw grammar reference</a>.
             </p>
         </section>
     </div>
