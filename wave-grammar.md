@@ -77,9 +77,24 @@ speak "hello world" voice=default seed=7
 `speak` expands into a sequence of `NoteEvent`s via a small, fixed
 grapheme-to-phoneme table — free-form frequencies (not MIDI-quantized),
 each phoneme mapped to a base frequency band with seeded tone variation
-inside that band. This is a proof-of-concept demonstrating the
-seed-derived-variation mechanism, not a text-to-speech engine — see
-[Scope](#scope-shipped-vs-deferred) for what that deliberately excludes.
+inside that band. Each phoneme's class picks its timbre rather than a single
+flat sine tone: vowels stack a soft formant-ish overtone on top of the
+fundamental (`aa`/`ee`/`oo`/`ai`/`au`), nasals and liquids stay a plain tone
+(`m`/`n`/`ng`/`w`/`r`/`l`/`j`), and plosives/fricatives synthesize from
+deterministic filtered noise instead of a tone — a short low-cutoff burst for
+plosives (`p`/`t`/`k`/`b`/`d`/`g`/`ch`), a sustained higher-cutoff hiss for
+fricatives (`s`/`sh`/`th`/`f`/`v`/`z`/`h`). This is a proof-of-concept
+demonstrating the seed-derived-variation mechanism, not a text-to-speech
+engine — see [Scope](#scope-shipped-vs-deferred) for what that deliberately
+excludes.
+
+**Preview vs. export.** The Playground also plays a live browser
+speech-synthesis overlay of the `speak` text as a convenience while a script
+runs (the same mechanism `voice` blocks use for lyrics) — that overlay is
+browser-side only and is never captured in the exported WAV. The WAV always
+contains exactly the deterministic prosody synthesis described above, so the
+export will sound more synthetic than the in-browser preview; this is
+expected, not a bug.
 
 ## `humanize` — named-parameter form
 
@@ -148,6 +163,11 @@ it shipped:
 - Seeded jitter — the named-parameter extension of `humanize` above
 - Phoneme/prosody tone mapping — `speak`, a small fixed grapheme/phoneme
   table, proof-of-concept scope
+- Class-based prosody timbre — vowels get a stacked formant-ish overtone,
+  plosives/fricatives synthesize from deterministic filtered noise instead
+  of a flat tone (revises the earlier "formant synthesis deferred" call
+  below: this is still not a multi-formant filter bank or real TTS, but the
+  export no longer sounds like a single flat sine beep per phoneme)
 
 **Explicitly deferred, not silently dropped:**
 - **Reverb** — algorithmically heavier (Schroeder/Freeverb-class) than the
@@ -156,10 +176,10 @@ it shipped:
 - **Per-track effect routing** — V7 ships master-only effects; the grammar
   and DSP would carry over directly to a per-track variant if a concrete use
   case shows up
-- **Multi-language or production-quality phoneme/prosody modeling, formant
-  synthesis** — the current `speak` table is deliberately small and
-  English-ish, built to prove the tone-variation mechanism, not to compete
-  with a real TTS engine
+- **Multi-language or production-quality phoneme/prosody modeling, a real
+  multi-formant filter bank** — the current `speak` table is deliberately
+  small and English-ish, built to prove the tone-variation mechanism (plus a
+  crude per-class timbre), not to compete with a real TTS engine
 - **Steeper filter slopes** (biquad/multi-pole) — V7 ships single-pole,
   6 dB/octave only
 - **Additional `speak` voices** — only `voice=default` is accepted; other
