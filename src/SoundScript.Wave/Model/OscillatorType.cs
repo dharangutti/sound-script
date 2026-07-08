@@ -11,5 +11,12 @@ public enum OscillatorType
     Sine,
     Saw,
     Square,
-    Triangle
+    Triangle,
+
+    /// <summary>
+    /// Deterministic filtered white noise (v2 wavetable path only — see
+    /// SoundScript.Wave.Synthesis.NoteRenderer). <c>FrequencyHz</c> is
+    /// reinterpreted as a one-pole low-pass cutoff rather than a pitch.
+    /// </summary>
+    Noise
 }

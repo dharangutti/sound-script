@@ -6,6 +6,7 @@
 // determinism regression, plus one combined test (all three together) per
 // the v3 spec. WaveRenderingTests (v1) and WaveV2Tests are intentionally
 // untouched; their passing unmodified proves the pre-v3 paths survived.
+using System.Linq;
 using SoundScript.Core.Ast;
 using SoundScript.Parser;
 using SoundScript.Wave;
@@ -622,26 +623,45 @@ public class WaveV3Tests
     }
 
     [Fact]
-    public void Speak_EmitsPhonemeTonesWithinTheTableBands()
+    public void Speak_EmitsClassAppropriateTimbrePerPhoneme()
     {
         var tracks = AstToNoteEventAdapter.Convert(ParseSsw("speak \"hello world\" seed=7"));
         var notes = tracks["default"];
 
-        // "hello world" → h ee l au | w au r l d = 9 phoneme tones
+        // "hello world" → h(fricative) ee(vowel) l(liquid) au(vowel) |
+        // w(nasal) au(vowel) r(liquid) l(liquid) d(plosive) = 9 phonemes
         // (doubled 'l' collapses; the inter-word gap is a rest, not a note).
-        Assert.Equal(9, notes.Count);
+        // Each of the 3 vowels (ee, au, au) also emits a stacked formant-ish
+        // overtone note, so the track carries 9 + 3 = 12 NoteEvents.
+        Assert.Equal(12, notes.Count);
+
+        var noiseNotes = notes.Where(n => n.Timbre.Oscillator == OscillatorType.Noise).ToList();
+        var tonalNotes = notes.Where(n => n.Timbre.Oscillator != OscillatorType.Noise).ToList();
+
+        // h and d are the only noise-class (fricative/plosive) phonemes here.
+        Assert.Equal(2, noiseNotes.Count);
+        Assert.Equal(10, tonalNotes.Count);
+
+        // Noise notes carry a filter-cutoff "frequency" in the consonant band,
+        // not a conversational pitch.
+        foreach (var note in noiseNotes)
+            Assert.InRange(note.FrequencyHz, 1200.0, 6000.0);
+
+        // Tonal notes (vowel fundamental + formant overtone, nasal, liquid)
+        // sit in the conversational band; a vowel's formant partial runs up
+        // to 2.5x the fundamental's ~330 Hz ceiling.
+        foreach (var note in tonalNotes)
+            Assert.InRange(note.FrequencyHz, 150.0, 850.0);
 
         foreach (var note in notes)
         {
-            // Whole table (including the fallback row) lives in ~160-330 Hz.
-            Assert.InRange(note.FrequencyHz, 150.0, 340.0);
             Assert.True(note.DurationSeconds > 0);
             Assert.InRange(note.Velocity, 0.0, 1.0);
         }
 
-        // Free-form Hz, not MIDI-quantized: same word, two different vowels
-        // drawn from the same band must not collapse to identical pitches.
-        Assert.NotEqual(notes[1].FrequencyHz, notes[3].FrequencyHz);
+        // Free-form Hz, not MIDI-quantized: distinct tonal phonemes drawn
+        // from the same band must not collapse to identical pitches.
+        Assert.True(tonalNotes.Select(n => n.FrequencyHz).Distinct().Count() > 1);
     }
 
     [Fact]

@@ -213,6 +213,10 @@
                 <code>seed=</code> is optional on both <code>humanize</code> and <code>speak</code> — leaving it out
                 doesn't mean random, it means the seed is derived from the track name or spoken text instead of an
                 explicit number, so the render still reproduces exactly the same way every time.
+                Like <code>voice</code> blocks, <code>speak</code> also plays a live browser speech-synthesis overlay
+                as a preview convenience while it runs — the downloaded WAV contains only the deterministic prosody
+                synthesis (<code>ProsodyToneGenerator</code>'s tones and noise-shaped consonants), never the live
+                voice, so the export always sounds a little more synthetic than the in-browser preview.
                 → <a href="/doc.html?p=wave-grammar.md" target="_blank" rel="noopener">.ssw grammar reference</a>.
             </p>
         </section>

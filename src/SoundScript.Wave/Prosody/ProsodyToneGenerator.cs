@@ -13,7 +13,8 @@ public readonly record struct ProsodyTone(
     double FrequencyHz,
     double DurationBeats,
     double Velocity,
-    bool IsRest)
+    bool IsRest,
+    PhonemeClass Class = PhonemeClass.Nasal)
 {
     public static ProsodyTone Rest(double durationBeats) =>
         new(0.0, durationBeats, 0.0, IsRest: true);
@@ -70,7 +71,7 @@ public static class ProsodyToneGenerator
                 var unit = DeterministicRandom.Unit01(seed, phonemeIndex, PitchSalt);
                 var frequency = range.MinHz + unit * (range.MaxHz - range.MinHz);
 
-                tones.Add(new ProsodyTone(frequency, range.DurationBeats, ToneVelocity, IsRest: false));
+                tones.Add(new ProsodyTone(frequency, range.DurationBeats, ToneVelocity, IsRest: false, range.Class));
                 phonemeIndex++;
             }
         }

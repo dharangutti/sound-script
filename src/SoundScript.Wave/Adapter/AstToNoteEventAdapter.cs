@@ -309,11 +309,25 @@ public static class AstToNoteEventAdapter
         return (startSeconds, velocity);
     }
 
+    // Formant-ish overtone ratio/level stacked onto a vowel's fundamental —
+    // a crude second-formant echo, not a real formant filter bank.
+    private const double VowelFormantRatio = 2.5;
+    private const double VowelFormantVelocityScale = 0.35;
+
+    private static readonly Adsr PlosiveEnvelope = new(Attack: 0.002, Decay: 0.015, Sustain: 0.0, Release: 0.01);
+    private static readonly Adsr FricativeEnvelope = new(Attack: 0.01, Decay: 0.02, Sustain: 0.6, Release: 0.05);
+
     /// <summary>
     /// v3 prosody: expands a <c>speak</c> directive into a deterministic
     /// NoteEvent sequence on the default track, advancing its beat cursor so
     /// speech composes sequentially with any surrounding top-level notes.
     /// Beats convert to seconds through the same tempo map as everything else.
+    ///
+    /// Each phoneme's <see cref="PhonemeClass"/> picks its timbre (see
+    /// PhonemeFrequencyTable for the class → band rationale): vowels stack a
+    /// soft formant-ish overtone on the fundamental, nasals/liquids stay a
+    /// plain tone, and plosives/fricatives synthesize from deterministic
+    /// filtered noise (<see cref="OscillatorType.Noise"/>) instead of a tone.
     /// </summary>
     private static void EmitSpeech(TrackState track, SpeakNode speak, ExecutionContext context)
     {
@@ -322,15 +336,64 @@ public static class AstToNoteEventAdapter
             if (!tone.IsRest)
             {
                 var startBeat = track.CurrentBeat;
-                track.Notes.Add(new NoteEvent(
-                    FrequencyHz: tone.FrequencyHz,
-                    StartTimeSeconds: BeatsToSeconds(context, 0, startBeat),
-                    DurationSeconds: BeatsToSeconds(context, startBeat, tone.DurationBeats),
-                    Velocity: tone.Velocity,
-                    Timbre: TimbreParams.Default));
+                var startSeconds = BeatsToSeconds(context, 0, startBeat);
+                var durationSeconds = BeatsToSeconds(context, startBeat, tone.DurationBeats);
+
+                foreach (var note in BuildSpeechNotes(tone, startSeconds, durationSeconds))
+                    track.Notes.Add(note);
             }
 
             AdvanceBeat(track, tone.DurationBeats);
+        }
+    }
+
+    private static IEnumerable<NoteEvent> BuildSpeechNotes(ProsodyTone tone, double startSeconds, double durationSeconds)
+    {
+        switch (tone.Class)
+        {
+            case PhonemeClass.Vowel:
+                yield return new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz,
+                    StartTimeSeconds: startSeconds,
+                    DurationSeconds: durationSeconds,
+                    Velocity: tone.Velocity,
+                    Timbre: TimbreParams.Default with { Oscillator = OscillatorType.Triangle });
+                yield return new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz * VowelFormantRatio,
+                    StartTimeSeconds: startSeconds,
+                    DurationSeconds: durationSeconds,
+                    Velocity: tone.Velocity * VowelFormantVelocityScale,
+                    Timbre: TimbreParams.Default);
+                break;
+
+            case PhonemeClass.Plosive:
+                yield return new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz,
+                    StartTimeSeconds: startSeconds,
+                    DurationSeconds: durationSeconds,
+                    Velocity: tone.Velocity,
+                    Timbre: TimbreParams.Default with { Oscillator = OscillatorType.Noise, Envelope = PlosiveEnvelope });
+                break;
+
+            case PhonemeClass.Fricative:
+                yield return new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz,
+                    StartTimeSeconds: startSeconds,
+                    DurationSeconds: durationSeconds,
+                    Velocity: tone.Velocity,
+                    Timbre: TimbreParams.Default with { Oscillator = OscillatorType.Noise, Envelope = FricativeEnvelope });
+                break;
+
+            case PhonemeClass.Nasal:
+            case PhonemeClass.Liquid:
+            default:
+                yield return new NoteEvent(
+                    FrequencyHz: tone.FrequencyHz,
+                    StartTimeSeconds: startSeconds,
+                    DurationSeconds: durationSeconds,
+                    Velocity: tone.Velocity,
+                    Timbre: TimbreParams.Default);
+                break;
         }
     }
 
