@@ -2,11 +2,13 @@ using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Compose;
+using SoundScript.Core.Ast;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
+using SoundScript.Wave;
 
 namespace SoundScript.Playground.Pages;
 
@@ -44,6 +46,20 @@ public partial class Playground
   private string? SsText { get; set; }
   private bool IsRunning { get; set; }
 
+  // UNDER DEVELOPMENT — v3: true only when the most recent Run actually took
+  // the SoundScript.Wave rail (the parsed AST contained an EffectNode or
+  // SpeakNode). Output-pane UI that's specific to that rail must gate on
+  // this rather than rendering unconditionally — see the wave safeguards
+  // doc's grammar-isolation rule.
+  private bool UsedWaveBackend { get; set; }
+
+  // UNDER DEVELOPMENT — v3: memoizes SoundScript.Wave renders by the exact
+  // script text. Safe because the wave backend is fully deterministic and
+  // every seed/effect parameter (speak's seed=, humanize's seed=, effect
+  // delay/filter params) is textually part of ScriptText — there is no
+  // hidden input that could make two identical keys render differently.
+  private readonly Dictionary<string, byte[]> _waveRenderCache = new();
+
   private void LoadSelectedExample()
   {
     switch (SelectedExampleKey)
@@ -67,6 +83,9 @@ public partial class Playground
       case "core-intelligence": LoadIntelligenceExample(); break;
       case "core-multitrack": LoadMultitrackExample(); break;
       case "core-playback": LoadPlaybackExample(); break;
+      case "wave-effects": LoadWaveEffectsExample(); break;
+      case "wave-speak": LoadWaveSpeakExample(); break;
+      case "wave-humanize": LoadWaveHumanizeExample(); break;
     }
   }
 
@@ -422,6 +441,50 @@ public partial class Playground
     ClearState();
   }
 
+  // UNDER DEVELOPMENT — v3: wave-only examples. These use grammar
+  // (effect/speak, humanize's named form) that the MIDI backend rejects with
+  // a clear error — Run routes them through SoundScript.Wave automatically
+  // because their AST contains an EffectNode/SpeakNode (see RunAsync).
+  private void LoadWaveEffectsExample()
+  {
+    ScriptText =
+        """
+        tempo 100
+        track melody {
+            mf
+            C4 q E4 q G4 q C5 h
+        }
+        effect delay time=0.25 feedback=0.35 mix=0.3
+        effect filter type=lowpass cutoff=2200
+        """;
+    ClearState();
+  }
+
+  private void LoadWaveSpeakExample()
+  {
+    ScriptText =
+        """
+        tempo 100
+        speak "hello world" seed=7
+        """;
+    ClearState();
+  }
+
+  private void LoadWaveHumanizeExample()
+  {
+    ScriptText =
+        """
+        tempo 120
+        track melody {
+            humanize timing=0.02 velocity=0.1 seed=42
+            mf
+            C4 q D4 q E4 q F4 q
+        }
+        speak "played by hand" seed=42
+        """;
+    ClearState();
+  }
+
   private async Task ComposeFromTextAsync()
   {
     try
@@ -600,12 +663,25 @@ public partial class Playground
       StatusMessage = null;
       WarningMessages = [];
       MidiBytes = null;
+      WavBytes = null;
+      UsedWaveBackend = false;
 
       if (SourceDiagnostics.ContainsImport(ScriptText))
         WarningMessages.Add("Imports are not supported in the browser playground. Use the CLI (ProgramLoader) for multi-file projects.");
 
       var tokens = new Tokenizer(ScriptText).Tokenize();
       var program = new SoundScript.Parser.Parser(tokens).Parse();
+
+      // Grammar-isolation rule (safeguards doc): the wave rail only kicks in
+      // when the AST actually contains a wave-only directive. Every other
+      // .ss script takes the unchanged MIDI path below — Interpreter.Interpret
+      // would otherwise throw NotSupportedException on EffectNode/SpeakNode.
+      if (ContainsWaveOnlyDirectives(program.Statements))
+      {
+        await RunWaveProgramAsync(program);
+        return;
+      }
+
       var interpreted = Interpreter.Interpret(program, "playground.ss");
       VocalInterpreter.Apply(program, interpreted);
 
@@ -641,12 +717,79 @@ public partial class Playground
       ErrorMessage = ex.Message;
       StatusMessage = null;
       MidiBytes = null;
+      WavBytes = null;
     }
     finally
     {
       IsRunning = false;
       StateHasChanged();
     }
+  }
+
+  // UNDER DEVELOPMENT — v3: renders and plays a program through
+  // SoundScript.Wave (AST -> WAV, no MIDI step) instead of the MIDI rail.
+  // Reuses the exact same WAV playback bridge (SoundScriptAudio/
+  // startWavPlayback) that the Timbre "Render Audio" buttons use below, so
+  // mobile Safari/Chrome's audio-unlock handling isn't duplicated or
+  // bypassed — the click that invoked Run is the unlock gesture.
+  private async Task RunWaveProgramAsync(ProgramNode program)
+  {
+    // Deterministic by construction: every seed/effect parameter that could
+    // affect output (speak's seed=, humanize's seed=, effect delay/filter
+    // params) is textual, inside ScriptText — so keying the cache on the
+    // exact script text can't produce a stale hit for a changed seed.
+    if (!_waveRenderCache.TryGetValue(ScriptText, out var wav))
+    {
+      wav = WaveRenderer.RenderStereoToBytes(program);
+      _waveRenderCache[ScriptText] = wav;
+    }
+
+    WavBytes = wav;
+    UsedWaveBackend = true;
+
+    await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+    await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+    var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+
+    StatusMessage = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step).";
+  }
+
+  // UNDER DEVELOPMENT — v3: grammar-isolation check (safeguards doc) —
+  // recurses into every statement container the parser actually nests
+  // speak/effect under, so a directive buried in a block/sequence/loop body
+  // isn't missed and silently falls through to the MIDI path, where
+  // Interpreter.Interpret would throw NotSupportedException.
+  private static bool ContainsWaveOnlyDirectives(IReadOnlyList<AstNode> statements)
+  {
+    foreach (var statement in statements)
+    {
+      switch (statement)
+      {
+        case EffectNode:
+        case SpeakNode:
+          return true;
+        case TrackNode track:
+          if (ContainsWaveOnlyDirectives(track.Body)) return true;
+          break;
+        case MelodyNode melody:
+          if (ContainsWaveOnlyDirectives(melody.Body)) return true;
+          break;
+        case LoopNode loop:
+          if (ContainsWaveOnlyDirectives(loop.Body)) return true;
+          break;
+        case BlockNode block:
+          if (ContainsWaveOnlyDirectives(block.Body)) return true;
+          break;
+        case SequenceNode sequence:
+          if (ContainsWaveOnlyDirectives(sequence.Body)) return true;
+          break;
+        case PhraseNode phrase:
+          if (ContainsWaveOnlyDirectives(phrase.Body)) return true;
+          break;
+      }
+    }
+
+    return false;
   }
 
   private async Task StopAsync()
@@ -693,5 +836,6 @@ public partial class Playground
     MidiBytes = null;
     WavBytes = null;
     SsText = null;
+    UsedWaveBackend = false;
   }
 }
