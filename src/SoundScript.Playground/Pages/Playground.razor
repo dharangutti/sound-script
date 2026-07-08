@@ -64,6 +64,12 @@
     <div class="panes">
         <section class="pane pane-editor">
             <label class="pane-label" for="script-input">SoundScript</label>
+            <div class="editor-toolbar">
+                <button type="button" class="btn btn-secondary" @onclick="ClearEditor">Clear</button>
+                <button type="button" class="btn btn-secondary" @onclick="ResetEditor">Reset</button>
+                <button type="button" class="btn btn-secondary" @onclick="CopyScriptAsync">Copy</button>
+                <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="DownloadCurrentScriptAsync">Download current script</button>
+            </div>
             <textarea id="script-input"
                       class="script-input"
                       @bind="ScriptText"

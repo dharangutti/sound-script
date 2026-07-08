@@ -57,10 +57,7 @@ window.SoundScriptAudio = (function () {
     }
 
     function download(base64, filename) {
-        const link = document.createElement('a');
-        link.href = `data:audio/wav;base64,${base64}`;
-        link.download = filename;
-        link.click();
+        window.SoundScriptDownload.fromBase64(base64, filename || 'soundscript.wav', 'audio/wav');
     }
 
     return { playWavBytes, stop, download };
