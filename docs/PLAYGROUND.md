@@ -98,6 +98,27 @@ The playground gained a **Wave (.ssw)** preset group (see `Playground.razor`
 | **Seeded humanize + speak** | `humanize timing=/velocity=/seed=` combined with `speak` |
 | **Combined (wave-effects.ssw)** | Exact on-disk [wave-effects.ssw](../examples/wave-effects.ssw) demo |
 | **Full song (full-song-wave.ss)** | Exact on-disk [full-song-wave.ss](../examples/full-song-wave.ss) four-part arrangement |
+| **Speech-only (speech-only-wave.ss)** | Exact on-disk [speech-only-wave.ss](../examples/speech-only-wave.ss) — `speak` only, no MIDI |
+
+## CLI + example reference (Playground UX)
+
+Each **Example** preset and the **Wave** pane dropdown now show metadata below the selector:
+
+| Field | Meaning |
+|-------|---------|
+| **Output rail badge** | MIDI, Wave, Wave (auto), SoundCSS, compose, or prosody |
+| **Playground action** | Which button runs this preset (`Run`, `Render`, etc.) |
+| **Example file link** | GitHub path under `examples/` when a matching on-disk file exists |
+| **CLI steps** | Equivalent `dotnet run --project src/SoundScript.Cli -- …` command(s), with **Copy** |
+
+The collapsible **Text-to-Melody — CLI reference** section lists all seven text workflows, including multi-step pipelines (`compose` → `render`, `compose --emit-ss` → `run`, `compose --wave`, etc.).
+
+Catalog lives in `PlaygroundPresetCatalog.cs`; `PlaygroundPresetsTests.ExampleDropdownKeys_HaveCatalogMetadata` asserts every dropdown `option value` has an entry.
+
+- [ ] Selecting any **Example** preset shows the CLI panel with at least one copyable command
+- [ ] **Text-to-Melody — CLI reference** expands and lists 7 workflows
+- [ ] Wave pane dropdown shows the same CLI panel for the selected wave preset
+- [ ] **Speech-only (speech-only-wave.ss)** loads in both main and Wave dropdowns; CLI shows `wave examples/speech-only-wave.ss`
 
 **Grammar isolation:** the wave badge and alternate pipeline diagram are
 gated on the parsed AST actually containing an `EffectNode`/`SpeakNode` —
@@ -160,7 +181,9 @@ python3 -m http.server 8080
 - [ ] Invalid syntax shows an error in the error panel
 - [ ] V2 preset buttons (Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Patterns, Orchestration) load scripts
 - [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
-- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak, Combined (wave-effects.ssw), Full song (full-song-wave.ss)) load scripts and **Run**/**Render** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
+- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak, Combined (wave-effects.ssw), Full song (full-song-wave.ss), Speech-only (speech-only-wave.ss)) load scripts and **Run**/**Render** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
+- [ ] Example dropdown CLI panel shows linked file + copyable CLI for the selected preset
+- [ ] Text-to-Melody CLI reference lists compose/render/wave multi-step commands
 - [ ] **Compose from text** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`
 - [ ] **Download MIDI** after composing saves a file byte-identical to `soundscript compose "Twinkle twinkle little star"`
 - [ ] **Compose with Prosody** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM (word-level prosody).`

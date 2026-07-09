@@ -47,11 +47,48 @@
                 <option value="wave-humanize">Seeded humanize + speak</option>
                 <option value="wave-effects-combined">Combined (wave-effects.ssw)</option>
                 <option value="wave-full-song">Full song (full-song-wave.ss)</option>
+                <option value="speech-only-wave">Speech-only (speech-only-wave.ss)</option>
             </optgroup>
         </select>
     </div>
 
-    <div class="presets">
+    @if (ActiveMainPreset is not null)
+    {
+        <section class="example-cli-panel" aria-label="Selected example — CLI reference">
+            <div class="example-cli-header">
+                <span class="badge badge-rail">@ActiveMainPreset.OutputRailLabel</span>
+                <span class="example-cli-action">Playground: <strong>@ActiveMainPreset.PlaygroundAction</strong></span>
+            </div>
+            @if (ActiveMainPreset.ExampleFile is not null)
+            {
+                <p class="example-cli-file">
+                    Example file:
+                    <a href="@ActiveMainPreset.ExampleRepoUrl" target="_blank" rel="noopener noreferrer">examples/@ActiveMainPreset.ExampleFile</a>
+                    · <a href="@ActiveMainPreset.DocsUrl" target="_blank" rel="noopener noreferrer">docs catalog</a>
+                </p>
+            }
+            else
+            {
+                <p class="example-cli-file example-cli-muted">No on-disk file — inline Playground preset only.</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(ActiveMainPreset.Notes))
+            {
+                <p class="example-cli-notes">@ActiveMainPreset.Notes</p>
+            }
+            <ol class="cli-steps">
+                @for (var i = 0; i < ActiveMainPreset.CliSteps.Count; i++)
+                {
+                    var line = ActiveMainPreset.CliSteps[i];
+                    <li>
+                        <code class="cli-line">@line</code>
+                        <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
+                    </li>
+                }
+            </ol>
+        </section>
+    }
+
+    <div class="presets presets-text">
         <span class="preset-label">Text-to-Melody:</span>
         <input class="compose-input"
                @bind="ComposeText"
@@ -64,6 +101,38 @@
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderWaveFromTextAsync">Render Wave</button>
         <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="RenderWaveWithProsodyAsync">Render Wave (Prosody)</button>
     </div>
+
+    <details class="example-cli-panel text-workflows">
+        <summary>Text-to-Melody — CLI reference (@PlaygroundPresetCatalog.AllTextWorkflows.Count workflows)</summary>
+        @foreach (var workflow in PlaygroundPresetCatalog.AllTextWorkflows)
+        {
+            <article class="text-workflow">
+                <div class="example-cli-header">
+                    <span class="badge badge-rail">@workflow.OutputRailShortLabel</span>
+                    <span class="example-cli-action">Button: <strong>@workflow.PlaygroundButton</strong></span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(workflow.Notes))
+                {
+                    <p class="example-cli-notes">@workflow.Notes</p>
+                }
+                <ol class="cli-steps">
+                    @foreach (var line in workflow.CliSteps)
+                    {
+                        <li>
+                            <code class="cli-line">@line</code>
+                            <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
+                        </li>
+                    }
+                </ol>
+            </article>
+        }
+        <p class="example-cli-file">
+            Default compose text matches the input above (<code>@PlaygroundPresetCatalog.DefaultComposeText</code>).
+            Replace quoted text in CLI commands when using your own lyrics.
+            · <a href="@PlaygroundPresetCatalog.DocsExamplesUrl" target="_blank" rel="noopener noreferrer">examples catalog</a>
+            · <a href="/doc.html?p=cli.md" target="_blank" rel="noopener noreferrer">CLI reference</a>
+        </p>
+    </details>
 
     <div class="panes">
         <section class="pane pane-editor">
@@ -235,15 +304,51 @@
             identical script text always produces byte-identical audio.
         </p>
 
-        <select @bind="SelectedWaveExampleKey">
+        <select @bind="SelectedWaveExampleKey" @bind:after="RefreshWavePresetInfo">
             <option value="wave-effects">Effects (delay + lowpass)</option>
             <option value="wave-speak">Speak (phoneme tones)</option>
             <option value="wave-humanize">Humanize</option>
             <option value="wave-effects-combined">Combined (wave-effects.ssw)</option>
             <option value="wave-full-song">Full song (full-song-wave.ss)</option>
+            <option value="speech-only-wave">Speech-only (speech-only-wave.ss)</option>
             <option value="showcase-jingle-bells-wave">Jingle Bells — Wave rail</option>
         </select>
         <button type="button" class="btn btn-secondary" @onclick="LoadSelectedWaveExample">Load</button>
+
+        @if (ActiveWavePreset is not null)
+        {
+            <section class="example-cli-panel example-cli-panel-wave" aria-label="Wave example — CLI reference">
+                <div class="example-cli-header">
+                    <span class="badge badge-rail">@ActiveWavePreset.OutputRailLabel</span>
+                    <span class="example-cli-action">Playground: <strong>@ActiveWavePreset.PlaygroundAction</strong></span>
+                </div>
+                @if (ActiveWavePreset.ExampleFile is not null)
+                {
+                    <p class="example-cli-file">
+                        Example file:
+                        <a href="@ActiveWavePreset.ExampleRepoUrl" target="_blank" rel="noopener noreferrer">examples/@ActiveWavePreset.ExampleFile</a>
+                        · <a href="@ActiveWavePreset.DocsUrl" target="_blank" rel="noopener noreferrer">docs catalog</a>
+                    </p>
+                }
+                else
+                {
+                    <p class="example-cli-file example-cli-muted">No on-disk file — inline Playground preset only.</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(ActiveWavePreset.Notes))
+                {
+                    <p class="example-cli-notes">@ActiveWavePreset.Notes</p>
+                }
+                <ol class="cli-steps">
+                    @foreach (var line in ActiveWavePreset.CliSteps)
+                    {
+                        <li>
+                            <code class="cli-line">@line</code>
+                            <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
+                        </li>
+                    }
+                </ol>
+            </section>
+        }
 
         <textarea class="script-input" @bind="WaveScriptText" spellcheck="false"></textarea>
 

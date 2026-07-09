@@ -1,15 +1,25 @@
+using System.Text.RegularExpressions;
 using SoundScript.Parser;
+using SoundScript.Playground;
 using SoundScript.Wave;
 using Xunit;
 using SoundScriptParser = SoundScript.Parser.Parser;
 
 namespace SoundScript.Tests;
 
-public class PlaygroundPresetsTests
+public partial class PlaygroundPresetsTests
 {
   private static readonly string PlaygroundCodePath = Path.GetFullPath(Path.Combine(
       AppContext.BaseDirectory,
       "../../../../../src/SoundScript.Playground/Pages/Playground.razor.cs"));
+
+  private static readonly string PlaygroundMarkupPath = Path.GetFullPath(Path.Combine(
+      AppContext.BaseDirectory,
+      "../../../../../src/SoundScript.Playground/Pages/Playground.razor"));
+
+  private static readonly string ExamplesRoot = Path.GetFullPath(Path.Combine(
+      AppContext.BaseDirectory,
+      "../../../../../examples"));
 
   [Fact]
   public void BrowserPresets_DoNotUseImport()
@@ -38,6 +48,46 @@ public class PlaygroundPresetsTests
   // Playground offers must actually render through SoundScript.Wave. Catches a
   // preset that was hand-authored against grammar the wave adapter can't take
   // (e.g. the pre-fix jingle-bells example, which threw on `play <pattern>`).
+  [Fact]
+  public void ExampleDropdownKeys_HaveCatalogMetadata()
+  {
+    var markup = File.ReadAllText(PlaygroundMarkupPath);
+    var keys = ExtractOptionValues(markup).Distinct(StringComparer.Ordinal).OrderBy(k => k).ToList();
+
+    Assert.NotEmpty(keys);
+    foreach (var key in keys)
+    {
+      var info = PlaygroundPresetCatalog.TryGet(key);
+      Assert.NotNull(info);
+      Assert.Equal(key, info!.Key);
+      Assert.False(string.IsNullOrWhiteSpace(info.Title));
+      Assert.False(string.IsNullOrWhiteSpace(info.PlaygroundAction));
+      Assert.NotEmpty(info.CliSteps);
+      Assert.All(info.CliSteps, step => Assert.StartsWith(PlaygroundPresetCatalog.CliPrefix, step));
+    }
+  }
+
+  [Fact]
+  public void TextWorkflows_ExposeMultiStepCliWhereNeeded()
+  {
+    var workflows = PlaygroundPresetCatalog.AllTextWorkflows;
+
+    Assert.Equal(7, workflows.Count);
+    Assert.Contains(workflows, w => w.Key == "compose-soundcss" && w.CliSteps.Count == 2);
+    Assert.Contains(workflows, w => w.Key == "compose-emit-ss" && w.CliSteps.Count == 2);
+    Assert.All(workflows, w => Assert.NotEmpty(w.CliSteps));
+  }
+
+  [Fact]
+  public void CatalogLinkedExampleFiles_ExistOnDisk()
+  {
+    foreach (var info in PlaygroundPresetCatalog.AllPresets.Where(p => p.ExampleFile is not null))
+    {
+      var path = Path.Combine(ExamplesRoot, info.ExampleFile!);
+      Assert.True(File.Exists(path), $"Preset '{info.Key}' links to missing examples/{info.ExampleFile}");
+    }
+  }
+
   [Fact]
   public void WavePresets_RenderThroughTheWaveRail()
   {
@@ -85,4 +135,13 @@ public class PlaygroundPresetsTests
 
     return scripts;
   }
+
+  private static IEnumerable<string> ExtractOptionValues(string razorMarkup)
+  {
+    foreach (Match match in OptionValueRegex().Matches(razorMarkup))
+      yield return match.Groups[1].Value;
+  }
+
+  [GeneratedRegex("option value=\"([^\"]+)\"", RegexOptions.CultureInvariant)]
+  private static partial Regex OptionValueRegex();
 }

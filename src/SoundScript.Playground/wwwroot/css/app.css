@@ -145,6 +145,120 @@ a:hover { text-decoration: underline; }
     outline-offset: 2px;
 }
 
+.example-cli-panel {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.example-cli-panel.text-workflows {
+    margin-bottom: 1.25rem;
+}
+
+.example-cli-panel.text-workflows > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+}
+
+.example-cli-panel.text-workflows[open] > summary {
+    margin-bottom: 1rem;
+}
+
+.example-cli-panel-wave {
+    margin-top: 0.75rem;
+}
+
+.example-cli-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.badge-rail {
+    color: var(--accent-2);
+    background: rgba(129, 140, 248, 0.12);
+    border-color: rgba(129, 140, 248, 0.3);
+}
+
+.example-cli-action {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.example-cli-file {
+    margin: 0 0 0.5rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+.example-cli-file code {
+    font-size: 0.85em;
+}
+
+.example-cli-muted {
+    font-style: italic;
+}
+
+.example-cli-notes {
+    margin: 0 0 0.65rem;
+    font-size: 0.88rem;
+    color: var(--text);
+}
+
+.text-workflow {
+    padding: 0.65rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.text-workflow:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.cli-steps {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.cli-steps li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cli-line {
+    flex: 1 1 16rem;
+    display: block;
+    padding: 0.35rem 0.55rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #c7d2e8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.btn-copy-cli {
+    flex: 0 0 auto;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.55rem;
+}
+
 .panes {
     display: grid;
     grid-template-columns: 1fr 1fr;
