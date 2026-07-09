@@ -551,34 +551,32 @@ public partial class Playground
     ClearState();
   }
 
-  // The Wave-rail (.ssw) counterpart of LoadJingleBellsExample. Same tune and
-  // rhythm, but authored strictly against grammar SoundScript.Wave actually
-  // honors (verified against AstToNoteEventAdapter): tempo/time, reusable
-  // blocks + play, multi-track (melody + chord harmony + root bass), chords
-  // (Cmaj/Fmaj/G7 render as stacked tones via EmitChord), the named-form
-  // humanize with an explicit seed= (wave-native jitter), and the wave-only
-  // effect chain (a light delay for sleigh-bell shimmer, plus a gentle
-  // lowpass). Wave has no voice/sing rail, so the lyrics are carried by
-  // `speak "..."` directives instead: each phrase renders as deterministic
-  // prosody tones baked into the WAV AND, in the Playground, fires real
-  // browser speechSynthesis as a playback-only overlay (see RunWaveProgramAsync
-  // / WaveSpeechTimeline). The three speak phrases sit on the top-level
-  // (default) track with a `rest w` pad so their onsets line up with the
-  // melody phrases (~beats 0 / 16 / 32); speech beat-length is independent of
-  // the melody's, so this is deliberately "reasonably close," not sample-exact.
+  // The Wave-rail (.ssw) counterpart of LoadJingleBellsExample — a full
+  // four-part "Jingle Bells" that now renders directly to WAV with every part
+  // audible. It exercises the multi-part audibility fixes end to end:
+  //   - melody notes live inside phrase { } blocks (the phrase bodies are now
+  //     entered, not skipped), with `play hook`/`play funline` resolved there;
+  //   - the choir line is a real voice { sing "..." } block, rendered on its
+  //     explicit per-syllable pitches (phoneme-shaped tones baked into the WAV);
+  //   - the harmony ends on `play strumPat Cmaj w`, a strummed chord.
+  // Plus the wave-native surface: named-form humanize with an explicit seed=,
+  // and the wave-only master effect chain (a light delay for sleigh-bell
+  // shimmer, then a gentle lowpass). Fully deterministic — every seed/effect
+  // parameter is textual.
   //
-  // Intentionally NOT used here because the wave adapter silently drops them
-  // (would look rich in source, sound thin): layer/instrument (no per-track
-  // timbre), gain, phrase { curve/transition/crescendo } (phrase bodies are
-  // skipped — their notes would never sound), voice/sing, orchestration/
-  // double/reinforce, and pattern/strum (a `play <pattern>` actively throws on
-  // this rail). Melody notes therefore live directly in blocks, not phrases.
+  // Still deferred on this rail (captured but not shaping the audio): per-track
+  // instrument/layer timbre, gain balancing, phrase curve/transition/crescendo
+  // shaping, vocal choir coloring, and general pattern arpeggio *sequencing*
+  // (only the strum-a-chord form of `play <pattern> <chord>` is honored). The
+  // parts are all audible; they aren't yet timbrally distinct or mix-balanced.
   private void LoadJingleBellsWaveExample()
   {
     WaveScriptText =
         """
         tempo 132
         time 4/4
+
+        pattern strumPat { strum }
 
         block hook {
             E4 q E4 q E4 h
@@ -596,17 +594,30 @@ public partial class Playground
 
         track melody {
             humanize timing=0.012 velocity=0.06 seed=7
-            mf
-            play hook
-            play funline
-            play hook
+            phrase {
+                curve soft
+                transition smooth
+                mf
+                play hook
+            }
+            phrase {
+                curve swell
+                f
+                play funline
+            }
+            phrase {
+                curve fade
+                mf
+                play hook
+            }
         }
 
         track harmony {
             p
             Cmaj w Cmaj w Cmaj w Cmaj w
             Fmaj w Fmaj w G7 w Cmaj w
-            Cmaj w Cmaj w G7 w Cmaj w
+            Cmaj w Cmaj w G7 w
+            play strumPat Cmaj w
         }
 
         track bass {
@@ -616,10 +627,14 @@ public partial class Playground
             C2 w C2 w G2 w C2 w
         }
 
-        speak "Jingle bells jingle bells jingle all the way" seed=13
-        rest w
-        speak "Oh what fun it is to ride in a one horse open sleigh" seed=13
-        speak "Jingle bells jingle bells jingle all the way" seed=13
+        voice lead {
+            vocal choir
+            mf
+            sing "Jingle bells jingle bells jingle all the way" E4 q E4 q E4 h E4 q E4 q E4 h E4 q G4 q C4:1.5 D4 e E4 h
+            rest h
+            sing "Oh what fun it is to ride in a one horse open sleigh" F4 q F4 q F4 q F4 q F4 q E4 q E4 q E4 q E4 q G4 q G4 q F4 q D4 q C4 for 3
+            sing "Jingle bells jingle bells jingle all the way" E4 q E4 q E4 h E4 q E4 q E4 h E4 q G4 q C4:1.5 D4 e E4 h
+        }
 
         effect delay time=0.18 feedback=0.25 mix=0.2
         effect filter type=lowpass cutoff=3200

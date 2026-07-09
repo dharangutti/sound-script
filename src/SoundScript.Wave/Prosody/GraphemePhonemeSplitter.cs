@@ -57,6 +57,30 @@ internal static class GraphemePhonemeSplitter
         ('x', ["k", "s"]),
     ];
 
+    /// <summary>
+    /// Classifies a sung syllable for timbre selection. A sung note sustains on
+    /// its vowel nucleus, so this returns the class of the first vocalic phoneme
+    /// when the syllable has one — that keeps the syllable's rendered tone a
+    /// sustained, formant-stacked vowel rather than a short consonant burst.
+    /// A vowel-less fragment falls back to its leading phoneme's class.
+    /// Reuses <see cref="Split"/> + <see cref="PhonemeFrequencyTable"/> — no new
+    /// classification rules.
+    /// </summary>
+    internal static PhonemeClass ClassifyLead(string syllable)
+    {
+        PhonemeClass? lead = null;
+
+        foreach (var phoneme in Split(syllable))
+        {
+            var phonemeClass = PhonemeFrequencyTable.Lookup(phoneme).Class;
+            lead ??= phonemeClass;
+            if (phonemeClass == PhonemeClass.Vowel)
+                return PhonemeClass.Vowel;
+        }
+
+        return lead ?? PhonemeClass.Nasal;
+    }
+
     /// <summary>Splits one word into canonical phoneme symbols.</summary>
     internal static IReadOnlyList<string> Split(string word)
     {
