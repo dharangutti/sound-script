@@ -1,4 +1,4 @@
-# SoundScript Playground — Verification Checklist (V7)
+# SoundScript Playground — Verification Checklist (V8)
 
 Use this checklist after building or deploying the playground.
 

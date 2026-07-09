@@ -212,23 +212,24 @@ Rendered twinkle.mid with examples/default.ssc to twinkle.wav.
 MIDI is never modified — the renderer **reads** note events and adds spectral
 envelopes via the [timbre engine](timbre-engine.md).
 
-## `wave` — script to WAV (V7)
+## `wave` — script to WAV (V8)
 
 ```
 soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]
+  [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>]
+  [--tts-dir <folder>]
 ```
 
 Renders a script directly through [SoundScript.Wave](wave-grammar.md) with no
-MIDI step. Accepts both standard `.ss` scripts (instrumental + vocal tracks)
-and wave-grammar `.ssw` scripts (`effect`, `speak`, named `humanize`).
+MIDI step. V8 adds **vocal stem mixing** — your own recordings in the exported
+WAV (see [whats-new-v8.md](whats-new-v8.md)).
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- wave examples/full-song-wave.ss jingle.wav
-dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw effects.wav --stereo
-```
-
-```
-Rendered examples/full-song-wave.ss directly to jingle.wav (no MIDI step).
+dotnet run --project src/SoundScript.Cli -- wave examples/wave-vocal-stem.ssw vocal.wav
+dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
+  --vocal my-recording.wav --vocal-gain=0.9
+dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav --tts-dir vocal-stems/
 ```
 
 | Flag / argument | Required | Purpose |
@@ -236,6 +237,10 @@ Rendered examples/full-song-wave.ss directly to jingle.wav (no MIDI step).
 | `script.ss\|script.ssw` | yes | Input script path |
 | `output.wav` | no | Output path (default: `output.wav` in cwd) |
 | `--stereo` | no | Write stereo WAV instead of mono |
+| `--vocal` | no | Mix a full vocal stem WAV (path relative to cwd or absolute) |
+| `--vocal-at` | no | Start beat for `--vocal` (default: `0`) |
+| `--vocal-gain` | no | Linear gain for `--vocal` (default: `1.0`) |
+| `--tts-dir` | no | Folder of pre-rendered WAVs mapped to each `speak` phrase (slug filenames) |
 
 **Flag ordering:** place `[output.wav]` immediately after the script path, before
 `--stereo`. `wave script.ss --stereo out.wav` ignores the custom path and uses

@@ -1,4 +1,4 @@
-# SoundScript Examples (V7)
+# SoundScript Examples (V8)
 
 Runnable example scripts for every major feature.
 
@@ -41,7 +41,18 @@ dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
 
 → [soundcss.md](soundcss.md) · [timbre-engine.md](timbre-engine.md) · [cli.md](cli.md#render--midi-to-audio-v4)
 
-## SoundScript.Wave Examples (V7)
+## SoundScript.Wave Examples (V8)
+
+| File | Demonstrates |
+|------|--------------|
+| [wave-effects.ssw](../examples/wave-effects.ssw) | Combined effects + speak demo |
+| [wave-speak.ssw](../examples/wave-speak.ssw) | `speak` prosody tones |
+| [wave-humanize.ssw](../examples/wave-humanize.ssw) | Seeded humanize + speak |
+| [full-song-wave.ss](../examples/full-song-wave.ss) | Four-part arrangement via wave backend |
+| [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech-only `speak` song |
+| [wave-vocal-stem.ssw](../examples/wave-vocal-stem.ssw) | **V8:** `speak sample=` with [vocal-stems/hello-world.wav](../examples/vocal-stems/hello-world.wav) |
+
+→ [wave-grammar.md](wave-grammar.md) · [whats-new-v8.md](whats-new-v8.md) · [cli.md](cli.md#wave--script-to-wav-v8)
 
 Wave examples render `.ss` or `.ssw` scripts directly to WAV — no MIDI step.
 The Playground also offers matching presets under **Wave (.ssw)**.
