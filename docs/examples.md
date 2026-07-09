@@ -52,6 +52,7 @@ The Playground also offers matching presets under **Wave (.ssw)**.
 | [wave-speak.ssw](../examples/wave-speak.ssw) | `speak` prosody tones only | `... wave examples/wave-speak.ssw` |
 | [wave-humanize.ssw](../examples/wave-humanize.ssw) | Seeded `humanize` + `speak` | `... wave examples/wave-humanize.ssw` |
 | [full-song-wave.ss](../examples/full-song-wave.ss) | Four-part song (standard `.ss` via wave backend) | `... wave examples/full-song-wave.ss jingle.wav` |
+| [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech + vocal song without MIDI | `... wave examples/speech-only-wave.ss speech.wav` |
 
 Add `--stereo` for stereo WAV output:
 

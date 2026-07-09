@@ -113,6 +113,7 @@ MidiGenerator → output.mid
 | [examples/wave-speak.ssw](examples/wave-speak.ssw) | Wave grammar — `speak` prosody tones |
 | [examples/wave-humanize.ssw](examples/wave-humanize.ssw) | Wave grammar — seeded humanize + speak |
 | [examples/full-song-wave.ss](examples/full-song-wave.ss) | Four-part song rendered via the wave backend |
+| [examples/speech-only-wave.ss](examples/speech-only-wave.ss) | Speech + vocal song without a MIDI step |
 
 → [docs/examples.md](docs/examples.md)
 
