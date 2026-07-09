@@ -4,7 +4,7 @@ using SoundScript.Core.Ast;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Voice;
-using SoundScript.Voice.Phonetics;
+using SoundScript.Core.Phonetics;
 using Xunit;
 using SoundScriptParser = SoundScript.Parser.Parser;
 

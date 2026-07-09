@@ -1,4 +1,4 @@
-namespace SoundScript.Voice.Phonetics;
+namespace SoundScript.Core.Phonetics;
 
 /// <summary>One syllable of a lyric line, ready to bind to a note.</summary>
 public readonly record struct LyricSyllable(string Text, bool IsWordEnd);
@@ -27,12 +27,6 @@ public static class LyricAligner
         return result;
     }
 
-    /// <summary>
-    /// Aligns syllables to <paramref name="noteCount"/> slots. Slots past the
-    /// syllable stream are melisma continuations (empty text). If the stream is
-    /// longer than the slots, the tail is joined into the last slot and
-    /// <paramref name="overflowed"/> is set.
-    /// </summary>
     public static IReadOnlyList<LyricSyllable?> Align(
         IReadOnlyList<LyricSyllable> syllables,
         int noteCount,

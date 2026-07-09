@@ -6,7 +6,9 @@
 // WaveV2Tests, and WaveV3Tests are intentionally untouched; their passing
 // unmodified proves the pre-v4 paths survived.
 using System.Linq;
+using SoundScript.Core;
 using SoundScript.Core.Ast;
+using SoundScript.Core.Phonetics;
 using SoundScript.Parser;
 using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
@@ -157,10 +159,10 @@ public class WaveV4Tests
     }
 
     [Fact]
-    public void Sing_SyllableNoteMismatch_AlignsFirstMinAndStillRenders()
+    public void Sing_SyllableNoteMismatch_UsesMelismaAndStillRenders()
     {
-        // Two syllables ("hel·lo"), three notes → align the first two 1:1,
-        // drop the surplus note; the line still renders (no crash, no silence).
+        // Two syllables ("hel·lo"), three notes → align with melisma on the
+        // third note; all three notes still render (matches VocalInterpreter).
         const string source = """
             voice lead {
                 sing "hello" C4 q E4 q G4 q
@@ -170,10 +172,11 @@ public class WaveV4Tests
         var notes = AstToNoteEventAdapter.Convert(ParseSsw(source))["lead"];
         Assert.NotEmpty(notes);
 
-        // Beat cursor only advanced for the two aligned notes (2 quarters), so
-        // no rendered event starts at/after the third note's beat (0.5s @ 120).
-        var latestStart = notes.Max(n => n.StartTimeSeconds);
-        Assert.True(latestStart < 1.0, $"Dropped note appears to have advanced the cursor: {latestStart}");
+        var distinctOnsets = notes
+            .Select(n => Math.Round(n.StartTimeSeconds, 3))
+            .Distinct()
+            .Count();
+        Assert.True(distinctOnsets >= 3, $"Expected three note onsets (melisma included), got {distinctOnsets}");
     }
 
     [Fact]
@@ -200,17 +203,17 @@ public class WaveV4Tests
     [InlineData("hello", 2)]
     [InlineData("jingle", 2)]
     [InlineData("Jingle bells jingle bells", 6)]
-    public void SyllableSplitter_CountsMatchTheCommonCase(string lyric, int expectedCount)
+    public void LyricAligner_CountsMatchTheCommonCase(string lyric, int expectedCount)
     {
-        Assert.Equal(expectedCount, SyllableSplitter.Split(lyric).Count);
+        Assert.Equal(expectedCount, LyricAligner.ToSyllables(lyric).Count);
     }
 
     [Fact]
-    public void SyllableSplitter_IsDeterministic()
+    public void LyricAligner_IsDeterministic()
     {
         Assert.Equal(
-            SyllableSplitter.Split("Jingle all the way"),
-            SyllableSplitter.Split("Jingle all the way"));
+            LyricAligner.ToSyllables("Jingle all the way"),
+            LyricAligner.ToSyllables("Jingle all the way"));
     }
 
     // ---- Bug 3: play <pattern> <chord> <duration> strums instead of throwing ----

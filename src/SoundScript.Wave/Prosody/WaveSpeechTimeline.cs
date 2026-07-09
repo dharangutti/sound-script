@@ -1,6 +1,7 @@
 // UNDER DEVELOPMENT — v3
 using SoundScript.Core;
 using SoundScript.Core.Ast;
+using SoundScript.Core.Phonetics;
 
 namespace SoundScript.Wave.Prosody;
 
@@ -22,8 +23,8 @@ public sealed record WaveSpeechWord(string Text, double StartMs, double Duration
 
 /// <summary>
 /// Walks the same unmodified AST as <see cref="Adapter.AstToNoteEventAdapter"/>
-/// and produces one <see cref="WaveSpeechWord"/> per <c>speak "..."</c>
-/// directive, timed at the beat cursor where that directive's prosody tones are
+/// and produces <see cref="WaveSpeechWord"/> entries for <c>speak "..."</c>
+/// directives and word-level entries for <c>voice { sing ... }</c> lines,
 /// emitted into the WAV. This is a playback-only overlay: it does not affect the
 /// rendered audio bytes in any way (the prosody tones stay in the WAV), so it
 /// leaves WAV determinism untouched.
@@ -113,9 +114,13 @@ public static class WaveSpeechTimeline
                 case SpeakNode speak:
                     EmitSpeech(GetDefaultTrack(), speak, context, words);
                     break;
+                case VoiceNode voice:
+                    ExecuteVoiceStatements(GetOrCreateTrack(tracks, trackOrder, voice.Name), voice.Body, context, words);
+                    break;
             }
         }
 
+        words.Sort((a, b) => a.StartMs.CompareTo(b.StartMs));
         return words;
     }
 
@@ -210,6 +215,102 @@ public static class WaveSpeechTimeline
         words.Add(new WaveSpeechWord(speak.Text, startMs, durationMs, NeutralMidi));
 
         AdvanceBeat(track, totalBeats);
+    }
+
+    private static void ExecuteVoiceStatements(
+        TrackCursor track, IReadOnlyList<AstNode> body, BuildContext context, List<WaveSpeechWord> words)
+    {
+        foreach (var statement in body)
+        {
+            switch (statement)
+            {
+                case RestNode rest:
+                    AdvanceBeat(track, rest.Rest.DurationBeats);
+                    break;
+                case SingNode sing:
+                    EmitSingWords(track, sing, context, words);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Emits one <see cref="WaveSpeechWord"/> per spoken word in a <c>sing</c>
+    /// line, mirroring <see cref="SoundScript.Voice.VocalSpeechTimeline"/> timing
+    /// semantics (melisma extends the current word; overflow merges into the
+    /// final note). Pitch comes from the first note of each word.
+    /// </summary>
+    private static void EmitSingWords(
+        TrackCursor track, SingNode sing, BuildContext context, List<WaveSpeechWord> words)
+    {
+        var syllables = LyricAligner.ToSyllables(sing.Lyric);
+        var slots = LyricAligner.Align(syllables, sing.Notes.Count, out _);
+
+        var text = string.Empty;
+        var wordStartBeat = track.CurrentBeat;
+        var wordDurationMs = 0.0;
+        var midi = NeutralMidi;
+        var wordComplete = false;
+        var wordStarted = false;
+
+        for (var i = 0; i < sing.Notes.Count; i++)
+        {
+            var note = sing.Notes[i];
+            var slot = slots[i];
+            var noteStartBeat = track.CurrentBeat;
+            var noteDurationMs = context.TempoMap.BeatsToMilliseconds(noteStartBeat, note.DurationBeats);
+
+            if (slot is null)
+            {
+                if (wordStarted)
+                    wordDurationMs += noteDurationMs;
+
+                AdvanceBeat(track, note.DurationBeats);
+                continue;
+            }
+
+            if (wordComplete || !wordStarted)
+            {
+                FlushSingWord(words, ref text, wordStartBeat, wordDurationMs, midi, context);
+                wordStartBeat = noteStartBeat;
+                wordDurationMs = 0.0;
+                midi = note.ToMidiNumber();
+                wordComplete = false;
+                wordStarted = true;
+            }
+
+            if (slot.Value.Text.Length > 0)
+                text += slot.Value.Text;
+
+            wordDurationMs += noteDurationMs;
+
+            if (slot.Value.IsWordEnd)
+                wordComplete = true;
+
+            AdvanceBeat(track, note.DurationBeats);
+        }
+
+        FlushSingWord(words, ref text, wordStartBeat, wordDurationMs, midi, context);
+    }
+
+    private static void FlushSingWord(
+        List<WaveSpeechWord> words,
+        ref string text,
+        double startBeat,
+        double durationMs,
+        int midi,
+        BuildContext context)
+    {
+        if (text.Length == 0)
+            return;
+
+        words.Add(new WaveSpeechWord(
+            text,
+            context.TempoMap.BeatsToMilliseconds(0, startBeat),
+            durationMs,
+            midi));
+
+        text = string.Empty;
     }
 
     private static void AdvanceBeat(TrackCursor track, double beats) =>

@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
-    <ProjectReference Include="..\SoundScript.Voice\SoundScript.Voice.csproj" />
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
   </ItemGroup>
 
