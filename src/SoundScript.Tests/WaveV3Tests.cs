@@ -665,6 +665,63 @@ public class WaveV3Tests
     }
 
     [Fact]
+    public void Speak_StaysAudibleAgainstABusyBackingTrack()
+    {
+        // Regression for "voice technically present but perceptually buried":
+        // speak content is short, transient phoneme blips scheduled on its own
+        // beat cursor, competing against continuous, sustained melody/harmony/
+        // bass in the same register. The mixdown has no per-track gain and only
+        // a single global down-only peak normalization shared by every track,
+        // so the voice:instrumental loudness ratio is set purely by the vocal
+        // track's own note velocity — which was low enough that a busy
+        // arrangement drowned the voice out (ratio ~0.63, roughly -4 dB) even
+        // though no sample was literally zero. Assert the speech track carries
+        // real energy relative to the full instrumental bed.
+        const string source = """
+            tempo 132
+            time 4/4
+
+            track melody {
+                mf
+                E4 q E4 q E4 h
+                E4 q G4 q C4:1.5 D4 e
+            }
+            track harmony {
+                p
+                Cmaj w Cmaj w
+                Fmaj w G7 w
+            }
+            track bass {
+                mf
+                C2 w C2 w
+                F2 w G2 w
+            }
+
+            speak "jingle bells jingle bells jingle all the way" seed=13
+            """;
+
+        var tracks = AstToNoteEventAdapter.Convert(ParseSsw(source));
+        Assert.True(tracks.ContainsKey("default"), "speech emitted no default track");
+
+        // The mix applies one global normalization scalar to every track alike,
+        // so it cancels out of the ratio: comparing the solo-rendered voice
+        // against the summed instrumental bed measures exactly the audible
+        // balance the listener hears in the export.
+        var voice = Mixer.RenderTrack(tracks["default"], SampleRate);
+        var instrumental = SumBuffers(
+            tracks.Where(t => t.Key != "default")
+                  .Select(t => Mixer.RenderTrack(t.Value, SampleRate)));
+
+        var ratio = FullRms(voice) / FullRms(instrumental);
+
+        // Achieved ratio is ~0.85 (-1.4 dB) with the presence-tuned velocity;
+        // the pre-fix 0.7 velocity yielded ~0.63 (-4 dB). A 0.75 floor sits
+        // between the two, so a regression back to a buried voice fails here.
+        Assert.True(ratio > 0.75,
+            $"Voice is too quiet against the backing track: voice/instrumental RMS ratio {ratio:F3} (expected > 0.75)");
+    }
+
+    [Fact]
     public void Speak_SameSeed_YieldsIdenticalToneSequences()
     {
         var first = ProsodyToneGenerator.Generate("hello world", "default", 7);
@@ -754,6 +811,31 @@ public class WaveV3Tests
             });
 
         return Mixer.RenderTrack([note], SampleRate);
+    }
+
+    private static float[] SumBuffers(IEnumerable<float[]> buffers)
+    {
+        var list = buffers.ToList();
+        var length = list.Count == 0 ? 0 : list.Max(b => b.Length);
+        var summed = new float[length];
+        foreach (var buffer in list)
+            for (var i = 0; i < buffer.Length; i++)
+                summed[i] += buffer[i];
+
+        return summed;
+    }
+
+    // Whole-buffer RMS (no transient skip) — for the voice-presence balance check.
+    private static double FullRms(float[] samples)
+    {
+        if (samples.Length == 0)
+            return 0.0;
+
+        var sum = 0.0;
+        foreach (var s in samples)
+            sum += (double)s * s;
+
+        return Math.Sqrt(sum / samples.Length);
     }
 
     // Skip the filter's initial transient before measuring.
