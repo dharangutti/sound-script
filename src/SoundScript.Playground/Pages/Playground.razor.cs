@@ -9,6 +9,7 @@ using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
 using SoundScript.Wave;
+using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Prosody;
 
 namespace SoundScript.Playground.Pages;
@@ -939,6 +940,104 @@ public partial class Playground
         WarningMessages.Add("Playback failed on this device, but you can still download the file.");
         StatusMessage =
             $"Rendered {syllableCount} syllable(s) offline at {interpreted.Tempo} BPM (SoundCSS timbre, word-level prosody). Playback failed on this device, but you can still download the WAV.";
+      }
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      WavBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task RenderWaveFromTextAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to render: the text is empty.";
+        return;
+      }
+
+      var ast = PhonemeComposer.BuildAst(ComposeText);
+      WavBytes = WaveRenderer.RenderStereoToBytes(ast);
+      UsedWaveBackend = true;
+
+      var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
+      var noteCount = AstToNoteEventAdapter.Convert(ast).Values.Sum(t => t.Count);
+      var tempo = Interpreter.Interpret(ast).Tempo;
+
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) into {noteCount} note(s) via SoundScript.Wave to {duration:F1}s of audio at {tempo} BPM (no MIDI step).";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) via SoundScript.Wave at {tempo} BPM (no MIDI step). Playback failed on this device, but you can still download the WAV.";
+      }
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      WavBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task RenderWaveWithProsodyAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ClearState();
+
+      if (string.IsNullOrWhiteSpace(ComposeText))
+      {
+        ErrorMessage = "Nothing to render: the text is empty.";
+        return;
+      }
+
+      var ast = ProsodyComposer.BuildAst(ComposeText);
+      WavBytes = WaveRenderer.RenderStereoToBytes(ast);
+      UsedWaveBackend = true;
+
+      var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
+      var noteCount = AstToNoteEventAdapter.Convert(ast).Values.Sum(t => t.Count);
+      var tempo = Interpreter.Interpret(ast).Tempo;
+
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", WavBytes);
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) into {noteCount} note(s) via SoundScript.Wave to {duration:F1}s of audio at {tempo} BPM (word-level prosody, no MIDI step).";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage =
+            $"Rendered {syllableCount} syllable(s) via SoundScript.Wave at {tempo} BPM (word-level prosody, no MIDI step). Playback failed on this device, but you can still download the WAV.";
       }
     }
     catch (Exception ex)
