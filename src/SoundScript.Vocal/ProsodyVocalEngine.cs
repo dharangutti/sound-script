@@ -1,7 +1,5 @@
-using SoundScript.Parser;
-using SoundScript.Wave;
 using SoundScript.Wave.Io;
-using SoundScriptParser = SoundScript.Parser.Parser;
+using SoundScript.Wave.Prosody;
 
 namespace SoundScript.Vocal;
 
@@ -18,17 +16,7 @@ public sealed class ProsodyVocalEngine : IVocalEngine
         if (string.IsNullOrWhiteSpace(text))
             throw new ArgumentException("Text must not be empty.", nameof(text));
 
-        var escaped = text.Replace("\\", "\\\\").Replace("\"", "\\\"");
-        var source = $$"""
-            tempo 120
-            speak "{{escaped}}" seed={{options.Seed}}
-            """;
-        var program = new SoundScriptParser(new Tokenizer(source).Tokenize()).Parse();
-
-        using var stream = new MemoryStream();
-        WaveRenderer.RenderTo(program, stream);
-        stream.Position = 0;
-        var samples = WavReader.ReadMono(stream);
+        var samples = ProsodySpeechRenderer.RenderStem(text, options.Seed, tempoBpm: 120);
         samples = VocalStemNormalizer.Normalize(samples, options.OutputGain);
 
         if (VocalStemNormalizer.Peak(samples) <= 1e-6)

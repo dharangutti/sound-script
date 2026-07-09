@@ -92,6 +92,41 @@ public static class ProsodyToneGenerator
         return tones;
     }
 
+    /// <summary>
+    /// Longer phonemes and shorter gaps for offline vocal stems — clearer than
+    /// in-mix prosody when listened to as an isolated WAV file.
+    /// </summary>
+    public static IReadOnlyList<ProsodyTone> GenerateForVocalStem(string text, int? explicitSeed)
+    {
+        var tones = Generate(text, "default", explicitSeed);
+        var result = new List<ProsodyTone>(tones.Count);
+
+        foreach (var tone in tones)
+        {
+            if (tone.IsRest)
+            {
+                result.Add(ProsodyTone.Rest(tone.DurationBeats * 0.15));
+                continue;
+            }
+
+            var durationScale = tone.Class switch
+            {
+                PhonemeClass.Vowel => 2.0,
+                PhonemeClass.Nasal or PhonemeClass.Liquid => 1.6,
+                PhonemeClass.Fricative => 1.35,
+                _ => 1.5,
+            };
+
+            result.Add(tone with
+            {
+                DurationBeats = tone.DurationBeats * durationScale,
+                Velocity = Math.Min(1.0, tone.Velocity * 1.05),
+            });
+        }
+
+        return result;
+    }
+
     private static List<string> SplitWords(string text)
     {
         var words = new List<string>();

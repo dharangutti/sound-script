@@ -49,7 +49,15 @@ public static class VocalBatchExporter
             var filePath = Path.Combine(outputDirectory, fileName);
 
             if (!skipExisting || !File.Exists(filePath))
-                engine.Synthesize(speak.Text, filePath, options);
+            {
+                var stemOptions = new VocalEngineOptions
+                {
+                    Voice = options.Voice,
+                    Seed = speak.Seed ?? options.Seed,
+                    OutputGain = options.OutputGain,
+                };
+                engine.Synthesize(speak.Text, filePath, stemOptions);
+            }
 
             results.Add(new VocalBatchItem(speak.Text, filePath, startSeconds));
         }

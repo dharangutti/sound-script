@@ -97,6 +97,15 @@ dotnet run --project src/SoundScript.Cli -- vocal generate "Jingle bells" \
   --out examples/vocal-stems/jingle-bells.wav --engine prosody
 ```
 
+**Engine choice (no NuGet dependency for prosody):**
+
+| Engine | Dependency | What you hear |
+|--------|------------|---------------|
+| `prosody` | None — built into SoundScript.Wave | Synthetic phoneme tones (buzzy, speech-like blips). Always works offline. |
+| `espeak` | System install: `espeak-ng` or `espeak` on PATH | Real spoken words (robotic TTS). Not a NuGet package — install via your OS package manager. |
+
+`vocal batch` on `jingle-bells-vocal.ssw` creates **two** stems (`jingle-bells-jingle-bells.wav`, `jingle-all-the-way.wav`). The repo may also contain `hello-world.wav` from the separate [wave-vocal-stem.ssw](wave-vocal-stem.ssw) example — that file is a bundled demo tone, not from the Jingle batch.
+
 Stems are peak-normalized for audibility. When `--tts-dir` or `--offline-tts` is
 used, synthetic `speak` phoneme tones are suppressed so only the stem overlays play.
 
