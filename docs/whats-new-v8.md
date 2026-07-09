@@ -30,11 +30,28 @@ dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
 # Map each speak phrase to pre-rendered files in a folder (slug filenames)
 dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
   --tts-dir vocal-stems/
+
+# Generate stems offline, then mix in one step (no cloud API)
+dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
+  --offline-tts prosody --offline-tts-dir vocal-stems/
+```
+
+New **`soundscript vocal`** verb — generate slug-named WAV stems without rendering
+the full mix:
+
+```bash
+# Single phrase (prosody = built-in synthetic; espeak = local espeak-ng if installed)
+dotnet run --project src/SoundScript.Cli -- vocal generate "Hello world" \
+  --out vocal-stems/hello-world.wav --engine prosody --seed=7
+
+# All speak phrases in a script
+dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
+  --out-dir vocal-stems/ --engine prosody --skip-existing
 ```
 
 `--tts-dir` expects files named from speak text (`hello-world.wav` for
-`speak "Hello world"`). Use this for **your own recordings** or files from an
-external TTS tool — API tokens stay in your environment/tooling, not in `.ssw`
+`speak "Hello world"`). Use **your own recordings**, **`vocal batch`**, or
+**`--offline-tts`** — API tokens stay in your environment/tooling, not in `.ssw`
 source.
 
 ## Improved synthetic prosody (fallback)

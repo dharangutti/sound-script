@@ -9,6 +9,7 @@
     <ProjectReference Include="..\SoundScript.Timbre\SoundScript.Timbre.csproj" />
     <ProjectReference Include="..\SoundScript.Prosody\SoundScript.Prosody.csproj" />
     <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
+    <ProjectReference Include="..\SoundScript.Vocal\SoundScript.Vocal.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

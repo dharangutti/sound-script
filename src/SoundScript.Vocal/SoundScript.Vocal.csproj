@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>SoundScript.Vocal</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
+    <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SoundScript.Tests" />
+  </ItemGroup>
+
+</Project>
