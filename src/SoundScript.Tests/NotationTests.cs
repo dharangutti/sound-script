@@ -136,19 +136,12 @@ public class NotationIntegrationTests
     [Fact]
     public void ExistingExamples_RemainValid()
     {
-        var examplePaths = Directory.GetFiles(
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../examples")),
-            "*.ss");
+        var examplePaths = ExampleTestHelpers.EnumerateMidiCompatibleExamples().ToList();
 
         Assert.NotEmpty(examplePaths);
 
         foreach (var path in examplePaths)
         {
-            // shared import libraries (*-lib.ss) define blocks only;
-            // they are exercised through the example that imports them
-            if (Path.GetFileName(path).EndsWith("-lib.ss", StringComparison.OrdinalIgnoreCase))
-                continue;
-
             var loaded = SoundScript.Parser.ProgramLoader.Load(path);
             var interpreted = Interpreter.Interpret(loaded.Program);
             Assert.True(interpreted.Tracks.Count > 0, $"Expected notes in {Path.GetFileName(path)}");
