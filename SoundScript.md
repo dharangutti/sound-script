@@ -53,7 +53,7 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 | Document | Description |
 |----------|-------------|
 | [language-reference.md](language-reference.md) | Complete syntax |
-| [cli.md](cli.md) | CLI reference (`run`, `compose`) |
+| [cli.md](cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`) |
 | [pipeline.md](pipeline.md) | Interpreter pipeline |
 | [architecture.md](architecture.md) | System architecture |
 | [examples.md](examples.md) | Example catalog |

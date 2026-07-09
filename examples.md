@@ -1,4 +1,4 @@
-# SoundScript Examples (V6)
+# SoundScript Examples (V7)
 
 Runnable example scripts for every major feature.
 
@@ -20,6 +20,46 @@ Runnable example scripts for every major feature.
 | [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 | [vocal-song.ss](../examples/vocal-song.ss) | Vocal track — lyrics + phonetic syllable alignment | `... run examples/vocal-song.ss` |
+
+## SoundCSS Examples (V4)
+
+SoundCSS (`.ssc`) styles phonemes for the offline timbre renderer. The default
+stylesheet ships in the repo and mirrors the embedded Playground stylesheet.
+
+| Example | Feature | Run |
+|---------|---------|-----|
+| [default.ssc](../examples/default.ssc) | Default `p` + `aa` phoneme rules (V4.1.1) | Used with `render` (see below) |
+
+Typical pipeline — compose text to MIDI, then render with SoundCSS:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.mid
+dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
+  --css examples/default.ssc --out twinkle.wav \
+  --text "Twinkle twinkle little star"
+```
+
+→ [soundcss.md](soundcss.md) · [timbre-engine.md](timbre-engine.md) · [cli.md](cli.md#render--midi-to-audio-v4)
+
+## SoundScript.Wave Examples (V7)
+
+Wave examples render `.ss` or `.ssw` scripts directly to WAV — no MIDI step.
+The Playground also offers matching presets under **Wave (.ssw)**.
+
+| Example | Feature | Run |
+|---------|---------|-----|
+| [wave-effects.ssw](../examples/wave-effects.ssw) | Combined `humanize` + `speak` + `effect` | `dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw` |
+| [wave-speak.ssw](../examples/wave-speak.ssw) | `speak` prosody tones only | `... wave examples/wave-speak.ssw` |
+| [wave-humanize.ssw](../examples/wave-humanize.ssw) | Seeded `humanize` + `speak` | `... wave examples/wave-humanize.ssw` |
+| [full-song-wave.ss](../examples/full-song-wave.ss) | Four-part song (standard `.ss` via wave backend) | `... wave examples/full-song-wave.ss jingle.wav` |
+
+Add `--stereo` for stereo WAV output:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw effects.wav --stereo
+```
+
+→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v7)
 
 ## Text-to-Melody Examples (V3.1)
 
@@ -125,32 +165,26 @@ Complete scripts backing the [Industrial Applications](https://soundscript.net/i
 | [multitrack-sync.ss](../examples/multitrack-sync.ss) | Multi-track sync |
 | [playback-shaping.ss](../examples/playback-shaping.ss) | Playback shaping |
 
-## Playground Presets (V2)
+## Playground Presets
 
-| Preset | Content |
-|--------|---------|
-| V2 Showcase | Combined imports, patterns, phrases, layers |
-| Imports | Multi-file import demo |
-| Blocks | Named block expansion |
-| Metadata | Gain + humanize |
-| Tempo | Tempo automation ramp |
-| Layers | Piano + cello layers |
-| Humanize | Deterministic jitter |
-| Advanced Chords | drop2, inv1, spread |
-| Phrases | Phrase curves + transitions |
-| Patterns | Arp, strum, rhythm |
-| Orchestration | double octave, bass, top |
-| Text-to-Melody | `compose` input + *Compose from text* (V3.1) |
-| Melody | Basic melody (v1.2) |
-| Articulations | Staccato, legato, accent |
-| Dynamics | p → mf → f |
-| Chords | Chord progressions |
-| Intelligence | Sequences + contour |
-| Multi-track | Melody + bass |
-| Playback | Shaping pipeline |
+| Preset group | Content |
+|--------------|---------|
+| **V2** | Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Phrases V3, Patterns, Orchestration, Voice |
+| **Core** | Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback |
+| **Showcase** | Jingle Bells (full MIDI showcase); Jingle Bells (Wave / speak overlay) |
+| **Wave (.ssw)** | Effects (delay + filter); Speak (prosody tone); Seeded humanize + speak; Combined (wave-effects.ssw); Full song (full-song-wave.ss) |
+| **Text-to-Melody** | `compose` / `prosody` input + **Compose from text** / **Compose with Prosody** (V3.1 / V5) |
+| **Render Audio** | Offline SoundCSS timbre over composed MIDI (uses embedded `default.ssc` rules) (V4) |
+
+**Note:** Imports require the CLI (`ProgramLoader`); they are not available in
+the browser playground. The **Imports** example runs via CLI only — see
+[imports.ss](../examples/imports.ss).
 
 ## Related
 
 - [whats-new-v2.md](whats-new-v2.md)
 - [whats-new-v6.md](whats-new-v6.md) — `.ss` export
+- [whats-new-v7.md](whats-new-v7.md) — SoundScript.Wave
+- [wave-grammar.md](wave-grammar.md)
+- [soundcss.md](soundcss.md)
 - [language-reference.md](language-reference.md)
