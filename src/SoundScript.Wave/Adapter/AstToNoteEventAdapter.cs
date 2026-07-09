@@ -19,13 +19,13 @@ namespace SoundScript.Wave.Adapter;
 /// (via "play"), loops, tempo (including ramps), and time signature, with
 /// velocity/dynamic markings mapped to 0.0-1.0. Directives that only make
 /// sense for MIDI-oriented playback shaping — instrument program changes,
-/// gain, orchestration, phrase shaping, chord voicing/balancing
-/// intelligence, arpeggio/strum patterns, and vocal (voice/sing) tracks —
-/// are not yet implemented. They are silently skipped rather than failing,
-/// so a MIDI-only .ss file can still be pushed through this rail and
-/// produce a flat, default-timbre rendering instead of an error. Every
-/// track gets <see cref="TimbreParams.Default"/> (sine + neutral ADSR)
-/// since the grammar has no per-track timbre directive yet.
+/// gain, orchestration, phrase <em>shaping</em>, chord voicing/balancing
+/// intelligence, and general arpeggio/strum <em>sequencing</em> — are not
+/// implemented. They are silently skipped rather than failing, so a
+/// MIDI-only .ss file can still be pushed through this rail and produce a
+/// flat, default-timbre rendering instead of an error. Every track gets
+/// <see cref="TimbreParams.Default"/> (sine + neutral ADSR) since the
+/// grammar has no per-track timbre directive yet.
 ///
 /// v3 additions:
 /// <list type="bullet">
@@ -38,6 +38,21 @@ namespace SoundScript.Wave.Adapter;
 /// <item><c>effect ...</c> nodes are deliberately NOT handled here: the
 /// effects chain is a master-only post-mix stage consumed by WaveRenderer
 /// through EffectSettingsFactory — not a per-track/per-note concern.</item>
+/// </list>
+///
+/// v4 additions — make full multi-part songs audible:
+/// <list type="bullet">
+/// <item><c>phrase { }</c> blocks are entered like a block so their notes
+/// render (<see cref="ExecuteStatements"/>); the shaping directives inside
+/// (curve/transition/envelope/swing/…) remain deferred no-ops.</item>
+/// <item><c>voice { sing ... }</c> renders each lyric line on its explicit
+/// per-note pitches, syllable-aligned via <see cref="SyllableSplitter"/> and
+/// reusing the <c>speak</c> phoneme timbre shaping (see EmitSing). The
+/// <c>vocal</c> choir-timbre directive is captured but deferred.</item>
+/// <item><c>play &lt;pattern&gt; &lt;chord&gt; &lt;duration&gt;</c> strums the
+/// inline chord's tones across time (see EmitStrummedChord) instead of
+/// aborting the whole render. <c>play &lt;pattern&gt;</c> with no inline chord
+/// (arpeggiating a sequence) stays an explicit, isolated NotSupported.</item>
 /// </list>
 /// </summary>
 public static class AstToNoteEventAdapter
@@ -83,9 +98,10 @@ public static class AstToNoteEventAdapter
                     context.Blocks[block.Name] = block.Body;
                     break;
                 case PatternNode pattern:
-                    // Registered only so an unresolved `play` can distinguish
-                    // "known but unsupported" from "genuine typo" — see summary.
-                    context.PatternNames.Add(pattern.Name);
+                    // Stored whole so `play <pattern> <chord>` can strum it
+                    // (see EmitStrummedChord) and an unresolved `play` can still
+                    // distinguish "known but unsupported" from "genuine typo".
+                    context.Patterns[pattern.Name] = pattern;
                     break;
                 case TrackNode track:
                     RequireUniqueTrackName(declaredTrackNames, track.Name);
@@ -119,14 +135,18 @@ public static class AstToNoteEventAdapter
                 case SpeakNode speak:
                     EmitSpeech(GetDefaultTrack(), speak, context);
                     break;
+                case VoiceNode voice:
+                    RequireUniqueTrackName(declaredTrackNames, voice.Name);
+                    ExecuteVoiceStatements(GetOrCreateTrack(tracks, trackOrder, voice.Name), voice.Body, context);
+                    break;
 
                 // EffectNode: master-only post-mix stage — consumed by
                 // WaveRenderer via EffectSettingsFactory, intentionally no
                 // per-track handling here (see class summary).
                 //
-                // InstrumentNode, GainNode, OrchestrationNode, Phrase*Node,
-                // VoiceNode, SingNode, BarNode, ImportNode: out of scope
-                // (see class summary). Skipped, not failed.
+                // InstrumentNode, GainNode, OrchestrationNode, phrase-shaping
+                // nodes, BarNode, ImportNode: out of scope (see class summary).
+                // Skipped, not failed.
             }
         }
 
@@ -186,6 +206,13 @@ public static class AstToNoteEventAdapter
                 case SpeakNode speak:
                     EmitSpeech(track, speak, context);
                     break;
+                case PhraseNode phrase:
+                    // A phrase groups notes for expressive shaping; enter it
+                    // like a block so its notes render. The shaping directives
+                    // inside (curve/transition/envelope/swing/…) hit no case
+                    // and stay no-ops — expressiveness, not audibility.
+                    ExecuteStatements(track, phrase.Body, context);
+                    break;
 
                 // See class summary for the full list of intentionally-skipped node types.
             }
@@ -206,11 +233,18 @@ public static class AstToNoteEventAdapter
             return;
         }
 
-        if (context.PatternNames.Contains(play.SequenceName))
+        if (context.Patterns.TryGetValue(play.SequenceName, out var pattern))
         {
+            if (play.PatternChord is not null)
+            {
+                EmitStrummedChord(track, pattern, play.PatternChord, context);
+                return;
+            }
+
             throw new NotSupportedException(
-                $"Pattern playback ('{play.SequenceName}') is not implemented in SoundScript.Wave v1 " +
-                "— arpeggio/strum pattern expansion is a documented v1 non-goal.");
+                $"Pattern playback ('{play.SequenceName}') without an inline chord is not implemented " +
+                "in SoundScript.Wave v1 — general arpeggio/strum sequencing stays a documented non-goal. " +
+                "'play <pattern> <chord> <duration>' (the strum-a-chord form) is supported.");
         }
 
         throw new InvalidOperationException($"Unknown block '{play.SequenceName}'.");
@@ -397,6 +431,154 @@ public static class AstToNoteEventAdapter
         }
     }
 
+    /// <summary>
+    /// v4 vocal track. Runs a <c>voice { }</c> block's body on its own beat
+    /// cursor (like a track). <c>vocal</c> timbre coloring is captured by the
+    /// grammar but deferred here (choir-specific shaping isn't required for
+    /// audibility); dynamics/velocity/rests behave as everywhere else, and each
+    /// <c>sing</c> line is expanded by <see cref="EmitSing"/>.
+    /// </summary>
+    private static void ExecuteVoiceStatements(TrackState track, IReadOnlyList<AstNode> body, ExecutionContext context)
+    {
+        foreach (var statement in body)
+        {
+            switch (statement)
+            {
+                case DynamicNode dynamic:
+                    track.CurrentDynamic = dynamic.Level;
+                    break;
+                case VelocityNode velocity:
+                    track.CurrentVelocity = velocity.Velocity;
+                    break;
+                case RestNode rest:
+                    AdvanceBeat(track, rest.Rest.DurationBeats);
+                    break;
+                case SingNode sing:
+                    EmitSing(track, sing, context);
+                    break;
+
+                // VocalTimbreNode ("vocal choir"): choir-specific timbre
+                // coloring is deferred (see class summary) — captured by the
+                // grammar, no-op for audibility here.
+            }
+        }
+    }
+
+    /// <summary>
+    /// Expands a <c>sing</c> line into audible phoneme-shaped tones on the
+    /// note's <em>explicit</em> pitches, aligning each lyric syllable 1:1 with a
+    /// note. Reuses <see cref="BuildSpeechNotes"/> unchanged (vowel formant
+    /// stacking, plosive/fricative noise bursts) — the only difference from
+    /// <see cref="EmitSpeech"/> is that pitch comes from the note, not a
+    /// generated frequency. On a syllable/note count mismatch the first
+    /// <c>min</c> pairs align 1:1 and the surplus is dropped with a warning.
+    /// </summary>
+    private static void EmitSing(TrackState track, SingNode sing, ExecutionContext context)
+    {
+        var syllables = SyllableSplitter.Split(sing.Lyric);
+        var notes = sing.Notes;
+
+        var count = Math.Min(syllables.Count, notes.Count);
+        if (syllables.Count != notes.Count)
+        {
+            context.Warnings.Add(
+                $"sing \"{Truncate(sing.Lyric)}\": {syllables.Count} syllable(s) but " +
+                $"{notes.Count} note(s) — aligning the first {count} 1:1, extra notes/syllables dropped.");
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            var note = notes[i];
+            var startBeat = track.CurrentBeat;
+            var startSeconds = BeatsToSeconds(context, 0, startBeat);
+            var durationSeconds = BeatsToSeconds(context, startBeat, note.DurationBeats);
+
+            var tone = new ProsodyTone(
+                FrequencyHz: MidiToHz(note.ToMidiNumber()),
+                DurationBeats: note.DurationBeats,
+                Velocity: ResolveVelocity(track, note.Velocity),
+                IsRest: false,
+                Class: GraphemePhonemeSplitter.ClassifyLead(syllables[i]));
+
+            foreach (var evt in BuildSpeechNotes(tone, startSeconds, durationSeconds))
+                track.Notes.Add(evt);
+
+            AdvanceBeat(track, note.DurationBeats);
+        }
+    }
+
+    /// <summary>Trims a lyric for a warning message so it stays one line.</summary>
+    private static string Truncate(string text, int maxLength = 40) =>
+        text.Length <= maxLength ? text : text[..maxLength] + "…";
+
+    // Per-tone onset offset when a strum pattern has no explicit rhythm — small
+    // enough to read as one strummed chord rather than an arpeggio. Deterministic.
+    private const double StrumStaggerSeconds = 0.015;
+
+    /// <summary>
+    /// Renders <c>play &lt;pattern&gt; &lt;chord&gt; &lt;duration&gt;</c> as a
+    /// strummed chord: the chord's tones staggered across time, ordered by the
+    /// pattern's <see cref="PatternDirection"/> (Up = low→high, Down =
+    /// high→low). Offsets come from <c>pattern.RhythmBeats</c> when present,
+    /// otherwise a fixed per-tone stagger. Each tone is its own NoteEvent — the
+    /// same per-tone approach <see cref="EmitChord"/> uses for humanize jitter,
+    /// with a deterministic directional offset instead of random jitter. No new
+    /// randomness is introduced.
+    /// </summary>
+    private static void EmitStrummedChord(TrackState track, PatternNode pattern, ChordNode chord, ExecutionContext context)
+    {
+        var startBeat = track.CurrentBeat;
+        var durationBeats = chord.DurationBeats;
+
+        var startSeconds = BeatsToSeconds(context, 0, startBeat);
+        var durationSeconds = BeatsToSeconds(context, startBeat, durationBeats);
+        var velocity = ResolveVelocity(track, chord.Velocity);
+
+        var tones = chord.ToMidiNumbers();
+        var offsets = StrumOffsets(pattern, tones.Count, context, startBeat);
+
+        for (var i = 0; i < tones.Count; i++)
+        {
+            // Down strums fire the top tone first; anything else ascends.
+            var toneIndex = pattern.Direction == PatternDirection.Down ? tones.Count - 1 - i : i;
+            var offset = offsets[i];
+
+            track.Notes.Add(new NoteEvent(
+                FrequencyHz: MidiToHz(tones[toneIndex]),
+                StartTimeSeconds: startSeconds + offset,
+                DurationSeconds: Math.Max(0.0, durationSeconds - offset),
+                Velocity: velocity,
+                Timbre: TimbreParams.Default));
+        }
+
+        AdvanceBeat(track, durationBeats);
+    }
+
+    private static IReadOnlyList<double> StrumOffsets(
+        PatternNode pattern, int toneCount, ExecutionContext context, double startBeat)
+    {
+        var offsets = new double[toneCount];
+
+        if (pattern.RhythmBeats.Count > 0)
+        {
+            // Cumulative rhythm, in seconds, cycling the rhythm if it has fewer
+            // steps than the chord has tones.
+            var cumulativeBeats = 0.0;
+            for (var i = 0; i < toneCount; i++)
+            {
+                offsets[i] = BeatsToSeconds(context, startBeat, cumulativeBeats);
+                cumulativeBeats += pattern.RhythmBeats[i % pattern.RhythmBeats.Count];
+            }
+        }
+        else
+        {
+            for (var i = 0; i < toneCount; i++)
+                offsets[i] = i * StrumStaggerSeconds;
+        }
+
+        return offsets;
+    }
+
     // Distinct salts keep the two jitter streams (and prosody's PitchSalt=100)
     // uncorrelated even when they share a seed.
     private const int TimingJitterSalt = 1;
@@ -484,7 +666,11 @@ public static class AstToNoteEventAdapter
         public TempoAutomationMap TempoMap { get; } = new();
         public Dictionary<string, List<AstNode>> Sequences { get; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, List<AstNode>> Blocks { get; } = new(StringComparer.OrdinalIgnoreCase);
-        public HashSet<string> PatternNames { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, PatternNode> Patterns { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Non-fatal adapter diagnostics (e.g. sing syllable/note mismatch).</summary>
+        public List<string> Warnings { get; } = [];
+
         public int? TimeSignatureNumerator { get; set; }
         public int? TimeSignatureDenominator { get; set; }
     }
