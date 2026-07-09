@@ -38,12 +38,15 @@ public partial class Playground
 
   private string ScriptText { get; set; } = DefaultScript;
   private string SelectedExampleKey { get; set; } = "v2-showcase";
+  private string WaveScriptText { get; set; } = "";
+  private string SelectedWaveExampleKey { get; set; } = "wave-effects";
   private string ComposeText { get; set; } = "Twinkle twinkle little star";
   private string? ErrorMessage { get; set; }
   private string? StatusMessage { get; set; }
   private List<string> WarningMessages { get; set; } = [];
   private byte[]? MidiBytes { get; set; }
   private byte[]? WavBytes { get; set; }
+  private byte[]? WaveOutputBytes { get; set; }
   private string? SsText { get; set; }
   private bool IsRunning { get; set; }
 
@@ -90,6 +93,18 @@ public partial class Playground
       case "wave-speak": LoadWaveSpeakExample(); break;
       case "wave-humanize": LoadWaveHumanizeExample(); break;
     }
+  }
+
+  private void LoadSelectedWaveExample()
+  {
+    switch (SelectedWaveExampleKey)
+    {
+      case "wave-effects": LoadWaveEffectsExample(); break;
+      case "wave-speak": LoadWaveSpeakExample(); break;
+      case "wave-humanize": LoadWaveHumanizeExample(); break;
+      case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
+    }
+    StateHasChanged();
   }
 
   private void LoadV2ShowcaseExample()
@@ -560,7 +575,7 @@ public partial class Playground
   // this rail). Melody notes therefore live directly in blocks, not phrases.
   private void LoadJingleBellsWaveExample()
   {
-    ScriptText =
+    WaveScriptText =
         """
         tempo 132
         time 4/4
@@ -609,7 +624,6 @@ public partial class Playground
         effect delay time=0.18 feedback=0.25 mix=0.2
         effect filter type=lowpass cutoff=3200
         """;
-    ClearState();
   }
 
   // UNDER DEVELOPMENT — v3: wave-only examples. These use grammar
@@ -618,7 +632,7 @@ public partial class Playground
   // because their AST contains an EffectNode/SpeakNode (see RunAsync).
   private void LoadWaveEffectsExample()
   {
-    ScriptText =
+    WaveScriptText =
         """
         tempo 100
         track melody {
@@ -628,22 +642,20 @@ public partial class Playground
         effect delay time=0.25 feedback=0.35 mix=0.3
         effect filter type=lowpass cutoff=2200
         """;
-    ClearState();
   }
 
   private void LoadWaveSpeakExample()
   {
-    ScriptText =
+    WaveScriptText =
         """
         tempo 100
         speak "hello world" seed=7
         """;
-    ClearState();
   }
 
   private void LoadWaveHumanizeExample()
   {
-    ScriptText =
+    WaveScriptText =
         """
         tempo 120
         track melody {
@@ -653,7 +665,6 @@ public partial class Playground
         }
         speak "played by hand" seed=42
         """;
-    ClearState();
   }
 
   private async Task ComposeFromTextAsync()
@@ -984,6 +995,73 @@ public partial class Playground
     }
   }
 
+  private async Task RunWaveAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ErrorMessage = null;
+      StatusMessage = null;
+      WarningMessages = [];
+      WaveOutputBytes = null;
+
+      if (string.IsNullOrWhiteSpace(WaveScriptText))
+      {
+        ErrorMessage = "Nothing to render: the script is empty.";
+        return;
+      }
+
+      var tokens = new Tokenizer(WaveScriptText).Tokenize();
+      var program = new SoundScript.Parser.Parser(tokens).Parse();
+
+      if (!_waveRenderCache.TryGetValue(WaveScriptText, out var wav))
+      {
+        wav = WaveRenderer.RenderStereoToBytes(program);
+        _waveRenderCache[WaveScriptText] = wav;
+      }
+
+      WaveOutputBytes = wav;
+
+      var speechWords = WaveSpeechTimeline.Build(program);
+
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", WaveOutputBytes);
+
+        var status = $"Playing — rendered {duration:F1}s of audio via SoundScript.Wave (deterministic, no MIDI step)";
+
+        if (speechWords.Count > 0)
+        {
+          status += $", speaking {speechWords.Count} phrase(s)";
+
+          var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+          if (!speechSupported)
+            WarningMessages.Add("This browser has no speech synthesis — 'speak' text plays as prosody tones only.");
+        }
+
+        StatusMessage = $"{status}.";
+      }
+      catch (Exception)
+      {
+        WarningMessages.Add("Playback failed on this device, but you can still download the file.");
+        StatusMessage = "Rendered audio via SoundScript.Wave (deterministic, no MIDI step). Playback failed on this device, but you can still download the WAV.";
+      }
+    }
+    catch (Exception ex)
+    {
+      ErrorMessage = ex.Message;
+      StatusMessage = null;
+      WaveOutputBytes = null;
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
   // UNDER DEVELOPMENT — v3: grammar-isolation check (safeguards doc) —
   // recurses into every statement container the parser actually nests
   // speak/effect under, so a directive buried in a block/sequence/loop body
@@ -1056,6 +1134,15 @@ public partial class Playground
 
     var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(SsText));
     await Js.InvokeVoidAsync("SoundScriptText.download", base64, "soundscript.ss");
+  }
+
+  private async Task DownloadWaveOutputAsync()
+  {
+    if (WaveOutputBytes is null)
+      return;
+
+    var base64 = Convert.ToBase64String(WaveOutputBytes);
+    await Js.InvokeVoidAsync("SoundScriptAudio.download", base64, "soundscript-wave.wav");
   }
 
   // Playback wrapper: runs the given JS audio call and, on failure (common on
