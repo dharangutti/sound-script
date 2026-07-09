@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "SoundScript.Playground",
   "resources": {
-    "hash": "sha256-I0kYqlhWeho3tdAlUAwwMDeypVFk6+HijoTxPX6grew=",
+    "hash": "sha256-OfZXptZwnig8oOu83yEE5iyg+XLiBgSYRHTMFiAIvJ8=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-YDHEHpc+/PUWFYa9BMCN3EcVlpemjKD024swcpPfMIQ="
     },
@@ -34,15 +34,15 @@
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-9IZ9TrlZNlZnRwyJW/atfyaqWDHIYDE3OuK1qLDwd+I=",
       "Microsoft.JSInterop.wasm": "sha256-p+3yNP8Ov8fHqh80OwxB+cSgrgFabbbE0DqHNhnvTRc=",
       "OggVorbisEncoder.wasm": "sha256-dZI//cDiKX76vyMqqNgmtZiT9t8/h9z9JlKlMUg4GHA=",
-      "SoundScript.Compose.wasm": "sha256-FjAYs+ZAEwq0uW5z+GGkCx1fWrgBZQwT9ShIz/sDxzQ=",
-      "SoundScript.Core.wasm": "sha256-JWk+7puvF78T3M1jU6WqHDDHYW4JLLanfdpaonKPsvc=",
-      "SoundScript.Midi.wasm": "sha256-aKL36beEOaFL77AKH/nNrns42Bsjqqpn53dO1AHqWuw=",
-      "SoundScript.Parser.wasm": "sha256-rOi+BWPFQqLClzGoXEEeyTsv+ittGe9J04lpPXSlcUQ=",
-      "SoundScript.Playground.wasm": "sha256-NkXuZK+D4ESRkQbCltES7VtRcD7Q2Stken0Mw9e9Rko=",
-      "SoundScript.Prosody.wasm": "sha256-SYW6HdiolPydA7Uy7FlNqwjVfL67mpvtTY6b7SHZm9I=",
-      "SoundScript.Timbre.wasm": "sha256-on3JMKLcQYj//UA07XUtE01USZ6PWpI3oyEhl8FqHrs=",
-      "SoundScript.Voice.wasm": "sha256-pSoP7hDTLajvcnjV/u7fmUvIIrpYOeC2XO5hKBMknXk=",
-      "SoundScript.Wave.wasm": "sha256-/GcvGUAjLnTKCuX1cTFJzldE49A97iSK7/1NruqDlUM=",
+      "SoundScript.Compose.wasm": "sha256-wbOq3+bDy79vEk6J+fgNhEc2QAijuq9K34Z8844jcf4=",
+      "SoundScript.Core.wasm": "sha256-+cKh8cnlXCXajUCcmjUD32uXiB+Yy+373Zv5R5t5kCc=",
+      "SoundScript.Midi.wasm": "sha256-fQ7Dda04H3vMYIGu16f5jSxC4iS1etSAVDKeoJJWFc0=",
+      "SoundScript.Parser.wasm": "sha256-nJv/kZ8FuchlpNotfJ6TBesytqEytGft+YE+fXnDVFQ=",
+      "SoundScript.Playground.wasm": "sha256-pc7QcOgKeiavJ2IdtZ3da+hg5mtpkqqgUSV5pBHJbfU=",
+      "SoundScript.Prosody.wasm": "sha256-tHRdpmDH0Ddn7OmXREduKTPBNrXe5c/m+8qM1WQZ3ik=",
+      "SoundScript.Timbre.wasm": "sha256-dG6Xhss3uUJmmS/3AXOVzts/CtYie+ixGZdYEtnh11E=",
+      "SoundScript.Voice.wasm": "sha256-UEaB4GU5uLcyw1Obsl4vd7LbEEVTZ5kJZse1LfpW01w=",
+      "SoundScript.Wave.wasm": "sha256-7LXw2jPdKh4BIBE8O0mjPlDrCeplxnfc/P6aPUACNAM=",
       "System.Collections.Concurrent.wasm": "sha256-+7LteTEbj9uF5idtxA4dKOzpdhQgGJhBuy25QyWkwJI=",
       "System.Collections.wasm": "sha256-lZznqFdYkllLhSSfOuqvQPHIIoBuPMUmJ6QzxiNi1DE=",
       "System.ComponentModel.Primitives.wasm": "sha256-2yVmu3xPhmOOZfWSOJgIoPimZ561LhQoha9XTvruCR0=",
