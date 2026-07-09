@@ -61,7 +61,10 @@ public static class AstToNoteEventAdapter
     public static Dictionary<string, List<NoteEvent>> Convert(ProgramNode program) =>
         Adapt(program).Tracks;
 
-    public static WaveAdaptationResult Adapt(ProgramNode program)
+    public static WaveAdaptationResult Adapt(ProgramNode program, WaveAdaptOptions? options = null) =>
+        AdaptCore(program, options);
+
+    private static WaveAdaptationResult AdaptCore(ProgramNode program, WaveAdaptOptions? options)
     {
         var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackState>(StringComparer.OrdinalIgnoreCase);
@@ -109,17 +112,17 @@ public static class AstToNoteEventAdapter
                     break;
                 case TrackNode track:
                     RequireUniqueTrackName(declaredTrackNames, track.Name);
-                    ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, track.Name), track.Body, context);
+                    ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, track.Name), track.Body, context, options);
                     break;
                 case MelodyNode melody:
                     RequireUniqueTrackName(declaredTrackNames, "melody");
-                    ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, "melody"), melody.Body, context);
+                    ExecuteStatements(GetOrCreateTrack(tracks, trackOrder, "melody"), melody.Body, context, options);
                     break;
                 case PlayNode play:
-                    ExecutePlay(GetDefaultTrack(), play, context);
+                    ExecutePlay(GetDefaultTrack(), play, context, options);
                     break;
                 case LoopNode loop:
-                    ExecuteLoop(GetDefaultTrack(), loop, context);
+                    ExecuteLoop(GetDefaultTrack(), loop, context, options);
                     break;
                 case VelocityNode velocity:
                     GetDefaultTrack().CurrentVelocity = velocity.Velocity;
@@ -137,7 +140,7 @@ public static class AstToNoteEventAdapter
                     EmitChord(GetDefaultTrack(), chord, context);
                     break;
                 case SpeakNode speak:
-                    EmitSpeech(GetDefaultTrack(), speak, context);
+                    EmitSpeech(GetDefaultTrack(), speak, context, options);
                     break;
                 case SampleNode sample:
                     EmitSample(GetDefaultTrack(), sample, context);
@@ -164,7 +167,11 @@ public static class AstToNoteEventAdapter
         return new WaveAdaptationResult(result, context.SampleOverlays, context.SpeakTimings);
     }
 
-    private static void ExecuteStatements(TrackState track, IReadOnlyList<AstNode> body, ExecutionContext context)
+    private static void ExecuteStatements(
+        TrackState track,
+        IReadOnlyList<AstNode> body,
+        ExecutionContext context,
+        WaveAdaptOptions? options)
     {
         foreach (var statement in body)
         {
@@ -205,13 +212,13 @@ public static class AstToNoteEventAdapter
                     EmitChord(track, chord, context);
                     break;
                 case LoopNode loop:
-                    ExecuteLoop(track, loop, context);
+                    ExecuteLoop(track, loop, context, options);
                     break;
                 case PlayNode play:
-                    ExecutePlay(track, play, context);
+                    ExecutePlay(track, play, context, options);
                     break;
                 case SpeakNode speak:
-                    EmitSpeech(track, speak, context);
+                    EmitSpeech(track, speak, context, options);
                     break;
                 case SampleNode sample:
                     EmitSample(track, sample, context);
@@ -221,7 +228,7 @@ public static class AstToNoteEventAdapter
                     // like a block so its notes render. The shaping directives
                     // inside (curve/transition/envelope/swing/…) hit no case
                     // and stay no-ops — expressiveness, not audibility.
-                    ExecuteStatements(track, phrase.Body, context);
+                    ExecuteStatements(track, phrase.Body, context, options);
                     break;
 
                 // See class summary for the full list of intentionally-skipped node types.
@@ -229,17 +236,17 @@ public static class AstToNoteEventAdapter
         }
     }
 
-    private static void ExecutePlay(TrackState track, PlayNode play, ExecutionContext context)
+    private static void ExecutePlay(TrackState track, PlayNode play, ExecutionContext context, WaveAdaptOptions? options)
     {
         if (context.Blocks.TryGetValue(play.SequenceName, out var blockBody))
         {
-            ExecuteStatements(track, blockBody, context);
+            ExecuteStatements(track, blockBody, context, options);
             return;
         }
 
         if (context.Sequences.TryGetValue(play.SequenceName, out var sequenceBody))
         {
-            ExecuteStatements(track, sequenceBody, context);
+            ExecuteStatements(track, sequenceBody, context, options);
             return;
         }
 
@@ -260,10 +267,10 @@ public static class AstToNoteEventAdapter
         throw new InvalidOperationException($"Unknown block '{play.SequenceName}'.");
     }
 
-    private static void ExecuteLoop(TrackState track, LoopNode loop, ExecutionContext context)
+    private static void ExecuteLoop(TrackState track, LoopNode loop, ExecutionContext context, WaveAdaptOptions? options)
     {
         for (var i = 0; i < loop.Count; i++)
-            ExecuteStatements(track, loop.Body, context);
+            ExecuteStatements(track, loop.Body, context, options);
     }
 
     private static void EmitNote(TrackState track, NoteNode note, ExecutionContext context)
@@ -373,7 +380,11 @@ public static class AstToNoteEventAdapter
     /// plain tone, and plosives/fricatives synthesize from deterministic
     /// filtered noise (<see cref="OscillatorType.Noise"/>) instead of a tone.
     /// </summary>
-    private static void EmitSpeech(TrackState track, SpeakNode speak, ExecutionContext context)
+    private static void EmitSpeech(
+        TrackState track,
+        SpeakNode speak,
+        ExecutionContext context,
+        WaveAdaptOptions? options)
     {
         var startBeat = track.CurrentBeat;
         var startSeconds = BeatsToSeconds(context, 0, startBeat);
@@ -384,9 +395,12 @@ public static class AstToNoteEventAdapter
             context.SampleOverlays.Add(new SampleOverlayRequest(speak.SamplePath, startSeconds, speak.SampleGain));
         }
 
+        var suppressSynthetic = options?.SuppressSyntheticSpeak == true
+            && string.IsNullOrWhiteSpace(speak.SamplePath);
+
         foreach (var tone in ProsodyToneGenerator.Generate(speak.Text, speak.Voice, speak.Seed))
         {
-            if (!tone.IsRest && string.IsNullOrWhiteSpace(speak.SamplePath))
+            if (!tone.IsRest && !suppressSynthetic && string.IsNullOrWhiteSpace(speak.SamplePath))
             {
                 var toneStartBeat = track.CurrentBeat;
                 var toneStartSeconds = BeatsToSeconds(context, 0, toneStartBeat);

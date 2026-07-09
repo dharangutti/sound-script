@@ -56,6 +56,14 @@ public sealed class EspeakNgVocalEngine : IVocalEngine
             }
 
             var mono = WavReader.ReadMono(tempPath);
+            mono = VocalStemNormalizer.Normalize(mono, options.OutputGain);
+
+            if (VocalStemNormalizer.Peak(mono) <= 1e-6)
+            {
+                throw new InvalidOperationException(
+                    $"{executable} produced a silent WAV — try --engine prosody or check the voice id.");
+            }
+
             WavWriter.Write(outputWavPath, mono);
         }
         finally

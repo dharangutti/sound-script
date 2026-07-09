@@ -14,6 +14,12 @@ public sealed class WaveRenderOptions
 
     /// <summary>When true, missing sample files are skipped instead of failing (Playground).</summary>
     public bool SkipMissingSamples { get; init; }
+
+    /// <summary>
+    /// Skip synthetic <c>speak</c> phoneme tones — use with <see cref="AdditionalSampleOverlays"/>.
+    /// Auto-enabled when additional overlays are present.
+    /// </summary>
+    public bool SuppressSyntheticSpeak { get; init; }
 }
 
 /// <summary>A pre-loaded mono buffer positioned on the timeline.</summary>
