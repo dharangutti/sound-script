@@ -54,6 +54,10 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 **`--offline-tts`** — API tokens stay in your environment/tooling, not in `.ssw`
 source.
 
+**Audibility:** offline stems are peak-normalized, and `wave --tts-dir` /
+`--offline-tts` suppresses synthetic `speak` phoneme tones so only the stem
+overlays play. Example: [examples/jingle-bells-vocal.ssw](../examples/jingle-bells-vocal.ssw).
+
 ## Improved synthetic prosody (fallback)
 
 When no `sample=` is set, V8 slightly strengthens vowel formants in exported

@@ -134,7 +134,7 @@ public static class PlaygroundPresetCatalog
 
     public static bool IsWaveExampleKey(string key) =>
         key.StartsWith("wave-", StringComparison.Ordinal) ||
-        key is "speech-only-wave" or "showcase-jingle-bells-wave";
+        key is "speech-only-wave" or "showcase-jingle-bells-wave" or "jingle-bells-vocal";
 
     public static string DocsExamplesUrl => $"/doc.html?p={DocsExamplesPath}";
 
@@ -268,6 +268,18 @@ public static class PlaygroundPresetCatalog
             PlaygroundOutputRail.Wave,
             "V8: speak sample= mixes your recording in CLI export; Playground uses synthetic fallback when stem file is absent.",
             [$"{CliPrefix}wave examples/wave-vocal-stem.ssw vocal.wav"]);
+
+        yield return Wave(
+            "jingle-bells-vocal",
+            "Jingle Bells + offline vocal (jingle-bells-vocal.ssw)",
+            "jingle-bells-vocal.ssw",
+            "Render (Wave pane)",
+            PlaygroundOutputRail.Wave,
+            "V8: speak phrases + vocal batch / wave --offline-tts for audible stems in the mix.",
+            [
+                $"{CliPrefix}vocal batch examples/jingle-bells-vocal.ssw --out-dir examples/vocal-stems --engine prosody",
+                $"{CliPrefix}wave examples/jingle-bells-vocal.ssw jingle-bells.wav --offline-tts prosody",
+            ]);
     }
 
     private static IEnumerable<PlaygroundPresetInfo> ShowcasePresets()

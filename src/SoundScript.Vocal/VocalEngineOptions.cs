@@ -8,4 +8,7 @@ public sealed class VocalEngineOptions
 
     /// <summary>Deterministic seed for the built-in prosody engine.</summary>
     public int Seed { get; init; } = 7;
+
+    /// <summary>Linear gain applied after peak normalization (default 1.0).</summary>
+    public double OutputGain { get; init; } = 1.0;
 }

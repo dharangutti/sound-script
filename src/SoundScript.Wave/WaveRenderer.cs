@@ -73,7 +73,8 @@ public static class WaveRenderer
 
     private static float[] MixProgram(ProgramNode program, WaveRenderOptions? options)
     {
-        var adapted = AstToNoteEventAdapter.Adapt(program);
+        var adaptOptions = BuildAdaptOptions(options);
+        var adapted = AstToNoteEventAdapter.Adapt(program, adaptOptions);
         var trackBuffers = RenderTrackBuffers(adapted.Tracks);
         var mixed = Mixer.SumTracksRaw(trackBuffers);
         mixed = ApplyOverlays(mixed, adapted.SampleOverlays, options);
@@ -86,7 +87,8 @@ public static class WaveRenderer
 
     private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program, WaveRenderOptions? options)
     {
-        var adapted = AstToNoteEventAdapter.Adapt(program);
+        var adaptOptions = BuildAdaptOptions(options);
+        var adapted = AstToNoteEventAdapter.Adapt(program, adaptOptions);
         var trackBuffers = RenderTrackBuffersStereo(adapted.Tracks);
         var (leftMixed, rightMixed) = Mixer.SumTracksStereoRaw(trackBuffers);
         leftMixed = ApplyOverlays(leftMixed, adapted.SampleOverlays, options);
@@ -158,5 +160,16 @@ public static class WaveRenderer
         }
 
         return mixed;
+    }
+
+    private static WaveAdaptOptions? BuildAdaptOptions(WaveRenderOptions? options)
+    {
+        if (options?.SuppressSyntheticSpeak != true
+            && (options?.AdditionalSampleOverlays is null || options.AdditionalSampleOverlays.Count == 0))
+        {
+            return null;
+        }
+
+        return new WaveAdaptOptions { SuppressSyntheticSpeak = true };
     }
 }

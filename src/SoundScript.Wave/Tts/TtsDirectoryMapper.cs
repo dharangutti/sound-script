@@ -38,7 +38,7 @@ public static class TtsDirectoryMapper
                     $"TTS directory is missing a vocal file for speak \"{speak.Text}\" (expected {path}).");
             }
 
-            overlays.Add(new SampleOverlayRequest(path, startSeconds, 1.0));
+            overlays.Add(new SampleOverlayRequest(path, startSeconds, speak.SampleGain));
         }
 
         return overlays;

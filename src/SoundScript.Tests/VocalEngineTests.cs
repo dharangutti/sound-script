@@ -21,6 +21,44 @@ public class VocalEngineTests
         Assert.True(new FileInfo(outPath).Length > 44);
         var samples = WavReader.ReadMono(outPath);
         Assert.NotEmpty(samples);
+        Assert.True(PeakPcm16(samples) >= 20_000, "Vocal stem should be loud enough to hear clearly.");
+    }
+
+    [Fact]
+    public void ProsodyEngine_NormalizesQuietOutputToAudiblePeak()
+    {
+        using var dir = new TempOutputDirectory();
+        var outPath = dir.FilePath("boosted.wav");
+        new ProsodyVocalEngine().Synthesize("test", outPath, new VocalEngineOptions { Seed = 3 });
+        Assert.InRange(PeakPcm16(WavReader.ReadMono(outPath)), 25_000, 32_767);
+    }
+
+    [Fact]
+    public void Example_JingleBellsVocal_OfflineTts_RendersAudibleVocal()
+    {
+        var exampleDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../examples"));
+        var script = Path.Combine(exampleDir, "jingle-bells-vocal.ssw");
+        using var dir = new TempOutputDirectory();
+        var outPath = dir.FilePath("jingle.wav");
+        var stemsDir = dir.FilePath("vocal-stems");
+
+        Assert.Equal(0, RunCli(
+            $"wave \"{script}\" \"{outPath}\" --offline-tts prosody --offline-tts-dir \"{stemsDir}\"").ExitCode);
+
+        Assert.True(File.Exists(outPath));
+        Assert.True(File.Exists(Path.Combine(stemsDir, "jingle-bells-jingle-bells.wav")));
+        Assert.True(File.Exists(Path.Combine(stemsDir, "jingle-all-the-way.wav")));
+        Assert.True(PeakPcm16(WavReader.ReadMono(outPath)) >= 15_000);
+        Assert.True(PeakPcm16(WavReader.ReadMono(Path.Combine(stemsDir, "jingle-bells-jingle-bells.wav"))) >= 20_000);
+    }
+
+    private static int PeakPcm16(float[] samples)
+    {
+        var peak = 0.0;
+        foreach (var sample in samples)
+            peak = Math.Max(peak, Math.Abs(sample));
+
+        return (int)Math.Round(peak * short.MaxValue);
     }
 
     [Fact]
