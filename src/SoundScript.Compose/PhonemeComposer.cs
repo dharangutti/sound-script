@@ -1,7 +1,7 @@
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Midi;
-using SoundScript.Voice.Phonetics;
+using SoundScript.Core.Phonetics;
 
 namespace SoundScript.Compose;
 

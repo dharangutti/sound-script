@@ -183,4 +183,50 @@ public class WaveSpeechTimelineTests
             Assert.Equal(first[i].Midi, second[i].Midi);
         }
     }
+
+    [Fact]
+    public void Build_VoiceSing_ProducesWordLevelEntriesWithNotePitch()
+    {
+        const string source = """
+            tempo 120
+            voice lead {
+                sing "Jingle bells" E4 q E4 q E4 h
+            }
+            """;
+
+        var words = WaveSpeechTimeline.Build(ParseSsw(source));
+
+        Assert.Equal(2, words.Count);
+        Assert.Equal("Jingle", words[0].Text);
+        Assert.Equal("bells", words[1].Text);
+        Assert.Equal(64, words[0].Midi); // E4
+        Assert.True(words[1].StartMs > words[0].StartMs);
+    }
+
+    [Fact]
+    public void Build_VoiceSing_MatchesVocalSpeechTimeline_WordTimings()
+    {
+        const string source = """
+            tempo 120
+            voice lead {
+                sing "Twinkle star" C4 q C5 q
+            }
+            """;
+
+        var program = ParseSsw(source);
+        var interpreted = SoundScript.Midi.Interpreter.Interpret(program, "test.ss");
+        SoundScript.Voice.VocalInterpreter.Apply(program, interpreted);
+
+        var waveWords = WaveSpeechTimeline.Build(program);
+        var vocalWords = SoundScript.Voice.VocalSpeechTimeline.Build(interpreted);
+
+        Assert.Equal(vocalWords.Count, waveWords.Count);
+        for (var i = 0; i < vocalWords.Count; i++)
+        {
+            Assert.Equal(vocalWords[i].Text, waveWords[i].Text);
+            Assert.Equal(vocalWords[i].Midi, waveWords[i].Midi);
+            Assert.Equal(vocalWords[i].StartMs, waveWords[i].StartMs, 3);
+            Assert.Equal(vocalWords[i].DurationMs, waveWords[i].DurationMs, 3);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-using SoundScript.Voice.Phonetics;
+using SoundScript.Core.Phonetics;
 
 namespace SoundScript.Prosody;
 

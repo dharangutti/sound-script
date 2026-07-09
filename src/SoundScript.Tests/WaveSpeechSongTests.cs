@@ -47,8 +47,10 @@ public class WaveSpeechSongTests
         var program = LoadExample(SpeechOnlyExamplePath);
         var words = WaveSpeechTimeline.Build(program);
 
-        // At minimum the `speak` phrase is timed; voice { sing } overlay arrives in a later phase.
+        // At minimum the `speak` phrase is timed; voice { sing } yields word-level entries.
         Assert.Contains(words, w => w.Text.Contains("prosody tones", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(words, w => w.Text.Equals("Hello", StringComparison.OrdinalIgnoreCase));
+        Assert.True(words.Count(w => w.Midi != 60) >= 3, "Expected word-level voice entries with note-derived pitch");
     }
 
     [Fact]

@@ -2,6 +2,7 @@
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
+using SoundScript.Core.Phonetics;
 using SoundScript.Wave.Model;
 using SoundScript.Wave.Prosody;
 using SoundScript.Wave.Synthesis;
@@ -46,7 +47,7 @@ namespace SoundScript.Wave.Adapter;
 /// render (<see cref="ExecuteStatements"/>); the shaping directives inside
 /// (curve/transition/envelope/swing/…) remain deferred no-ops.</item>
 /// <item><c>voice { sing ... }</c> renders each lyric line on its explicit
-/// per-note pitches, syllable-aligned via <see cref="SyllableSplitter"/> and
+    /// per-note pitches, syllable-aligned via <see cref="LyricAligner"/> and
 /// reusing the <c>speak</c> phoneme timbre shaping (see EmitSing). The
 /// <c>vocal</c> choir-timbre directive is captured but deferred.</item>
 /// <item><c>play &lt;pattern&gt; &lt;chord&gt; &lt;duration&gt;</c> strums the
@@ -466,39 +467,40 @@ public static class AstToNoteEventAdapter
 
     /// <summary>
     /// Expands a <c>sing</c> line into audible phoneme-shaped tones on the
-    /// note's <em>explicit</em> pitches, aligning each lyric syllable 1:1 with a
-    /// note. Reuses <see cref="BuildSpeechNotes"/> unchanged (vowel formant
-    /// stacking, plosive/fricative noise bursts) — the only difference from
-    /// <see cref="EmitSpeech"/> is that pitch comes from the note, not a
-    /// generated frequency. On a syllable/note count mismatch the first
-    /// <c>min</c> pairs align 1:1 and the surplus is dropped with a warning.
+    /// note's <em>explicit</em> pitches, aligning each lyric syllable to note
+    /// slots via <see cref="LyricAligner"/> (melisma and overflow match the
+    /// MIDI vocal interpreter). Reuses <see cref="BuildSpeechNotes"/> unchanged.
     /// </summary>
     private static void EmitSing(TrackState track, SingNode sing, ExecutionContext context)
     {
-        var syllables = SyllableSplitter.Split(sing.Lyric);
-        var notes = sing.Notes;
+        var syllables = LyricAligner.ToSyllables(sing.Lyric);
+        var slots = LyricAligner.Align(syllables, sing.Notes.Count, out var overflowed);
 
-        var count = Math.Min(syllables.Count, notes.Count);
-        if (syllables.Count != notes.Count)
+        if (overflowed)
         {
             context.Warnings.Add(
-                $"sing \"{Truncate(sing.Lyric)}\": {syllables.Count} syllable(s) but " +
-                $"{notes.Count} note(s) — aligning the first {count} 1:1, extra notes/syllables dropped.");
+                $"Lyric \"{Truncate(sing.Lyric)}\" has {syllables.Count} syllables for " +
+                $"{sing.Notes.Count} notes — tail merged onto final note.");
         }
 
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < sing.Notes.Count; i++)
         {
-            var note = notes[i];
+            var note = sing.Notes[i];
+            var slot = slots[i];
             var startBeat = track.CurrentBeat;
             var startSeconds = BeatsToSeconds(context, 0, startBeat);
             var durationSeconds = BeatsToSeconds(context, startBeat, note.DurationBeats);
+
+            var phonemeClass = slot is null || string.IsNullOrEmpty(slot.Value.Text)
+                ? PhonemeClass.Vowel
+                : GraphemePhonemeSplitter.ClassifyLead(slot.Value.Text);
 
             var tone = new ProsodyTone(
                 FrequencyHz: MidiToHz(note.ToMidiNumber()),
                 DurationBeats: note.DurationBeats,
                 Velocity: ResolveVelocity(track, note.Velocity),
                 IsRest: false,
-                Class: GraphemePhonemeSplitter.ClassifyLead(syllables[i]));
+                Class: phonemeClass);
 
             foreach (var evt in BuildSpeechNotes(tone, startSeconds, durationSeconds))
                 track.Notes.Add(evt);
