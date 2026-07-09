@@ -218,6 +218,7 @@ envelopes via the [timbre engine](timbre-engine.md).
 soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]
   [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>]
   [--tts-dir <folder>]
+  [--offline-tts [espeak|prosody]] [--offline-tts-dir <folder>] [--offline-tts-voice <id>] [--seed=<n>]
 ```
 
 Renders a script directly through [SoundScript.Wave](wave-grammar.md) with no
@@ -230,6 +231,8 @@ dotnet run --project src/SoundScript.Cli -- wave examples/wave-vocal-stem.ssw vo
 dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
   --vocal my-recording.wav --vocal-gain=0.9
 dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav --tts-dir vocal-stems/
+dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav \
+  --offline-tts prosody --offline-tts-dir vocal-stems/
 ```
 
 | Flag / argument | Required | Purpose |
@@ -241,6 +244,10 @@ dotnet run --project src/SoundScript.Cli -- wave song.ssw out.wav --tts-dir voca
 | `--vocal-at` | no | Start beat for `--vocal` (default: `0`) |
 | `--vocal-gain` | no | Linear gain for `--vocal` (default: `1.0`) |
 | `--tts-dir` | no | Folder of pre-rendered WAVs mapped to each `speak` phrase (slug filenames) |
+| `--offline-tts` | no | Generate slug-named stems with an offline engine, then mix (default engine: espeak if installed, else prosody) |
+| `--offline-tts-dir` | no | Output folder for `--offline-tts` (default: `<script-dir>/vocal-stems`) |
+| `--offline-tts-voice` | no | eSpeak voice id when using `--offline-tts` (default: `en`) |
+| `--seed` | no | Prosody seed for synthetic stems (default: `7`) |
 
 **Flag ordering:** place `[output.wav]` immediately after the script path, before
 `--stereo`. `wave script.ss --stereo out.wav` ignores the custom path and uses
@@ -250,6 +257,33 @@ Unlike `run`, the wave verb does not invoke `VocalInterpreter` — it loads the
 AST via `ProgramLoader` and renders through `WaveRenderer` only. Wave-only
 directives (`effect`, `speak`, named `humanize`) are rejected by `run` with a
 clear error; use `wave` (or the Playground's automatic wave routing) instead.
+
+## `vocal` — offline stem generation (V8)
+
+```
+soundscript vocal generate "<text>" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]
+soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]
+```
+
+Generates slug-named WAV files for `speak` phrases without rendering the full
+mix. Uses the **SoundScript.Vocal** library (same engines as `wave --offline-tts`).
+
+```bash
+dotnet run --project src/SoundScript.Cli -- vocal generate "Hello world" \
+  --out vocal-stems/hello-world.wav --engine prosody
+dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
+  --out-dir vocal-stems/ --engine prosody --skip-existing
+```
+
+| Flag / argument | Required | Purpose |
+|-----------------|----------|---------|
+| `generate` / `batch` | yes | Subcommand |
+| `"<text>"` or `script.ssw` | yes | Phrase or script containing `speak` nodes |
+| `--out` / `--out-dir` | yes | Output WAV path or folder |
+| `--engine` | no | `prosody` (built-in synthetic) or `espeak` (local espeak-ng); default picks espeak when installed |
+| `--voice` | no | eSpeak voice id (default: `en`) |
+| `--seed` | no | Prosody seed (default: `7`) |
+| `--skip-existing` | no | Batch only — skip files that already exist |
 
 ## Exit codes
 

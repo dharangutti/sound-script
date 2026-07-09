@@ -4,6 +4,7 @@ using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
+using SoundScript.Vocal;
 using SoundScript.Voice;
 using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
@@ -29,6 +30,7 @@ return args[0].ToLowerInvariant() switch
     "prosody" => Prosody(args),
     "render" => Render(args),
     "wave" => Wave(args),
+    "vocal" => Vocal(args),
     _ => PrintUsage()
 };
 
@@ -39,7 +41,9 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
-    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [espeak|prosody]] [--offline-tts-dir <folder>]");
+    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]");
     return 1;
 }
 
@@ -487,6 +491,17 @@ static int Wave(string[] args)
         if (TryGetFlagValue(args, "--tts-dir", out var ttsDir))
             additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, ttsDir);
 
+        if (TryGetOfflineTts(args, scriptPath, scriptDirectory, out var offlineTtsDir, out var offlineEngineName))
+        {
+            var engine = string.IsNullOrWhiteSpace(offlineEngineName)
+                ? VocalEngineFactory.CreateDefault()
+                : VocalEngineFactory.Create(offlineEngineName);
+            var vocalOptions = BuildVocalOptions(args);
+            VocalBatchExporter.ExportFromScript(scriptPath, offlineTtsDir, engine, vocalOptions);
+            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, offlineTtsDir);
+            Console.Error.WriteLine($"offline-tts: generated vocal stems in {offlineTtsDir} via {engine.Name}.");
+        }
+
         if (TryGetFlagValue(args, "--vocal", out var vocalPath))
         {
             var vocalGain = TryGetDoubleFlag(args, "--vocal-gain", out var gain) ? gain : 1.0;
@@ -520,16 +535,204 @@ static int Wave(string[] args)
 }
 
 static bool WaveFlagTakesValue(string flag) =>
-    flag is "--vocal" or "--tts-dir" or "--vocal-at" or "--vocal-gain";
+    flag is "--vocal" or "--tts-dir" or "--vocal-at" or "--vocal-gain"
+        or "--offline-tts" or "--offline-tts-dir" or "--offline-tts-voice";
+
+static int Vocal(string[] args)
+{
+    if (args.Length < 3)
+    {
+        PrintVocalUsage();
+        return 1;
+    }
+
+    return args[1].ToLowerInvariant() switch
+    {
+        "generate" => VocalGenerate(args),
+        "batch" => VocalBatch(args),
+        _ => PrintVocalUsage(),
+    };
+}
+
+static int PrintVocalUsage()
+{
+    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    return 1;
+}
+
+static int VocalGenerate(string[] args)
+{
+    string? text = null;
+    string? outPath = null;
+    string? engineName = null;
+
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (TryMatchFlag(args, ref i, "--out", out var parsedOut))
+        {
+            if (parsedOut is not null)
+                outPath = parsedOut;
+            continue;
+        }
+
+        if (TryMatchFlag(args, ref i, "--engine", out var parsedEngine))
+        {
+            if (parsedEngine is not null)
+                engineName = parsedEngine;
+            continue;
+        }
+
+        if (args[i].StartsWith("--", StringComparison.Ordinal))
+            continue;
+        text ??= args[i];
+    }
+
+    if (string.IsNullOrWhiteSpace(text))
+    {
+        Console.Error.WriteLine("Missing speak text.");
+        return PrintVocalUsage();
+    }
+
+    outPath ??= Path.Combine(Directory.GetCurrentDirectory(), $"{TtsDirectoryMapper.Slugify(text)}.wav");
+    var options = BuildVocalOptions(args);
+
+    try
+    {
+        var engine = string.IsNullOrWhiteSpace(engineName)
+            ? VocalEngineFactory.CreateDefault()
+            : VocalEngineFactory.Create(engineName);
+        engine.Synthesize(text, outPath, options);
+        Console.WriteLine($"Generated vocal stem ({engine.Name}) → {outPath}");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static int VocalBatch(string[] args)
+{
+    if (args.Length < 4)
+        return PrintVocalUsage();
+
+    var scriptPath = args[2];
+    if (scriptPath.StartsWith("--", StringComparison.Ordinal))
+        return PrintVocalUsage();
+
+    if (!File.Exists(scriptPath))
+    {
+        Console.Error.WriteLine($"Script not found: {scriptPath}");
+        return 1;
+    }
+
+    if (!TryGetFlagValue(args, "--out-dir", out var outDir) || string.IsNullOrWhiteSpace(outDir))
+    {
+        Console.Error.WriteLine("Missing --out-dir <folder>.");
+        return PrintVocalUsage();
+    }
+
+    var engineName = TryGetFlagValue(args, "--engine", out var namedEngine) ? namedEngine : null;
+    var skipExisting = args.Contains("--skip-existing");
+    var options = BuildVocalOptions(args);
+
+    try
+    {
+        var engine = string.IsNullOrWhiteSpace(engineName)
+            ? VocalEngineFactory.CreateDefault()
+            : VocalEngineFactory.Create(engineName);
+        var items = VocalBatchExporter.ExportFromScript(scriptPath, outDir, engine, options, skipExisting);
+        Console.WriteLine($"Generated {items.Count} vocal stem(s) ({engine.Name}) in {outDir}.");
+        foreach (var item in items)
+            Console.WriteLine($"  {Path.GetFileName(item.FilePath)} ← \"{item.Text}\"");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static VocalEngineOptions BuildVocalOptions(string[] args)
+{
+    var voice = TryGetFlagValue(args, "--voice", out var v) ? v
+        : TryGetFlagValue(args, "--offline-tts-voice", out var ov) ? ov
+        : "en";
+    var seed = TryGetIntFlag(args, "--seed", out var s) ? s : 7;
+    return new VocalEngineOptions { Voice = voice, Seed = seed };
+}
+
+static bool TryGetOfflineTts(
+    string[] args,
+    string scriptPath,
+    string scriptDirectory,
+    out string ttsDirectory,
+    out string? engineName)
+{
+    ttsDirectory = string.Empty;
+    engineName = null;
+
+    for (var i = 0; i < args.Length; i++)
+    {
+        if (!string.Equals(args[i], "--offline-tts", StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        if (i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal))
+        {
+            engineName = args[i + 1];
+        }
+
+        ttsDirectory = TryGetFlagValue(args, "--offline-tts-dir", out var dir) && !string.IsNullOrWhiteSpace(dir)
+            ? dir
+            : Path.Combine(scriptDirectory, "vocal-stems");
+
+        return true;
+    }
+
+    return false;
+}
+
+static bool TryMatchFlag(string[] args, ref int index, string flag, out string? value)
+{
+    value = null;
+    if (!string.Equals(args[index], flag, StringComparison.OrdinalIgnoreCase))
+        return false;
+
+    if (index + 1 >= args.Length)
+        return true;
+
+    value = args[index + 1];
+    index++;
+    return true;
+}
+
+static bool TryGetIntFlag(string[] args, string flag, out int value)
+{
+    value = 0;
+    if (!TryGetFlagValue(args, flag, out var text))
+        return false;
+
+    return int.TryParse(text, out value);
+}
 
 static bool TryGetFlagValue(string[] args, string flag, out string value)
 {
     value = string.Empty;
-    for (var i = 0; i < args.Length - 1; i++)
+    for (var i = 0; i < args.Length; i++)
     {
-        if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
         {
             value = args[i + 1];
+            return true;
+        }
+
+        var prefix = flag + "=";
+        if (args[i].StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            value = args[i][prefix.Length..];
             return true;
         }
     }
