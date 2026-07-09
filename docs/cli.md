@@ -1,11 +1,19 @@
 # CLI Reference
 
 The SoundScript CLI (`SoundScript.Cli`, assembly name `soundscript`) compiles
-scripts and text to standard MIDI files. It requires the .NET 8 SDK and runs on
-Windows, macOS, and Linux.
+scripts and text to MIDI, renders offline timbre audio, and renders `.ss`/`.ssw`
+scripts directly to WAV. It requires the .NET 8 SDK and runs on Windows, macOS,
+and Linux.
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- <verb> <arguments>
+```
+
+Print the version and exit:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- --version
+dotnet run --project src/SoundScript.Cli -- -v
 ```
 
 ## Verbs
@@ -16,6 +24,7 @@ dotnet run --project src/SoundScript.Cli -- <verb> <arguments>
 | `compose` | Compose plain text to MIDI via the [PhonemeComposer](phoneme-composer.md) (V3.1) |
 | `prosody` | Compose plain text to MIDI via the word-level [ProsodyComposer](word-prosody.md) (V5) |
 | `render` | Offline timbre synthesis: MIDI + SoundCSS → WAV/OGG ([V4](whats-new-v4.md)) |
+| `wave` | Direct wave synthesis: `.ss`/`.ssw` → WAV via [SoundScript.Wave](wave-grammar.md) ([V7](whats-new-v7.md)) |
 
 ## `run` — compile a script
 
@@ -153,7 +162,7 @@ Also mutually exclusive with `--append`, for the same reason.
 ## `render` — MIDI to audio (V4)
 
 ```
-soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text "<source text>"]
+soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text "<source text>"]
 ```
 
 Offline, deterministic timbre synthesis using [SoundCSS](soundcss.md):
@@ -178,12 +187,46 @@ Rendered twinkle.mid with examples/default.ssc to twinkle.wav.
 MIDI is never modified — the renderer **reads** note events and adds spectral
 envelopes via the [timbre engine](timbre-engine.md).
 
+## `wave` — script to WAV (V7)
+
+```
+soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]
+```
+
+Renders a script directly through [SoundScript.Wave](wave-grammar.md) with no
+MIDI step. Accepts both standard `.ss` scripts (instrumental + vocal tracks)
+and wave-grammar `.ssw` scripts (`effect`, `speak`, named `humanize`).
+
+```bash
+dotnet run --project src/SoundScript.Cli -- wave examples/full-song-wave.ss jingle.wav
+dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw effects.wav --stereo
+```
+
+```
+Rendered examples/full-song-wave.ss directly to jingle.wav (no MIDI step).
+```
+
+| Flag / argument | Required | Purpose |
+|-----------------|----------|---------|
+| `script.ss\|script.ssw` | yes | Input script path |
+| `output.wav` | no | Output path (default: `output.wav` in cwd) |
+| `--stereo` | no | Write stereo WAV instead of mono |
+
+**Flag ordering:** place `[output.wav]` immediately after the script path, before
+`--stereo`. `wave script.ss --stereo out.wav` ignores the custom path and uses
+the default `output.wav`.
+
+Unlike `run`, the wave verb does not invoke `VocalInterpreter` — it loads the
+AST via `ProgramLoader` and renders through `WaveRenderer` only. Wave-only
+directives (`effect`, `speak`, named `humanize`) are rejected by `run` with a
+clear error; use `wave` (or the Playground's automatic wave routing) instead.
+
 ## Exit codes
 
 | Code | Meaning |
 |------|---------|
-| `0` | MIDI written successfully |
-| `1` | Usage error, missing file, empty compose text, or compile error (message on stderr) |
+| `0` | Output written successfully (MIDI, WAV, or OGG) |
+| `1` | Usage error, missing file, empty compose text, or compile/render error (message on stderr) |
 
 ## Related
 
@@ -191,6 +234,8 @@ envelopes via the [timbre engine](timbre-engine.md).
 - [phoneme-composer.md](phoneme-composer.md) — module reference
 - [word-prosody.md](word-prosody.md) — `ProsodyComposer` module reference (V5)
 - [whats-new-v6.md](whats-new-v6.md) — `--emit-ss` design and guarantees (V6)
+- [whats-new-v7.md](whats-new-v7.md) — SoundScript.Wave and the `wave` verb (V7)
+- [wave-grammar.md](wave-grammar.md) — `.ssw` grammar reference (V7)
 - [soundcss.md](soundcss.md) — SoundCSS timbre language (V4)
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`

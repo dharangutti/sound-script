@@ -1,0 +1,3 @@
+tempo 100
+
+speak "hello world" seed=7
