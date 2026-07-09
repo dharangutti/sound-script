@@ -32,12 +32,14 @@ namespace SoundScript.Wave;
 /// no randomness, no wall-clock dependence, no non-deterministic
 /// floating-point summation ordering (see Mixing.Mixer).
 ///
-/// Backend only: this class (and the whole module) is not wired into
-/// SoundScript.Cli or SoundScript.Playground. Callers parse a <c>.ssw</c>
-/// file with the existing SoundScript.Parser.ProgramLoader themselves (kept
-/// out of this project so SoundScript.Wave's only dependency stays
-/// SoundScript.Core) and hand the resulting ProgramNode to <see cref="Render"/>.
-/// See SoundScript.Tests for a minimal internal verification harness.
+/// Consumers: the CLI's <c>soundscript wave &lt;script.ss|.ssw&gt; [out.wav]
+/// [--stereo]</c> subcommand and the Blazor Playground's wave rail both parse
+/// with SoundScript.Parser and hand the resulting ProgramNode to
+/// <see cref="Render"/>/<see cref="RenderStereoToBytes"/>. This project itself
+/// still references SoundScript.Core only — parsing is kept on the caller's
+/// side so SoundScript.Wave's single dependency stays Core. See
+/// SoundScript.Tests for the internal verification harness and
+/// <c>examples/full-song-wave.ss</c> for an end-to-end four-part sample.
 /// </summary>
 public static class WaveRenderer
 {

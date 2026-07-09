@@ -51,5 +51,5 @@ voice choirline {
     vocal choir
     mf
     sing "Jingle bells jingle bells" E4 q E4 q E4 h E4 q E4 q E4 h
-    sing "Jingle all the way oh" E4 q G4 q C4 q D4 q E4 w
+    sing "Jingle all the way" E4 q G4 q C4 q D4 q E4 w
 }

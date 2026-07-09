@@ -341,6 +341,26 @@ public class WaveV4Tests
         Assert.Equal(first, second);
     }
 
+    [Fact]
+    public void OnDiskExample_RendersAllFourPartsThroughTheWaveRail()
+    {
+        // Locks the CLI example (`soundscript wave examples/full-song-wave.ss`)
+        // so an edit that reintroduces a silent/aborting part is caught here.
+        var path = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "../../../../../examples/full-song-wave.ss"));
+        var source = File.ReadAllText(path);
+
+        var tracks = AstToNoteEventAdapter.Convert(ParseSsw(source));
+        foreach (var name in new[] { "melody", "harmony", "bass", "choirline" })
+        {
+            Assert.True(tracks.ContainsKey(name), $"missing track '{name}'");
+            var rms = FullRms(Mixer.RenderTrack(tracks[name], SampleRate));
+            Assert.True(rms > 0.05, $"track '{name}' is near-silent: RMS {rms:F5}");
+        }
+
+        Assert.NotEmpty(WaveRenderer.RenderToBytes(ParseSsw(source)));
+    }
+
     // A compact four-part song touching all three fixes: melody in phrase{}
     // blocks (Bug 1), a strummed chord in the harmony (Bug 3), and a
     // voice { sing } choir line (Bug 2), over a plain bass.

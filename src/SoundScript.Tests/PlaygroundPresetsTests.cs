@@ -1,5 +1,7 @@
 using SoundScript.Parser;
+using SoundScript.Wave;
 using Xunit;
+using SoundScriptParser = SoundScript.Parser.Parser;
 
 namespace SoundScript.Tests;
 
@@ -32,14 +34,39 @@ public class PlaygroundPresetsTests
     Assert.Equal(expected, SourceDiagnostics.ContainsImport(script));
   }
 
-  internal static IEnumerable<string> ExtractPresetScripts(string playgroundSource)
+  // Regression for the wave-rail wiring: every WaveScriptText preset the
+  // Playground offers must actually render through SoundScript.Wave. Catches a
+  // preset that was hand-authored against grammar the wave adapter can't take
+  // (e.g. the pre-fix jingle-bells example, which threw on `play <pattern>`).
+  [Fact]
+  public void WavePresets_RenderThroughTheWaveRail()
+  {
+    var source = File.ReadAllText(PlaygroundCodePath);
+    var wavePresets = ExtractAssignedScripts(source, "WaveScriptText =").ToList();
+
+    Assert.NotEmpty(wavePresets);
+    foreach (var script in wavePresets)
+    {
+      var program = new SoundScriptParser(new Tokenizer(script).Tokenize()).Parse();
+      var bytes = WaveRenderer.RenderToBytes(program);
+      Assert.NotEmpty(bytes);
+    }
+  }
+
+  // "ScriptText =" is a substring of "WaveScriptText =", so this returns the
+  // MIDI-rail presets AND the wave presets — the callers that need only one
+  // rail pass the more specific marker.
+  internal static IEnumerable<string> ExtractPresetScripts(string playgroundSource) =>
+      ExtractAssignedScripts(playgroundSource, "ScriptText =");
+
+  internal static IEnumerable<string> ExtractAssignedScripts(string playgroundSource, string marker)
   {
     var scripts = new List<string>();
     var search = 0;
 
     while (true)
     {
-      var assign = playgroundSource.IndexOf("ScriptText =", search, StringComparison.Ordinal);
+      var assign = playgroundSource.IndexOf(marker, search, StringComparison.Ordinal);
       if (assign < 0)
         break;
 
