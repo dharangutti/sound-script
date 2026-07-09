@@ -5,6 +5,7 @@ using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
+using SoundScript.Wave;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -24,6 +25,7 @@ return args[0].ToLowerInvariant() switch
     "compose" => Compose(args),
     "prosody" => Prosody(args),
     "render" => Render(args),
+    "wave" => Wave(args),
     _ => PrintUsage()
 };
 
@@ -34,6 +36,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text \"<source text>\"]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]");
     return 1;
 }
 
@@ -351,6 +354,42 @@ static int Render(string[] args)
         OfflineRenderer.RenderFile(midiPath, cssPath, outputPath, options);
 
         Console.WriteLine($"Rendered {midiPath} with {cssPath} to {outputPath}.");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static int Wave(string[] args)
+{
+    var scriptPath = args[1];
+    if (!File.Exists(scriptPath))
+    {
+        Console.Error.WriteLine($"Script not found: {scriptPath}");
+        return 1;
+    }
+
+    var outputPath = args.Length > 2 && !args[2].StartsWith("--")
+        ? args[2]
+        : Path.Combine(Directory.GetCurrentDirectory(), "output.wav");
+
+    var stereo = args.Contains("--stereo");
+
+    try
+    {
+        var loaded = ProgramLoader.Load(scriptPath);
+        foreach (var warning in loaded.Warnings)
+            Console.Error.WriteLine($"warning: {warning}");
+
+        if (stereo)
+            WaveRenderer.RenderStereo(loaded.Program, outputPath);
+        else
+            WaveRenderer.Render(loaded.Program, outputPath);
+
+        Console.WriteLine($"Rendered {scriptPath} directly to {outputPath} (no MIDI step).");
         return 0;
     }
     catch (Exception ex)

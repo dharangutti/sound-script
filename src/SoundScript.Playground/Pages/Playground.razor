@@ -221,4 +221,36 @@
             </p>
         </section>
     </div>
+
+    <section class="pane pane-wave" aria-labelledby="wave-heading">
+        <h2 id="wave-heading">SoundScript.Wave — .ssw direct to WAV</h2>
+        <p class="hint">
+            No MIDI step. <code>track</code>/<code>speak</code>/<code>effect</code>
+            scripts render straight to WAV through <code>AstToNoteEventAdapter →
+            Mixer → MasterEffectChain → WavWriter</code>. Deterministic —
+            identical script text always produces byte-identical audio.
+        </p>
+
+        <select @bind="SelectedWaveExampleKey">
+            <option value="wave-effects">Effects (delay + lowpass)</option>
+            <option value="wave-speak">Speak (phoneme tones)</option>
+            <option value="wave-humanize">Humanize</option>
+            <option value="showcase-jingle-bells-wave">Jingle Bells — Wave rail</option>
+        </select>
+        <button type="button" class="btn btn-secondary" @onclick="LoadSelectedWaveExample">Load</button>
+
+        <textarea class="script-input" @bind="WaveScriptText" spellcheck="false"></textarea>
+
+        <div class="actions">
+            <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunWaveAsync">
+                @(IsRunning ? "Rendering…" : "Render")
+            </button>
+            @if (WaveOutputBytes is not null)
+            {
+                <button type="button" class="btn btn-secondary" @onclick="DownloadWaveOutputAsync">Download WAV</button>
+            }
+        </div>
+
+        <span class="badge">SoundScript.Wave · no MIDI step</span>
+    </section>
 </div>
