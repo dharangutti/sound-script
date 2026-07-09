@@ -1,6 +1,6 @@
 # SoundScript Documentation
 
-SoundScript is an open-source, deterministic music DSL that compiles text to MIDI (or, as of V7, directly to WAV). It runs as a cross-platform .NET CLI (Windows, macOS, Linux) and as a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari). This is the documentation hub for **V7**.
+SoundScript is an open-source, deterministic music DSL that compiles text to MIDI (or, as of V7, directly to WAV). V8 adds **vocal stem mixing** into exported Wave files. It runs as a cross-platform .NET CLI (Windows, macOS, Linux) and as a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari). This is the documentation hub for **V8**.
 
 ## Documentation Index
 
@@ -10,12 +10,18 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 |----------|-------------|
 | [user-guide.md](user-guide.md) | Hands-on user guide — from first note to industrial audio cues, with runnable examples |
 
+### V8 Features
+
+| Document | Description |
+|----------|-------------|
+| [whats-new-v8.md](whats-new-v8.md) | V8 changelog — vocal stems in Wave export |
+| [wave-grammar.md](wave-grammar.md) | `.ssw` grammar — `sample`, `speak sample=`, plus V7 `effect`/`speak` |
+
 ### V7 Features
 
 | Document | Description |
 |----------|-------------|
 | [whats-new-v7.md](whats-new-v7.md) | V7 changelog — SoundScript.Wave reaches the Playground |
-| [wave-grammar.md](wave-grammar.md) | `.ssw` grammar reference — `effect`, `speak`, `humanize`'s named form |
 
 ### V3.1 Features
 

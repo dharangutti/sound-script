@@ -22,99 +22,88 @@ namespace SoundScript.Wave;
 ///                                     output.wav
 /// </code>
 ///
-/// This is a parallel rail alongside SoundScript.Midi, selected by the
-/// <c>.ssw</c> file extension, reusing the existing grammar/tokenizer/parser/
-/// AST without introducing a new language. It references SoundScript.Core
-/// only, so it can be added or removed without touching SoundScript.Midi,
-/// SoundScript.Timbre, or the parser.
-///
-/// Determinism: identical input produces byte-identical WAV output —
-/// no randomness, no wall-clock dependence, no non-deterministic
-/// floating-point summation ordering (see Mixing.Mixer).
-///
-/// Consumers: the CLI's <c>soundscript wave &lt;script.ss|.ssw&gt; [out.wav]
-/// [--stereo]</c> subcommand and the Blazor Playground's wave rail both parse
-/// with SoundScript.Parser and hand the resulting ProgramNode to
-/// <see cref="Render"/>/<see cref="RenderStereoToBytes"/>. This project itself
-/// still references SoundScript.Core only — parsing is kept on the caller's
-/// side so SoundScript.Wave's single dependency stays Core. See
-/// SoundScript.Tests for the internal verification harness and
-/// <c>examples/full-song-wave.ss</c> for an end-to-end four-part sample.
+/// V8 adds external vocal stem mixing via <c>sample</c>, <c>speak sample=</c>,
+/// and CLI overlays (<c>--vocal</c>, <c>--tts-dir</c>).
 /// </summary>
 public static class WaveRenderer
 {
-    public static byte[] RenderToBytes(ProgramNode program)
+    public static byte[] RenderToBytes(ProgramNode program, WaveRenderOptions? options = null)
     {
         using var stream = new MemoryStream();
-        RenderTo(program, stream);
+        RenderTo(program, stream, options);
         return stream.ToArray();
     }
 
-    public static void Render(ProgramNode program, string outputWavPath)
+    public static void Render(ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
-        var mixed = MixProgram(program);
+        var mixed = MixProgram(program, options);
         WavWriter.Write(outputWavPath, mixed);
     }
 
-    public static void RenderTo(ProgramNode program, Stream destination)
+    public static void RenderTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
-        var mixed = MixProgram(program);
+        var mixed = MixProgram(program, options);
         WavWriter.WriteTo(destination, mixed, WavWriter.SampleRate);
     }
 
-    /// <summary>
-    /// Stereo (interleaved L/R 16-bit PCM) counterpart of
-    /// <see cref="RenderToBytes"/>. Because no .ss/.ssw grammar directive for
-    /// pan exists (adding one would require modifying SoundScript.Core or
-    /// SoundScript.Parser, which the safeguards forbid), the adapter still
-    /// assigns Pan = 0.0 to every note — a parsed program renders dead-center,
-    /// as a mono image duplicated to both channels. The pan plumbing below the
-    /// adapter (Mixer → stereo WAV writer) is fully live, so direct API
-    /// callers constructing NoteEvents with non-zero Pan get true stereo
-    /// today; see Mixer.RenderTrackStereo for the full scope rationale.
-    /// </summary>
-    public static byte[] RenderStereoToBytes(ProgramNode program)
+    public static byte[] RenderStereoToBytes(ProgramNode program, WaveRenderOptions? options = null)
     {
         using var stream = new MemoryStream();
-        RenderStereoTo(program, stream);
+        RenderStereoTo(program, stream, options);
         return stream.ToArray();
     }
 
-    public static void RenderStereo(ProgramNode program, string outputWavPath)
+    public static void RenderStereo(ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
-        var (left, right) = MixProgramStereo(program);
+        var (left, right) = MixProgramStereo(program, options);
         WavWriter.WriteStereo(outputWavPath, left, right);
     }
 
-    public static void RenderStereoTo(ProgramNode program, Stream destination)
+    public static void RenderStereoTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
-        var (left, right) = MixProgramStereo(program);
+        var (left, right) = MixProgramStereo(program, options);
         WavWriter.WriteStereoTo(destination, left, right, WavWriter.SampleRate);
     }
 
-    /// <summary>
-    /// SHA-256 of <see cref="RenderToBytes"/>, hex-encoded. Mirrors
-    /// SoundScript.Timbre.OfflineRenderer.RenderSha256 — the checksum
-    /// determinism suite hashes the render instead of asserting on raw WAV
-    /// bytes directly, so a mismatch reports a 64-char digest rather than
-    /// dumping the buffer (see WaveDeterminismTests).
-    /// </summary>
-    public static string RenderSha256(ProgramNode program) =>
-        Convert.ToHexString(SHA256.HashData(RenderToBytes(program)));
+    public static string RenderSha256(ProgramNode program, WaveRenderOptions? options = null) =>
+        Convert.ToHexString(SHA256.HashData(RenderToBytes(program, options)));
 
-    /// <summary>Stereo counterpart of <see cref="RenderSha256"/>.</summary>
-    public static string RenderStereoSha256(ProgramNode program) =>
-        Convert.ToHexString(SHA256.HashData(RenderStereoToBytes(program)));
+    public static string RenderStereoSha256(ProgramNode program, WaveRenderOptions? options = null) =>
+        Convert.ToHexString(SHA256.HashData(RenderStereoToBytes(program, options)));
 
-    // v3: the master effects chain runs post-mix, as the final stage before
-    // the WAV writer — master-only by design (see MasterEffectChain for the
-    // full rationale; per-track routing stays in the parking lot). Programs
-    // without effect directives take the identical pre-v3 path: an empty
-    // chain returns the mixed buffer untouched.
-    private static float[] MixProgram(ProgramNode program)
+    private static float[] MixProgram(ProgramNode program, WaveRenderOptions? options)
     {
-        var tracks = AstToNoteEventAdapter.Convert(program);
+        var adapted = AstToNoteEventAdapter.Adapt(program);
+        var trackBuffers = RenderTrackBuffers(adapted.Tracks);
+        var mixed = Mixer.SumTracksRaw(trackBuffers);
+        mixed = ApplyOverlays(mixed, adapted.SampleOverlays, options);
+        if (options?.AdditionalSampleOverlays is not null)
+            mixed = ApplyOverlays(mixed, options.AdditionalSampleOverlays, options);
+        mixed = ApplyExternalOverlays(mixed, options);
+        var finalized = Mixer.FinalizeMix(mixed);
+        return MasterEffectChain.Apply(finalized, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
+    }
 
+    private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program, WaveRenderOptions? options)
+    {
+        var adapted = AstToNoteEventAdapter.Adapt(program);
+        var trackBuffers = RenderTrackBuffersStereo(adapted.Tracks);
+        var (leftMixed, rightMixed) = Mixer.SumTracksStereoRaw(trackBuffers);
+        leftMixed = ApplyOverlays(leftMixed, adapted.SampleOverlays, options);
+        rightMixed = ApplyOverlays(rightMixed, adapted.SampleOverlays, options);
+        if (options?.AdditionalSampleOverlays is not null)
+        {
+            leftMixed = ApplyOverlays(leftMixed, options.AdditionalSampleOverlays, options);
+            rightMixed = ApplyOverlays(rightMixed, options.AdditionalSampleOverlays, options);
+        }
+        leftMixed = ApplyExternalOverlays(leftMixed, options);
+        rightMixed = ApplyExternalOverlays(rightMixed, options);
+        var (left, right) = Mixer.FinalizeMixStereo(leftMixed, rightMixed);
+        return MasterEffectChain.ApplyStereo(left, right, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
+    }
+
+    private static List<float[]> RenderTrackBuffers(Dictionary<string, List<Model.NoteEvent>> tracks)
+    {
         var trackBuffers = new List<float[]>(tracks.Count);
         foreach (var notes in tracks.Values)
         {
@@ -122,14 +111,12 @@ public static class WaveRenderer
                 trackBuffers.Add(Mixer.RenderTrack(notes, WavWriter.SampleRate));
         }
 
-        var mixed = Mixer.MixTracks(trackBuffers);
-        return MasterEffectChain.Apply(mixed, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
+        return trackBuffers;
     }
 
-    private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program)
+    private static List<(float[] Left, float[] Right)> RenderTrackBuffersStereo(
+        Dictionary<string, List<Model.NoteEvent>> tracks)
     {
-        var tracks = AstToNoteEventAdapter.Convert(program);
-
         var trackBuffers = new List<(float[] Left, float[] Right)>(tracks.Count);
         foreach (var notes in tracks.Values)
         {
@@ -137,7 +124,39 @@ public static class WaveRenderer
                 trackBuffers.Add(Mixer.RenderTrackStereo(notes, WavWriter.SampleRate));
         }
 
-        var (left, right) = Mixer.MixTracksStereo(trackBuffers);
-        return MasterEffectChain.ApplyStereo(left, right, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
+        return trackBuffers;
+    }
+
+    private static double[] ApplyOverlays(
+        double[] mixed,
+        IReadOnlyList<SampleOverlayRequest> overlays,
+        WaveRenderOptions? options)
+    {
+        foreach (var overlay in overlays)
+        {
+            var path = WavePathResolver.Resolve(options?.ScriptDirectory, overlay.RelativePath);
+            if (options?.SkipMissingSamples == true && !File.Exists(path))
+                continue;
+
+            var samples = WavReader.ReadMono(path);
+            var startSample = Math.Max(0, (int)Math.Round(overlay.StartTimeSeconds * WavWriter.SampleRate));
+            mixed = Mixer.OverlayMono(mixed, samples, startSample, overlay.Gain);
+        }
+
+        return mixed;
+    }
+
+    private static double[] ApplyExternalOverlays(double[] mixed, WaveRenderOptions? options)
+    {
+        if (options?.ExternalOverlays is null)
+            return mixed;
+
+        foreach (var overlay in options.ExternalOverlays)
+        {
+            var startSample = Math.Max(0, (int)Math.Round(overlay.StartTimeSeconds * WavWriter.SampleRate));
+            mixed = Mixer.OverlayMono(mixed, overlay.Samples, startSample, overlay.Gain);
+        }
+
+        return mixed;
     }
 }

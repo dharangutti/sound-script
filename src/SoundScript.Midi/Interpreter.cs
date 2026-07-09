@@ -154,6 +154,11 @@ public static class Interpreter
                         "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
                         "phoneme-level frequency mapping. Render this file through the wave backend instead.");
+                case SampleNode:
+                    throw new NotSupportedException(
+                        "'sample' (external WAV stem overlay) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot mix audio buffers. " +
+                        "Render this file through the wave backend instead.");
             }
         }
 
@@ -339,6 +344,11 @@ public static class Interpreter
                         "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
                         "phoneme-level frequency mapping. Render this file through the wave backend instead.");
+                case SampleNode:
+                    throw new NotSupportedException(
+                        "'sample' (external WAV stem overlay) is a wave-backend directive " +
+                        "(SoundScript.Wave, .ssw files): the MIDI backend cannot mix audio buffers. " +
+                        "Render this file through the wave backend instead.");
             }
         }
     }

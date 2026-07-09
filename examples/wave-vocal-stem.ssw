@@ -1,0 +1,9 @@
+tempo 120
+time 4/4
+
+track pad {
+    p
+    Cmaj w Gmaj w
+}
+
+speak "Hello from my vocal stem" sample="vocal-stems/hello-world.wav" gain=0.95 seed=7

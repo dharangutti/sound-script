@@ -91,10 +91,35 @@ excludes.
 **Preview vs. export.** The Playground also plays a live browser
 speech-synthesis overlay of the `speak` text as a convenience while a script
 runs (the same mechanism `voice` blocks use for lyrics) — that overlay is
-browser-side only and is never captured in the exported WAV. The WAV always
-contains exactly the deterministic prosody synthesis described above, so the
-export will sound more synthetic than the in-browser preview; this is
-expected, not a bug.
+browser-side only and is never captured in the exported WAV unless you use
+**V8 vocal stems** (`sample` / `speak sample=` — see below). Without a stem,
+the WAV contains deterministic prosody synthesis only, so the export sounds
+more synthetic than the in-browser preview.
+
+**V8 vocal stems.** When `sample=` is set on `speak`, or a `sample` directive
+is used, the **exported WAV includes your recording** instead of synthetic
+phoneme tones for that segment. Use the CLI with on-disk WAV files.
+
+## `sample` — external WAV stem (V8)
+
+```ss
+sample "vocal-stems/take.wav" gain=0.9 at=0
+```
+
+- **Per-track** (same placement rules as `speak`).
+- `gain=` — optional linear gain (default `1.0`).
+- `at=` — optional start beat; omit to use the current track cursor.
+- Path resolves relative to the script file directory.
+- Supports 16-bit PCM WAV, mono or stereo, resampled to 44.1 kHz.
+
+**`speak` with a recording:**
+
+```ss
+speak "Jingle bells" sample="vocal-stems/jingle.wav" gain=0.95 seed=7
+```
+
+When `sample=` is present, beat timing follows the usual prosody rhythm but
+the audio comes from your file, not `ProsodyToneGenerator`.
 
 ## `humanize` — named-parameter form
 

@@ -7,6 +7,8 @@ using SoundScript.Timbre;
 using SoundScript.Voice;
 using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
+using SoundScript.Wave.Io;
+using SoundScript.Wave.Tts;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -37,7 +39,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
-    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>]");
     return 1;
 }
 
@@ -455,11 +457,22 @@ static int Wave(string[] args)
         return 1;
     }
 
-    var outputPath = args.Length > 2 && !args[2].StartsWith("--")
-        ? args[2]
-        : Path.Combine(Directory.GetCurrentDirectory(), "output.wav");
+    string? outputPath = null;
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (args[i].StartsWith("--", StringComparison.Ordinal))
+            continue;
+        if (i > 0 && WaveFlagTakesValue(args[i - 1]))
+            continue;
+
+        outputPath = args[i];
+        break;
+    }
+
+    outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.wav");
 
     var stereo = args.Contains("--stereo");
+    var scriptDirectory = Path.GetDirectoryName(Path.GetFullPath(scriptPath)) ?? Directory.GetCurrentDirectory();
 
     try
     {
@@ -467,10 +480,34 @@ static int Wave(string[] args)
         foreach (var warning in loaded.Warnings)
             Console.Error.WriteLine($"warning: {warning}");
 
+        var adapted = AstToNoteEventAdapter.Adapt(loaded.Program);
+        IReadOnlyList<WaveExternalOverlay>? externalOverlays = null;
+        IReadOnlyList<SampleOverlayRequest>? additionalOverlays = null;
+
+        if (TryGetFlagValue(args, "--tts-dir", out var ttsDir))
+            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, ttsDir);
+
+        if (TryGetFlagValue(args, "--vocal", out var vocalPath))
+        {
+            var vocalGain = TryGetDoubleFlag(args, "--vocal-gain", out var gain) ? gain : 1.0;
+            var vocalAtBeats = TryGetDoubleFlag(args, "--vocal-at", out var atBeats) ? atBeats : 0.0;
+            var vocalSamples = WavReader.ReadMono(WavePathResolver.Resolve(scriptDirectory, vocalPath));
+            var tempo = Interpreter.Interpret(loaded.Program).Tempo;
+            var startSeconds = vocalAtBeats * (60.0 / tempo);
+            externalOverlays = [new WaveExternalOverlay(vocalSamples, startSeconds, vocalGain)];
+        }
+
+        var renderOptions = new WaveRenderOptions
+        {
+            ScriptDirectory = scriptDirectory,
+            AdditionalSampleOverlays = additionalOverlays,
+            ExternalOverlays = externalOverlays,
+        };
+
         if (stereo)
-            WaveRenderer.RenderStereo(loaded.Program, outputPath);
+            WaveRenderer.RenderStereo(loaded.Program, outputPath, renderOptions);
         else
-            WaveRenderer.Render(loaded.Program, outputPath);
+            WaveRenderer.Render(loaded.Program, outputPath, renderOptions);
 
         Console.WriteLine($"Rendered {scriptPath} directly to {outputPath} (no MIDI step).");
         return 0;
@@ -480,4 +517,32 @@ static int Wave(string[] args)
         Console.Error.WriteLine(ex.Message);
         return 1;
     }
+}
+
+static bool WaveFlagTakesValue(string flag) =>
+    flag is "--vocal" or "--tts-dir" or "--vocal-at" or "--vocal-gain";
+
+static bool TryGetFlagValue(string[] args, string flag, out string value)
+{
+    value = string.Empty;
+    for (var i = 0; i < args.Length - 1; i++)
+    {
+        if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase))
+        {
+            value = args[i + 1];
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool TryGetDoubleFlag(string[] args, string flag, out double value)
+{
+    value = 0;
+    if (!TryGetFlagValue(args, flag, out var text))
+        return false;
+
+    return double.TryParse(text, System.Globalization.NumberStyles.Float,
+        System.Globalization.CultureInfo.InvariantCulture, out value);
 }

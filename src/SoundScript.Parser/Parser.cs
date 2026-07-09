@@ -94,6 +94,9 @@ public sealed class Parser
         if (Match(TokenType.Speak))
             return ParseSpeakStatement();
 
+        if (Match(TokenType.Sample))
+            return ParseSampleStatement();
+
         if (Check(TokenType.Articulation))
         {
             var articulation = ParseOptionalPrefixArticulation();
@@ -589,6 +592,9 @@ public sealed class Parser
         if (Match(TokenType.Speak))
             return ParseSpeakStatement();
 
+        if (Match(TokenType.Sample))
+            return ParseSampleStatement();
+
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -784,7 +790,7 @@ public sealed class Parser
             throw Invalid(textToken, "speak text must contain at least one letter.");
 
         var parameters = ParseKeyValueParameters("speak");
-        RejectUnknownParameters(parameters, "speak", "voice", "seed");
+        RejectUnknownParameters(parameters, "speak", "voice", "seed", "sample", "gain");
 
         var voice = parameters.TryGetValue("voice", out var voiceToken)
             ? voiceToken.Value
@@ -794,7 +800,50 @@ public sealed class Parser
         if (parameters.TryGetValue("seed", out var seedToken))
             seed = ParseNonNegativeIntParameter(seedToken, "speak seed");
 
-        return new SpeakNode { Text = textToken.Value, Voice = voice, Seed = seed };
+        string? samplePath = null;
+        if (parameters.TryGetValue("sample", out var sampleToken))
+            samplePath = sampleToken.Value;
+
+        var sampleGain = 1.0;
+        if (parameters.TryGetValue("gain", out var sampleGainToken))
+            sampleGain = ParsePositiveDoubleParameter(sampleGainToken, "speak gain (sample level)");
+
+        return new SpeakNode
+        {
+            Text = textToken.Value,
+            Voice = voice,
+            Seed = seed,
+            SamplePath = samplePath,
+            SampleGain = sampleGain,
+        };
+    }
+
+    private SampleNode ParseSampleStatement()
+    {
+        var pathToken = Expect(TokenType.StringLiteral, "path to a WAV file (a quoted string)");
+        var parameters = ParseKeyValueParameters("sample");
+        RejectUnknownParameters(parameters, "sample", "gain", "at");
+
+        var gain = 1.0;
+        if (parameters.TryGetValue("gain", out var gainToken))
+            gain = ParsePositiveDoubleParameter(gainToken, "sample gain");
+
+        double? atBeats = null;
+        if (parameters.TryGetValue("at", out var atToken))
+            atBeats = ParsePositiveDoubleParameter(atToken, "sample at");
+
+        return new SampleNode { Path = pathToken.Value, Gain = gain, AtBeats = atBeats };
+    }
+
+    private static double ParsePositiveDoubleParameter(Token token, string label)
+    {
+        if (!double.TryParse(token.Value, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var value) || value < 0)
+        {
+            throw Invalid(token, $"{label} must be a non-negative number.");
+        }
+
+        return value;
     }
 
     /// <summary>
@@ -1291,7 +1340,7 @@ public sealed class Parser
             or TokenType.Curve or TokenType.Transition or TokenType.Pattern
             or TokenType.PatternRhythm or TokenType.Orchestration
             or TokenType.Voice or TokenType.Sing or TokenType.Vocal
-            or TokenType.Effect or TokenType.Speak;
+            or TokenType.Effect or TokenType.Speak or TokenType.Sample;
 
     private static int ParsePositiveInt(Token token, string label)
     {
