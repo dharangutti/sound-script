@@ -40,7 +40,7 @@ New **`soundscript vocal`** verb — generate slug-named WAV stems without rende
 the full mix:
 
 ```bash
-# Single phrase (prosody = built-in synthetic; espeak = local espeak-ng if installed)
+# Single phrase (prosody = built-in synthetic phoneme tones; espeak = system TTS if installed)
 dotnet run --project src/SoundScript.Cli -- vocal generate "Hello world" \
   --out vocal-stems/hello-world.wav --engine prosody --seed=7
 
@@ -48,6 +48,10 @@ dotnet run --project src/SoundScript.Cli -- vocal generate "Hello world" \
 dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
   --out-dir vocal-stems/ --engine prosody --skip-existing
 ```
+
+**`prosody` needs no install** — it produces buzzy speech-like blips, not human
+speech. For spoken words, install **espeak-ng** on your system (not a NuGet
+package) and use `--engine espeak`.
 
 `--tts-dir` expects files named from speak text (`hello-world.wav` for
 `speak "Hello world"`). Use **your own recordings**, **`vocal batch`**, or
