@@ -132,6 +132,10 @@ public static class PlaygroundPresetCatalog
 
     public static IEnumerable<PlaygroundPresetInfo> AllPresets => Presets.Values;
 
+    public static bool IsWaveExampleKey(string key) =>
+        key.StartsWith("wave-", StringComparison.Ordinal) ||
+        key is "speech-only-wave" or "showcase-jingle-bells-wave";
+
     public static string DocsExamplesUrl => $"/doc.html?p={DocsExamplesPath}";
 
     public static string DescribeOutputRail(PlaygroundOutputRail rail) => rail switch

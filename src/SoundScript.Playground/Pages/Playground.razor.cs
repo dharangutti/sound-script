@@ -63,8 +63,8 @@ public partial class Playground
 
   protected override void OnInitialized()
   {
-    RefreshMainPresetInfo();
-    RefreshWavePresetInfo();
+    LoadSelectedExample();
+    LoadSelectedWaveExample(syncMainEditor: false);
   }
 
   private void RefreshMainPresetInfo() =>
@@ -126,10 +126,19 @@ public partial class Playground
       case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
     }
 
+    if (PlaygroundPresetCatalog.IsWaveExampleKey(SelectedExampleKey))
+    {
+      ScriptText = WaveScriptText;
+      SelectedWaveExampleKey = SelectedExampleKey;
+      RefreshWavePresetInfo();
+    }
+
     RefreshMainPresetInfo();
+    ClearState();
+    StateHasChanged();
   }
 
-  private void LoadSelectedWaveExample()
+  private void LoadSelectedWaveExample(bool syncMainEditor = true)
   {
     switch (SelectedWaveExampleKey)
     {
@@ -142,6 +151,15 @@ public partial class Playground
       case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
     }
 
+    if (syncMainEditor)
+    {
+      ScriptText = WaveScriptText;
+      SelectedExampleKey = SelectedWaveExampleKey;
+      RefreshMainPresetInfo();
+    }
+
+    WaveOutputBytes = null;
+    ClearState();
     RefreshWavePresetInfo();
     StateHasChanged();
   }
