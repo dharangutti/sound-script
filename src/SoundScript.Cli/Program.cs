@@ -6,6 +6,7 @@ using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Voice;
 using SoundScript.Wave;
+using SoundScript.Wave.Adapter;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -33,8 +34,8 @@ static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript --version | -v");
     Console.Error.WriteLine("       soundscript run <script.ss> [output.mid]");
-    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
-    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
+    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
+    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]");
     return 1;
@@ -96,6 +97,8 @@ static int Compose(string[] args)
     string? outputPath = null;
     string? appendScriptPath = null;
     string? emitSsPath = null;
+    var waveOutput = false;
+    var stereo = false;
 
     for (var i = 2; i < args.Length; i++)
     {
@@ -119,6 +122,14 @@ static int Compose(string[] args)
 
             emitSsPath = args[++i];
         }
+        else if (string.Equals(args[i], "--wave", StringComparison.OrdinalIgnoreCase))
+        {
+            waveOutput = true;
+        }
+        else if (string.Equals(args[i], "--stereo", StringComparison.OrdinalIgnoreCase))
+        {
+            stereo = true;
+        }
         else
         {
             outputPath = args[i];
@@ -133,10 +144,41 @@ static int Compose(string[] args)
         return 1;
     }
 
-    outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
+    if (waveOutput && appendScriptPath is not null)
+    {
+        Console.Error.WriteLine(
+            "--wave and --append cannot be combined: --append merges into an interpreted MIDI program, " +
+            "which has no single AST to render through SoundScript.Wave.");
+        return 1;
+    }
+
+    outputPath ??= Path.Combine(
+        Directory.GetCurrentDirectory(),
+        waveOutput ? "output.wav" : "output.mid");
 
     try
     {
+        if (waveOutput)
+        {
+            var ast = PhonemeComposer.BuildAst(text);
+            if (emitSsPath is not null)
+                File.WriteAllText(emitSsPath, SsPrinter.Print(ast));
+
+            if (stereo)
+                WaveRenderer.RenderStereo(ast, outputPath);
+            else
+                WaveRenderer.Render(ast, outputPath);
+
+            var waveSyllables = PhonemeComposer.SplitSyllables(text);
+            var waveNoteCount = AstToNoteEventAdapter.Convert(ast).Values.Sum(t => t.Count);
+            var waveTempo = Interpreter.Interpret(ast).Tempo;
+            var waveSummary = $"Composed {waveSyllables.Count} syllable(s) into {waveNoteCount} note(s)";
+            if (emitSsPath is not null)
+                waveSummary += $" and .ss source to {emitSsPath}";
+            Console.WriteLine($"{waveSummary} and rendered to {outputPath} via SoundScript.Wave (no MIDI step) at {waveTempo} BPM.");
+            return 0;
+        }
+
         SoundScript.Core.InterpretedProgram interpreted;
         if (appendScriptPath is not null)
         {
@@ -198,6 +240,8 @@ static int Prosody(string[] args)
     string? outputPath = null;
     string? appendScriptPath = null;
     string? emitSsPath = null;
+    var waveOutput = false;
+    var stereo = false;
 
     for (var i = 2; i < args.Length; i++)
     {
@@ -221,6 +265,14 @@ static int Prosody(string[] args)
 
             emitSsPath = args[++i];
         }
+        else if (string.Equals(args[i], "--wave", StringComparison.OrdinalIgnoreCase))
+        {
+            waveOutput = true;
+        }
+        else if (string.Equals(args[i], "--stereo", StringComparison.OrdinalIgnoreCase))
+        {
+            stereo = true;
+        }
         else
         {
             outputPath = args[i];
@@ -235,10 +287,41 @@ static int Prosody(string[] args)
         return 1;
     }
 
-    outputPath ??= Path.Combine(Directory.GetCurrentDirectory(), "output.mid");
+    if (waveOutput && appendScriptPath is not null)
+    {
+        Console.Error.WriteLine(
+            "--wave and --append cannot be combined: --append merges into an interpreted MIDI program, " +
+            "which has no single AST to render through SoundScript.Wave.");
+        return 1;
+    }
+
+    outputPath ??= Path.Combine(
+        Directory.GetCurrentDirectory(),
+        waveOutput ? "output.wav" : "output.mid");
 
     try
     {
+        if (waveOutput)
+        {
+            var ast = ProsodyComposer.BuildAst(text);
+            if (emitSsPath is not null)
+                File.WriteAllText(emitSsPath, SsPrinter.Print(ast));
+
+            if (stereo)
+                WaveRenderer.RenderStereo(ast, outputPath);
+            else
+                WaveRenderer.Render(ast, outputPath);
+
+            var waveSyllableCount = WordTokenizer.Tokenize(text).Sum(w => w.Syllables.Count);
+            var waveNoteCount = AstToNoteEventAdapter.Convert(ast).Values.Sum(t => t.Count);
+            var waveTempo = Interpreter.Interpret(ast).Tempo;
+            var waveSummary = $"Composed {waveSyllableCount} syllable(s) into {waveNoteCount} note(s) (word-level prosody)";
+            if (emitSsPath is not null)
+                waveSummary += $" and .ss source to {emitSsPath}";
+            Console.WriteLine($"{waveSummary} and rendered to {outputPath} via SoundScript.Wave (no MIDI step) at {waveTempo} BPM.");
+            return 0;
+        }
+
         SoundScript.Core.InterpretedProgram interpreted;
         if (appendScriptPath is not null)
         {
