@@ -1,5 +1,25 @@
 # SoundScript Release Notes
 
+## V7 — SoundScript.Wave (direct `.ss`/`.ssw` → WAV)
+
+- **New subsystem:** `SoundScript.Wave` — deterministic AST-to-WAV synthesis
+  (`WaveRenderer`, `AstToNoteEventAdapter`, master effects chain). Wave-only
+  grammar additions: `effect`, `speak`, and `humanize`'s named
+  `timing=/velocity=/seed=` form.
+- **New CLI verb:** `soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]`.
+- **Playground:** **Run** auto-routes wave-grammar scripts through
+  SoundScript.Wave; new **Wave (.ssw)** preset group and dedicated wave pane.
+- **Examples:** [examples/wave-effects.ssw](examples/wave-effects.ssw),
+  [examples/wave-speak.ssw](examples/wave-speak.ssw),
+  [examples/wave-humanize.ssw](examples/wave-humanize.ssw),
+  [examples/full-song-wave.ss](examples/full-song-wave.ss).
+- **No breaking changes:** existing `.ss` scripts and the MIDI pipeline are
+  unchanged; wave-only directives are rejected by `run` with a clear error.
+
+Details: [docs/whats-new-v7.md](docs/whats-new-v7.md) ·
+[docs/wave-grammar.md](docs/wave-grammar.md) ·
+[docs/cli.md](docs/cli.md)
+
 ## V6 — Editable .ss Export (`--emit-ss`)
 
 - **New library API:** `SoundScript.Parser.SsPrinter.Print(ProgramNode)` —

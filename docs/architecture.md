@@ -13,7 +13,7 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer + submodules (V3.1)
     SoundScript.Timbre/     # Offline timbre: SoundCSS + SpectralEngine (V4)
     SoundScript.Prosody/    # Word-level prosody: ProsodyComposer + submodules (V5)
-    SoundScript.Cli/        # Command-line runner (run + compose + prosody + render)
+    SoundScript.Cli/        # Command-line runner (run + compose + prosody + render + wave)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
     SoundScript.Tests/      # xUnit tests
@@ -152,7 +152,7 @@ other end. → [whats-new-v6.md](whats-new-v6.md)
 
 ## Deployment
 
-- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss` · `... -- compose "text"` · `... -- prosody "text"`
+- **CLI:** `dotnet run --project src/SoundScript.Cli -- run script.ss` · `... -- compose "text"` · `... -- prosody "text"` · `... -- render file.mid --css style.ssc` · `... -- wave script.ssw`
 - **Website:** `docs/` → GitHub Pages → soundscript.net
 - **Playground:** `dotnet publish` → `docs/playground/`
 

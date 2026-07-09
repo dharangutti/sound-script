@@ -87,9 +87,9 @@ parsed AST for the new node types and, if present, renders through
 small "SoundScript.Wave · no MIDI step" indicator, an alternate pipeline
 diagram) only appears for scripts that actually use the new grammar — an
 ordinary `.ss` script's Playground experience is unchanged. A new "Wave
-(.ssw)" preset group demonstrates all three additions.
-
-`SoundScript.Cli` does not yet have a `.ssw` rendering verb — see
+(.ssw)" preset group demonstrates all three additions. The CLI also exposes
+a `wave` verb for direct `.ss`/`.ssw` → WAV rendering — see
+[cli.md](cli.md#wave--script-to-wav-v7) and
 [wave-grammar.md](wave-grammar.md#where-you-can-use-this-today).
 
 ## Protected subsystems

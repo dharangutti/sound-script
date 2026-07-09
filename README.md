@@ -108,6 +108,11 @@ MidiGenerator → output.mid
 | [examples/industrial-temperature-trend.ss](examples/industrial-temperature-trend.ss) | Industrial cue — temperature trend |
 | [examples/industrial-robotic-arm.ss](examples/industrial-robotic-arm.ss) | Industrial cue — robotic arm motion phases |
 | [examples/vocal-song.ss](examples/vocal-song.ss) | Vocal track — lyrics bound to pitches via phonetics |
+| [examples/default.ssc](examples/default.ssc) | SoundCSS timbre stylesheet (V4) |
+| [examples/wave-effects.ssw](examples/wave-effects.ssw) | Wave grammar — combined humanize + speak + effects |
+| [examples/wave-speak.ssw](examples/wave-speak.ssw) | Wave grammar — `speak` prosody tones |
+| [examples/wave-humanize.ssw](examples/wave-humanize.ssw) | Wave grammar — seeded humanize + speak |
+| [examples/full-song-wave.ss](examples/full-song-wave.ss) | Four-part song rendered via the wave backend |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -219,7 +224,9 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
     SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer, PhonemeSplitter, PhonemeMapper
-    SoundScript.Cli/        # CLI (run + compose)
+    SoundScript.Timbre/      # Offline timbre synthesis (SoundCSS)
+    SoundScript.Wave/        # Direct AST → WAV synthesis (V7)
+    SoundScript.Cli/        # CLI (run, compose, prosody, render, wave)
     SoundScript.Playground/ # Browser playground
 
 /docs                       # Documentation + website
@@ -282,7 +289,7 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 |----------|-------------|
 | [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
-| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`) |
+| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`) |
 | [docs/text-to-melody.md](docs/text-to-melody.md) | Text-to-melody pipeline (V3.1) |
 | [docs/phoneme-composer.md](docs/phoneme-composer.md) | PhonemeComposer module reference |
 | [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) | V3.1 changelog |

@@ -96,6 +96,8 @@ The playground gained a **Wave (.ssw)** preset group (see `Playground.razor`
 | **Effects (delay + filter)** | `effect delay ...` / `effect filter ...`, master-only post-mix |
 | **Speak (prosody tone)** | `speak "..." seed=` phoneme/prosody tone mapping |
 | **Seeded humanize + speak** | `humanize timing=/velocity=/seed=` combined with `speak` |
+| **Combined (wave-effects.ssw)** | Exact on-disk [wave-effects.ssw](../examples/wave-effects.ssw) demo |
+| **Full song (full-song-wave.ss)** | Exact on-disk [full-song-wave.ss](../examples/full-song-wave.ss) four-part arrangement |
 
 **Grammar isolation:** the wave badge and alternate pipeline diagram are
 gated on the parsed AST actually containing an `EffectNode`/`SpeakNode` —
@@ -116,8 +118,8 @@ the bare-number `humanize` form. → [wave-grammar.md](wave-grammar.md)
 - [ ] Running the same wave-only script twice in a row reports the same
       rendered duration both times (render cache keyed on script text)
 - [ ] A `.ss` script using `effect`/`speak` inside the **CLI** (`soundscript
-      run`) fails with a named "wave-backend directive" error — the
-      Playground's automatic routing is what avoids that error in-browser
+      run`) fails with a named "wave-backend directive" error — use
+      `soundscript wave` or the Playground's automatic routing instead
 
 ## Render Audio (V4)
 
@@ -158,7 +160,7 @@ python3 -m http.server 8080
 - [ ] Invalid syntax shows an error in the error panel
 - [ ] V2 preset buttons (Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Patterns, Orchestration) load scripts
 - [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
-- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak) load scripts and **Run** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
+- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak, Combined (wave-effects.ssw), Full song (full-song-wave.ss)) load scripts and **Run**/**Render** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
 - [ ] **Compose from text** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`
 - [ ] **Download MIDI** after composing saves a file byte-identical to `soundscript compose "Twinkle twinkle little star"`
 - [ ] **Compose with Prosody** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM (word-level prosody).`

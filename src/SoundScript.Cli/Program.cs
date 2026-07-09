@@ -31,11 +31,11 @@ return args[0].ToLowerInvariant() switch
 
 static int PrintUsage()
 {
-    Console.Error.WriteLine("Usage: soundscript --version");
+    Console.Error.WriteLine("Usage: soundscript --version | -v");
     Console.Error.WriteLine("       soundscript run <script.ss> [output.mid]");
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]");
-    Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> --out <output.wav|ogg> [--text \"<source text>\"]");
+    Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]");
     return 1;
 }

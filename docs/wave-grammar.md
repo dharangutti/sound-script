@@ -193,17 +193,30 @@ Nothing above moves off this list without a concrete use case — see
 The [Playground](https://soundscript.net/playground/) runs `effect`/`speak`/
 named-`humanize` scripts directly — `Run` detects the wave-only grammar and
 renders through SoundScript.Wave instead of MIDI automatically (see
-[PLAYGROUND.md](PLAYGROUND.md)). `SoundScript.Cli` does not yet have a
-`.ssw`/wave rendering verb; use the Playground, or drive
-`SoundScript.Wave.WaveRenderer` directly as a library.
+[PLAYGROUND.md](PLAYGROUND.md)). From the CLI, use the `wave` verb:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw output.wav
+```
+
+You can also drive `SoundScript.Wave.WaveRenderer` directly as a library.
 
 ## Examples
 
-→ [examples/wave-effects.ssw](../examples/wave-effects.ssw) — paste into the
+→ [examples/wave-effects.ssw](../examples/wave-effects.ssw) — combined
+`humanize` + `speak` + `effect` demo. Paste into the
 [Playground](https://soundscript.net/playground/) editor and hit **Run**
-(or load it via the "Wave (.ssw)" example presets, which use the same
-grammar). There is no CLI command for this yet — see
-"Where you can use this today" above.
+(or load it via the "Wave (.ssw)" example presets, including **Combined
+(wave-effects.ssw)**). From the CLI:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw output.wav
+```
+
+See also [examples/wave-speak.ssw](../examples/wave-speak.ssw),
+[examples/wave-humanize.ssw](../examples/wave-humanize.ssw), and
+[examples/full-song-wave.ss](../examples/full-song-wave.ss) (standard `.ss`
+rendered through the wave backend).
 
 ## Related
 

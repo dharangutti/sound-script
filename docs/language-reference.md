@@ -384,6 +384,42 @@ identical MIDI bytes on every platform, the same contract as scripts.
 
 → [text-to-melody.md](text-to-melody.md) · [phoneme-composer.md](phoneme-composer.md) · [cli.md](cli.md)
 
+## Text-to-Melody: `prosody` (V5)
+
+Same CLI shape as `compose`, but pitch follows word stress and sentence contour
+via the [`ProsodyComposer`](word-prosody.md):
+
+```bash
+soundscript prosody "Twinkle twinkle little star" [output.mid]
+soundscript prosody "Twinkle twinkle little star" out.mid --append file.ss
+soundscript prosody "Twinkle twinkle little star" --emit-ss twinkle-prosody.ss
+```
+
+→ [word-prosody.md](word-prosody.md) · [cli.md](cli.md#prosody--word-level-text-to-melody-v5)
+
+## Offline timbre: `render` (V4)
+
+Renders an existing MIDI file with a [SoundCSS](soundcss.md) (`.ssc`) stylesheet:
+
+```bash
+soundscript render file.mid --css examples/default.ssc [--out output.wav] [--text "source text"]
+```
+
+→ [soundcss.md](soundcss.md) · [timbre-engine.md](timbre-engine.md) · [cli.md](cli.md#render--midi-to-audio-v4)
+
+## Direct wave output: `wave` (V7)
+
+Renders a `.ss` or `.ssw` script directly to WAV via [SoundScript.Wave](wave-grammar.md)
+— no MIDI step. Wave-only grammar (`effect`, `speak`, named `humanize`) is
+rejected by `run`; use `wave` instead:
+
+```bash
+soundscript wave examples/wave-effects.ssw [output.wav] [--stereo]
+soundscript wave examples/full-song-wave.ss jingle.wav
+```
+
+→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v7)
+
 ## AST Node Types
 
 | Node | Purpose |
@@ -412,7 +448,7 @@ identical MIDI bytes on every platform, the same contract as scripts.
 - [notation.md](notation.md) — Notation engine (Phase 2)
 - [expressive-notation.md](expressive-notation.md) — Rests, ties, articulations (Phase 3)
 - [whats-new-v2.md](whats-new-v2.md) — V2 changelog
-- [cli.md](cli.md) — CLI reference (`run`, `compose`)
+- [cli.md](cli.md) — CLI reference (`run`, `compose`, `prosody`, `render`, `wave`)
 - [text-to-melody.md](text-to-melody.md) — Text-to-melody engine (V3.1)
 - [pipeline.md](pipeline.md) — Interpreter pipeline
 - [examples.md](examples.md) — Example catalog
