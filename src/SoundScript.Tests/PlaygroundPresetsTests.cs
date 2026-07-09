@@ -89,6 +89,25 @@ public partial class PlaygroundPresetsTests
   }
 
   [Fact]
+  public void IndexHtml_DoesNotReferenceMissingScopedStylesheet()
+  {
+    var indexPath = Path.GetFullPath(Path.Combine(
+        AppContext.BaseDirectory,
+        "../../../../../src/SoundScript.Playground/wwwroot/index.html"));
+    var html = File.ReadAllText(indexPath);
+    Assert.DoesNotContain("SoundScript.Playground.styles.css", html);
+  }
+
+  [Theory]
+  [InlineData("wave-effects", true)]
+  [InlineData("speech-only-wave", true)]
+  [InlineData("showcase-jingle-bells-wave", true)]
+  [InlineData("v2-showcase", false)]
+  [InlineData("core-melody", false)]
+  public void IsWaveExampleKey_ClassifiesPresetKeys(string key, bool expected) =>
+      Assert.Equal(expected, PlaygroundPresetCatalog.IsWaveExampleKey(key));
+
+  [Fact]
   public void WavePresets_RenderThroughTheWaveRail()
   {
     var source = File.ReadAllText(PlaygroundCodePath);

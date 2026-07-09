@@ -50,11 +50,172 @@
                 <option value="speech-only-wave">Speech-only (speech-only-wave.ss)</option>
             </optgroup>
         </select>
+        @if (ActiveMainPreset is not null)
+        {
+            <span class="preset-active-title">@ActiveMainPreset.Title</span>
+        }
+    </div>
+
+    <div class="playground-playbar" role="toolbar" aria-label="Compile and play">
+        <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunAsync">
+            @(IsRunning ? "Running…" : "Run")
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
+        @if (MidiBytes is not null)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="DownloadAsync">Download MIDI</button>
+        }
+        @if (WavBytes is not null)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="DownloadWavAsync">Download WAV</button>
+        }
+        @if (SsText is not null)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="DownloadSsAsync">Download .ss</button>
+        }
+        @if (UsedWaveBackend)
+        {
+            <span class="badge badge-playbar">SoundScript.Wave · no MIDI step</span>
+        }
+    </div>
+
+    <div class="panes">
+        <section class="pane pane-editor">
+            <label class="pane-label" for="script-input">SoundScript</label>
+            <div class="editor-toolbar">
+                <button type="button" class="btn btn-primary btn-toolbar-run" disabled="@IsRunning" @onclick="RunAsync">
+                    @(IsRunning ? "Running…" : "Run")
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
+                <button type="button" class="btn btn-secondary" @onclick="ClearEditor">Clear</button>
+                <button type="button" class="btn btn-secondary" @onclick="ResetEditor">Reset</button>
+                <button type="button" class="btn btn-secondary" @onclick="CopyScriptAsync">Copy</button>
+                <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="DownloadCurrentScriptAsync">Download script</button>
+            </div>
+            <textarea id="script-input"
+                      @key="SelectedExampleKey"
+                      class="script-input script-input-main"
+                      @bind="ScriptText"
+                      spellcheck="false"
+                      placeholder="track melody { ... }"></textarea>
+        </section>
+
+        <section class="pane pane-output">
+            <label class="pane-label">Output</label>
+
+            @if (!string.IsNullOrEmpty(StatusMessage))
+            {
+                <div class="status" role="status">@StatusMessage</div>
+            }
+
+            @if (WarningMessages.Count > 0)
+            {
+                <div class="warning" role="status">
+                    <strong>Warnings</strong>
+                    <ul>
+                        @foreach (var warning in WarningMessages)
+                        {
+                            <li>@warning</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="error" role="alert">
+                    <strong>Error</strong>
+                    <pre>@ErrorMessage</pre>
+                </div>
+            }
+
+            @if (SsText is not null)
+            {
+                <details class="ss-preview">
+                    <summary>View .ss source</summary>
+                    <pre>@SsText</pre>
+                </details>
+            }
+
+            <div class="pipeline">
+                <span>Tokenizer</span>
+                <span class="arrow">→</span>
+                <span>Parser</span>
+                <span class="arrow">→</span>
+                <span>Interpreter</span>
+                <span class="arrow">→</span>
+                <span>PhraseTimingShaper</span>
+                <span class="arrow">→</span>
+                <span>PhraseShaper</span>
+                <span class="arrow">→</span>
+                <span>PatternExpander</span>
+                <span class="arrow">→</span>
+                <span>Orchestration</span>
+                <span class="arrow">→</span>
+                <span>Layers</span>
+                <span class="arrow">→</span>
+                <span>Humanize</span>
+                <span class="arrow">→</span>
+                <span>MIDI</span>
+                <span class="arrow">+</span>
+                <span>Voice</span>
+                <span class="arrow">+</span>
+                <span>PhonemeComposer</span>
+                <span class="arrow">+</span>
+                <span>ProsodyComposer</span>
+                <span class="arrow">→</span>
+                <span>SoundCSS</span>
+                <span class="arrow">→</span>
+                <span>Timbre</span>
+            </div>
+
+            @if (UsedWaveBackend)
+            {
+                <div class="pipeline">
+                    <span>Tokenizer</span>
+                    <span class="arrow">→</span>
+                    <span>Parser</span>
+                    <span class="arrow">→</span>
+                    <span>SoundScript.Wave</span>
+                    <span class="arrow">+</span>
+                    <span>MasterEffectChain</span>
+                    <span class="arrow">+</span>
+                    <span>ProsodyToneGenerator</span>
+                    <span class="arrow">→</span>
+                    <span>WAV</span>
+                </div>
+            }
+
+            <details class="output-hint">
+                <summary>About this playground</summary>
+                <p class="hint">
+                    No server, no API calls. Imports use the CLI (<code>ProgramLoader</code>); all other V2 features run here.
+                    <code>voice</code> blocks speak their lyrics through your browser's speech synthesis while the melody plays —
+                    the downloaded MIDI carries the lyrics as standard karaoke events.
+                    <strong>Compose from text</strong> runs the deterministic <code>PhonemeComposer</code>
+                    (text → syllables → phonemes → gestures → MIDI): the same text always produces the same MIDI bytes.
+                    <strong>Compose with Prosody</strong> runs the V5 <code>ProsodyComposer</code> instead — pitch is
+                    planned top-down (phrase → word → syllable) so the melody follows spoken stress and sentence
+                    contour rather than a fixed pitch per phoneme.
+                    <strong>Render Audio</strong> adds the V4 offline timbre pass (MIDI → SoundCSS → WAV) — slow-motion synthesis, not real-time playback.
+                    <strong>Render Audio (Prosody)</strong> runs the same offline timbre pass over the <code>ProsodyComposer</code> MIDI instead —
+                    same phoneme timbre, word/syllable-shaped pitch.
+                    Both compose buttons also produce an editable <strong>.ss</strong> export (V6) — view it inline,
+                    download it, hand-tweak a note, and run it through <code>soundscript run</code> to hear exactly your edit.
+                    <strong>Run</strong> also understands wave-only grammar (<code>effect delay/filter</code>, <code>speak</code>,
+                    and <code>humanize</code>'s named <code>timing=/velocity=/seed=</code> form) — a script using any of it
+                    skips MIDI entirely and renders straight to WAV through <strong>SoundScript.Wave</strong>, byte-identical
+                    for the same script text every time. Everything else still plays through MIDI, unchanged.
+                    → <a href="/doc.html?p=wave-grammar.md" target="_blank" rel="noopener">.ssw grammar reference</a>.
+                </p>
+            </details>
+        </section>
     </div>
 
     @if (ActiveMainPreset is not null)
     {
-        <section class="example-cli-panel" aria-label="Selected example — CLI reference">
+        <details class="example-cli-panel">
+            <summary>Example CLI — @ActiveMainPreset.Title (@ActiveMainPreset.OutputRailShortLabel)</summary>
             <div class="example-cli-header">
                 <span class="badge badge-rail">@ActiveMainPreset.OutputRailLabel</span>
                 <span class="example-cli-action">Playground: <strong>@ActiveMainPreset.PlaygroundAction</strong></span>
@@ -85,7 +246,7 @@
                     </li>
                 }
             </ol>
-        </section>
+        </details>
     }
 
     <div class="presets presets-text">
@@ -134,190 +295,38 @@
         </p>
     </details>
 
-    <div class="panes">
-        <section class="pane pane-editor">
-            <label class="pane-label" for="script-input">SoundScript</label>
-            <div class="editor-toolbar">
-                <button type="button" class="btn btn-secondary" @onclick="ClearEditor">Clear</button>
-                <button type="button" class="btn btn-secondary" @onclick="ResetEditor">Reset</button>
-                <button type="button" class="btn btn-secondary" @onclick="CopyScriptAsync">Copy</button>
-                <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="DownloadCurrentScriptAsync">Download current script</button>
-            </div>
-            <textarea id="script-input"
-                      class="script-input"
-                      @bind="ScriptText"
-                      spellcheck="false"
-                      placeholder="track melody { ... }"></textarea>
-        </section>
-
-        <section class="pane pane-output">
-            <label class="pane-label">Output</label>
-
-            @* UNDER DEVELOPMENT — v3: grammar-isolation rule — only rendered
-               when the last Run actually took the SoundScript.Wave rail
-               (AST contained an EffectNode/SpeakNode), never unconditionally. *@
-            @if (UsedWaveBackend)
-            {
-                <span class="badge">SoundScript.Wave · no MIDI step</span>
-            }
-
-            <div class="actions">
-                <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunAsync">
-                    @(IsRunning ? "Running…" : "Run")
-                </button>
-                <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
-                @if (MidiBytes is not null)
-                {
-                    <button type="button" class="btn btn-secondary" @onclick="DownloadAsync">Download MIDI</button>
-                }
-                @if (WavBytes is not null)
-                {
-                    <button type="button" class="btn btn-secondary" @onclick="DownloadWavAsync">Download WAV</button>
-                }
-                @if (SsText is not null)
-                {
-                    <button type="button" class="btn btn-secondary" @onclick="DownloadSsAsync">Download .ss</button>
-                }
-            </div>
-
-            @if (SsText is not null)
-            {
-                <details class="ss-preview">
-                    <summary>View .ss source</summary>
-                    <pre>@SsText</pre>
-                </details>
-            }
-
-            @if (!string.IsNullOrEmpty(StatusMessage))
-            {
-                <div class="status" role="status">@StatusMessage</div>
-            }
-
-            @if (WarningMessages.Count > 0)
-            {
-                <div class="warning" role="status">
-                    <strong>Warnings</strong>
-                    <ul>
-                        @foreach (var warning in WarningMessages)
-                        {
-                            <li>@warning</li>
-                        }
-                    </ul>
-                </div>
-            }
-
-            @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <div class="error" role="alert">
-                    <strong>Error</strong>
-                    <pre>@ErrorMessage</pre>
-                </div>
-            }
-
-            <div class="pipeline">
-                <span>Tokenizer</span>
-                <span class="arrow">→</span>
-                <span>Parser</span>
-                <span class="arrow">→</span>
-                <span>Interpreter</span>
-                <span class="arrow">→</span>
-                <span>PhraseTimingShaper</span>
-                <span class="arrow">→</span>
-                <span>PhraseShaper</span>
-                <span class="arrow">→</span>
-                <span>PatternExpander</span>
-                <span class="arrow">→</span>
-                <span>Orchestration</span>
-                <span class="arrow">→</span>
-                <span>Layers</span>
-                <span class="arrow">→</span>
-                <span>Humanize</span>
-                <span class="arrow">→</span>
-                <span>MIDI</span>
-                <span class="arrow">+</span>
-                <span>Voice</span>
-                <span class="arrow">+</span>
-                <span>PhonemeComposer</span>
-                <span class="arrow">+</span>
-                <span>ProsodyComposer</span>
-                <span class="arrow">→</span>
-                <span>SoundCSS</span>
-                <span class="arrow">→</span>
-                <span>Timbre</span>
-            </div>
-
-            @* UNDER DEVELOPMENT — v3: shown only when Run actually took the
-               wave rail (grammar-isolation rule — see the badge above). *@
-            @if (UsedWaveBackend)
-            {
-                <div class="pipeline">
-                    <span>Tokenizer</span>
-                    <span class="arrow">→</span>
-                    <span>Parser</span>
-                    <span class="arrow">→</span>
-                    <span>SoundScript.Wave</span>
-                    <span class="arrow">+</span>
-                    <span>MasterEffectChain</span>
-                    <span class="arrow">+</span>
-                    <span>ProsodyToneGenerator</span>
-                    <span class="arrow">→</span>
-                    <span>WAV</span>
-                </div>
-            }
-
-            <p class="hint">
-                No server, no API calls. Imports use the CLI (<code>ProgramLoader</code>); all other V2 features run here.
-                <code>voice</code> blocks speak their lyrics through your browser's speech synthesis while the melody plays —
-                the downloaded MIDI carries the lyrics as standard karaoke events.
-                <strong>Compose from text</strong> runs the deterministic <code>PhonemeComposer</code>
-                (text → syllables → phonemes → gestures → MIDI): the same text always produces the same MIDI bytes.
-                <strong>Compose with Prosody</strong> runs the V5 <code>ProsodyComposer</code> instead — pitch is
-                planned top-down (phrase → word → syllable) so the melody follows spoken stress and sentence
-                contour rather than a fixed pitch per phoneme.
-                <strong>Render Audio</strong> adds the V4 offline timbre pass (MIDI → SoundCSS → WAV) — slow-motion synthesis, not real-time playback.
-                <strong>Render Audio (Prosody)</strong> runs the same offline timbre pass over the <code>ProsodyComposer</code> MIDI instead —
-                same phoneme timbre, word/syllable-shaped pitch.
-                Both compose buttons also produce an editable <strong>.ss</strong> export (V6) — view it inline,
-                download it, hand-tweak a note, and run it through <code>soundscript run</code> to hear exactly your edit.
-                <strong>Run</strong> also understands wave-only grammar (<code>effect delay/filter</code>, <code>speak</code>,
-                and <code>humanize</code>'s named <code>timing=/velocity=/seed=</code> form) — a script using any of it
-                skips MIDI entirely and renders straight to WAV through <strong>SoundScript.Wave</strong>, byte-identical
-                for the same script text every time. Everything else still plays through MIDI, unchanged.
-                <code>seed=</code> is optional on both <code>humanize</code> and <code>speak</code> — leaving it out
-                doesn't mean random, it means the seed is derived from the track name or spoken text instead of an
-                explicit number, so the render still reproduces exactly the same way every time.
-                Like <code>voice</code> blocks, <code>speak</code> also plays a live browser speech-synthesis overlay
-                as a preview convenience while it runs — the downloaded WAV contains only the deterministic prosody
-                synthesis (<code>ProsodyToneGenerator</code>'s tones and noise-shaped consonants), never the live
-                voice, so the export always sounds a little more synthetic than the in-browser preview.
-                → <a href="/doc.html?p=wave-grammar.md" target="_blank" rel="noopener">.ssw grammar reference</a>.
-            </p>
-        </section>
-    </div>
-
     <section class="pane pane-wave" aria-labelledby="wave-heading">
-        <h2 id="wave-heading">SoundScript.Wave — .ssw direct to WAV</h2>
-        <p class="hint">
-            No MIDI step. <code>track</code>/<code>speak</code>/<code>effect</code>
-            scripts render straight to WAV through <code>AstToNoteEventAdapter →
-            Mixer → MasterEffectChain → WavWriter</code>. Deterministic —
-            identical script text always produces byte-identical audio.
-        </p>
+        <div class="pane-wave-header">
+            <h2 id="wave-heading">SoundScript.Wave — .ssw direct to WAV</h2>
+            <p class="hint">
+                No MIDI step. <code>track</code>/<code>speak</code>/<code>effect</code>
+                scripts render straight to WAV through <code>AstToNoteEventAdapter →
+                Mixer → MasterEffectChain → WavWriter</code>. Deterministic —
+                identical script text always produces byte-identical audio.
+            </p>
+        </div>
 
-        <select @bind="SelectedWaveExampleKey" @bind:after="RefreshWavePresetInfo">
-            <option value="wave-effects">Effects (delay + lowpass)</option>
-            <option value="wave-speak">Speak (phoneme tones)</option>
-            <option value="wave-humanize">Humanize</option>
-            <option value="wave-effects-combined">Combined (wave-effects.ssw)</option>
-            <option value="wave-full-song">Full song (full-song-wave.ss)</option>
-            <option value="speech-only-wave">Speech-only (speech-only-wave.ss)</option>
-            <option value="showcase-jingle-bells-wave">Jingle Bells — Wave rail</option>
-        </select>
-        <button type="button" class="btn btn-secondary" @onclick="LoadSelectedWaveExample">Load</button>
+        <div class="presets presets-wave">
+            <span class="preset-label">Example:</span>
+            <select class="example-select" @bind="SelectedWaveExampleKey" @bind:after="() => LoadSelectedWaveExample()">
+                <option value="wave-effects">Effects (delay + lowpass)</option>
+                <option value="wave-speak">Speak (phoneme tones)</option>
+                <option value="wave-humanize">Humanize</option>
+                <option value="wave-effects-combined">Combined (wave-effects.ssw)</option>
+                <option value="wave-full-song">Full song (full-song-wave.ss)</option>
+                <option value="speech-only-wave">Speech-only (speech-only-wave.ss)</option>
+                <option value="showcase-jingle-bells-wave">Jingle Bells — Wave rail</option>
+            </select>
+            @if (ActiveWavePreset is not null)
+            {
+                <span class="preset-active-title">@ActiveWavePreset.Title</span>
+            }
+        </div>
 
         @if (ActiveWavePreset is not null)
         {
-            <section class="example-cli-panel example-cli-panel-wave" aria-label="Wave example — CLI reference">
+            <details class="example-cli-panel example-cli-panel-wave">
+                <summary>Wave example CLI — @ActiveWavePreset.Title</summary>
                 <div class="example-cli-header">
                     <span class="badge badge-rail">@ActiveWavePreset.OutputRailLabel</span>
                     <span class="example-cli-action">Playground: <strong>@ActiveWavePreset.PlaygroundAction</strong></span>
@@ -347,21 +356,25 @@
                         </li>
                     }
                 </ol>
-            </section>
+            </details>
         }
 
-        <textarea class="script-input" @bind="WaveScriptText" spellcheck="false"></textarea>
+        <textarea @key="SelectedWaveExampleKey"
+                  class="script-input script-input-wave"
+                  @bind="WaveScriptText"
+                  spellcheck="false"
+                  placeholder="effect delay time=0.25 feedback=0.35 mix=0.3"></textarea>
 
-        <div class="actions">
+        <div class="actions actions-wave">
             <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunWaveAsync">
                 @(IsRunning ? "Rendering…" : "Render")
             </button>
+            <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
             @if (WaveOutputBytes is not null)
             {
                 <button type="button" class="btn btn-secondary" @onclick="DownloadWaveOutputAsync">Download WAV</button>
             }
+            <span class="badge badge-wave">SoundScript.Wave · no MIDI step</span>
         </div>
-
-        <span class="badge">SoundScript.Wave · no MIDI step</span>
     </section>
 </div>

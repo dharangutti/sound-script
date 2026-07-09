@@ -154,19 +154,101 @@ a:hover { text-decoration: underline; }
     box-shadow: var(--shadow);
 }
 
-.example-cli-panel.text-workflows {
-    margin-bottom: 1.25rem;
-}
-
-.example-cli-panel.text-workflows > summary {
+.example-cli-panel > summary {
     cursor: pointer;
     font-weight: 600;
     color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.example-cli-panel[open] > summary {
     margin-bottom: 0.75rem;
 }
 
-.example-cli-panel.text-workflows[open] > summary {
+.preset-active-title {
+    color: var(--muted);
+    font-size: 0.88rem;
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playground-playbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 1rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0.5rem;
+    z-index: 20;
+}
+
+.badge-playbar {
+    margin-left: auto;
+}
+
+.btn-toolbar-run {
+    min-width: 5.5rem;
+}
+
+.script-input-main {
+    min-height: 24rem;
+}
+
+.output-hint {
+    margin-top: auto;
+}
+
+.output-hint > summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+}
+
+.pane-wave {
+    margin-top: 1.25rem;
+}
+
+.pane-wave-header {
+    margin-bottom: 0.75rem;
+}
+
+.pane-wave-header h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.presets-wave {
+    margin-bottom: 0.75rem;
+}
+
+.script-input-wave {
+    min-height: 16rem;
+    margin-bottom: 0.75rem;
+}
+
+.actions-wave {
+    margin-bottom: 0;
+}
+
+.badge-wave {
+    margin-left: auto;
+}
+
+.example-cli-panel.text-workflows {
+    margin-bottom: 1.25rem;
 }
 
 .example-cli-panel-wave {
@@ -363,6 +445,21 @@ a:hover { text-decoration: underline; }
     margin-bottom: 1rem;
 }
 
+.warning {
+    padding: 0.75rem 1rem;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: var(--gold);
+    font-size: 0.9rem;
+}
+
+.warning ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.25rem;
+}
+
 .error {
     padding: 0.75rem 1rem;
     background: rgba(248, 113, 113, 0.08);
@@ -467,6 +564,10 @@ a:hover { text-decoration: underline; }
         grid-template-columns: 1fr;
     }
 
+    .script-input-main {
+        min-height: 18rem;
+    }
+
     .script-input {
         min-height: 16rem;
     }
@@ -507,6 +608,12 @@ a:hover { text-decoration: underline; }
         padding: 0.85rem;
     }
 
+    .playground-playbar {
+        top: 0;
+        padding: 0.55rem 0.65rem;
+    }
+
+    .playground-playbar .btn,
     .actions .btn,
     .editor-toolbar .btn {
         flex: 1 1 auto;
