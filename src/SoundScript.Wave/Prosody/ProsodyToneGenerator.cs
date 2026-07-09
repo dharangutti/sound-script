@@ -34,7 +34,20 @@ public readonly record struct ProsodyTone(
 public static class ProsodyToneGenerator
 {
     private const double WordGapBeats = 0.25;
-    private const double ToneVelocity = 0.7;
+
+    // Per-phoneme note velocity. Speech phonemes are short, transient blips
+    // (57-227 ms, separated by rests) that must read as "voice" against the
+    // continuous, sustained melody/harmony/bass bed a program can layer under
+    // them — and in the very same ~130-900 Hz register, where they mask
+    // easily. Because the mixdown's peak-normalization is a single global
+    // down-scale shared by every track (see Mixing.Mixer — never a per-track
+    // gain, never compression), the voice:instrumental loudness ratio is
+    // invariant to that normalization and scales linearly with this constant.
+    // It is deliberately near the [0,1] velocity ceiling (leaving a hair of
+    // headroom) so speech has genuine presence in the exported WAV rather than
+    // sitting ~4 dB under a busy backing arrangement; raising it changes only
+    // the vocal track's own pre-mix loudness, not the mixdown policy.
+    private const double ToneVelocity = 0.95;
 
     // Salt for pitch draws; distinct from the humanize salts so a shared seed
     // can never correlate prosody pitch with note jitter.
