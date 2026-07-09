@@ -58,6 +58,34 @@ public partial class Playground
   // doc's grammar-isolation rule.
   private bool UsedWaveBackend { get; set; }
 
+  private PlaygroundPresetInfo? ActiveMainPreset { get; set; }
+  private PlaygroundPresetInfo? ActiveWavePreset { get; set; }
+
+  protected override void OnInitialized()
+  {
+    RefreshMainPresetInfo();
+    RefreshWavePresetInfo();
+  }
+
+  private void RefreshMainPresetInfo() =>
+      ActiveMainPreset = PlaygroundPresetCatalog.TryGet(SelectedExampleKey);
+
+  private void RefreshWavePresetInfo() =>
+      ActiveWavePreset = PlaygroundPresetCatalog.TryGet(SelectedWaveExampleKey);
+
+  private async Task CopyCliLineAsync(string line)
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("navigator.clipboard.writeText", line);
+      StatusMessage = "Copied CLI command to clipboard.";
+    }
+    catch
+    {
+      WarningMessages.Add("Couldn't copy to clipboard — your browser blocked clipboard access.");
+    }
+  }
+
   // UNDER DEVELOPMENT — v3: memoizes SoundScript.Wave renders by the exact
   // script text. Safe because the wave backend is fully deterministic and
   // every seed/effect parameter (speak's seed=, humanize's seed=, effect
@@ -95,7 +123,10 @@ public partial class Playground
       case "wave-humanize": LoadWaveHumanizeExample(); break;
       case "wave-effects-combined": LoadWaveEffectsCombinedExample(); break;
       case "wave-full-song": LoadWaveFullSongExample(); break;
+      case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
     }
+
+    RefreshMainPresetInfo();
   }
 
   private void LoadSelectedWaveExample()
@@ -107,8 +138,11 @@ public partial class Playground
       case "wave-humanize": LoadWaveHumanizeExample(); break;
       case "wave-effects-combined": LoadWaveEffectsCombinedExample(); break;
       case "wave-full-song": LoadWaveFullSongExample(); break;
+      case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
       case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
     }
+
+    RefreshWavePresetInfo();
     StateHasChanged();
   }
 
@@ -766,6 +800,28 @@ public partial class Playground
             mf
             sing "Jingle bells jingle bells" E4 q E4 q E4 h E4 q E4 q E4 h
             sing "Jingle all the way" E4 q G4 q C4 q D4 q E4 w
+        }
+        """;
+  }
+
+  private void LoadSpeechOnlyWaveExample()
+  {
+    WaveScriptText =
+        """
+        tempo 100
+        time 4/4
+
+        voice narrator {
+            mf
+            sing "Hello from SoundScript Wave" C4 q D4 q E4 q F4 q
+            sing "Speech without a MIDI step" G4 q F4 q E4 w
+        }
+
+        speak "This line uses prosody tones in the WAV" seed=7
+
+        track pad {
+            p
+            Cmaj w Gmaj w
         }
         """;
   }
