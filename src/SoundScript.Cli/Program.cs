@@ -604,6 +604,12 @@ static int VocalGenerate(string[] args)
             : VocalEngineFactory.Create(engineName);
         engine.Synthesize(text, outPath, options);
         Console.WriteLine($"Generated vocal stem ({engine.Name}) → {outPath}");
+        if (engine.Name == "prosody")
+        {
+            Console.Error.WriteLine(
+                "note: prosody produces synthetic phoneme tones (buzzy speech-like blips), not human speech. " +
+                "Install espeak-ng on your system and use --engine espeak for spoken words.");
+        }
         return 0;
     }
     catch (Exception ex)
@@ -647,6 +653,12 @@ static int VocalBatch(string[] args)
         Console.WriteLine($"Generated {items.Count} vocal stem(s) ({engine.Name}) in {outDir}.");
         foreach (var item in items)
             Console.WriteLine($"  {Path.GetFileName(item.FilePath)} ← \"{item.Text}\"");
+        if (engine.Name == "prosody")
+        {
+            Console.Error.WriteLine(
+                "note: prosody produces synthetic phoneme tones (buzzy speech-like blips), not human speech. " +
+                "Install espeak-ng on your system and use --engine espeak for spoken words.");
+        }
         return 0;
     }
     catch (Exception ex)

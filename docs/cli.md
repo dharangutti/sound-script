@@ -280,7 +280,7 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 | `generate` / `batch` | yes | Subcommand |
 | `"<text>"` or `script.ssw` | yes | Phrase or script containing `speak` nodes |
 | `--out` / `--out-dir` | yes | Output WAV path or folder |
-| `--engine` | no | `prosody` (built-in synthetic) or `espeak` (local espeak-ng); default picks espeak when installed |
+| `--engine` | no | `prosody` (built-in synthetic phoneme tones — no install, not human speech) or `espeak` (system espeak-ng); default picks espeak when installed |
 | `--voice` | no | eSpeak voice id (default: `en`) |
 | `--seed` | no | Prosody seed (default: `7`) |
 | `--skip-existing` | no | Batch only — skip files that already exist |
