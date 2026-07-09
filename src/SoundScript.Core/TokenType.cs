@@ -61,5 +61,6 @@ public enum TokenType
     Assign,     // '=' in key=value directive parameters
     Effect,     // 'effect' — master effects chain (wave backend only)
     Speak,      // 'speak' — phoneme/prosody tone mapping (wave backend only)
+    Sample,     // 'sample' — external WAV stem overlay (wave backend only, V8)
     EndOfFile
 }

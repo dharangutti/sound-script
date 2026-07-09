@@ -259,6 +259,15 @@ public static class PlaygroundPresetCatalog
             PlaygroundOutputRail.Wave,
             "Contains speak (wave-only) — use wave, not run.",
             [$"{CliPrefix}wave examples/speech-only-wave.ss speech.wav"]);
+
+        yield return Wave(
+            "wave-vocal-stem",
+            "Vocal stem (wave-vocal-stem.ssw)",
+            "wave-vocal-stem.ssw",
+            "Render (Wave pane)",
+            PlaygroundOutputRail.Wave,
+            "V8: speak sample= mixes your recording in CLI export; Playground uses synthetic fallback when stem file is absent.",
+            [$"{CliPrefix}wave examples/wave-vocal-stem.ssw vocal.wav"]);
     }
 
     private static IEnumerable<PlaygroundPresetInfo> ShowcasePresets()

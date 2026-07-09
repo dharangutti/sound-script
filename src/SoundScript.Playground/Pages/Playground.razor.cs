@@ -91,6 +91,8 @@ public partial class Playground
   // every seed/effect parameter (speak's seed=, humanize's seed=, effect
   // delay/filter params) is textually part of ScriptText — there is no
   // hidden input that could make two identical keys render differently.
+  private static readonly WaveRenderOptions PlaygroundWaveOptions = new() { SkipMissingSamples = true };
+
   private readonly Dictionary<string, byte[]> _waveRenderCache = new();
 
   private void LoadSelectedExample()
@@ -124,6 +126,7 @@ public partial class Playground
       case "wave-effects-combined": LoadWaveEffectsCombinedExample(); break;
       case "wave-full-song": LoadWaveFullSongExample(); break;
       case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
+      case "wave-vocal-stem": LoadWaveVocalStemExample(); break;
     }
 
     if (PlaygroundPresetCatalog.IsWaveExampleKey(SelectedExampleKey))
@@ -148,6 +151,7 @@ public partial class Playground
       case "wave-effects-combined": LoadWaveEffectsCombinedExample(); break;
       case "wave-full-song": LoadWaveFullSongExample(); break;
       case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
+      case "wave-vocal-stem": LoadWaveVocalStemExample(); break;
       case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
     }
 
@@ -844,6 +848,22 @@ public partial class Playground
         """;
   }
 
+  private void LoadWaveVocalStemExample()
+  {
+    WaveScriptText =
+        """
+        tempo 120
+        time 4/4
+
+        track pad {
+            p
+            Cmaj w Gmaj w
+        }
+
+        speak "Hello from my vocal stem" seed=7
+        """;
+  }
+
   private async Task ComposeFromTextAsync()
   {
     try
@@ -1043,7 +1063,7 @@ public partial class Playground
       }
 
       var ast = PhonemeComposer.BuildAst(ComposeText);
-      WavBytes = WaveRenderer.RenderStereoToBytes(ast);
+      WavBytes = WaveRenderer.RenderStereoToBytes(ast, PlaygroundWaveOptions);
       UsedWaveBackend = true;
 
       var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
@@ -1092,7 +1112,7 @@ public partial class Playground
       }
 
       var ast = ProsodyComposer.BuildAst(ComposeText);
-      WavBytes = WaveRenderer.RenderStereoToBytes(ast);
+      WavBytes = WaveRenderer.RenderStereoToBytes(ast, PlaygroundWaveOptions);
       UsedWaveBackend = true;
 
       var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
@@ -1227,7 +1247,7 @@ public partial class Playground
     // exact script text can't produce a stale hit for a changed seed.
     if (!_waveRenderCache.TryGetValue(ScriptText, out var wav))
     {
-      wav = WaveRenderer.RenderStereoToBytes(program);
+      wav = WaveRenderer.RenderStereoToBytes(program, PlaygroundWaveOptions);
       _waveRenderCache[ScriptText] = wav;
     }
 
@@ -1291,7 +1311,7 @@ public partial class Playground
 
       if (!_waveRenderCache.TryGetValue(WaveScriptText, out var wav))
       {
-        wav = WaveRenderer.RenderStereoToBytes(program);
+        wav = WaveRenderer.RenderStereoToBytes(program, PlaygroundWaveOptions);
         _waveRenderCache[WaveScriptText] = wav;
       }
 
@@ -1349,7 +1369,8 @@ public partial class Playground
       switch (statement)
       {
         case EffectNode:
-        case SpeakNode:
+        case SpeakNode speak when string.IsNullOrWhiteSpace(speak.SamplePath):
+        case SampleNode:
           return true;
         case TrackNode track:
           if (ContainsWaveOnlyDirectives(track.Body)) return true;
@@ -1458,7 +1479,7 @@ public partial class Playground
 
       if (ContainsWaveOnlyDirectives(program.Statements))
       {
-        var wav = WaveRenderer.RenderStereoToBytes(program);
+        var wav = WaveRenderer.RenderStereoToBytes(program, PlaygroundWaveOptions);
         var wavBase64 = Convert.ToBase64String(wav);
         await Js.InvokeVoidAsync("SoundScriptAudio.download", wavBase64, "soundscript.wav");
         StatusMessage = "Downloaded current script as WAV.";

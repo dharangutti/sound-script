@@ -60,6 +60,44 @@ public static class Mixer
         return BufferMath.ToFloat(mixed, BufferMath.NormalizationScale(BufferMath.Peak(mixed)));
     }
 
+    public static double[] SumTracksRaw(IReadOnlyList<float[]> trackBuffers)
+    {
+        var totalLength = 0;
+        foreach (var track in trackBuffers)
+            totalLength = Math.Max(totalLength, track.Length);
+
+        var mixed = new double[totalLength];
+        foreach (var track in trackBuffers)
+        {
+            for (var i = 0; i < track.Length; i++)
+                mixed[i] += track[i];
+        }
+
+        return mixed;
+    }
+
+    public static double[] OverlayMono(double[] buffer, float[] overlay, int startSample, double gain)
+    {
+        if (overlay.Length == 0)
+            return buffer;
+
+        var requiredLength = startSample + overlay.Length;
+        if (buffer.Length < requiredLength)
+        {
+            var expanded = new double[requiredLength];
+            Array.Copy(buffer, expanded, buffer.Length);
+            buffer = expanded;
+        }
+
+        for (var i = 0; i < overlay.Length; i++)
+            buffer[startSample + i] += overlay[i] * gain;
+
+        return buffer;
+    }
+
+    public static float[] FinalizeMix(double[] mixed) =>
+        BufferMath.ToFloat(mixed, BufferMath.NormalizationScale(BufferMath.Peak(mixed)));
+
     /// <summary>
     /// Stereo counterpart of <see cref="RenderTrack"/>: each note is rendered
     /// mono, then placed in the stereo field by its
@@ -137,6 +175,32 @@ public static class Mixer
         var scale = BufferMath.NormalizationScale(BufferMath.Peak(mixedLeft, mixedRight));
 
         return (BufferMath.ToFloat(mixedLeft, scale), BufferMath.ToFloat(mixedRight, scale));
+    }
+
+    public static (double[] Left, double[] Right) SumTracksStereoRaw(
+        IReadOnlyList<(float[] Left, float[] Right)> trackBuffers)
+    {
+        var totalLength = 0;
+        foreach (var (left, right) in trackBuffers)
+            totalLength = Math.Max(totalLength, Math.Max(left.Length, right.Length));
+
+        var mixedLeft = new double[totalLength];
+        var mixedRight = new double[totalLength];
+        foreach (var (left, right) in trackBuffers)
+        {
+            for (var i = 0; i < left.Length; i++)
+                mixedLeft[i] += left[i];
+            for (var i = 0; i < right.Length; i++)
+                mixedRight[i] += right[i];
+        }
+
+        return (mixedLeft, mixedRight);
+    }
+
+    public static (float[] Left, float[] Right) FinalizeMixStereo(double[] left, double[] right)
+    {
+        var scale = BufferMath.NormalizationScale(BufferMath.Peak(left, right));
+        return (BufferMath.ToFloat(left, scale), BufferMath.ToFloat(right, scale));
     }
 
     /// <summary>

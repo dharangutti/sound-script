@@ -20,4 +20,10 @@ public sealed record SpeakNode : AstNode
 
     /// <summary>Explicit tone-variation seed; null derives one from <see cref="Text"/>.</summary>
     public int? Seed { get; init; }
+
+    /// <summary>Optional recorded vocal stem for this phrase (V8). When set, the WAV file is mixed at speak timing instead of synthetic phoneme tones.</summary>
+    public string? SamplePath { get; init; }
+
+    /// <summary>Gain applied to <see cref="SamplePath"/> (default 1.0).</summary>
+    public double SampleGain { get; init; } = 1.0;
 }

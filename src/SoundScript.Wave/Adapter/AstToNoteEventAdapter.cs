@@ -58,7 +58,10 @@ namespace SoundScript.Wave.Adapter;
 /// </summary>
 public static class AstToNoteEventAdapter
 {
-    public static Dictionary<string, List<NoteEvent>> Convert(ProgramNode program)
+    public static Dictionary<string, List<NoteEvent>> Convert(ProgramNode program) =>
+        Adapt(program).Tracks;
+
+    public static WaveAdaptationResult Adapt(ProgramNode program)
     {
         var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackState>(StringComparer.OrdinalIgnoreCase);
@@ -136,6 +139,9 @@ public static class AstToNoteEventAdapter
                 case SpeakNode speak:
                     EmitSpeech(GetDefaultTrack(), speak, context);
                     break;
+                case SampleNode sample:
+                    EmitSample(GetDefaultTrack(), sample, context);
+                    break;
                 case VoiceNode voice:
                     RequireUniqueTrackName(declaredTrackNames, voice.Name);
                     ExecuteVoiceStatements(GetOrCreateTrack(tracks, trackOrder, voice.Name), voice.Body, context);
@@ -155,7 +161,7 @@ public static class AstToNoteEventAdapter
         foreach (var name in trackOrder)
             result[name] = tracks[name].Notes;
 
-        return result;
+        return new WaveAdaptationResult(result, context.SampleOverlays, context.SpeakTimings);
     }
 
     private static void ExecuteStatements(TrackState track, IReadOnlyList<AstNode> body, ExecutionContext context)
@@ -206,6 +212,9 @@ public static class AstToNoteEventAdapter
                     break;
                 case SpeakNode speak:
                     EmitSpeech(track, speak, context);
+                    break;
+                case SampleNode sample:
+                    EmitSample(track, sample, context);
                     break;
                 case PhraseNode phrase:
                     // A phrase groups notes for expressive shaping; enter it
@@ -347,7 +356,7 @@ public static class AstToNoteEventAdapter
     // Formant-ish overtone ratio/level stacked onto a vowel's fundamental —
     // a crude second-formant echo, not a real formant filter bank.
     private const double VowelFormantRatio = 2.5;
-    private const double VowelFormantVelocityScale = 0.35;
+    private const double VowelFormantVelocityScale = 0.42;
 
     private static readonly Adsr PlosiveEnvelope = new(Attack: 0.002, Decay: 0.015, Sustain: 0.0, Release: 0.01);
     private static readonly Adsr FricativeEnvelope = new(Attack: 0.01, Decay: 0.02, Sustain: 0.6, Release: 0.05);
@@ -366,20 +375,36 @@ public static class AstToNoteEventAdapter
     /// </summary>
     private static void EmitSpeech(TrackState track, SpeakNode speak, ExecutionContext context)
     {
+        var startBeat = track.CurrentBeat;
+        var startSeconds = BeatsToSeconds(context, 0, startBeat);
+        context.SpeakTimings.Add((speak, startSeconds));
+
+        if (!string.IsNullOrWhiteSpace(speak.SamplePath))
+        {
+            context.SampleOverlays.Add(new SampleOverlayRequest(speak.SamplePath, startSeconds, speak.SampleGain));
+        }
+
         foreach (var tone in ProsodyToneGenerator.Generate(speak.Text, speak.Voice, speak.Seed))
         {
-            if (!tone.IsRest)
+            if (!tone.IsRest && string.IsNullOrWhiteSpace(speak.SamplePath))
             {
-                var startBeat = track.CurrentBeat;
-                var startSeconds = BeatsToSeconds(context, 0, startBeat);
-                var durationSeconds = BeatsToSeconds(context, startBeat, tone.DurationBeats);
+                var toneStartBeat = track.CurrentBeat;
+                var toneStartSeconds = BeatsToSeconds(context, 0, toneStartBeat);
+                var durationSeconds = BeatsToSeconds(context, toneStartBeat, tone.DurationBeats);
 
-                foreach (var note in BuildSpeechNotes(tone, startSeconds, durationSeconds))
+                foreach (var note in BuildSpeechNotes(tone, toneStartSeconds, durationSeconds))
                     track.Notes.Add(note);
             }
 
             AdvanceBeat(track, tone.DurationBeats);
         }
+    }
+
+    private static void EmitSample(TrackState track, SampleNode sample, ExecutionContext context)
+    {
+        var beat = sample.AtBeats ?? track.CurrentBeat;
+        var startSeconds = BeatsToSeconds(context, 0, beat);
+        context.SampleOverlays.Add(new SampleOverlayRequest(sample.Path, startSeconds, sample.Gain));
     }
 
     private static IEnumerable<NoteEvent> BuildSpeechNotes(ProsodyTone tone, double startSeconds, double durationSeconds)
@@ -675,5 +700,9 @@ public static class AstToNoteEventAdapter
 
         public int? TimeSignatureNumerator { get; set; }
         public int? TimeSignatureDenominator { get; set; }
+
+        public List<SampleOverlayRequest> SampleOverlays { get; } = [];
+
+        public List<(SpeakNode Speak, double StartTimeSeconds)> SpeakTimings { get; } = [];
     }
 }

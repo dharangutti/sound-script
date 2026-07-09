@@ -1,5 +1,21 @@
 # SoundScript Release Notes
 
+## V8 — Vocal stems in Wave export
+
+- **New wave grammar:** `sample "path.wav"` and `speak "..." sample="path.wav"`
+  mix your own 16-bit PCM recordings into exported WAV (deterministic given
+  fixed stem bytes).
+- **CLI:** `wave ... --vocal <stem.wav>`, `--vocal-at`, `--vocal-gain`,
+  `--tts-dir <folder>` for full-stem or per-phrase pre-rendered vocals.
+- **Improved synthetic prosody** when no stem is provided (richer vowel formants).
+- **Example:** [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw),
+  [examples/vocal-stems/hello-world.wav](examples/vocal-stems/hello-world.wav).
+- **No breaking MIDI changes.**
+
+Details: [docs/whats-new-v8.md](docs/whats-new-v8.md) ·
+[docs/wave-grammar.md](docs/wave-grammar.md) ·
+[docs/cli.md](docs/cli.md)
+
 ## V7 — SoundScript.Wave (direct `.ss`/`.ssw` → WAV)
 
 - **New subsystem:** `SoundScript.Wave` — deterministic AST-to-WAV synthesis
