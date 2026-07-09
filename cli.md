@@ -50,7 +50,7 @@ Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vo
 ## `compose` — text to melody (V3.1)
 
 ```
-soundscript compose "<text>" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]
+soundscript compose "<text>" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]
 ```
 
 ### Standalone
@@ -116,10 +116,32 @@ dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star
 sha256sum a.mid b.mid   # identical hashes
 ```
 
+### `--wave` — compose directly to WAV (V7)
+
+Skips the MIDI step and renders the composed AST through
+[SoundScript.Wave](wave-grammar.md):
+
+```bash
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.wav --wave
+dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.wav --wave --emit-ss twinkle.ss
+```
+
+```
+Composed 7 syllable(s) into 24 note(s) and rendered to twinkle.wav via SoundScript.Wave (no MIDI step) at 96 BPM.
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--wave` | Render through SoundScript.Wave instead of writing MIDI |
+| `--stereo` | Write stereo WAV (with `--wave` only) |
+
+`--wave` cannot be combined with `--append`. It can be combined with
+`--emit-ss` to export both `.ss` source and a `.wav` in one command.
+
 ## `prosody` — word-level text to melody (V5)
 
 ```
-soundscript prosody "<text>" [output.mid] [--append <script.ss>] [--emit-ss <path.ss>]
+soundscript prosody "<text>" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]
 ```
 
 Same shape as `compose`, but pitch is planned top-down (phrase → word →
@@ -158,6 +180,9 @@ dotnet run --project src/SoundScript.Cli -- run twinkle-prosody.ss twinkle-proso
 ```
 
 Also mutually exclusive with `--append`, for the same reason.
+
+`--wave` and `--stereo` behave the same as on `compose` — see
+[`compose --wave`](#--wave--compose-directly-to-wav-v7).
 
 ## `render` — MIDI to audio (V4)
 
