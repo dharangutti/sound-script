@@ -118,6 +118,10 @@ text-to-speech engine. See [wave-grammar.md](wave-grammar.md#scope-shipped-vs-de
 for what was deliberately deferred (reverb, per-track effect routing,
 multi-language prosody, additional voices).
 
+## Later releases
+
+→ [What's new in V8](whats-new-v8.md) — vocal stems in Wave export
+
 ## Previous releases
 
 → [What's new in V6](whats-new-v6.md) — editable `.ss` export
