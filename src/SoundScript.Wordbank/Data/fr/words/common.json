@@ -37,6 +37,24 @@
     { "word": "france", "syllables": ["france"], "stress": ["primary"] },
     { "word": "petites", "syllables": ["pe", "tites"], "stress": ["unstressed", "primary"] },
     { "word": "belles", "syllables": ["belles"], "stress": ["primary"] },
-    { "word": "étoilée", "syllables": ["é", "toi", "lée"], "stress": ["unstressed", "primary", "unstressed"] }
+    { "word": "étoilée", "syllables": ["é", "toi", "lée"], "stress": ["unstressed", "primary", "unstressed"] },
+    { "word": "maison", "syllables": ["mai", "son"], "stress": ["primary", "unstressed"] },
+    { "word": "bien", "syllables": ["bien"], "stress": ["primary"] },
+    { "word": "père", "syllables": ["père"], "stress": ["primary"] },
+    { "word": "mère", "syllables": ["mère"], "stress": ["primary"] },
+    { "word": "pays", "syllables": ["pays"], "stress": ["primary"] },
+    { "word": "personne", "syllables": ["per", "sonne"], "stress": ["primary", "unstressed"] },
+    { "word": "vie", "syllables": ["vie"], "stress": ["primary"] },
+    { "word": "eau", "syllables": ["eau"], "stress": ["primary"] },
+    { "word": "ville", "syllables": ["ville"], "stress": ["primary"] },
+    { "word": "femme", "syllables": ["femme"], "stress": ["primary"] },
+    { "word": "homme", "syllables": ["homme"], "stress": ["primary"] },
+    { "word": "fille", "syllables": ["fille"], "stress": ["primary"] },
+    { "word": "bon", "syllables": ["bon"], "stress": ["primary"] },
+    { "word": "nouveau", "syllables": ["nou", "veau"], "stress": ["primary", "unstressed"] },
+    { "word": "grand", "syllables": ["grand"], "stress": ["primary"] },
+    { "word": "voir", "syllables": ["voir"], "stress": ["primary"] },
+    { "word": "faire", "syllables": ["faire"], "stress": ["primary"] },
+    { "word": "aussi", "syllables": ["aus", "si"], "stress": ["unstressed", "primary"] }
   ]
 }
