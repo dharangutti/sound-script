@@ -158,6 +158,32 @@ public class WordbankAutoGenerateTests : IDisposable
         }
     }
 
+    [Fact]
+    public void Cli_WordbankNormalize_ProducesCanonicalWavFromCorpusAudio()
+    {
+        var wordbankRoot = TryResolveWordbankRoot();
+        if (wordbankRoot is null)
+            return; // no wordbank checkout available in this environment
+
+        var temp = Path.Combine(Path.GetTempPath(), "ss-wb-norm-cli-" + Guid.NewGuid().ToString("N"));
+        CopyDirectory(wordbankRoot, temp);
+        try
+        {
+            var normalized = Path.Combine(temp, "corpus", "v2026.07", "audio", "en", "normalized", "hello.wav");
+
+            var result = RunCli($"wordbank normalize hello --locale en --wordbank-dir \"{temp}\"");
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains("Normalized", result.StdOut);
+            Assert.True(File.Exists(normalized));
+            Assert.True(File.Exists(Path.ChangeExtension(normalized, ".json")));
+        }
+        finally
+        {
+            if (Directory.Exists(temp))
+                Directory.Delete(temp, recursive: true);
+        }
+    }
+
     private static string? TryResolveWordbankRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
