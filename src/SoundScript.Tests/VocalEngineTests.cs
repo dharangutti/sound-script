@@ -34,6 +34,26 @@ public class VocalEngineTests
     }
 
     [Fact]
+    public void Example_JingleBellsWordbank_OfflineTts_RendersAudibleVocal()
+    {
+        var exampleDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../examples"));
+        var script = Path.Combine(exampleDir, "jingle-bells-wordbank.ssw");
+        using var dir = new TempOutputDirectory();
+        var outPath = dir.FilePath("jingle-wordbank.wav");
+        var stemsDir = dir.FilePath("vocal-stems/wordbank");
+
+        Assert.Equal(0, RunCli(
+            $"wave \"{script}\" \"{outPath}\" --offline-tts wordbank --offline-tts-dir \"{stemsDir}\" --locale en").ExitCode);
+
+        Assert.True(File.Exists(outPath));
+        Assert.True(File.Exists(Path.Combine(stemsDir, "jingle-bells-jingle-bells.wav")));
+        Assert.True(File.Exists(Path.Combine(stemsDir, "jingle-all-the-way.wav")));
+        Assert.True(File.Exists(Path.Combine(stemsDir, "oh-what-fun-it-is.wav")));
+        Assert.True(PeakPcm16(WavReader.ReadMono(outPath)) >= 15_000);
+        Assert.True(PeakPcm16(WavReader.ReadMono(Path.Combine(stemsDir, "jingle-bells-jingle-bells.wav"))) >= 20_000);
+    }
+
+    [Fact]
     public void Example_JingleBellsVocal_OfflineTts_RendersAudibleVocal()
     {
         var exampleDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../examples"));

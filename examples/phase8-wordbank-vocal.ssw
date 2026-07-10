@@ -1,6 +1,3 @@
-# Phase 8 — wordbank vocal demo
-# Renders synthetic backing; speak phrases use offline composite TTS (corpus + G2P).
-
 tempo 96
 
 track pad {
