@@ -92,6 +92,20 @@ public static class CorpusCatalog
         return File.Exists(path) ? path : null;
     }
 
+    /// <summary>
+    /// Resolves the canonical output path for a normalized lemma WAV under
+    /// <c>corpus/vYYYY.MM/audio/{locale}/normalized/{lemma}.wav</c>. Returns null
+    /// when no corpus root is loaded. The directory is not created here.
+    /// </summary>
+    public static string? ResolveNormalizedAudioPath(string localeCode, string lemma)
+    {
+        EnsureLoaded();
+        if (_loadedRoot is null || string.IsNullOrWhiteSpace(localeCode) || string.IsNullOrWhiteSpace(lemma))
+            return null;
+
+        return Path.Combine(_loadedRoot, "audio", localeCode, "normalized", lemma + ".wav");
+    }
+
     private static void EnsureLoaded()
     {
         if (_lemmaIndex is not null)
