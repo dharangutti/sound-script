@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../schema/lemmas.schema.json",
+  "corpusId": "2026.07",
+  "locale": "es",
+  "version": 0,
+  "status": "pilot",
+  "description": "Spanish lemma harvest stub. Pilot list planned for v2026.08.",
+  "entries": []
+}

@@ -127,13 +127,10 @@ public class VocalEngineTests
     }
 
     [Fact]
-    public void Factory_CreateDefault_UsesProsodyWhenEspeakMissing()
+    public void Factory_CreateDefault_UsesCompositeEngine()
     {
-        if (EspeakNgVocalEngine.ResolveExecutable() is not null)
-            return;
-
         var engine = VocalEngineFactory.CreateDefault();
-        Assert.Equal("prosody", engine.Name);
+        Assert.Equal("composite", engine.Name);
     }
 
     [Fact]

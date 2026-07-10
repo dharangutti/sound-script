@@ -1,0 +1,11 @@
+# Phase 8 — wordbank vocal demo
+# Renders synthetic backing; speak phrases use offline composite TTS (corpus + G2P).
+
+tempo 96
+
+track pad {
+  mp C3 q G3 q A3 q E3 q
+}
+
+speak "Hello welcome" voice=default seed=7
+speak "Hello xenoglottophobia" voice=default seed=8

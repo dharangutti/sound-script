@@ -23,4 +23,24 @@ for locale in "$SOURCE/data"/*; do
   fi
 done
 
+if [[ -d "$SOURCE/corpus/v2026.07" ]]; then
+  audio_backup=""
+  if [[ -d "$TARGET/corpus/v2026.07/audio" && ! -d "$SOURCE/corpus/v2026.07/audio" ]]; then
+    audio_backup="$(mktemp -d)"
+    cp -R "$TARGET/corpus/v2026.07/audio" "$audio_backup/"
+  fi
+
+  rm -rf "$TARGET/corpus"
+  mkdir -p "$TARGET/corpus"
+  cp -R "$SOURCE/corpus/v2026.07" "$TARGET/corpus/"
+
+  if [[ -n "$audio_backup" ]]; then
+    cp -R "$audio_backup/audio" "$TARGET/corpus/v2026.07/"
+    rm -rf "$audio_backup"
+    echo "Preserved embedded corpus audio (submodule has no audio/ yet)"
+  fi
+
+  echo "Synced corpus v2026.07 (metadata + audio)"
+fi
+
 echo "Synced wordbank data from $SOURCE to $TARGET"

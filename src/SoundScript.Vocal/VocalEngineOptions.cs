@@ -6,6 +6,9 @@ public sealed class VocalEngineOptions
     /// <summary>Engine-specific voice id (e.g. eSpeak <c>en</c>).</summary>
     public string Voice { get; init; } = "en";
 
+    /// <summary>Wordbank locale for corpus lookup and G2P (defaults to active catalog locale).</summary>
+    public string? Locale { get; init; }
+
     /// <summary>Deterministic seed for the built-in prosody engine.</summary>
     public int Seed { get; init; } = 7;
 

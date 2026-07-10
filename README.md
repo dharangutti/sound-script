@@ -289,7 +289,8 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 ## What's New in V8
 
 - **Vocal stems in Wave export** — `sample`, `speak sample=`, CLI `--vocal` / `--tts-dir` / `--offline-tts`
-- **`soundscript vocal`** — `generate` and `batch` for offline stem WAVs (`prosody` built-in, `espeak` optional)
+- **`soundscript vocal`** — `generate` and `batch` for offline stem WAVs (`composite` default: corpus + G2P; `espeak`/`prosody` optional)
+- **Phase 8 wordbank vocal** — curated CC0/CC-BY pronunciation audio with G2P fallback → [docs/phase8-wordbank-vocal.md](docs/phase8-wordbank-vocal.md)
 - Example: [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw)
 
 → [docs/whats-new-v8.md](docs/whats-new-v8.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
