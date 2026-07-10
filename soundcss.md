@@ -98,6 +98,86 @@ deterministic MIDI signature guessing.
 `PhonemeTimbreMapper` ships a total fallback table covering every phoneme in
 `PhonemeMapper`. SoundCSS overrides merge on top of the built-in row.
 
+## Word-level pronunciation
+
+Beyond phoneme selectors, SoundCSS supports **word rules** that style a whole
+spoken word. A word rule uses a **quoted selector**; phoneme rules (bare symbols
+like `p`, `aa`) are untouched, so existing stylesheets keep working.
+
+```css
+"twinkle" {
+    style: sing;
+    pitch: +2;
+    accent: uk;
+    vibrato: light;
+}
+
+"star" {
+    style: whisper;
+    energy: low;
+    breath: high;
+}
+```
+
+### Word attributes
+
+| Attribute | Values | Meaning |
+|-----------|--------|---------|
+| `style` | `normal` \| `sing` \| `whisper` \| `shout` | Delivery style |
+| `accent` | `usa` \| `uk` \| `india` | Regional accent target |
+| `speed` | `fast` \| `slow` \| `x1.2` \| `x0.8` | Rate preset or explicit multiplier (`0.1 < N ≤ 10`) |
+| `pitch` | `+N` \| `-N` | Pitch offset in semitones (`−24..24`) |
+| `energy` | `high` \| `medium` \| `low` | Loudness/effort |
+| `timbre` | `bright` \| `dark` \| `flat` | Spectral colour |
+| `gender` | `male` \| `female` \| `neutral` | Voice gender target |
+| `age` | `child` \| `teen` \| `adult` \| `senior` | Voice age target |
+| `persona` | `narrator` \| `robot` \| `soft` \| `bright` | Named persona preset |
+| `emotion` | `happy` \| `sad` \| `angry` \| `calm` \| `excited` | Emotional colouring |
+| `breath` | `none` \| `low` \| `medium` \| `high` | Breathiness amount |
+| `vibrato` | `none` \| `light` \| `medium` \| `strong` | Vibrato depth |
+
+Invalid values are rejected at parse time with a clear error listing the allowed
+tokens. All attributes are optional; unset ones are simply absent from the plan.
+
+### Persona presets
+
+`persona` selects a bundled voice character. It composes with the other
+attributes — set a persona for the overall character, then fine-tune:
+
+```css
+// A calm storyteller
+"once" {
+    persona: narrator;
+    speed: slow;
+    energy: medium;
+}
+
+// A robotic refrain
+"initialize" {
+    persona: robot;
+    pitch: -2;
+    vibrato: none;
+    timbre: flat;
+}
+```
+
+### Transform plans
+
+Each word rule is validated into a `SoundCssPronunciation`, which the parser
+projects into a deterministic **`TransformPlan`** — an ordered, DSP-agnostic list
+of directives consumed by the rendering pipeline:
+
+```csharp
+var plans = SoundCSSParser.ParseTransformPlans(source);
+TransformPlan twinkle = plans["twinkle"];
+// twinkle.Directives → [Style=sing, Accent=uk, Pitch=+2 (Numeric 2), Vibrato=light]
+```
+
+Directives are always emitted in a fixed order (`style, accent, speed, pitch,
+energy, timbre, gender, age, persona, emotion, breath, vibrato`), so identical
+input yields byte-identical plans. Mapping these directives to concrete DSP
+parameters happens in the DSP mapping layer.
+
 ## Example file
 
 → [examples/default.ssc](../examples/default.ssc)
