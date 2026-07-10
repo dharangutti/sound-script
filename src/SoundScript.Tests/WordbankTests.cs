@@ -8,10 +8,15 @@ public class WordbankTests : IDisposable
 {
     public WordbankTests()
     {
+        WordbankCatalog.ResetToEmbedded();
         WordbankCatalog.ResetActive();
     }
 
-    public void Dispose() => WordbankCatalog.ResetActive();
+    public void Dispose()
+    {
+        WordbankCatalog.ResetToEmbedded();
+        WordbankCatalog.ResetActive();
+    }
 
     [Fact]
     public void DefaultLocale_LoadsEmbeddedEnglishPack()
@@ -152,5 +157,88 @@ public class WordbankTests : IDisposable
         Assert.True(WordbankCatalog.TrySetActive("fr", out _));
         var syllables = SoundScript.Core.Phonetics.Syllabifier.Syllabify("Bonjour");
         Assert.Equal(["Bon", "jour"], syllables);
+    }
+
+    [Fact]
+    public void TryLoadFromRoot_LoadsLocalesFromDisk()
+    {
+        var root = ResolveWordbankRoot();
+        Assert.True(WordbankCatalog.TryLoadFromRoot(root, out var error), error);
+        Assert.True(WordbankCatalog.IsExternal);
+        Assert.Equal(root, WordbankCatalog.LoadedRoot);
+        Assert.Equal(["en", "es", "fr"], WordbankCatalog.AvailableLocales);
+        Assert.Equal("en", WordbankCatalog.ActiveLocaleCode);
+    }
+
+    [Fact]
+    public void TryLoadFromRoot_SwitchesActiveLocale()
+    {
+        var root = ResolveWordbankRoot();
+        Assert.True(WordbankCatalog.TryLoadFromRoot(root, out _));
+        Assert.True(WordbankCatalog.TrySetActive("es", out _));
+        Assert.Contains("el", WordbankCatalog.Active.FunctionWordSet);
+    }
+
+    [Fact]
+    public void ResetToEmbedded_RestoresEmbeddedCatalog()
+    {
+        var root = ResolveWordbankRoot();
+        Assert.True(WordbankCatalog.TryLoadFromRoot(root, out _));
+        Assert.True(WordbankCatalog.IsExternal);
+
+        WordbankCatalog.ResetToEmbedded();
+        Assert.False(WordbankCatalog.IsExternal);
+        Assert.Null(WordbankCatalog.LoadedRoot);
+        Assert.Equal("en", WordbankCatalog.ActiveLocaleCode);
+    }
+
+    [Fact]
+    public void TryLoadFromRoot_RejectsMissingManifest()
+    {
+        var temp = Path.Combine(Path.GetTempPath(), $"ss-wordbank-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(temp);
+        try
+        {
+            Assert.False(WordbankCatalog.TryLoadFromRoot(temp, out var error));
+            Assert.Contains("manifest", error, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(temp, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void SpanishCommonDictionary_IncludesGracias()
+    {
+        var locale = WordbankCatalog.GetLocale("es");
+        Assert.True(locale.WordEntryMap.ContainsKey("gracias"));
+        Assert.True(locale.WordEntryMap.Count >= 25);
+    }
+
+    [Fact]
+    public void FrenchCommonDictionary_IncludesBonsoir()
+    {
+        var locale = WordbankCatalog.GetLocale("fr");
+        Assert.True(locale.WordEntryMap.ContainsKey("bonsoir"));
+        Assert.True(locale.WordEntryMap.Count >= 25);
+    }
+
+    private static string ResolveWordbankRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            foreach (var name in new[] { "wordbank", "../soundscript-wordbank" })
+            {
+                var candidate = Path.GetFullPath(Path.Combine(dir.FullName, name));
+                if (File.Exists(Path.Combine(candidate, "manifest.json")))
+                    return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new InvalidOperationException("Could not locate soundscript-wordbank root for tests.");
     }
 }

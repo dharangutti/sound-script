@@ -39,8 +39,8 @@ static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript --version | -v");
     Console.Error.WriteLine("       soundscript run <script.ss> [output.mid]");
-    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--locale en|es|fr] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
-    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--locale en|es|fr] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
+    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
+    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [espeak|prosody]] [--offline-tts-dir <folder>]");
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
@@ -98,6 +98,12 @@ static int Compose(string[] args)
     if (string.IsNullOrWhiteSpace(text))
     {
         Console.Error.WriteLine("Nothing to compose: the text is empty.");
+        return 1;
+    }
+
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
         return 1;
     }
 
@@ -255,6 +261,12 @@ static int Prosody(string[] args)
     if (string.IsNullOrWhiteSpace(text))
     {
         Console.Error.WriteLine("Nothing to compose: the text is empty.");
+        return 1;
+    }
+
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
         return 1;
     }
 
@@ -747,6 +759,36 @@ static bool TryMatchFlag(string[] args, ref int index, string flag, out string? 
 
     value = args[index + 1];
     index++;
+    return true;
+}
+
+static bool TryConfigureWordbankCatalog(string[] args, int startIndex, out string? error)
+{
+    var wordbankDir = Environment.GetEnvironmentVariable("WORDBANK_DIR");
+    for (var i = startIndex; i < args.Length; i++)
+    {
+        if (!string.Equals(args[i], "--wordbank-dir", StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        if (i + 1 >= args.Length)
+        {
+            error = "--wordbank-dir requires a path: compose \"text\" --wordbank-dir ./wordbank";
+            return false;
+        }
+
+        wordbankDir = args[++i];
+    }
+
+    if (string.IsNullOrWhiteSpace(wordbankDir))
+    {
+        error = null;
+        return true;
+    }
+
+    if (!WordbankCatalog.TryLoadFromRoot(wordbankDir, out error))
+        return false;
+
+    error = null;
     return true;
 }
 

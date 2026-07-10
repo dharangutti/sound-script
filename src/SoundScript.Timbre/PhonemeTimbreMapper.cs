@@ -15,6 +15,8 @@ public static class PhonemeTimbreMapper
     private static TimbreProfile? _cachedDefault;
     private static Dictionary<string, TimbreProfile>? _cachedTable;
 
+    private static int _cachedGeneration = -1;
+
     /// <summary>Fallback profile for phonemes without an explicit row.</summary>
     public static TimbreProfile DefaultProfile
     {
@@ -36,16 +38,25 @@ public static class PhonemeTimbreMapper
 
     private static void EnsureCache()
     {
+        var generation = WordbankCatalog.Generation;
         var code = WordbankCatalog.ActiveLocaleCode;
-        if (_cachedLocaleCode == code && _cachedTable is not null && _cachedDefault is not null)
+        if (_cachedGeneration == generation
+            && _cachedLocaleCode == code
+            && _cachedTable is not null
+            && _cachedDefault is not null)
             return;
 
         lock (CacheLock)
         {
+            generation = WordbankCatalog.Generation;
             code = WordbankCatalog.ActiveLocaleCode;
-            if (_cachedLocaleCode == code && _cachedTable is not null && _cachedDefault is not null)
+            if (_cachedGeneration == generation
+                && _cachedLocaleCode == code
+                && _cachedTable is not null
+                && _cachedDefault is not null)
                 return;
 
+            _cachedGeneration = generation;
             _cachedLocaleCode = code;
             _cachedDefault = WordbankTimbreMappings.ToProfile(WordbankCatalog.Active.PhonemeTimbre.Default);
             var table = new Dictionary<string, TimbreProfile>(StringComparer.Ordinal);
