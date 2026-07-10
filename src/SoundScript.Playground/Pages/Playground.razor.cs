@@ -128,6 +128,7 @@ public partial class Playground
       case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
       case "wave-vocal-stem": LoadWaveVocalStemExample(); break;
       case "jingle-bells-vocal": LoadJingleBellsVocalExample(); break;
+      case "jingle-bells-wordbank": LoadJingleBellsWordbankExample(); break;
     }
 
     if (PlaygroundPresetCatalog.IsWaveExampleKey(SelectedExampleKey))
@@ -154,6 +155,7 @@ public partial class Playground
       case "speech-only-wave": LoadSpeechOnlyWaveExample(); break;
       case "wave-vocal-stem": LoadWaveVocalStemExample(); break;
       case "jingle-bells-vocal": LoadJingleBellsVocalExample(); break;
+      case "jingle-bells-wordbank": LoadJingleBellsWordbankExample(); break;
       case "showcase-jingle-bells-wave": LoadJingleBellsWaveExample(); break;
     }
 
@@ -914,6 +916,61 @@ public partial class Playground
 
         speak "Jingle bells jingle bells" seed=7 gain=1.1
         speak "Jingle all the way" seed=8 gain=1.1
+
+        effect delay time=0.18 feedback=0.25 mix=0.2
+        effect filter type=lowpass cutoff=3200
+        """;
+  }
+
+  private void LoadJingleBellsWordbankExample()
+  {
+    WaveScriptText =
+        """
+        tempo 132
+        time 4/4
+
+        block hook {
+            E4 q E4 q E4 h
+            E4 q E4 q E4 h
+            E4 q G4 q C4 q D4 q
+            E4 w
+        }
+
+        pattern strumPat {
+            strum
+        }
+
+        track melody {
+            instrument violin
+            mf
+            phrase {
+                curve soft
+                transition smooth
+                play hook
+            }
+        }
+
+        track harmony {
+            instrument piano
+            p
+            Cmaj w Cmaj w
+            Cmaj w Gmaj w
+            play strumPat Cmaj w
+            Fmaj w Cmaj w
+        }
+
+        track bass {
+            instrument bass
+            mf
+            C2 w C2 w
+            C2 w G2 w
+            C2 w
+            F2 w C2 w
+        }
+
+        speak "Jingle bells jingle bells" seed=7 gain=1.05
+        speak "Jingle all the way" seed=8 gain=1.05
+        speak "Oh what fun it is" seed=9 gain=1.0
 
         effect delay time=0.18 feedback=0.25 mix=0.2
         effect filter type=lowpass cutoff=3200

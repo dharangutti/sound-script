@@ -1,5 +1,20 @@
 # SoundScript Release Notes
 
+## V9 — WordBank vocal engine in the Playground
+
+- **New Playground preset:** *Jingle Bells + WordBank vocal* — offline, deterministic
+  human-audio vocalization (corpus + G2P timbre, no eSpeak).
+- **Corpus expansion:** embedded WordBank corpus grows from 32 to **66** English
+  pronunciations, covering the full "Jingle Bells" word set.
+- **CLI fix:** `wave --tts-dir` / `--offline-tts-dir` now resolve relative to the
+  script directory (fixes a doubled-path bug).
+- **Example:** [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw),
+  [examples/jingle-bells-wordbank.wav](examples/jingle-bells-wordbank.wav).
+- **No breaking changes.**
+
+Details: [docs/whats-new-v9.md](docs/whats-new-v9.md) ·
+[docs/phase8-wordbank-vocal.md](docs/phase8-wordbank-vocal.md)
+
 ## V8 — Vocal stems in Wave export
 
 - **New wave grammar:** `sample "path.wav"` and `speak "..." sample="path.wav"`

@@ -23,7 +23,7 @@ corpus/v2026.07/
 
 | Locale | Pilot list | Lemma harvest |
 |--------|------------|---------------|
-| `en` | 1000 lemmas (`pilot-1k.txt`) | **32** harvested pronunciations (Commons CC0/CC-BY) |
+| `en` | 1000 lemmas (`pilot-1k.txt`) | **66** harvested pronunciations (Commons CC0/CC-BY) — includes full Jingle Bells word set |
 | `es` | Deferred | Stub only |
 | `fr` | Deferred | Stub only |
 

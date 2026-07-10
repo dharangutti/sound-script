@@ -8,11 +8,16 @@ No eSpeak, no composite fallback.
 
 [jingle-bells-wordbank.ssw](jingle-bells-wordbank.ssw) — same instrumental layout as [jingle-bells-vocal.ssw](jingle-bells-vocal.ssw).
 
-| `speak` phrase | Corpus audio | G2P timbre |
-|----------------|--------------|------------|
-| `Jingle bells jingle bells` | jingle ×2 | bells ×2 |
-| `Jingle all the way` | jingle, way | all, the |
-| `Oh what fun it is` | it | oh, what, fun, is |
+Since the wordbank corpus (v0.6.2) now covers the **full Jingle Bells word set** (66 English
+pronunciations, see [wordbank CHANGELOG](https://github.com/dharangutti/soundscript-wordbank/blob/main/CHANGELOG.md)),
+every word below is resolved from **corpus human audio** — G2P timbre is only a fallback for
+words outside the song vocabulary.
+
+| `speak` phrase | Corpus audio |
+|----------------|--------------|
+| `Jingle bells jingle bells` | jingle, bells, jingle, bells |
+| `Jingle all the way` | jingle, all, the, way |
+| `Oh what fun it is` | oh, what, fun, it, is |
 
 ## Render full mix (instrumental + WordBank stems)
 

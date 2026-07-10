@@ -1,4 +1,4 @@
-# SoundScript Playground — Verification Checklist (V8)
+# SoundScript Playground — Verification Checklist (V9)
 
 Use this checklist after building or deploying the playground.
 
@@ -181,7 +181,7 @@ python3 -m http.server 8080
 - [ ] Invalid syntax shows an error in the error panel
 - [ ] V2 preset buttons (Showcase, Blocks, Metadata, Tempo, Layers, Humanize, Chords+, Phrases, Patterns, Orchestration) load scripts
 - [ ] Core preset buttons (Melody, Articulations, Dynamics, Chords, Intelligence, Multi-track, Playback) load scripts
-- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak, Combined (wave-effects.ssw), Full song (full-song-wave.ss), Speech-only (speech-only-wave.ss)) load scripts and **Run**/**Render** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
+- [ ] Wave preset buttons (Effects (delay + filter), Speak (prosody tone), Seeded humanize + speak, Combined (wave-effects.ssw), Full song (full-song-wave.ss), Speech-only (speech-only-wave.ss), Vocal stem (wave-vocal-stem.ssw), Jingle Bells + offline vocal, Jingle Bells + WordBank vocal (V9)) load scripts and **Run**/**Render** plays them via SoundScript.Wave (see "SoundScript.Wave (V7)" above)
 - [ ] Example dropdown CLI panel shows linked file + copyable CLI for the selected preset
 - [ ] Text-to-Melody CLI reference lists compose/render/wave multi-step commands
 - [ ] **Compose from text** with the default text plays and reports `Composed 7 syllable(s) into 24 note(s) at 96 BPM.`
