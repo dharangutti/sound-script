@@ -37,6 +37,26 @@
     { "word": "noches", "syllables": ["no", "ches"], "stress": ["primary", "unstressed"] },
     { "word": "pequeños", "syllables": ["pe", "que", "ños"], "stress": ["primary", "unstressed", "secondary"] },
     { "word": "hermosas", "syllables": ["her", "mo", "sas"], "stress": ["unstressed", "primary", "unstressed"] },
-    { "word": "canciones", "syllables": ["can", "cio", "nes"], "stress": ["unstressed", "primary", "unstressed"] }
+    { "word": "canciones", "syllables": ["can", "cio", "nes"], "stress": ["unstressed", "primary", "unstressed"] },
+    { "word": "adiós", "syllables": ["a", "diós"], "stress": ["unstressed", "primary"] },
+    { "word": "amor", "syllables": ["a", "mor"], "stress": ["unstressed", "primary"] },
+    { "word": "casa", "syllables": ["ca", "sa"], "stress": ["primary", "unstressed"] },
+    { "word": "bien", "syllables": ["bien"], "stress": ["primary"] },
+    { "word": "padre", "syllables": ["pa", "dre"], "stress": ["primary", "unstressed"] },
+    { "word": "madre", "syllables": ["ma", "dre"], "stress": ["primary", "unstressed"] },
+    { "word": "país", "syllables": ["pa", "ís"], "stress": ["unstressed", "primary"] },
+    { "word": "persona", "syllables": ["per", "so", "na"], "stress": ["unstressed", "primary", "unstressed"] },
+    { "word": "vida", "syllables": ["vi", "da"], "stress": ["primary", "unstressed"] },
+    { "word": "agua", "syllables": ["a", "gua"], "stress": ["unstressed", "primary"] },
+    { "word": "ciudad", "syllables": ["ciu", "dad"], "stress": ["unstressed", "primary"] },
+    { "word": "mujer", "syllables": ["mu", "jer"], "stress": ["unstressed", "primary"] },
+    { "word": "hombre", "syllables": ["hom", "bre"], "stress": ["primary", "unstressed"] },
+    { "word": "niña", "syllables": ["ni", "ña"], "stress": ["primary", "unstressed"] },
+    { "word": "bueno", "syllables": ["bue", "no"], "stress": ["primary", "unstressed"] },
+    { "word": "nuevo", "syllables": ["nue", "vo"], "stress": ["primary", "unstressed"] },
+    { "word": "grande", "syllables": ["gran", "de"], "stress": ["primary", "unstressed"] },
+    { "word": "ver", "syllables": ["ver"], "stress": ["primary"] },
+    { "word": "hacer", "syllables": ["ha", "cer"], "stress": ["unstressed", "primary"] },
+    { "word": "también", "syllables": ["tam", "bién"], "stress": ["unstressed", "primary"] }
   ]
 }
