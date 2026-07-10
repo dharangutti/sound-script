@@ -23,7 +23,7 @@ corpus/v2026.07/
 
 | Locale | Pilot list | Lemma harvest |
 |--------|------------|---------------|
-| `en` | 1000 lemmas (`pilot-1k.txt`) | Pilot harvest started (4 pronunciations + G2P fallback) |
+| `en` | 1000 lemmas (`pilot-1k.txt`) | **32** harvested pronunciations (Commons CC0/CC-BY) |
 | `es` | Deferred | Stub only |
 | `fr` | Deferred | Stub only |
 
