@@ -36,7 +36,7 @@ dotnet run --project src/SoundScript.Cli -- vocal generate \
 | Engine | Behavior |
 |--------|----------|
 | `wordbank` | Corpus human WAV per word → G2P timbre (`SpectralEngine`) for OOV |
-| `composite` | **Default.** Same as wordbank, then eSpeak per word, then prosody |
+| `composite` | **Default.** Corpus → **eSpeak** (OOV) → G2P → prosody per word |
 | `espeak` | System TTS only |
 | `prosody` | Legacy synthetic phoneme blips |
 
@@ -45,7 +45,7 @@ Per-word resolution:
 ```
 hello  → corpus/audio/en/hello.wav (Wikimedia Commons, CC-BY)
 welcome → corpus/audio/en/welcome.wav
-xenoglottophobia → G2P via grapheme-rules + phoneme-timbre-profiles
+to, SoundScript → eSpeak when installed (intelligible speech), else G2P timbre
 ```
 
 ## Corpus pilot (v2026.07)

@@ -4,7 +4,7 @@ using SoundScript.Wave.Prosody;
 namespace SoundScript.Vocal;
 
 /// <summary>
-/// Wordbank-first vocal engine: corpus human audio → G2P timbre → eSpeak → prosody.
+/// Wordbank-first vocal engine: corpus human audio → eSpeak → G2P timbre → prosody.
 /// </summary>
 public sealed class CompositeVocalEngine : IVocalEngine
 {
@@ -37,7 +37,8 @@ public sealed class CompositeVocalEngine : IVocalEngine
             if (parts.Count > 0)
                 parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
 
-            parts.Add(SynthesizeWordWithFallback(word, locale, options));
+            parts.Add(WordbankVocalSynthesizer.PrepareWordStem(
+                SynthesizeWordWithFallback(word, locale, options)));
         }
 
         var samples = VocalStemProcessor.Concat(parts);
@@ -57,14 +58,8 @@ public sealed class CompositeVocalEngine : IVocalEngine
 
     private float[] SynthesizeWordWithFallback(string word, string locale, VocalEngineOptions options)
     {
-        try
-        {
-            return WordbankVocalSynthesizer.SynthesizeWord(word, locale, options);
-        }
-        catch (InvalidOperationException)
-        {
-            // fall through to espeak / prosody
-        }
+        if (WordbankVocalSynthesizer.TrySynthesizeCorpusWord(word, locale, out var corpus))
+            return corpus;
 
         if (_espeak is not null)
         {
@@ -81,9 +76,13 @@ public sealed class CompositeVocalEngine : IVocalEngine
             }
             catch (InvalidOperationException)
             {
-                // fall through
+                // fall through to G2P / prosody
             }
         }
+
+        var g2p = TimbreVocalSynthesizer.SynthesizeWord(word);
+        if (g2p.Length > 0 && VocalStemNormalizer.Peak(g2p) > 1e-6)
+            return g2p;
 
         var prosody = ProsodySpeechRenderer.RenderStem(word, options.Seed);
         if (prosody.Length > 0 && VocalStemNormalizer.Peak(prosody) > 1e-6)

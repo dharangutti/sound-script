@@ -269,7 +269,7 @@ Generates slug-named WAV files for `speak` phrases without rendering the full
 mix. Uses the **SoundScript.Vocal** library (same engines as `wave --offline-tts`).
 
 ```bash
-# Default: composite (corpus human audio → G2P timbre → espeak → prosody per word)
+# Default: composite (corpus human audio → espeak → G2P timbre → prosody per word)
 dotnet run --project src/SoundScript.Cli -- vocal generate "Hello welcome" \
   --out vocal-stems/hello-welcome.wav --locale en
 
