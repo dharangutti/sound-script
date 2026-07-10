@@ -38,4 +38,11 @@ public sealed class CorpusLemmaEntry
     public double? TrimEndMs { get; init; }
     public double Gain { get; init; } = 1.0;
     public double PitchSemitones { get; init; }
+
+    // Provenance for machine-generated pronunciations (see WordbankAutoGenerate).
+    // Absent on human-recorded corpus entries.
+    public string? Generator { get; init; }
+    public string? GeneratorVersion { get; init; }
+    public string? GeneratedAt { get; init; }
+    public int? NormalizerVersion { get; init; }
 }
