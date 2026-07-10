@@ -378,6 +378,8 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 | [docs/patterns.md](docs/patterns.md) | Pattern engine |
 | [docs/orchestration.md](docs/orchestration.md) | Orchestration helpers |
 | [docs/vocal.md](docs/vocal.md) | Vocal track + phonetics engine |
+| [docs/soundcss.md](docs/soundcss.md) | SoundCSS timbre + word-level pronunciation, DSP mapping table, persona presets |
+| [docs/PLAYGROUND.md](docs/PLAYGROUND.md) | Playground checklist + wordbank normalize / `--auto-generate-missing` HOWTO |
 | [docs/pipeline.md](docs/pipeline.md) | Interpreter pipeline |
 | [docs/architecture.md](docs/architecture.md) | System architecture |
 | [docs/examples.md](docs/examples.md) | Example catalog |

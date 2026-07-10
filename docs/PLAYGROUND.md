@@ -156,6 +156,58 @@ the same text produces different (improved) WAV bytes compared to V4.0.
 
 → [timbre-engine.md](timbre-engine.md) · [soundcss.md](soundcss.md) · [v4.1-cycle-synthesis.md](v4.1-cycle-synthesis.md) · [v4.1.1-timbre-tuning.md](v4.1.1-timbre-tuning.md)
 
+## Wordbank normalization & auto-generation (V9.x)
+
+The `wordbank` CLI verb produces the canonical, deterministic pronunciation WAVs
+that back word-level rendering. Both commands take an optional `--wordbank-dir`
+(defaults to the embedded corpus) and `--locale` (defaults to the active locale).
+
+### Normalize existing corpus audio (`wordbank normalize`)
+
+Runs the deterministic `WordbankNormalizer` (silence trim → peak/RMS gain →
+optional pitch centering) and writes `corpus/v{version}/audio/{locale}/normalized/{lemma}.wav`
+plus a metadata sidecar (`normalized`, `basePitchHz`, `durationMs`, `energyRMS`,
+`normalizerVersion`):
+
+```bash
+# One lemma
+dotnet run --project src/SoundScript.Cli -- \
+  wordbank normalize hello --locale en --wordbank-dir ./wordbank
+
+# Every lemma in a locale
+dotnet run --project src/SoundScript.Cli -- \
+  wordbank normalize --all --locale en --wordbank-dir ./wordbank
+```
+
+Re-running produces byte-identical output for the same input and
+`normalizerVersion` (bit-stable).
+
+### Auto-generate a missing lemma (`--auto-generate-missing`)
+
+When a lemma has no recording, `wordbank ensure` can synthesize one with eSpeak,
+normalize it, persist it, and record generator provenance
+(`generator`, `generatorVersion`, `generatedAt`, `normalizerVersion`) on the lemma:
+
+```bash
+# Off by default: reports the lemma as missing
+dotnet run --project src/SoundScript.Cli -- \
+  wordbank ensure quokka --locale en --wordbank-dir ./wordbank
+
+# Opt in: generate → normalize → persist (requires espeak-ng on PATH)
+dotnet run --project src/SoundScript.Cli -- \
+  wordbank ensure quokka --locale en --wordbank-dir ./wordbank --auto-generate-missing
+
+# Idempotent: a subsequent run resolves from the normalized WAV without regenerating
+dotnet run --project src/SoundScript.Cli -- \
+  wordbank ensure quokka --locale en --wordbank-dir ./wordbank
+```
+
+- [ ] `wordbank normalize hello` writes `audio/en/normalized/hello.wav` + `.json`
+- [ ] `wordbank normalize --all` reports a normalized count for the locale
+- [ ] `wordbank ensure <new> --auto-generate-missing` generates once; a second run prints `Resolved …`
+
+→ [soundcss.md](soundcss.md)
+
 ## Build
 
 - [ ] `dotnet build` succeeds with no errors

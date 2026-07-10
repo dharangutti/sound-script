@@ -77,6 +77,25 @@ public class DspTransformRendererTests
     }
 
     [Fact]
+    public void Render_SingingExample_IsReproducibleAndDistinctFromNormal()
+    {
+        var input = TestTone();
+
+        var singing = SoundCSSParser.ParsePronunciations(
+            "\"la\" { style: sing; vibrato: strong; pitch: +4; energy: high; }")["la"];
+        var singPlan = SoundCssDspMapper.Map(singing, CanonicalVoiceMetadata.Default);
+
+        var hashA = RenderHash(input, singPlan);
+        var hashB = RenderHash(input, singPlan);
+        Assert.Equal(hashA, hashB);
+        Assert.Matches("^[0-9A-F]{64}$", hashA);
+
+        var normal = SoundCSSParser.ParsePronunciations("\"la\" { style: normal; }")["la"];
+        var normalHash = RenderHash(input, SoundCssDspMapper.Map(normal, CanonicalVoiceMetadata.Default));
+        Assert.NotEqual(hashA, normalHash);
+    }
+
+    [Fact]
     public void Render_Gain_ScalesAmplitude()
     {
         var input = TestTone();
