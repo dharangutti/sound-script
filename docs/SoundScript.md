@@ -59,7 +59,7 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 | Document | Description |
 |----------|-------------|
 | [language-reference.md](language-reference.md) | Complete syntax |
-| [cli.md](cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`) |
+| [cli.md](cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`, `vocal`) |
 | [pipeline.md](pipeline.md) | Interpreter pipeline |
 | [architecture.md](architecture.md) | System architecture |
 | [examples.md](examples.md) | Example catalog |
@@ -81,6 +81,7 @@ SoundScript is an open-source, deterministic music DSL that compiles text to MID
 dotnet build
 dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
+dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-vocal.ssw jingle.wav --offline-tts prosody
 ```
 
 ## Playground
