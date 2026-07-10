@@ -11,16 +11,22 @@ public static class WordbankCatalog
     private static readonly Lazy<IReadOnlyDictionary<string, LocalePack>> Locales = new(LoadAllLocales);
     private static string _activeCode = "en";
 
+    [ThreadStatic]
+    private static string? _threadActiveCode;
+
     static WordbankCatalog()
     {
         _activeCode = Manifest.Value.DefaultLocale;
     }
 
+    private static string ActiveCode =>
+        _threadActiveCode ?? _activeCode;
+
     /// <summary>Code of the currently active locale (default: manifest defaultLocale).</summary>
-    public static string ActiveLocaleCode => _activeCode;
+    public static string ActiveLocaleCode => ActiveCode;
 
     /// <summary>The currently active locale pack.</summary>
-    public static LocalePack Active => GetLocale(_activeCode);
+    public static LocalePack Active => GetLocale(ActiveCode);
 
     /// <summary>Alias for <see cref="Active"/>.</summary>
     public static LocalePack Default => Active;
@@ -50,13 +56,18 @@ public static class WordbankCatalog
             return false;
         }
 
+        _threadActiveCode = code;
         _activeCode = code;
         error = null;
         return true;
     }
 
     /// <summary>Resets the active locale to the manifest default.</summary>
-    public static void ResetActive() => _activeCode = Manifest.Value.DefaultLocale;
+    public static void ResetActive()
+    {
+        _threadActiveCode = null;
+        _activeCode = Manifest.Value.DefaultLocale;
+    }
 
     /// <summary>Loads a locale pack from a directory on disk (for tests or custom packs).</summary>
     public static LocalePack LoadFromDirectory(string localeDirectory) =>

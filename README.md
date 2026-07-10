@@ -166,13 +166,16 @@ existing script's output.
 ## Wordbank integration
 
 Linguistic tables (function words, grapheme rules, phoneme mappings, prosody
-offsets, legal syllable onsets, and optional per-word overrides) load at runtime
-from embedded JSON sourced from the companion
+offsets, legal syllable onsets, locale syllabification rules, timbre profiles,
+and optional per-word overrides) load at runtime from embedded JSON sourced from
+the companion
 [soundscript-wordbank](https://github.com/dharangutti/soundscript-wordbank)
-repository (English, Spanish, and French locale packs in v0.2.0). Sync updated
-data with:
+repository (English, Spanish, and French locale packs in v0.3.0). The wordbank
+is vendored as a git submodule at `wordbank/` and copied into
+`src/SoundScript.Wordbank/Data/` before build. Sync updated data with:
 
 ```bash
+git submodule update --init --recursive   # first clone
 ./scripts/sync-wordbank.sh
 ```
 
