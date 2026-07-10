@@ -2,45 +2,297 @@
   "$schema": "../../../schema/lemmas.schema.json",
   "corpusId": "2026.07",
   "locale": "en",
-  "version": 1,
+  "version": 2,
   "status": "pilot",
-  "description": "Pilot harvested pronunciations (CC0 / CC-BY) from Wikimedia Commons with G2P fallback for OOV words.",
+  "description": "Harvested CC0/CC-BY English pronunciations from Wikimedia Commons.",
   "entries": [
     {
-      "lemma": "hello",
+      "lemma": "another",
       "license": "CC-BY-4.0",
-      "source": "Wikimedia Commons — En-us-hello.ogg",
-      "attribution": "Speaker on Wikimedia Commons; file En-us-hello.ogg",
+      "source": "Wikimedia Commons \u2014 En-uk-another.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/another.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "away",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-away.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/away.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "beautiful",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-beautiful.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/beautiful.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "before",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-before.ogg",
+      "attribution": "Dvortygirl",
+      "audio": "audio/en/before.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "child",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-child.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/child.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "computer",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-computer.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/computer.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "food",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-food.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/food.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "friend",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-friend.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/friend.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "happy",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-happy.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/happy.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "hello",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-hello.ogg",
+      "attribution": "Dvortygirl",
       "audio": "audio/en/hello.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "it",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-it.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/it.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "jingle",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-jingle.ogg",
+      "attribution": "No machine-readable author provided. Dvortygirl assumed (based on copyright claims).",
+      "audio": "audio/en/jingle.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "life",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-life.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/life.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "little",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-little.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/little.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "love",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-love.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/love.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "man",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-man.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/man.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "music",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-music.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/music.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "people",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-people.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/people.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "school",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-school.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/school.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "sound",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-sound.ogg",
+      "attribution": "Dvortygirl",
+      "audio": "audio/en/sound.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "star",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-star.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/star.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "table",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-table.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/table.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "test",
+      "license": "CC0-1.0",
+      "source": "Pilot clip (v0.6.1) \u2014 no standalone CC-BY/CC0 Commons file found for lemma 'test'",
+      "attribution": "SoundScript project (pilot placeholder pending harvest)",
+      "audio": "audio/en/test.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "this",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-this.ogg",
+      "attribution": "Wikimedia Commons speaker; file En-us-this.ogg",
+      "audio": "audio/en/this.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "together",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-together.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/together.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "water",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-water.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/water.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "way",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons \u2014 En-uk-way.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/way.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
     {
       "lemma": "welcome",
       "license": "CC-BY-4.0",
-      "source": "Wikimedia Commons — En-us-welcome.ogg",
-      "attribution": "Speaker on Wikimedia Commons; file En-us-welcome.ogg",
+      "source": "Wikimedia Commons \u2014 En-uk-welcome.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
       "audio": "audio/en/welcome.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
     {
-      "lemma": "test",
+      "lemma": "with",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-uk-with.ogg",
+      "attribution": "Troll Control",
+      "audio": "audio/en/with.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "woman",
       "license": "CC-BY-4.0",
-      "source": "Wikimedia Commons — En-uk-test.ogg",
-      "attribution": "Speaker on Wikimedia Commons; file En-uk-test.ogg",
-      "audio": "audio/en/test.wav",
+      "source": "Wikimedia Commons \u2014 En-uk-woman.ogg",
+      "attribution": "Association Shtooka, Judith Franck",
+      "audio": "audio/en/woman.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "work",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 En-us-work.ogg",
+      "attribution": "Dvortygirl",
+      "audio": "audio/en/work.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
     {
       "lemma": "world",
       "license": "CC0-1.0",
-      "source": "SoundScript pilot clip (v0.6.0) — replace with Commons/Lingua Libre harvest",
+      "source": "Pilot clip (v0.6.1) \u2014 no standalone CC-BY/CC0 Commons file found for lemma 'world'",
       "attribution": "SoundScript project (pilot placeholder pending harvest)",
       "audio": "audio/en/world.wav",
       "trimStartMs": 0,
-      "gain": 0.95
+      "gain": 1.0
     }
   ]
 }

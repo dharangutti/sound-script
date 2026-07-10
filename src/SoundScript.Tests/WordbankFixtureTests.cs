@@ -93,6 +93,27 @@ public class WordbankFixtureTests : IDisposable
             .ToHashSet(StringComparer.Ordinal);
     }
 
+    [Fact]
+    public void CorpusCatalog_CoversMostCiFixtureWords()
+    {
+        var lemmasPath = ResolveWordbankRoot();
+        var document = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(
+            File.ReadAllText(Path.Combine(lemmasPath, "corpus/v2026.07/en/lemmas.json")));
+        var lemmas = document.GetProperty("entries").EnumerateArray()
+            .Select(e => e.GetProperty("lemma").GetString()!.ToLowerInvariant())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var fixturesPath = Path.Combine(lemmasPath, "fixtures/ci-50.json");
+        var fixtures = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(
+            File.ReadAllText(fixturesPath));
+        var enWords = fixtures.GetProperty("fixtures").GetProperty("en").EnumerateArray()
+            .Select(e => e.GetString()!.ToLowerInvariant())
+            .ToList();
+
+        var covered = enWords.Count(word => lemmas.Contains(word));
+        Assert.True(covered >= 26, $"Expected at least 26/50 CI English words in corpus, found {covered}.");
+    }
+
     private static string ResolveWordbankRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
