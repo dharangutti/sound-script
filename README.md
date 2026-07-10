@@ -116,7 +116,7 @@ MidiGenerator → output.mid
 | [examples/speech-only-wave.ss](examples/speech-only-wave.ss) | Speech + vocal song without a MIDI step |
 | [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw) | V8: `speak sample=` vocal stem mixing |
 | [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) | V8: Jingle Bells + offline vocal stems |
-| [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) | Phase 8: Jingle Bells rhythm with WordBank-only vocal stems |
+| [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) | V9: Jingle Bells rhythm with WordBank-only vocal stems (Playground preset) |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -190,7 +190,7 @@ dotnet run --project src/SoundScript.Cli -- prosody "Hola mundo" out.mid --local
 # or pass --wordbank-dir ./wordbank on compose / prosody
 ```
 
-See [wordbank VERSIONING.md](https://github.com/dharangutti/soundscript-wordbank/blob/main/docs/VERSIONING.md) for the engine ↔ package ↔ corpus contract (`8.0.x` / `>= 0.5.0` / `2026.07.0`).
+See [wordbank VERSIONING.md](https://github.com/dharangutti/soundscript-wordbank/blob/main/docs/VERSIONING.md) for the engine ↔ package ↔ corpus contract (`9.0.x` / `>= 0.6.2` / `2026.07.1`).
 
 Select a locale for `compose` or `prosody`:
 
@@ -287,12 +287,24 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
 
+## What's New in V9
+
+- **WordBank vocal engine in the Playground** — new *Jingle Bells + WordBank vocal* preset
+  (offline, deterministic corpus audio + G2P timbre, no eSpeak)
+- **Corpus expansion** — embedded WordBank corpus grows from 32 to **66** English
+  pronunciations, covering the full "Jingle Bells" word set
+- **CLI fix** — `wave --tts-dir` / `--offline-tts-dir` resolve relative to the script directory
+- Example: [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) ·
+  [examples/jingle-bells-wordbank.wav](examples/jingle-bells-wordbank.wav)
+
+→ [docs/whats-new-v9.md](docs/whats-new-v9.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
+
 ## What's New in V8
 
 - **Vocal stems in Wave export** — `sample`, `speak sample=`, CLI `--vocal` / `--tts-dir` / `--offline-tts`
 - **`soundscript vocal`** — `generate` and `batch` for offline stem WAVs (`composite` default: corpus + G2P; `espeak`/`prosody` optional)
 - **Phase 8 wordbank vocal** — curated CC0/CC-BY pronunciation audio with G2P fallback → [docs/phase8-wordbank-vocal.md](docs/phase8-wordbank-vocal.md)
-- Example: [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) · WordBank-only rhythm demo: [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw)
+- Example: [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw)
 
 → [docs/whats-new-v8.md](docs/whats-new-v8.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
 

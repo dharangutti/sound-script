@@ -134,7 +134,7 @@ public static class PlaygroundPresetCatalog
 
     public static bool IsWaveExampleKey(string key) =>
         key.StartsWith("wave-", StringComparison.Ordinal) ||
-        key is "speech-only-wave" or "showcase-jingle-bells-wave" or "jingle-bells-vocal";
+        key is "speech-only-wave" or "showcase-jingle-bells-wave" or "jingle-bells-vocal" or "jingle-bells-wordbank";
 
     public static string DocsExamplesUrl => $"/doc.html?p={DocsExamplesPath}";
 
@@ -279,6 +279,19 @@ public static class PlaygroundPresetCatalog
             [
                 $"{CliPrefix}vocal batch examples/jingle-bells-vocal.ssw --out-dir examples/vocal-stems --engine prosody",
                 $"{CliPrefix}wave examples/jingle-bells-vocal.ssw jingle-bells.wav --offline-tts prosody",
+            ]);
+
+        yield return Wave(
+            "jingle-bells-wordbank",
+            "Jingle Bells + WordBank-only vocal (jingle-bells-wordbank.ssw)",
+            "jingle-bells-wordbank.ssw",
+            "Render (Wave pane)",
+            PlaygroundOutputRail.Wave,
+            "V9: WordBank engine only — corpus human audio + G2P timbre fallback, no eSpeak. " +
+            "Playground preview uses the synthetic prosody fallback; CLI produces the real corpus-backed vocal.",
+            [
+                $"{CliPrefix}vocal batch examples/jingle-bells-wordbank.ssw --out-dir examples/vocal-stems/wordbank --engine wordbank --locale en",
+                $"{CliPrefix}wave examples/jingle-bells-wordbank.ssw jingle-bells-wordbank.wav --tts-dir vocal-stems/wordbank --locale en",
             ]);
     }
 

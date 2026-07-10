@@ -111,7 +111,30 @@ public class WordbankFixtureTests : IDisposable
             .ToList();
 
         var covered = enWords.Count(word => lemmas.Contains(word));
-        Assert.True(covered >= 26, $"Expected at least 26/50 CI English words in corpus, found {covered}.");
+        Assert.True(covered >= 27, $"Expected at least 27/50 CI English words in corpus, found {covered}.");
+    }
+
+    [Fact]
+    public void CorpusCatalog_CoversFullJingleBellsWordSet()
+    {
+        var lemmasPath = ResolveWordbankRoot();
+        var document = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(
+            File.ReadAllText(Path.Combine(lemmasPath, "corpus/v2026.07/en/lemmas.json")));
+        var lemmas = document.GetProperty("entries").EnumerateArray()
+            .Select(e => e.GetProperty("lemma").GetString()!.ToLowerInvariant())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        string[] jingleBellsWords =
+        [
+            "jingle", "bells", "all", "the", "way", "oh", "what", "fun", "it", "is",
+            "to", "ride", "in", "a", "one", "horse", "open", "sleigh", "dashing",
+            "through", "snow", "over", "fields", "we", "go", "laughing", "on",
+            "bobtail", "ring", "making", "spirits", "bright", "and", "sing",
+            "sleighing", "song", "tonight",
+        ];
+
+        foreach (var word in jingleBellsWords)
+            Assert.True(lemmas.Contains(word), $"Jingle Bells word '{word}' missing from corpus.");
     }
 
     private static string ResolveWordbankRoot()

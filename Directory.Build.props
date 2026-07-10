@@ -8,9 +8,9 @@
     from the same values on the next push to main.
   -->
   <PropertyGroup>
-    <Version>8.0.0</Version>
-    <SoundScriptVersionLabel>V8</SoundScriptVersionLabel>
-    <SoundScriptCodename>Vocal Stems in Wave Export</SoundScriptCodename>
+    <Version>9.0.0</Version>
+    <SoundScriptVersionLabel>V9</SoundScriptVersionLabel>
+    <SoundScriptCodename>WordBank Vocal Engine</SoundScriptCodename>
   </PropertyGroup>
 
   <ItemGroup>

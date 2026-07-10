@@ -85,3 +85,5 @@ wave-backend error pattern as V7. Existing `.ss` MIDI workflows are unchanged.
 
 → [wave-grammar.md](wave-grammar.md) · [cli.md](cli.md#wave--script-to-wav-v8) ·
 [examples.md](examples.md)
+
+→ [What's new in V9](whats-new-v9.md)
