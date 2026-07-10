@@ -1,3 +1,5 @@
+using SoundScript.Wordbank;
+
 namespace SoundScript.Prosody;
 
 /// <summary>
@@ -7,24 +9,22 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class SyllableContourGenerator
 {
-    private const int PrimaryOffset = 2;
-    private const int SecondaryOffset = 1;
-    private const int UnstressedOffset = 0;
+    private static readonly Dictionary<string, int> Offsets = WordbankCatalog.Default.WordProsody.SyllableStressOffsets;
 
     /// <summary>Computes one semitone offset per syllable, from its stress level.</summary>
     public static IReadOnlyList<int> GenerateOffsets(IReadOnlyList<StressLevel> stress)
     {
-        var offsets = new int[stress.Count];
+        var result = new int[stress.Count];
         for (var i = 0; i < stress.Count; i++)
         {
-            offsets[i] = stress[i] switch
+            result[i] = stress[i] switch
             {
-                StressLevel.Primary => PrimaryOffset,
-                StressLevel.Secondary => SecondaryOffset,
-                _ => UnstressedOffset,
+                StressLevel.Primary => Offsets["primary"],
+                StressLevel.Secondary => Offsets["secondary"],
+                _ => Offsets["unstressed"],
             };
         }
 
-        return offsets;
+        return result;
     }
 }

@@ -1,3 +1,5 @@
+using SoundScript.Wordbank;
+
 namespace SoundScript.Prosody;
 
 /// <summary>
@@ -8,6 +10,8 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class PhraseContourEngine
 {
+    private static readonly Wordbank.Models.WordProsodyDocument Prosody = WordbankCatalog.Default.WordProsody;
+
     /// <summary>
     /// Detects sentence type from surface punctuation: a trailing '?' is a
     /// question, everything else is treated as a statement. Multi-sentence
@@ -31,22 +35,29 @@ public static class PhraseContourEngine
         {
             deltas[i] = type switch
             {
-                SentenceType.Question => Ramp(i, wordCount, from: -3, to: 5),
-                SentenceType.ListItem => Math.Min(i, 3),
-                _ => Ramp(i, wordCount, from: 2, to: -4),
+                SentenceType.Question => Ramp(i, wordCount, Prosody.PhraseContours["question"]),
+                SentenceType.ListItem => ComputeListItemDelta(i, Prosody.PhraseContours["listItem"]),
+                _ => Ramp(i, wordCount, Prosody.PhraseContours["statement"]),
             };
         }
 
         return deltas;
     }
 
-    private static int Ramp(int index, int count, int from, int to)
+    private static int Ramp(int index, int count, Wordbank.Models.RampContour contour)
     {
         if (count <= 1)
             return 0;
 
         var t = (double)index / (count - 1);
-        var value = from + (to - from) * t;
+        var value = contour.From + (contour.To - contour.From) * t;
         return (int)Math.Round(value, MidpointRounding.AwayFromZero);
+    }
+
+    private static int ComputeListItemDelta(int index, Wordbank.Models.RampContour contour)
+    {
+        var step = contour.Step ?? 1;
+        var max = contour.Max ?? 3;
+        return Math.Min(index * step, max);
     }
 }

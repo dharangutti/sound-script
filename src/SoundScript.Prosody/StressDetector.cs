@@ -1,3 +1,5 @@
+using SoundScript.Wordbank;
+
 namespace SoundScript.Prosody;
 
 /// <summary>
@@ -13,18 +15,22 @@ namespace SoundScript.Prosody;
 ///  - 3+ syllables: first syllable primary, last syllable secondary, every
 ///    syllable in between unstressed.
 ///
+/// Per-word overrides from the wordbank dictionary are applied when present.
 /// Same word and syllable split always yields the same stress pattern.
 /// </summary>
 public static class StressDetector
 {
-    private static readonly string[] UnstressedPrefixes =
-        ["re", "de", "un", "in", "con", "dis", "ex", "en"];
+    private static readonly string[] UnstressedPrefixes = WordbankCatalog.Default.StressPrefixes.Prefixes;
 
     /// <summary>Detects one stress level per syllable.</summary>
     public static IReadOnlyList<StressLevel> Detect(string word, IReadOnlyList<string> syllables)
     {
         if (syllables.Count == 0)
             return [];
+
+        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+            && entry.Stress is { Length: > 0 } stressOverride)
+            return ParseStress(stressOverride);
 
         var isFunctionWord = FunctionWords.Contains(word);
 
@@ -46,6 +52,16 @@ public static class StressDetector
         levels[^1] = StressLevel.Secondary;
         return levels;
     }
+
+    private static IReadOnlyList<StressLevel> ParseStress(string[] stress) =>
+        stress.Select(ParseStressLevel).ToArray();
+
+    private static StressLevel ParseStressLevel(string value) => value switch
+    {
+        "primary" => StressLevel.Primary,
+        "secondary" => StressLevel.Secondary,
+        _ => StressLevel.Unstressed,
+    };
 
     private static bool StartsWithUnstressedPrefix(string syllable)
     {

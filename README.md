@@ -163,6 +163,18 @@ existing script's output.
 
 → [docs/text-to-melody.md](docs/text-to-melody.md) · [docs/phoneme-composer.md](docs/phoneme-composer.md) · [docs/cli.md](docs/cli.md)
 
+## Wordbank integration
+
+Linguistic tables (function words, grapheme rules, phoneme mappings, prosody
+offsets, legal syllable onsets, and optional per-word overrides) load at runtime
+from embedded JSON sourced from the companion
+[soundscript-wordbank](https://github.com/dharangutti/soundscript-wordbank)
+repository. Sync updated data with:
+
+```bash
+./scripts/sync-wordbank.sh
+```
+
 ## V4: Offline timbre synthesis
 
 V4 adds **SoundScript.Timbre** — deterministic MIDI → WAV/OGG using
@@ -227,6 +239,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
     SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer, PhonemeSplitter, PhonemeMapper
+    SoundScript.Wordbank/   # Embedded linguistic data from soundscript-wordbank
     SoundScript.Timbre/      # Offline timbre synthesis (SoundCSS)
     SoundScript.Wave/        # Direct AST → WAV synthesis (V7)
     SoundScript.Cli/        # CLI (run, compose, prosody, render, wave)

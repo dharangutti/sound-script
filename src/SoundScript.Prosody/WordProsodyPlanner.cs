@@ -24,7 +24,7 @@ public static class WordProsodyPlanner
         for (var i = 0; i < words.Count; i++)
         {
             var word = words[i];
-            var category = FunctionWords.Contains(word.Word) ? WordCategory.Function : WordCategory.Content;
+            var category = ResolveCategory(word.Word);
             var position = PositionOf(i, words.Count);
             var stress = StressDetector.Detect(word.Word, word.Syllables);
             var baseMidi = WordPitchTable.BaseMidi(category, position);
@@ -33,6 +33,19 @@ public static class WordProsodyPlanner
         }
 
         return plans;
+    }
+
+    private static WordCategory ResolveCategory(string word)
+    {
+        if (Wordbank.WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+            && entry.Category is not null)
+        {
+            return entry.Category.Equals("function", StringComparison.OrdinalIgnoreCase)
+                ? WordCategory.Function
+                : WordCategory.Content;
+        }
+
+        return FunctionWords.Contains(word) ? WordCategory.Function : WordCategory.Content;
     }
 
     private static PhrasePosition PositionOf(int index, int count)

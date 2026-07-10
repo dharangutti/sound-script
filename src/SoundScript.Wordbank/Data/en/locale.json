@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schema/locale.schema.json",
+  "code": "en",
+  "name": "English",
+  "version": "0.1.0",
+  "files": {
+    "functionWords": "function-words.json",
+    "stressPrefixes": "stress-prefixes.json",
+    "wordProsody": "word-prosody.json",
+    "graphemeRules": "grapheme-rules.json",
+    "legalOnsets": "legal-onsets.json",
+    "phonemeCompose": "phoneme-compose-gestures.json",
+    "phonemeWave": "phoneme-wave-frequencies.json",
+    "wordEntries": "words/seed.json"
+  }
+}

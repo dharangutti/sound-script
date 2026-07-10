@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schema/grapheme-rules.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Deterministic grapheme-to-phoneme rules. Digraphs are consumed before single letters; doubled consonants collapse.",
+  "digraphs": [
+    { "grapheme": "sh", "phonemes": ["sh"] },
+    { "grapheme": "ch", "phonemes": ["ch"] },
+    { "grapheme": "th", "phonemes": ["th"] },
+    { "grapheme": "ph", "phonemes": ["f"] },
+    { "grapheme": "wh", "phonemes": ["w"] },
+    { "grapheme": "ng", "phonemes": ["ng"] },
+    { "grapheme": "ck", "phonemes": ["k"] },
+    { "grapheme": "qu", "phonemes": ["k", "w"] },
+    { "grapheme": "aa", "phonemes": ["aa"] },
+    { "grapheme": "ee", "phonemes": ["ee"] },
+    { "grapheme": "oo", "phonemes": ["oo"] },
+    { "grapheme": "ai", "phonemes": ["ai"] },
+    { "grapheme": "au", "phonemes": ["au"] },
+    { "grapheme": "ea", "phonemes": ["ee"] },
+    { "grapheme": "ey", "phonemes": ["ee"] },
+    { "grapheme": "ie", "phonemes": ["ee"] },
+    { "grapheme": "ay", "phonemes": ["ai"] },
+    { "grapheme": "oa", "phonemes": ["oo"] },
+    { "grapheme": "ou", "phonemes": ["au"] },
+    { "grapheme": "ow", "phonemes": ["au"] }
+  ],
+  "singleLetters": [
+    { "letter": "a", "phonemes": ["aa"] },
+    { "letter": "e", "phonemes": ["ee"] },
+    { "letter": "i", "phonemes": ["ai"] },
+    { "letter": "o", "phonemes": ["au"] },
+    { "letter": "u", "phonemes": ["oo"] },
+    { "letter": "y", "phonemes": ["ee"] },
+    { "letter": "c", "phonemes": ["k"] },
+    { "letter": "q", "phonemes": ["k"] },
+    { "letter": "x", "phonemes": ["k", "s"] }
+  ]
+}

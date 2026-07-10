@@ -1,0 +1,7 @@
+{
+  "$schema": "../../schema/stress-prefixes.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Two-syllable words starting with these prefixes use trochaic stress on the second syllable (e.g. re-TURN, un-HAPPY).",
+  "prefixes": ["re", "de", "un", "in", "con", "dis", "ex", "en"]
+}
