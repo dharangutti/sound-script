@@ -178,6 +178,71 @@ energy, timbre, gender, age, persona, emotion, breath, vibrato`), so identical
 input yields byte-identical plans. Mapping these directives to concrete DSP
 parameters happens in the DSP mapping layer.
 
+## DSP mapping table
+
+`SoundCssDspMapper.Map(pronunciation, canonicalVoice)` turns a validated
+`SoundCssPronunciation` into a numeric `DspTransformPlan`:
+
+```
+DspTransformPlan {
+    pitchSemitones, timeStretch, gainDb,
+    eqBands[], formantShift, vibrato { rateHz, depthSemitones },
+    noiseLayer, targetPitchHz
+}
+```
+
+Composition is deterministic: the `persona` preset is applied first, then explicit
+attributes compose on top — pitch/gain are **additive**, speed/formant are
+**multiplicative**, EQ bands are **appended**, and vibrato/noise **accumulate**.
+`speed` is a playback-rate factor `S`, stored as `timeStretch = 1 / S`.
+
+| Attribute | Value | Numeric transform |
+|-----------|-------|-------------------|
+| `style` | sing | vibrato 5.5 Hz / 0.3, gain +1 dB, S×0.97, high-shelf +1 dB @3 kHz |
+| | whisper | noise +0.5, gain −6 dB, high-shelf +3 dB @4 kHz, low-shelf −4 dB @250 Hz |
+| | shout | gain +5 dB, peak +3 dB @2 kHz, high-shelf +2 dB @3.5 kHz |
+| `accent` | uk | formant ×1.02, peak +1 dB @2.5 kHz |
+| | india | formant ×1.04, peak +1.5 dB @3 kHz, S×1.03 |
+| `speed` | fast / slow / xN | S ×1.15 / ×0.85 / ×N |
+| `pitch` | +N / −N | pitch += N semitones |
+| `energy` | high / medium / low | gain +4 / 0 / −4 dB |
+| `timbre` | bright | high-shelf +4 dB @3.5 kHz |
+| | dark | low-shelf +3 dB @250 Hz, high-shelf −3 dB @3.5 kHz |
+| `gender` | male | pitch −4, formant ×0.92 |
+| | female | pitch +4, formant ×1.08 |
+| `age` | child | pitch +5, S×1.15, formant ×1.15 |
+| | teen | pitch +2, formant ×1.05 |
+| | senior | pitch −1, gain −1 dB, vibrato 4 Hz / 0.2 |
+| `emotion` | happy | pitch +1, S×1.05, gain +1, vibrato 5.5 Hz / 0.15 |
+| | sad | pitch −1, S×0.92, gain −2, low-shelf +2 dB @250 Hz, vibrato 4 Hz / 0.1 |
+| | angry | gain +4, S×1.05, peak +3 dB @2 kHz |
+| | calm | gain −1, S×0.95, high-shelf −1 dB @4 kHz |
+| | excited | pitch +2, S×1.1, gain +3, vibrato 6 Hz / 0.2 |
+| `breath` | low / medium / high | noise +0.1 / +0.25 / +0.45 (+high-shelf +2 dB @4 kHz) |
+| `vibrato` | light / medium / strong | 5.5 Hz / 0.2, 5.5 Hz / 0.4, 6 Hz / 0.7 |
+
+Pitch is computed **relative to the canonical `basePitchHz`** (from the Prompt 1/2
+normalizer sidecar) and clamped so the target stays in the 70–500 Hz human band;
+`formantShift` is likewise bounded so the first formant stays 250–1200 Hz. Final
+clamps: gain ±24 dB, timeStretch 0.25–4, vibrato depth 0–2 / rate 0–12 Hz,
+noise 0–1.
+
+### Persona presets
+
+Each persona applies a bundle of transforms as a base:
+
+| Persona | Transforms |
+|---------|-----------|
+| `narrator` | gain +1 dB, S×0.95, noise +0.05, low-shelf +1 dB @300 Hz, high-shelf −1 dB @6 kHz |
+| `robot` | noise +0.12, peak +3 dB @1.5 kHz, low-shelf −2 dB @400 Hz, high-shelf +1 dB @3 kHz, no vibrato |
+| `soft` | gain −3 dB, noise +0.2, high-shelf −2 dB @4 kHz, vibrato 5 Hz / 0.15 |
+| `bright` | gain +1 dB, high-shelf +5 dB @4 kHz, peak +2 dB @2.5 kHz |
+
+The DSP rendering layer (`DspTransformRenderer`) applies a plan deterministically,
+reusing the shared one-pole filter (EQ), resampling (pitch shift / time-stretch),
+the deterministic sine LFO (vibrato), and the seeded PRNG (breath/noise) — so a
+given `(input, plan, seed)` renders byte-identical audio on every platform.
+
 ## Example file
 
 → [examples/default.ssc](../examples/default.ssc)
