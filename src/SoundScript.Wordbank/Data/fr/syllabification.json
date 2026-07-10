@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema/syllabification.schema.json",
+  "version": 1,
+  "locale": "fr",
+  "description": "French syllabification: nasal and vowel digraph nuclei, accented vowels.",
+  "vowelLetters": ["a", "e", "i", "o", "u", "y"],
+  "accentedVowels": ["à", "â", "é", "è", "ê", "ë", "î", "ï", "ô", "ù", "û", "ü"],
+  "treatYAsVowel": true,
+  "silentTerminalE": true,
+  "consonantLeNucleus": true,
+  "maxOnsetClusterLength": 3,
+  "nucleusDigraphs": ["eau", "oin", "ain", "ein", "ien", "an", "en", "in", "on", "un", "ai", "ei", "ou", "eu", "au"]
+}

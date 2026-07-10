@@ -2,15 +2,17 @@
   "$schema": "../../schema/locale.schema.json",
   "code": "es",
   "name": "Spanish",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "files": {
     "functionWords": "function-words.json",
     "stressPrefixes": "stress-prefixes.json",
     "wordProsody": "word-prosody.json",
     "graphemeRules": "grapheme-rules.json",
     "legalOnsets": "legal-onsets.json",
+    "syllabification": "syllabification.json",
     "phonemeCompose": "phoneme-compose-gestures.json",
     "phonemeWave": "phoneme-wave-frequencies.json",
+    "phonemeTimbre": "phoneme-timbre-profiles.json",
     "wordEntries": "words/common.json"
   }
 }
