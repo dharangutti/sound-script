@@ -36,6 +36,21 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # eSpeak powers the wordbank auto-generation integration tests. When it is
+      # absent those tests soft-skip, so the Windows install is best-effort.
+      - name: Install eSpeak (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng
+
+      - name: Install eSpeak (macOS)
+        if: runner.os == 'macOS'
+        run: brew install espeak-ng
+
+      - name: Install eSpeak (Windows)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: choco install espeak --yes --no-progress
+
       - name: Run tests
         # Debug, not Release: a couple of pre-existing tests (ImportTests.
         # Cli_RunsMultiFileProject, MeasureValidationUxTests.
