@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="SoundScript.Tests" />
+    <InternalsVisibleTo Include="SoundScript.Vocal" />
   </ItemGroup>
 
 </Project>

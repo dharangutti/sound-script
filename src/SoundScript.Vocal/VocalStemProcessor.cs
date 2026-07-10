@@ -66,7 +66,7 @@ internal static class VocalStemProcessor
         return trimmed;
     }
 
-    private static float[] PitchShift(float[] samples, double semitones)
+    internal static float[] PitchShift(float[] samples, double semitones)
     {
         if (samples.Length == 0)
             return samples;
@@ -76,6 +76,34 @@ internal static class VocalStemProcessor
         var output = new float[outputLength];
 
         for (var i = 0; i < outputLength; i++)
+        {
+            var source = i * ratio;
+            var index = (int)source;
+            var frac = source - index;
+            if (index >= samples.Length - 1)
+            {
+                output[i] = samples[^1];
+                continue;
+            }
+
+            output[i] = (float)(samples[index] * (1 - frac) + samples[index + 1] * frac);
+        }
+
+        return output;
+    }
+
+    /// <summary>Deterministic linear-interpolation resample to an explicit length (time-stretch).</summary>
+    internal static float[] ResampleToLength(float[] samples, int targetLength)
+    {
+        if (targetLength <= 0)
+            return [];
+        if (samples.Length == 0 || samples.Length == targetLength)
+            return samples.Length == targetLength ? samples : new float[targetLength];
+
+        var output = new float[targetLength];
+        var ratio = (double)samples.Length / targetLength;
+
+        for (var i = 0; i < targetLength; i++)
         {
             var source = i * ratio;
             var index = (int)source;
