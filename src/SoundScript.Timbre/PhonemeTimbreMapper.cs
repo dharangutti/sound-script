@@ -10,6 +10,7 @@ namespace SoundScript.Timbre;
 /// </summary>
 public static class PhonemeTimbreMapper
 {
+    private static readonly object CacheLock = new();
     private static string? _cachedLocaleCode;
     private static TimbreProfile? _cachedDefault;
     private static Dictionary<string, TimbreProfile>? _cachedTable;
@@ -39,11 +40,19 @@ public static class PhonemeTimbreMapper
         if (_cachedLocaleCode == code && _cachedTable is not null && _cachedDefault is not null)
             return;
 
-        _cachedLocaleCode = code;
-        _cachedDefault = WordbankTimbreMappings.ToProfile(WordbankCatalog.Active.PhonemeTimbre.Default);
-        _cachedTable = new Dictionary<string, TimbreProfile>(StringComparer.Ordinal);
-        foreach (var (phoneme, row) in WordbankCatalog.Active.TimbreProfileMap)
-            _cachedTable[phoneme] = WordbankTimbreMappings.ToProfile(row);
+        lock (CacheLock)
+        {
+            code = WordbankCatalog.ActiveLocaleCode;
+            if (_cachedLocaleCode == code && _cachedTable is not null && _cachedDefault is not null)
+                return;
+
+            _cachedLocaleCode = code;
+            _cachedDefault = WordbankTimbreMappings.ToProfile(WordbankCatalog.Active.PhonemeTimbre.Default);
+            var table = new Dictionary<string, TimbreProfile>(StringComparer.Ordinal);
+            foreach (var (phoneme, row) in WordbankCatalog.Active.TimbreProfileMap)
+                table[phoneme] = WordbankTimbreMappings.ToProfile(row);
+            _cachedTable = table;
+        }
     }
 
     /// <summary>Resolves a phoneme to its timbre profile with optional CSS overrides.</summary>
