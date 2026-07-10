@@ -9,12 +9,12 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class WordPitchTable
 {
-    private static readonly Wordbank.Models.WordProsodyDocument Prosody = WordbankCatalog.Default.WordProsody;
+    private static Wordbank.Models.WordProsodyDocument Prosody => WordbankCatalog.Active.WordProsody;
 
     /// <summary>MIDI number of the table's centre pitch, C4.</summary>
     public static int CenterMidi => Prosody.CenterMidi;
 
-    private static readonly Dictionary<(WordCategory, PhrasePosition), int> Offsets = BuildOffsets();
+    private static Dictionary<(WordCategory, PhrasePosition), int> Offsets => BuildOffsets();
 
     /// <summary>Base MIDI number for a word of the given category and phrase position.</summary>
     public static int BaseMidi(WordCategory category, PhrasePosition position) =>

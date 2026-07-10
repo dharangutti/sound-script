@@ -20,7 +20,7 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class StressDetector
 {
-    private static readonly string[] UnstressedPrefixes = WordbankCatalog.Default.StressPrefixes.Prefixes;
+    private static string[] UnstressedPrefixes => WordbankCatalog.Active.StressPrefixes.Prefixes;
 
     /// <summary>Detects one stress level per syllable.</summary>
     public static IReadOnlyList<StressLevel> Detect(string word, IReadOnlyList<string> syllables)
@@ -28,7 +28,7 @@ public static class StressDetector
         if (syllables.Count == 0)
             return [];
 
-        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+        if (WordbankCatalog.Active.WordEntryMap.TryGetValue(word, out var entry)
             && entry.Stress is { Length: > 0 } stressOverride)
             return ParseStress(stressOverride);
 

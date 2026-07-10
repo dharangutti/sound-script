@@ -169,10 +169,17 @@ Linguistic tables (function words, grapheme rules, phoneme mappings, prosody
 offsets, legal syllable onsets, and optional per-word overrides) load at runtime
 from embedded JSON sourced from the companion
 [soundscript-wordbank](https://github.com/dharangutti/soundscript-wordbank)
-repository. Sync updated data with:
+repository (English, Spanish, and French locale packs in v0.2.0). Sync updated
+data with:
 
 ```bash
 ./scripts/sync-wordbank.sh
+```
+
+Select a locale for `compose` or `prosody`:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- prosody "Hola mundo" out.mid --locale es
 ```
 
 ## V4: Offline timbre synthesis

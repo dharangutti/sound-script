@@ -18,14 +18,14 @@ using SoundScript.Wordbank;
 /// </summary>
 public static class Syllabifier
 {
-    private static readonly HashSet<string> LegalOnsets = WordbankCatalog.Default.LegalOnsetSet;
+    private static HashSet<string> LegalOnsets => WordbankCatalog.Active.LegalOnsetSet;
 
     public static IReadOnlyList<string> Syllabify(string word)
     {
         if (string.IsNullOrWhiteSpace(word))
             return [];
 
-        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+        if (WordbankCatalog.Active.WordEntryMap.TryGetValue(word, out var entry)
             && entry.Syllables is { Length: > 0 } syllables)
             return ApplyWordEntrySyllables(word, syllables);
 
@@ -44,7 +44,7 @@ public static class Syllabifier
 
     public static int CountSyllables(string word)
     {
-        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+        if (WordbankCatalog.Active.WordEntryMap.TryGetValue(word, out var entry)
             && entry.Syllables is { Length: > 0 } syllables)
             return syllables.Length;
 

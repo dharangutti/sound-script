@@ -15,7 +15,7 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class ProsodyClamp
 {
-    private static readonly Wordbank.Models.ClampSettings Settings = WordbankCatalog.Default.WordProsody.Clamp;
+    private static Wordbank.Models.ClampSettings Settings => WordbankCatalog.Active.WordProsody.Clamp;
 
     /// <summary>Clamps a per-syllable MIDI sequence to the bounds described above.</summary>
     public static IReadOnlyList<int> Clamp(IReadOnlyList<int> midiSequence)

@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema/manifest.schema.json",
+  "name": "soundscript-wordbank",
+  "version": "0.2.0",
+  "schemaVersion": 1,
+  "description": "Deterministic linguistic data for SoundScript text-to-melody, prosody, and speech synthesis engines.",
+  "defaultLocale": "en",
+  "locales": [
+    { "code": "en", "name": "English", "path": "data/en" },
+    { "code": "es", "name": "Spanish", "path": "data/es" },
+    { "code": "fr", "name": "French", "path": "data/fr" }
+  ],
+  "source": {
+    "repository": "https://github.com/dharangutti/sound-script",
+    "note": "Initial data exported from SoundScript built-in tables (FunctionWords, StressDetector, WordPitchTable, PhonemeMapper, PhonemeSplitter, Syllabifier, PhonemeFrequencyTable)."
+  }
+}

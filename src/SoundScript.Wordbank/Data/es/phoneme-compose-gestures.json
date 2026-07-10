@@ -1,0 +1,40 @@
+{
+  "$schema": "../../schema/phoneme-compose.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Phoneme-to-musical-gesture mapping for SoundScript.Compose PhonemeMapper (V3.1 text-to-melody).",
+  "defaultGesture": {
+    "kind": "legato",
+    "pitch": "C",
+    "octave": 4,
+    "duration": "eighth"
+  },
+  "phonemes": [
+    { "phoneme": "p", "kind": "staccato", "pitch": "A", "octave": 3, "duration": "eighth" },
+    { "phoneme": "t", "kind": "staccato", "pitch": "B", "octave": 3, "duration": "eighth" },
+    { "phoneme": "k", "kind": "staccato", "pitch": "B", "octave": 3, "duration": "eighth" },
+    { "phoneme": "b", "kind": "staccato", "pitch": "A", "octave": 3, "duration": "eighth" },
+    { "phoneme": "d", "kind": "staccato", "pitch": "B", "octave": 3, "duration": "eighth" },
+    { "phoneme": "g", "kind": "staccato", "pitch": "B", "octave": 3, "duration": "eighth" },
+    { "phoneme": "ch", "kind": "staccato", "pitch": "B", "octave": 3, "duration": "eighth" },
+    { "phoneme": "m", "kind": "swell", "pitch": "C", "octave": 4, "duration": "quarter" },
+    { "phoneme": "n", "kind": "swell", "pitch": "C", "octave": 4, "duration": "quarter" },
+    { "phoneme": "ng", "kind": "swell", "pitch": "C", "octave": 4, "duration": "quarter" },
+    { "phoneme": "w", "kind": "swell", "pitch": "C", "octave": 4, "duration": "eighth" },
+    { "phoneme": "s", "kind": "fade", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "sh", "kind": "fade", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "th", "kind": "fade", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "f", "kind": "fade", "pitch": "C", "octave": 4, "duration": "eighth" },
+    { "phoneme": "v", "kind": "fade", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "z", "kind": "fade", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "h", "kind": "fade", "pitch": "C", "octave": 4, "duration": "eighth" },
+    { "phoneme": "r", "kind": "accent", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "l", "kind": "accent", "pitch": "C", "octave": 4, "duration": "eighth" },
+    { "phoneme": "j", "kind": "accent", "pitch": "D", "octave": 4, "duration": "eighth" },
+    { "phoneme": "aa", "kind": "legato", "pitch": "D", "octave": 4, "duration": "quarter" },
+    { "phoneme": "ee", "kind": "legato", "pitch": "E", "octave": 4, "duration": "quarter" },
+    { "phoneme": "oo", "kind": "legato", "pitch": "B", "octave": 3, "duration": "quarter" },
+    { "phoneme": "ai", "kind": "legato", "pitch": "E", "octave": 4, "duration": "quarter" },
+    { "phoneme": "au", "kind": "legato", "pitch": "C", "octave": 4, "duration": "quarter" }
+  ]
+}

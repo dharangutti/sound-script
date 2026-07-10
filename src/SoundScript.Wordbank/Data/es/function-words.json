@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schema/function-words.schema.json",
+  "version": 1,
+  "locale": "es",
+  "description": "Closed set of Spanish function words.",
+  "categories": {
+    "articles": ["el", "la", "los", "las", "un", "una", "unos", "unas"],
+    "conjunctions": ["y", "o", "pero", "ni", "sino", "aunque"],
+    "prepositions": [
+      "de", "en", "a", "con", "por", "para", "sin", "sobre", "entre", "hacia",
+      "desde", "hasta", "al", "del", "ante", "bajo", "tras"
+    ],
+    "pronouns": [
+      "yo", "tu", "tú", "el", "él", "ella", "nosotros", "vosotros", "ellos", "ellas",
+      "me", "te", "se", "le", "les", "lo", "la", "los", "las", "mí", "ti", "usted", "ustedes"
+    ],
+    "auxiliaries": [
+      "es", "son", "era", "fue", "ser", "estar", "está", "están", "estoy", "estás",
+      "he", "ha", "han", "hay", "había", "haber", "soy", "eres", "somos"
+    ]
+  }
+}

@@ -11,12 +11,11 @@ namespace SoundScript.Compose;
 /// </summary>
 public static class PhonemeMapper
 {
-    private static readonly LocalePack Locale = WordbankCatalog.Default;
-
-  /// <summary>Fallback for phonemes without an explicit row.</summary>
-    public static readonly MusicalGesture DefaultGesture = ToGesture(Locale.PhonemeCompose.DefaultGesture);
-
-    private static readonly Dictionary<string, MusicalGesture> Table = BuildTable();
+    private static LocalePack Locale => WordbankCatalog.Active;
+    /// <summary>Fallback for phonemes without an explicit row.</summary>
+    public static MusicalGesture DefaultGesture =>
+        ToGesture(WordbankCatalog.Active.PhonemeCompose.DefaultGesture);
+    private static Dictionary<string, MusicalGesture> Table => BuildTable();
 
     /// <summary>Maps a phoneme symbol to its gesture, falling back to <see cref="DefaultGesture"/>.</summary>
     public static MusicalGesture Map(string phoneme) =>

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schema/legal-onsets.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "English consonant clusters that may legally start a syllable (maximal-onset syllabification rule).",
+  "onsets": [
+    "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gl", "gr",
+    "kl", "kn", "kr", "kw", "ph", "pl", "pr", "qu", "sc", "sh", "sk",
+    "sl", "sm", "sn", "sp", "st", "sw", "th", "tr", "tw", "wh", "wr",
+    "sch", "scr", "shr", "sph", "spl", "spr", "squ", "str", "thr", "chr"
+  ]
+}

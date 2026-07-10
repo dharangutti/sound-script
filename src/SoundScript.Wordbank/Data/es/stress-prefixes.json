@@ -1,0 +1,7 @@
+{
+  "$schema": "../../schema/stress-prefixes.schema.json",
+  "version": 1,
+  "locale": "es",
+  "description": "Spanish prefixes that shift stress to the following syllable in two-syllable words.",
+  "prefixes": ["re", "de", "des", "in", "im", "con", "com", "dis", "ex", "en", "em", "sub", "trans"]
+}

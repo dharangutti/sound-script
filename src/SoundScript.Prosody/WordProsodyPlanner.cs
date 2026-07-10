@@ -37,7 +37,7 @@ public static class WordProsodyPlanner
 
     private static WordCategory ResolveCategory(string word)
     {
-        if (Wordbank.WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+        if (Wordbank.WordbankCatalog.Active.WordEntryMap.TryGetValue(word, out var entry)
             && entry.Category is not null)
         {
             return entry.Category.Equals("function", StringComparison.OrdinalIgnoreCase)

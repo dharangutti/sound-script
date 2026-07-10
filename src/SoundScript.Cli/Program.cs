@@ -10,6 +10,7 @@ using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Io;
 using SoundScript.Wave.Tts;
+using SoundScript.Wordbank;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -38,8 +39,8 @@ static int PrintUsage()
 {
     Console.Error.WriteLine("Usage: soundscript --version | -v");
     Console.Error.WriteLine("       soundscript run <script.ss> [output.mid]");
-    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
-    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
+    Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--locale en|es|fr] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
+    Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--locale en|es|fr] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [espeak|prosody]] [--offline-tts-dir <folder>]");
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
@@ -135,6 +136,20 @@ static int Compose(string[] args)
         else if (string.Equals(args[i], "--stereo", StringComparison.OrdinalIgnoreCase))
         {
             stereo = true;
+        }
+        else if (string.Equals(args[i], "--locale", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--locale requires a locale code: compose \"text\" --locale en");
+                return 1;
+            }
+
+            if (!WordbankCatalog.TrySetActive(args[++i], out var localeError))
+            {
+                Console.Error.WriteLine(localeError);
+                return 1;
+            }
         }
         else
         {
@@ -278,6 +293,20 @@ static int Prosody(string[] args)
         else if (string.Equals(args[i], "--stereo", StringComparison.OrdinalIgnoreCase))
         {
             stereo = true;
+        }
+        else if (string.Equals(args[i], "--locale", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--locale requires a locale code: prosody \"text\" --locale en");
+                return 1;
+            }
+
+            if (!WordbankCatalog.TrySetActive(args[++i], out var localeError))
+            {
+                Console.Error.WriteLine(localeError);
+                return 1;
+            }
         }
         else
         {
