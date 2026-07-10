@@ -261,18 +261,20 @@ clear error; use `wave` (or the Playground's automatic wave routing) instead.
 ## `vocal` — offline stem generation (V8)
 
 ```
-soundscript vocal generate "<text>" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]
-soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]
+soundscript vocal generate "<text>" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]
+soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]
 ```
 
 Generates slug-named WAV files for `speak` phrases without rendering the full
 mix. Uses the **SoundScript.Vocal** library (same engines as `wave --offline-tts`).
 
 ```bash
-dotnet run --project src/SoundScript.Cli -- vocal generate "Hello world" \
-  --out vocal-stems/hello-world.wav --engine prosody
+# Default: composite (corpus human audio → G2P timbre → espeak → prosody per word)
+dotnet run --project src/SoundScript.Cli -- vocal generate "Hello welcome" \
+  --out vocal-stems/hello-welcome.wav --locale en
+
 dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
-  --out-dir vocal-stems/ --engine prosody --skip-existing
+  --out-dir vocal-stems/ --engine composite --skip-existing
 ```
 
 | Flag / argument | Required | Purpose |
@@ -280,10 +282,14 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 | `generate` / `batch` | yes | Subcommand |
 | `"<text>"` or `script.ssw` | yes | Phrase or script containing `speak` nodes |
 | `--out` / `--out-dir` | yes | Output WAV path or folder |
-| `--engine` | no | `prosody` (built-in synthetic phoneme tones — no install, not human speech) or `espeak` (system espeak-ng); default picks espeak when installed |
+| `--wordbank-dir` | no | Load locale packs + corpus from a wordbank checkout (`WORDBANK_DIR` env also works) |
+| `--engine` | no | `composite` (default), `wordbank`, `espeak`, or `prosody` |
+| `--locale` | no | Wordbank locale for corpus lookup and G2P (default: active catalog locale) |
 | `--voice` | no | eSpeak voice id (default: `en`) |
 | `--seed` | no | Prosody seed (default: `7`) |
 | `--skip-existing` | no | Batch only — skip files that already exist |
+
+→ [phase8-wordbank-vocal.md](phase8-wordbank-vocal.md) for corpus audio, licenses, and examples.
 
 ## Exit codes
 
