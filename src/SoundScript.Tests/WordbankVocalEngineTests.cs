@@ -47,7 +47,7 @@ public class WordbankVocalEngineTests
     }
 
     [Fact]
-    public void CompositeEngine_MixesCorpusAndG2P()
+    public void CompositeEngine_MixesCorpusAndFallback()
     {
         using var dir = new TempOutputDirectory();
         var outPath = dir.FilePath("mixed.wav");
@@ -55,6 +55,29 @@ public class WordbankVocalEngineTests
 
         Assert.True(File.Exists(outPath));
         Assert.True(PeakPcm16(WavReader.ReadMono(outPath)) >= 15_000);
+    }
+
+    [Fact]
+    public void CompositeEngine_PhraseWithCorpusAndOovWords_IsAudibleThroughout()
+    {
+        using var dir = new TempOutputDirectory();
+        var outPath = dir.FilePath("phrase.wav");
+        new CompositeVocalEngine().Synthesize(
+            "Hello welcome to SoundScript",
+            outPath,
+            new VocalEngineOptions { Locale = "en" });
+
+        var samples = WavReader.ReadMono(outPath);
+        Assert.True(PeakPcm16(samples) >= 20_000);
+
+        // Later words must not be buried: tail quarter should stay audible.
+        var tailStart = (int)(samples.Length * 0.55);
+        var tail = samples.AsSpan(tailStart);
+        var tailPeak = 0.0;
+        foreach (var sample in tail)
+            tailPeak = Math.Max(tailPeak, Math.Abs(sample));
+
+        Assert.True(tailPeak >= 0.08, "Tail of phrase should remain audible after corpus words.");
     }
 
     [Fact]

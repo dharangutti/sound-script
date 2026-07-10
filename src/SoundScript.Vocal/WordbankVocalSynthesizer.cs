@@ -1,6 +1,5 @@
 using SoundScript.Wave.Io;
 using SoundScript.Wordbank;
-using SoundScript.Wordbank.Models;
 
 namespace SoundScript.Vocal;
 
@@ -25,15 +24,16 @@ internal static class WordbankVocalSynthesizer
             if (parts.Count > 0)
                 parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
 
-            parts.Add(SynthesizeWord(word, locale, options));
+            parts.Add(PrepareWordStem(SynthesizeWord(word, locale)));
         }
 
         return VocalStemProcessor.Concat(parts);
     }
 
-    internal static float[] SynthesizeWord(string word, string locale, VocalEngineOptions options)
+    /// <summary>Corpus human audio when available; otherwise G2P timbre (wordbank-only path).</summary>
+    internal static float[] SynthesizeWord(string word, string locale)
     {
-        if (TryLoadCorpusAudio(word, locale, out var audio))
+        if (TrySynthesizeCorpusWord(word, locale, out var audio))
             return audio;
 
         var g2p = TimbreVocalSynthesizer.SynthesizeWord(word);
@@ -44,7 +44,7 @@ internal static class WordbankVocalSynthesizer
             $"Wordbank engine could not synthesize '{word}' — no corpus audio and G2P produced silence.");
     }
 
-    private static bool TryLoadCorpusAudio(string word, string locale, out float[] audio)
+    internal static bool TrySynthesizeCorpusWord(string word, string locale, out float[] audio)
     {
         audio = [];
 
@@ -65,6 +65,9 @@ internal static class WordbankVocalSynthesizer
 
         return audio.Length > 0 && VocalStemNormalizer.Peak(audio) > 1e-6;
     }
+
+    internal static float[] PrepareWordStem(float[] samples) =>
+        VocalStemNormalizer.Normalize(samples, outputGain: 1.0);
 
     internal static string ResolveLocale(VocalEngineOptions options) =>
         !string.IsNullOrWhiteSpace(options.Locale)
