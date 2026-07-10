@@ -1,4 +1,4 @@
-# SoundScript Examples (V8)
+# SoundScript Examples (V9)
 
 Runnable example scripts for every major feature.
 
@@ -52,7 +52,7 @@ dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
 | [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech-only `speak` song |
 | [wave-vocal-stem.ssw](../examples/wave-vocal-stem.ssw) | **V8:** `speak sample=` with [vocal-stems/hello-world.wav](../examples/vocal-stems/hello-world.wav) |
 | [jingle-bells-vocal.ssw](../examples/jingle-bells-vocal.ssw) | **V8:** Jingle Bells + offline vocal stems (`vocal batch` / `wave --offline-tts`) |
-| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | **Phase 8:** Jingle Bells rhythm with WordBank-only stems (corpus + G2P, no eSpeak) |
+| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | **V9:** Jingle Bells rhythm with WordBank-only stems (corpus + G2P, no eSpeak) |
 
 → [wave-grammar.md](wave-grammar.md) · [whats-new-v8.md](whats-new-v8.md) · [cli.md](cli.md#wave--script-to-wav-v8)
 
@@ -67,7 +67,7 @@ The Playground also offers matching presets under **Wave (.ssw)**.
 | [full-song-wave.ss](../examples/full-song-wave.ss) | Four-part song (standard `.ss` via wave backend) | `... wave examples/full-song-wave.ss jingle.wav` |
 | [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech + vocal song without MIDI | `... wave examples/speech-only-wave.ss speech.wav` |
 | [jingle-bells-vocal.ssw](../examples/jingle-bells-vocal.ssw) | Jingle Bells + offline vocal stems | see [V8 vocal CLI](#v8-offline-vocal-stems-cli) below |
-| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | Jingle Bells + WordBank-only vocal stems | see [WordBank Jingle Bells](#wordbank-jingle-bells-phase-8) below |
+| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | Jingle Bells + WordBank-only vocal stems | see [WordBank Jingle Bells](#wordbank-jingle-bells-v9) below |
 
 Add `--stereo` for stereo WAV output:
 
@@ -113,9 +113,14 @@ used, synthetic `speak` phoneme tones are suppressed so only the stem overlays p
 
 → [cli.md](cli.md#vocal--offline-stem-generation-v8) · [whats-new-v8.md](whats-new-v8.md)
 
-### WordBank Jingle Bells (Phase 8)
+### WordBank Jingle Bells (V9)
 
 Pure WordBank vocalization — corpus human audio where harvested, G2P timbre elsewhere. No eSpeak.
+The embedded corpus (v0.6.2) now covers the **full Jingle Bells word set** (66 English
+pronunciations), so every word in this example resolves from corpus audio.
+
+Also available as a **Playground preset** — *Jingle Bells + WordBank vocal (V9)* under the
+main **Example** dropdown or the **Wave (.ssw)** pane.
 
 ```bash
 # Stems (wordbank engine only)
@@ -129,7 +134,7 @@ dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-wordbank.
 
 Pre-rendered: [jingle-bells-wordbank.wav](../examples/jingle-bells-wordbank.wav) · [jingle-bells-wordbank.md](../examples/jingle-bells-wordbank.md)
 
-→ [phase8-wordbank-vocal.md](phase8-wordbank-vocal.md)
+→ [whats-new-v9.md](whats-new-v9.md) · [phase8-wordbank-vocal.md](phase8-wordbank-vocal.md)
 
 ## Text-to-Melody Examples (V3.1)
 

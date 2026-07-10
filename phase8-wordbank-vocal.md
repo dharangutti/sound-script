@@ -52,10 +52,13 @@ to, SoundScript → eSpeak when installed (intelligible speech), else G2P timbre
 
 | Lemma | License | Source |
 |-------|---------|--------|
-| 32 pilot lemmas | CC0 / CC-BY | Wikimedia Commons (`scripts/harvest_commons_en.py`) |
-| CI coverage | 26/50 en | See `fixtures/ci-50.json` overlap |
+| 66 pilot lemmas (v0.6.2) | CC0 / CC-BY | Wikimedia Commons + Lingua Libre (`scripts/harvest_commons_en.py`) |
+| CI coverage | 27/50 en | See `fixtures/ci-50.json` overlap |
 
-Harvest pipeline (future): Wiktionary → Wikimedia Commons / Lingua Libre → `corpus/vYYYY.MM/audio/{locale}/`.
+v0.6.2 adds the full **Jingle Bells** word set (chorus + verse 1) — see the
+[jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) example (V9), now available as a Playground preset.
+
+Harvest pipeline: Wiktionary / Lingua Libre → Wikimedia Commons → `corpus/vYYYY.MM/audio/{locale}/`.
 
 ## DSP transforms
 
