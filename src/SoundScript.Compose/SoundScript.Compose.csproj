@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
+    <ProjectReference Include="..\SoundScript.Wordbank\SoundScript.Wordbank.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

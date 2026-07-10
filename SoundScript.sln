@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Wave", "src\Sou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Vocal", "src\SoundScript.Vocal\SoundScript.Vocal.csproj", "{08A878EC-C4D4-4CAD-929B-6471CC907439}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Wordbank", "src\SoundScript.Wordbank\SoundScript.Wordbank.csproj", "{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +199,18 @@ Global
 		{08A878EC-C4D4-4CAD-929B-6471CC907439}.Release|x64.Build.0 = Release|Any CPU
 		{08A878EC-C4D4-4CAD-929B-6471CC907439}.Release|x86.ActiveCfg = Release|Any CPU
 		{08A878EC-C4D4-4CAD-929B-6471CC907439}.Release|x86.Build.0 = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|x64.Build.0 = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|x64.ActiveCfg = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|x64.Build.0 = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -215,5 +229,6 @@ Global
 		{0561AC1C-94CF-485A-9CF5-158FE30C32C1} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 		{B6C58B0B-05B7-40E9-B910-CE14B6DF7A34} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 		{08A878EC-C4D4-4CAD-929B-6471CC907439} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 	EndGlobalSection
 EndGlobal

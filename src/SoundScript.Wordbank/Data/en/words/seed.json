@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schema/word-entries.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Optional per-word overrides for syllabification, stress, or category. Rule-based engines use these when present; otherwise heuristics apply.",
+  "entries": [
+    {
+      "word": "twinkle",
+      "syllables": ["twin", "kle"],
+      "stress": ["primary", "unstressed"]
+    },
+    {
+      "word": "little",
+      "syllables": ["lit", "tle"],
+      "stress": ["primary", "unstressed"]
+    },
+    {
+      "word": "return",
+      "syllables": ["re", "turn"],
+      "stress": ["unstressed", "primary"]
+    },
+    {
+      "word": "computer",
+      "syllables": ["com", "pu", "ter"],
+      "stress": ["primary", "unstressed", "secondary"]
+    }
+  ]
+}

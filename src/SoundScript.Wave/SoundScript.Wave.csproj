@@ -15,6 +15,7 @@
       SoundScript.Midi, SoundScript.Timbre, or the parser.
     -->
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript.Wordbank\SoundScript.Wordbank.csproj" />
   </ItemGroup>
 
   <ItemGroup>

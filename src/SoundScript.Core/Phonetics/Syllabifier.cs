@@ -1,5 +1,7 @@
 namespace SoundScript.Core.Phonetics;
 
+using SoundScript.Wordbank;
+
 /// <summary>
 /// Deterministic rule-based English syllabifier.
 ///
@@ -16,18 +18,16 @@ namespace SoundScript.Core.Phonetics;
 /// </summary>
 public static class Syllabifier
 {
-    private static readonly HashSet<string> LegalOnsets = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gl", "gr",
-        "kl", "kn", "kr", "kw", "ph", "pl", "pr", "qu", "sc", "sh", "sk",
-        "sl", "sm", "sn", "sp", "st", "sw", "th", "tr", "tw", "wh", "wr",
-        "sch", "scr", "shr", "sph", "spl", "spr", "squ", "str", "thr", "chr"
-    };
+    private static readonly HashSet<string> LegalOnsets = WordbankCatalog.Default.LegalOnsetSet;
 
     public static IReadOnlyList<string> Syllabify(string word)
     {
         if (string.IsNullOrWhiteSpace(word))
             return [];
+
+        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+            && entry.Syllables is { Length: > 0 } syllables)
+            return ApplyWordEntrySyllables(word, syllables);
 
         var letters = word.Where(char.IsLetter).ToArray();
         if (letters.Length == 0)
@@ -44,6 +44,10 @@ public static class Syllabifier
 
     public static int CountSyllables(string word)
     {
+        if (WordbankCatalog.Default.WordEntryMap.TryGetValue(word, out var entry)
+            && entry.Syllables is { Length: > 0 } syllables)
+            return syllables.Length;
+
         var letters = new string(word.Where(char.IsLetter).ToArray());
         return letters.Length == 0 ? 1 : Math.Max(1, FindNuclei(letters).Count);
     }
@@ -174,5 +178,27 @@ public static class Syllabifier
         }
 
         return false;
+    }
+
+    private static IReadOnlyList<string> ApplyWordEntrySyllables(string word, string[] syllables)
+    {
+        var letters = word.Where(char.IsLetter).ToArray();
+        if (letters.Length == 0)
+            return syllables;
+
+        var text = new string(letters);
+        var expected = string.Concat(syllables);
+        if (!string.Equals(expected, text, StringComparison.OrdinalIgnoreCase))
+            return syllables;
+
+        var boundaries = new List<int>();
+        var offset = 0;
+        for (var i = 0; i < syllables.Length - 1; i++)
+        {
+            offset += syllables[i].Length;
+            boundaries.Add(offset);
+        }
+
+        return Split(word, text, boundaries);
     }
 }

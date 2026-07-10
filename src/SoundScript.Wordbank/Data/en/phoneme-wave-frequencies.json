@@ -1,0 +1,40 @@
+{
+  "$schema": "../../schema/phoneme-wave.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Phoneme frequency bands for SoundScript.Wave ProsodyToneGenerator (V7 synthetic speech).",
+  "default": {
+    "minHz": 200.0,
+    "maxHz": 240.0,
+    "durationBeats": 0.25,
+    "class": "nasal"
+  },
+  "phonemes": [
+    { "phoneme": "aa", "minHz": 200.0, "maxHz": 280.0, "durationBeats": 0.5, "class": "vowel" },
+    { "phoneme": "ee", "minHz": 240.0, "maxHz": 330.0, "durationBeats": 0.5, "class": "vowel" },
+    { "phoneme": "oo", "minHz": 160.0, "maxHz": 220.0, "durationBeats": 0.5, "class": "vowel" },
+    { "phoneme": "ai", "minHz": 220.0, "maxHz": 310.0, "durationBeats": 0.5, "class": "vowel" },
+    { "phoneme": "au", "minHz": 180.0, "maxHz": 250.0, "durationBeats": 0.5, "class": "vowel" },
+    { "phoneme": "m", "minHz": 170.0, "maxHz": 210.0, "durationBeats": 0.375, "class": "nasal" },
+    { "phoneme": "n", "minHz": 180.0, "maxHz": 220.0, "durationBeats": 0.375, "class": "nasal" },
+    { "phoneme": "ng", "minHz": 170.0, "maxHz": 215.0, "durationBeats": 0.375, "class": "nasal" },
+    { "phoneme": "w", "minHz": 175.0, "maxHz": 225.0, "durationBeats": 0.25, "class": "nasal" },
+    { "phoneme": "p", "minHz": 1200.0, "maxHz": 1500.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "b", "minHz": 1300.0, "maxHz": 1600.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "t", "minHz": 1500.0, "maxHz": 1800.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "d", "minHz": 1400.0, "maxHz": 1700.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "k", "minHz": 1700.0, "maxHz": 2000.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "g", "minHz": 1600.0, "maxHz": 1900.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "ch", "minHz": 1800.0, "maxHz": 2000.0, "durationBeats": 0.125, "class": "plosive" },
+    { "phoneme": "s", "minHz": 4500.0, "maxHz": 6000.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "sh", "minHz": 3500.0, "maxHz": 5000.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "th", "minHz": 3800.0, "maxHz": 5200.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "f", "minHz": 3000.0, "maxHz": 4200.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "v", "minHz": 3000.0, "maxHz": 4200.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "z", "minHz": 4500.0, "maxHz": 6000.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "h", "minHz": 3200.0, "maxHz": 4500.0, "durationBeats": 0.25, "class": "fricative" },
+    { "phoneme": "r", "minHz": 200.0, "maxHz": 260.0, "durationBeats": 0.25, "class": "liquid" },
+    { "phoneme": "l", "minHz": 195.0, "maxHz": 255.0, "durationBeats": 0.25, "class": "liquid" },
+    { "phoneme": "j", "minHz": 210.0, "maxHz": 270.0, "durationBeats": 0.25, "class": "liquid" }
+  ]
+}

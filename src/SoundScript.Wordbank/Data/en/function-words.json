@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schema/function-words.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "Closed set of English function words. Any word not listed is treated as a content word.",
+  "categories": {
+    "articles": ["a", "an", "the"],
+    "conjunctions": ["and", "or", "but", "nor", "so", "yet"],
+    "prepositions": [
+      "in", "on", "at", "to", "of", "for", "with", "by", "from", "as",
+      "into", "onto", "over", "under", "about", "up", "down", "off"
+    ],
+    "pronouns": [
+      "i", "you", "he", "she", "it", "we", "they", "me", "him", "her",
+      "us", "them", "this", "that", "these", "those"
+    ],
+    "auxiliaries": [
+      "is", "are", "was", "were", "be", "been", "being", "am",
+      "do", "does", "did", "has", "have", "had",
+      "will", "would", "can", "could", "shall", "should", "may", "might", "must"
+    ]
+  }
+}
