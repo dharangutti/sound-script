@@ -170,13 +170,22 @@ offsets, legal syllable onsets, locale syllabification rules, timbre profiles,
 and optional per-word overrides) load at runtime from embedded JSON sourced from
 the companion
 [soundscript-wordbank](https://github.com/dharangutti/soundscript-wordbank)
-repository (English, Spanish, and French locale packs in v0.3.0). The wordbank
+repository (English, Spanish, and French locale packs in v0.4.0). The wordbank
 is vendored as a git submodule at `wordbank/` and copied into
 `src/SoundScript.Wordbank/Data/` before build. Sync updated data with:
 
 ```bash
 git submodule update --init --recursive   # first clone
 ./scripts/sync-wordbank.sh
+./scripts/bump-wordbank-submodule.sh      # update submodule + sync
+```
+
+Load an external wordbank checkout at runtime (overrides embedded packs):
+
+```bash
+export WORDBANK_DIR=./wordbank
+dotnet run --project src/SoundScript.Cli -- prosody "Hola mundo" out.mid --locale es
+# or pass --wordbank-dir ./wordbank on compose / prosody
 ```
 
 Select a locale for `compose` or `prosody`:

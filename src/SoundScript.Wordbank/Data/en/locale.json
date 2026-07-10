@@ -2,7 +2,7 @@
   "$schema": "../../schema/locale.schema.json",
   "code": "en",
   "name": "English",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "files": {
     "functionWords": "function-words.json",
     "stressPrefixes": "stress-prefixes.json",

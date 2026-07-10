@@ -1,7 +1,7 @@
 {
   "$schema": "./schema/manifest.schema.json",
   "name": "soundscript-wordbank",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "schemaVersion": 1,
   "description": "Deterministic linguistic data for SoundScript text-to-melody, prosody, and speech synthesis engines.",
   "defaultLocale": "en",

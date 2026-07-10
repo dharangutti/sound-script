@@ -116,7 +116,7 @@ public sealed class LocalePack
         }
     }
 
-    private static T DeserializeFile<T>(string path)
+    internal static T DeserializeFile<T>(string path)
     {
         var json = File.ReadAllText(path);
         return Deserialize<T>(json);
