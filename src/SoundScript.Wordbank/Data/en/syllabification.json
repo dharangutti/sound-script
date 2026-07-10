@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema/syllabification.schema.json",
+  "version": 1,
+  "locale": "en",
+  "description": "English syllabification heuristics: maximal onset, silent-e, consonant-le.",
+  "vowelLetters": ["a", "e", "i", "o", "u"],
+  "accentedVowels": [],
+  "treatYAsVowel": true,
+  "silentTerminalE": true,
+  "consonantLeNucleus": true,
+  "maxOnsetClusterLength": 3,
+  "nucleusDigraphs": []
+}

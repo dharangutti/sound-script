@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schema/syllabification.schema.json",
+  "version": 1,
+  "locale": "es",
+  "description": "Spanish syllabification: accented vowels as nuclei, no silent-e rule.",
+  "vowelLetters": ["a", "e", "i", "o", "u"],
+  "accentedVowels": ["á", "é", "í", "ó", "ú", "ü"],
+  "treatYAsVowel": false,
+  "silentTerminalE": false,
+  "consonantLeNucleus": false,
+  "maxOnsetClusterLength": 3,
+  "nucleusDigraphs": []
+}

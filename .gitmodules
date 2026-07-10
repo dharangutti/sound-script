@@ -1,0 +1,4 @@
+[submodule "wordbank"]
+	path = wordbank
+	url = https://github.com/dharangutti/soundscript-wordbank.git
+	branch = cursor/phase4-timbre-submodule-syllabification-6d6d

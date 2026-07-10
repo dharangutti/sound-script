@@ -15,7 +15,9 @@ public sealed class LocaleFiles
     public string WordProsody { get; init; } = "";
     public string GraphemeRules { get; init; } = "";
     public string LegalOnsets { get; init; } = "";
+    public string Syllabification { get; init; } = "";
     public string PhonemeCompose { get; init; } = "";
     public string PhonemeWave { get; init; } = "";
+    public string PhonemeTimbre { get; init; } = "";
     public string WordEntries { get; init; } = "";
 }

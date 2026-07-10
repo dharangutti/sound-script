@@ -1,23 +1,24 @@
 namespace SoundScript.Core.Phonetics;
 
 using SoundScript.Wordbank;
+using SoundScript.Wordbank.Models;
 
 /// <summary>
-/// Deterministic rule-based English syllabifier.
+/// Deterministic rule-based syllabifier driven by the active wordbank locale pack.
 ///
 /// The engine applies three phonetic principles, in order:
 ///  1. Nucleus detection — every syllable has exactly one vowel nucleus
-///     (vowel group, with silent-e and consonant-le handling).
+///     (vowel letters, accented vowels, and locale-specific nucleus digraphs).
 ///  2. Maximal onset — intervocalic consonant clusters attach to the following
-///     syllable as far as English phonotactics allow (legal onset table).
+///     syllable as far as locale phonotactics allow (legal onset table).
 ///  3. Sonority sequencing — anything that cannot legally start a syllable
 ///     stays in the coda of the previous one.
 ///
-/// No dictionaries, no randomness: the same word always yields the same
-/// syllables on every platform, matching SoundScript's determinism guarantee.
+/// Optional per-word dictionary overrides take precedence. No randomness.
 /// </summary>
 public static class Syllabifier
 {
+    private static SyllabificationDocument Rules => WordbankCatalog.Active.Syllabification;
     private static HashSet<string> LegalOnsets => WordbankCatalog.Active.LegalOnsetSet;
 
     public static IReadOnlyList<string> Syllabify(string word)
@@ -55,33 +56,45 @@ public static class Syllabifier
     private static List<(int Start, int End)> FindNuclei(string text)
     {
         var lower = text.ToLowerInvariant();
+        var rules = Rules;
         var nuclei = new List<(int Start, int End)>();
         var index = 0;
 
         while (index < lower.Length)
         {
-            if (!IsVowel(lower, index))
+            var digraph = MatchNucleusDigraph(lower, index, rules.NucleusDigraphs);
+            if (digraph is not null)
+            {
+                nuclei.Add((index, index + digraph.Length - 1));
+                index += digraph.Length;
+                continue;
+            }
+
+            if (!IsVowel(lower, index, rules))
             {
                 index++;
                 continue;
             }
 
             var start = index;
-            while (index < lower.Length && IsVowel(lower, index))
+            while (index < lower.Length && IsVowel(lower, index, rules))
                 index++;
 
             nuclei.Add((start, index - 1));
         }
 
-        if (nuclei.Count > 1)
+        if (rules.SilentTerminalE && nuclei.Count > 1)
         {
             var last = nuclei[^1];
             if (last.Start == last.End
                 && last.Start == lower.Length - 1
                 && lower[^1] == 'e'
-                && !IsVowel(lower, last.Start - 1))
+                && !IsVowel(lower, last.Start - 1, rules))
             {
-                if (lower[last.Start - 1] == 'l' && last.Start - 2 >= 0 && !IsVowel(lower, last.Start - 2))
+                if (rules.ConsonantLeNucleus
+                    && lower[last.Start - 1] == 'l'
+                    && last.Start - 2 >= 0
+                    && !IsVowel(lower, last.Start - 2, rules))
                     nuclei[^1] = (last.Start - 1, last.End);
                 else
                     nuclei.RemoveAt(nuclei.Count - 1);
@@ -117,10 +130,11 @@ public static class Syllabifier
 
     private static int MaximalOnsetLength(string cluster)
     {
+        var maxLength = Math.Max(1, Rules.MaxOnsetClusterLength);
         if (cluster.Length == 1)
             return 1;
 
-        for (var length = Math.Min(3, cluster.Length); length >= 2; length--)
+        for (var length = Math.Min(maxLength, cluster.Length); length >= 2; length--)
         {
             var candidate = cluster[^length..];
             if (length < cluster.Length && LegalOnsets.Contains(candidate))
@@ -162,18 +176,43 @@ public static class Syllabifier
         return syllables;
     }
 
-    private static bool IsVowel(string lower, int index)
+    private static string? MatchNucleusDigraph(string lower, int index, string[] digraphs)
+    {
+        string? best = null;
+        foreach (var digraph in digraphs.OrderByDescending(d => d.Length))
+        {
+            if (index + digraph.Length > lower.Length)
+                continue;
+
+            if (string.Compare(lower, index, digraph, 0, digraph.Length, StringComparison.Ordinal) == 0
+                && digraph.Length > (best?.Length ?? 0))
+                best = digraph;
+        }
+
+        return best;
+    }
+
+    private static bool IsVowel(string lower, int index, SyllabificationDocument rules)
     {
         if (index < 0 || index >= lower.Length)
             return false;
 
-        var c = lower[index];
-        if (c is 'a' or 'e' or 'i' or 'o' or 'u')
-            return true;
-
-        if (c == 'y')
+        var ch = lower[index].ToString();
+        foreach (var vowel in rules.VowelLetters)
         {
-            var prevIsVowel = index > 0 && lower[index - 1] is 'a' or 'e' or 'i' or 'o' or 'u';
+            if (string.Equals(ch, vowel, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        foreach (var vowel in rules.AccentedVowels)
+        {
+            if (string.Equals(ch, vowel, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        if (rules.TreatYAsVowel && lower[index] == 'y')
+        {
+            var prevIsVowel = index > 0 && IsVowel(lower, index - 1, rules);
             return index > 0 && !prevIsVowel;
         }
 

@@ -2,12 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SOURCE="${WORDBANK_SOURCE:-$ROOT/../soundscript-wordbank}"
+SOURCE="${WORDBANK_SOURCE:-$ROOT/wordbank}"
 TARGET="$ROOT/src/SoundScript.Wordbank/Data"
 
 if [[ ! -d "$SOURCE/data" ]]; then
   echo "Wordbank source not found at $SOURCE" >&2
-  echo "Set WORDBANK_SOURCE to the soundscript-wordbank checkout." >&2
+  echo "Set WORDBANK_SOURCE to the soundscript-wordbank checkout, or add the wordbank git submodule." >&2
   exit 1
 fi
 
