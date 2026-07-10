@@ -116,6 +116,7 @@ MidiGenerator → output.mid
 | [examples/speech-only-wave.ss](examples/speech-only-wave.ss) | Speech + vocal song without a MIDI step |
 | [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw) | V8: `speak sample=` vocal stem mixing |
 | [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) | V8: Jingle Bells + offline vocal stems |
+| [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) | Phase 8: Jingle Bells rhythm with WordBank-only vocal stems |
 
 → [docs/examples.md](docs/examples.md)
 

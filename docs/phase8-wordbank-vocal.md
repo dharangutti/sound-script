@@ -65,7 +65,7 @@ Lemma metadata supports `trimStartMs`, `trimEndMs`, `gain`, and `pitchSemitones`
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- wave examples/phase8-wordbank-vocal.ssw out.wav \
-  --offline-tts composite --offline-tts-dir examples/vocal-stems/
+  --offline-tts composite --offline-tts-dir vocal-stems
 ```
 
-See [examples/phase8-wordbank-vocal.ssw](../examples/phase8-wordbank-vocal.ssw).
+See [examples/phase8-wordbank-vocal.ssw](../examples/phase8-wordbank-vocal.ssw) and the rhythmic [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) demo.

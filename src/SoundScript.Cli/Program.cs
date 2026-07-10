@@ -538,17 +538,21 @@ static int Wave(string[] args)
         IReadOnlyList<SampleOverlayRequest>? additionalOverlays = null;
 
         if (TryGetFlagValue(args, "--tts-dir", out var ttsDir))
-            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, ttsDir);
+        {
+            var resolvedTtsDir = WavePathResolver.Resolve(scriptDirectory, ttsDir);
+            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, resolvedTtsDir);
+        }
 
         if (TryGetOfflineTts(args, scriptPath, scriptDirectory, out var offlineTtsDir, out var offlineEngineName))
         {
+            var resolvedOfflineTtsDir = WavePathResolver.Resolve(scriptDirectory, offlineTtsDir);
             var engine = string.IsNullOrWhiteSpace(offlineEngineName)
                 ? VocalEngineFactory.CreateDefault()
                 : VocalEngineFactory.Create(offlineEngineName);
             var vocalOptions = BuildVocalOptions(args);
-            VocalBatchExporter.ExportFromScript(scriptPath, offlineTtsDir, engine, vocalOptions);
-            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, offlineTtsDir);
-            Console.Error.WriteLine($"offline-tts: generated vocal stems in {offlineTtsDir} via {engine.Name}.");
+            VocalBatchExporter.ExportFromScript(scriptPath, resolvedOfflineTtsDir, engine, vocalOptions);
+            additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, resolvedOfflineTtsDir);
+            Console.Error.WriteLine($"offline-tts: generated vocal stems in {resolvedOfflineTtsDir} via {engine.Name}.");
         }
 
         if (TryGetFlagValue(args, "--vocal", out var vocalPath))
@@ -764,7 +768,7 @@ static bool TryGetOfflineTts(
 
         ttsDirectory = TryGetFlagValue(args, "--offline-tts-dir", out var dir) && !string.IsNullOrWhiteSpace(dir)
             ? dir
-            : Path.Combine(scriptDirectory, "vocal-stems");
+            : "vocal-stems";
 
         return true;
     }

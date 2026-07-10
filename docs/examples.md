@@ -52,6 +52,7 @@ dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
 | [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech-only `speak` song |
 | [wave-vocal-stem.ssw](../examples/wave-vocal-stem.ssw) | **V8:** `speak sample=` with [vocal-stems/hello-world.wav](../examples/vocal-stems/hello-world.wav) |
 | [jingle-bells-vocal.ssw](../examples/jingle-bells-vocal.ssw) | **V8:** Jingle Bells + offline vocal stems (`vocal batch` / `wave --offline-tts`) |
+| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | **Phase 8:** Jingle Bells rhythm with WordBank-only stems (corpus + G2P, no eSpeak) |
 
 → [wave-grammar.md](wave-grammar.md) · [whats-new-v8.md](whats-new-v8.md) · [cli.md](cli.md#wave--script-to-wav-v8)
 
@@ -66,6 +67,7 @@ The Playground also offers matching presets under **Wave (.ssw)**.
 | [full-song-wave.ss](../examples/full-song-wave.ss) | Four-part song (standard `.ss` via wave backend) | `... wave examples/full-song-wave.ss jingle.wav` |
 | [speech-only-wave.ss](../examples/speech-only-wave.ss) | Speech + vocal song without MIDI | `... wave examples/speech-only-wave.ss speech.wav` |
 | [jingle-bells-vocal.ssw](../examples/jingle-bells-vocal.ssw) | Jingle Bells + offline vocal stems | see [V8 vocal CLI](#v8-offline-vocal-stems-cli) below |
+| [jingle-bells-wordbank.ssw](../examples/jingle-bells-wordbank.ssw) | Jingle Bells + WordBank-only vocal stems | see [WordBank Jingle Bells](#wordbank-jingle-bells-phase-8) below |
 
 Add `--stereo` for stereo WAV output:
 
@@ -86,7 +88,7 @@ dotnet run --project src/SoundScript.Cli -- vocal batch examples/jingle-bells-vo
 
 # Step 2 — render the mix using those stems
 dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-vocal.ssw jingle-bells.wav \
-  --tts-dir examples/vocal-stems
+  --tts-dir vocal-stems
 
 # One step — generate stems + render (default folder: <script-dir>/vocal-stems)
 dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-vocal.ssw jingle-bells.wav \
@@ -110,6 +112,24 @@ Stems are peak-normalized for audibility. When `--tts-dir` or `--offline-tts` is
 used, synthetic `speak` phoneme tones are suppressed so only the stem overlays play.
 
 → [cli.md](cli.md#vocal--offline-stem-generation-v8) · [whats-new-v8.md](whats-new-v8.md)
+
+### WordBank Jingle Bells (Phase 8)
+
+Pure WordBank vocalization — corpus human audio where harvested, G2P timbre elsewhere. No eSpeak.
+
+```bash
+# Stems (wordbank engine only)
+dotnet run --project src/SoundScript.Cli -- vocal batch examples/jingle-bells-wordbank.ssw \
+  --out-dir examples/vocal-stems/wordbank --engine wordbank --locale en
+
+# Full mix (instrumental + WordBank stems)
+dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-wordbank.ssw \
+  examples/jingle-bells-wordbank.wav --tts-dir vocal-stems/wordbank --locale en
+```
+
+Pre-rendered: [jingle-bells-wordbank.wav](../examples/jingle-bells-wordbank.wav) · [jingle-bells-wordbank.md](../examples/jingle-bells-wordbank.md)
+
+→ [phase8-wordbank-vocal.md](phase8-wordbank-vocal.md)
 
 ## Text-to-Melody Examples (V3.1)
 
