@@ -118,6 +118,16 @@ public static class CorpusCatalog
         }
     }
 
+    /// <summary>Returns all known lemma keys for a locale (sorted), or empty when unknown.</summary>
+    public static IReadOnlyList<string> GetLemmaKeys(string localeCode)
+    {
+        EnsureLoaded();
+        if (_lemmaIndex is null || !_lemmaIndex.TryGetValue(localeCode, out var localeMap))
+            return [];
+
+        return localeMap.Keys.OrderBy(key => key, StringComparer.Ordinal).ToArray();
+    }
+
     /// <summary>Looks up a lemma entry for the given locale (case-insensitive).</summary>
     public static bool TryGetLemma(string localeCode, string lemma, out CorpusLemmaEntry entry)
     {

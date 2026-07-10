@@ -48,6 +48,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
     Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
     Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
+    Console.Error.WriteLine("       soundscript wordbank normalize <lemma>|--all [--locale <code>] [--wordbank-dir <path>]");
     return 1;
 }
 
@@ -750,6 +751,7 @@ static int Wordbank(string[] args)
     return args[1].ToLowerInvariant() switch
     {
         "ensure" => WordbankEnsure(args),
+        "normalize" => WordbankNormalize(args),
         _ => PrintWordbankUsage(),
     };
 }
@@ -757,6 +759,7 @@ static int Wordbank(string[] args)
 static int PrintWordbankUsage()
 {
     Console.Error.WriteLine("Usage: soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
+    Console.Error.WriteLine("       soundscript wordbank normalize <lemma>|--all [--locale <code>] [--wordbank-dir <path>]");
     return 1;
 }
 
@@ -813,6 +816,79 @@ static int WordbankEnsure(string[] args)
                 Console.Error.WriteLine(result.Reason);
                 return 1;
         }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static int WordbankNormalize(string[] args)
+{
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
+        return 1;
+    }
+
+    EnsureEmbeddedCorpus();
+
+    var normalizeAll = args.Contains("--all", StringComparer.OrdinalIgnoreCase);
+    var locale = TryGetFlagValue(args, "--locale", out var loc) && !string.IsNullOrWhiteSpace(loc)
+        ? loc
+        : WordbankCatalog.ActiveLocaleCode;
+
+    string? lemma = null;
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (args[i].StartsWith("--", StringComparison.Ordinal))
+        {
+            if (IsWordbankValueFlag(args[i]) && i + 1 < args.Length)
+                i++;
+            continue;
+        }
+
+        lemma ??= args[i];
+    }
+
+    if (!normalizeAll && string.IsNullOrWhiteSpace(lemma))
+    {
+        Console.Error.WriteLine("Missing lemma (or pass --all).");
+        return PrintWordbankUsage();
+    }
+
+    try
+    {
+        var normalizer = new WordbankNormalizer();
+
+        if (normalizeAll)
+        {
+            var lemmas = CorpusCatalog.GetLemmaKeys(locale);
+            var normalized = 0;
+            var missing = 0;
+            foreach (var key in lemmas)
+            {
+                var outcome = normalizer.Normalize(key, locale);
+                if (outcome.Success)
+                    normalized++;
+                else
+                    missing++;
+            }
+
+            Console.WriteLine($"Normalized {normalized} lemma(s) for '{locale}' ({missing} missing source audio).");
+            return 0;
+        }
+
+        var result = normalizer.Normalize(lemma!, locale);
+        if (result.Success)
+        {
+            Console.WriteLine($"Normalized '{lemma}' ({locale}) → {result.Path}");
+            return 0;
+        }
+
+        Console.Error.WriteLine(result.Reason);
+        return 1;
     }
     catch (Exception ex)
     {
