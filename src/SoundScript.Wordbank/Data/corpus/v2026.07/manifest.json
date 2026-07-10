@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/corpus-manifest.schema.json",
   "id": "2026.07",
-  "version": 0,
+  "version": 1,
   "status": "pilot",
   "description": "July 2026 pilot corpus — curated 1k English lemmas before harvest automation.",
   "released": "2026-07-10",

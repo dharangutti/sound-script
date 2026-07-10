@@ -2,10 +2,37 @@
   "$schema": "../../../schema/lemmas.schema.json",
   "corpusId": "2026.07",
   "locale": "en",
-  "version": 2,
+  "version": 3,
   "status": "pilot",
   "description": "Harvested CC0/CC-BY English pronunciations from Wikimedia Commons.",
   "entries": [
+    {
+      "lemma": "a",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-a.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/a.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "all",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-all.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/all.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "and",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-and.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/and.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
     {
       "lemma": "another",
       "license": "CC-BY-4.0",
@@ -43,6 +70,33 @@
       "gain": 1.0
     },
     {
+      "lemma": "bells",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-bells.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/bells.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "bobtail",
+      "license": "CC0-1.0",
+      "source": "Pilot clip (v0.7.0) \u2014 no standalone CC-BY/CC0 Commons file found for lemma 'bobtail'",
+      "attribution": "SoundScript project (pilot placeholder pending harvest)",
+      "audio": "audio/en/bobtail.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "bright",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-bright.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/bright.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "child",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-child.ogg",
@@ -57,6 +111,24 @@
       "source": "Wikimedia Commons \u2014 En-uk-computer.ogg",
       "attribution": "Association Shtooka, Judith Franck",
       "audio": "audio/en/computer.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "dashing",
+      "license": "CC0-1.0",
+      "source": "Pilot clip (v0.7.0) \u2014 no standalone CC-BY/CC0 Commons file found for lemma 'dashing'",
+      "attribution": "SoundScript project (pilot placeholder pending harvest)",
+      "audio": "audio/en/dashing.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "fields",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-fields.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/fields.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
@@ -79,6 +151,24 @@
       "gain": 1.0
     },
     {
+      "lemma": "fun",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-fun.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/fun.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "go",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-go.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/go.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "happy",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-happy.ogg",
@@ -97,6 +187,33 @@
       "gain": 1.0
     },
     {
+      "lemma": "horse",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-horse.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/horse.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "in",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-in.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/in.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "is",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-is.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/is.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "it",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-it.ogg",
@@ -111,6 +228,15 @@
       "source": "Wikimedia Commons \u2014 En-us-jingle.ogg",
       "attribution": "No machine-readable author provided. Dvortygirl assumed (based on copyright claims).",
       "audio": "audio/en/jingle.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "laughing",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Wodencafe-laughing.wav",
+      "attribution": "Speaker: Wodencafe; Recorder: Wodencafe",
+      "audio": "audio/en/laughing.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
@@ -142,6 +268,15 @@
       "gain": 1.0
     },
     {
+      "lemma": "making",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-making.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/making.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "man",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-man.ogg",
@@ -160,11 +295,74 @@
       "gain": 1.0
     },
     {
+      "lemma": "oh",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Wodencafe-oh.wav",
+      "attribution": "Speaker: Wodencafe; Recorder: Wodencafe",
+      "audio": "audio/en/oh.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "on",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-on.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/on.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "one",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-one.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/one.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "open",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Samuel Muldoon (Muldoonsamuel55)-open.wav",
+      "attribution": "Speaker: Samuel Muldoon; Recorder: Muldoonsamuel55",
+      "audio": "audio/en/open.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "over",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-over.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/over.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "people",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-people.ogg",
       "attribution": "Association Shtooka, Judith Franck",
       "audio": "audio/en/people.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "ride",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-ride.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/ride.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "ring",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-ring.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/ring.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
@@ -178,11 +376,65 @@
       "gain": 1.0
     },
     {
+      "lemma": "sing",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-sing.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/sing.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "sleigh",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Arlo Barnes-sleigh.wav",
+      "attribution": "Speaker: Arlo Barnes; Recorder: Arlo Barnes",
+      "audio": "audio/en/sleigh.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "sleighing",
+      "license": "CC0-1.0",
+      "source": "Pilot clip (v0.7.0) \u2014 no standalone CC-BY/CC0 Commons file found for lemma 'sleighing'",
+      "attribution": "SoundScript project (pilot placeholder pending harvest)",
+      "audio": "audio/en/sleighing.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "snow",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-snow.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/snow.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "song",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-song.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/song.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "sound",
       "license": "CC0-1.0",
       "source": "Wikimedia Commons \u2014 En-us-sound.ogg",
       "attribution": "Dvortygirl",
       "audio": "audio/en/sound.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "spirits",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-spirits.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/spirits.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
@@ -214,6 +466,15 @@
       "gain": 1.0
     },
     {
+      "lemma": "the",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-the.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/the.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "this",
       "license": "CC0-1.0",
       "source": "Wikimedia Commons \u2014 En-us-this.ogg",
@@ -223,11 +484,38 @@
       "gain": 1.0
     },
     {
+      "lemma": "through",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-through.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/through.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "to",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-to.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/to.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "together",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-together.ogg",
       "attribution": "Association Shtooka, Judith Franck",
       "audio": "audio/en/together.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "tonight",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-tonight.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/tonight.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
@@ -250,11 +538,29 @@
       "gain": 1.0
     },
     {
+      "lemma": "we",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-we.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/we.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
       "lemma": "welcome",
       "license": "CC-BY-4.0",
       "source": "Wikimedia Commons \u2014 En-uk-welcome.ogg",
       "attribution": "Association Shtooka, Judith Franck",
       "audio": "audio/en/welcome.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "what",
+      "license": "CC0-1.0",
+      "source": "Wikimedia Commons \u2014 LL-Q1860 (eng)-Grendelkhan-what.wav",
+      "attribution": "Speaker: Grendelkhan; Recorder: Grendelkhan",
+      "audio": "audio/en/what.wav",
       "trimStartMs": 0,
       "gain": 1.0
     },
