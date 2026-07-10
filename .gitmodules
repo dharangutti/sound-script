@@ -1,0 +1,4 @@
+[submodule "wordbank"]
+	path = wordbank
+	url = https://github.com/dharangutti/soundscript-wordbank.git
+	branch = main

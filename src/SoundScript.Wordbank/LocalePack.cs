@@ -17,8 +17,10 @@ public sealed class LocalePack
     public WordProsodyDocument WordProsody { get; init; } = new();
     public GraphemeRulesDocument GraphemeRules { get; init; } = new();
     public LegalOnsetsDocument LegalOnsets { get; init; } = new();
+    public SyllabificationDocument Syllabification { get; init; } = new();
     public PhonemeComposeDocument PhonemeCompose { get; init; } = new();
     public PhonemeWaveDocument PhonemeWave { get; init; } = new();
+    public PhonemeTimbreDocument PhonemeTimbre { get; init; } = new();
     public WordEntriesDocument WordEntries { get; init; } = new();
 
     public HashSet<string> FunctionWordSet { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
@@ -26,6 +28,7 @@ public sealed class LocalePack
     public Dictionary<string, WordEntry> WordEntryMap { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, PhonemeGesture> ComposeGestureMap { get; private set; } = new(StringComparer.Ordinal);
     public Dictionary<string, PhonemeFrequency> WaveFrequencyMap { get; private set; } = new(StringComparer.Ordinal);
+    public Dictionary<string, TimbreProfileRow> TimbreProfileMap { get; private set; } = new(StringComparer.Ordinal);
 
     internal static LocalePack FromDirectory(string localeDirectory)
     {
@@ -40,8 +43,10 @@ public sealed class LocalePack
             WordProsody = DeserializeFile<WordProsodyDocument>(Path.Combine(localeDirectory, manifest.Files.WordProsody)),
             GraphemeRules = DeserializeFile<GraphemeRulesDocument>(Path.Combine(localeDirectory, manifest.Files.GraphemeRules)),
             LegalOnsets = DeserializeFile<LegalOnsetsDocument>(Path.Combine(localeDirectory, manifest.Files.LegalOnsets)),
+            Syllabification = DeserializeFile<SyllabificationDocument>(Path.Combine(localeDirectory, manifest.Files.Syllabification)),
             PhonemeCompose = DeserializeFile<PhonemeComposeDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeCompose)),
             PhonemeWave = DeserializeFile<PhonemeWaveDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeWave)),
+            PhonemeTimbre = DeserializeFile<PhonemeTimbreDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeTimbre)),
             WordEntries = DeserializeFile<WordEntriesDocument>(Path.Combine(localeDirectory, manifest.Files.WordEntries)),
         };
 
@@ -63,8 +68,10 @@ public sealed class LocalePack
             WordProsody = DeserializeEmbedded<WordProsodyDocument>(assembly, prefix + manifest.Files.WordProsody.Replace('/', '.').Replace("\\", ".")),
             GraphemeRules = DeserializeEmbedded<GraphemeRulesDocument>(assembly, prefix + manifest.Files.GraphemeRules.Replace('/', '.').Replace("\\", ".")),
             LegalOnsets = DeserializeEmbedded<LegalOnsetsDocument>(assembly, prefix + manifest.Files.LegalOnsets.Replace('/', '.').Replace("\\", ".")),
+            Syllabification = DeserializeEmbedded<SyllabificationDocument>(assembly, prefix + manifest.Files.Syllabification.Replace('/', '.').Replace("\\", ".")),
             PhonemeCompose = DeserializeEmbedded<PhonemeComposeDocument>(assembly, prefix + manifest.Files.PhonemeCompose.Replace('/', '.').Replace("\\", ".")),
             PhonemeWave = DeserializeEmbedded<PhonemeWaveDocument>(assembly, prefix + manifest.Files.PhonemeWave.Replace('/', '.').Replace("\\", ".")),
+            PhonemeTimbre = DeserializeEmbedded<PhonemeTimbreDocument>(assembly, prefix + manifest.Files.PhonemeTimbre.Replace('/', '.').Replace("\\", ".")),
             WordEntries = DeserializeEmbedded<WordEntriesDocument>(assembly, prefix + manifest.Files.WordEntries.Replace('/', '.').Replace("\\", ".")),
         };
 
@@ -99,6 +106,13 @@ public sealed class LocalePack
         {
             if (!string.IsNullOrEmpty(frequency.Phoneme))
                 WaveFrequencyMap[frequency.Phoneme] = frequency;
+        }
+
+        TimbreProfileMap = new Dictionary<string, TimbreProfileRow>(StringComparer.Ordinal);
+        foreach (var profile in PhonemeTimbre.Phonemes)
+        {
+            if (!string.IsNullOrEmpty(profile.Phoneme))
+                TimbreProfileMap[profile.Phoneme] = profile;
         }
     }
 

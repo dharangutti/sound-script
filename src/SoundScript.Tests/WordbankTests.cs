@@ -3,12 +3,15 @@ using Xunit;
 
 namespace SoundScript.Tests;
 
-public class WordbankTests
+[Collection("WordbankCatalog")]
+public class WordbankTests : IDisposable
 {
     public WordbankTests()
     {
         WordbankCatalog.ResetActive();
     }
+
+    public void Dispose() => WordbankCatalog.ResetActive();
 
     [Fact]
     public void DefaultLocale_LoadsEmbeddedEnglishPack()
@@ -94,5 +97,60 @@ public class WordbankTests
         Assert.Equal("fr", locale.Code);
         Assert.Contains("bonjour", locale.WordEntryMap.Keys, StringComparer.OrdinalIgnoreCase);
         Assert.Contains("le", locale.FunctionWordSet);
+    }
+
+    [Fact]
+    public void ActiveLocale_LoadsSyllabificationRules()
+    {
+        var rules = WordbankCatalog.Active.Syllabification;
+        Assert.Equal("en", rules.Locale);
+        Assert.True(rules.SilentTerminalE);
+        Assert.Contains("a", rules.VowelLetters);
+    }
+
+    [Fact]
+    public void ActiveLocale_LoadsPhonemeTimbreProfiles()
+    {
+        var timbre = WordbankCatalog.Active.PhonemeTimbre;
+        Assert.Equal("en", timbre.Locale);
+        Assert.Equal(550, timbre.Default.Formant1Hz);
+        Assert.Contains(timbre.Phonemes, row => row.Phoneme == "aa");
+        Assert.True(WordbankCatalog.Active.TimbreProfileMap.ContainsKey("aa"));
+    }
+
+    [Fact]
+    public void TrySetActive_SwitchesSyllabificationRules()
+    {
+        Assert.True(WordbankCatalog.TrySetActive("es", out _));
+        Assert.False(WordbankCatalog.Active.Syllabification.SilentTerminalE);
+        Assert.Contains("á", WordbankCatalog.Active.Syllabification.AccentedVowels);
+
+        Assert.True(WordbankCatalog.TrySetActive("fr", out _));
+        Assert.Contains("eau", WordbankCatalog.Active.Syllabification.NucleusDigraphs);
+        Assert.True(WordbankCatalog.Active.Syllabification.TreatYAsVowel);
+    }
+
+    [Fact]
+    public void SpanishSyllabifier_UsesLocaleRulesWithoutSilentE()
+    {
+        Assert.True(WordbankCatalog.TrySetActive("es", out _));
+        var syllables = SoundScript.Core.Phonetics.Syllabifier.Syllabify("gracias");
+        Assert.Equal(["gra", "cias"], syllables);
+    }
+
+    [Fact]
+    public void FrenchSyllabifier_UsesNucleusDigraphs()
+    {
+        Assert.True(WordbankCatalog.TrySetActive("fr", out _));
+        var syllables = SoundScript.Core.Phonetics.Syllabifier.Syllabify("chanson");
+        Assert.Equal(["chan", "son"], syllables);
+    }
+
+    [Fact]
+    public void FrenchSyllabifier_WordEntryOverride_PreservesCasing()
+    {
+        Assert.True(WordbankCatalog.TrySetActive("fr", out _));
+        var syllables = SoundScript.Core.Phonetics.Syllabifier.Syllabify("Bonjour");
+        Assert.Equal(["Bon", "jour"], syllables);
     }
 }
