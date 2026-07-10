@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data\**\*.json" />
+    <Content Include="Data\corpus\**\*" CopyToOutputDirectory="PreserveNewest" Link="Data\corpus\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

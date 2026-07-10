@@ -42,9 +42,9 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
-    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [espeak|prosody]] [--offline-tts-dir <folder>]");
-    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>]");
+    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
     return 1;
 }
 
@@ -495,6 +495,14 @@ static int Render(string[] args)
 
 static int Wave(string[] args)
 {
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
+        return 1;
+    }
+
+    EnsureEmbeddedCorpus();
+
     var scriptPath = args[1];
     if (!File.Exists(scriptPath))
     {
@@ -597,13 +605,20 @@ static int Vocal(string[] args)
 
 static int PrintVocalUsage()
 {
-    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--engine espeak|prosody] [--voice <id>] [--seed=<n>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--engine espeak|prosody] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
     return 1;
 }
 
 static int VocalGenerate(string[] args)
 {
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
+        return 1;
+    }
+
+    EnsureEmbeddedCorpus();
     string? text = null;
     string? outPath = null;
     string? engineName = null;
@@ -645,11 +660,11 @@ static int VocalGenerate(string[] args)
             : VocalEngineFactory.Create(engineName);
         engine.Synthesize(text, outPath, options);
         Console.WriteLine($"Generated vocal stem ({engine.Name}) → {outPath}");
-        if (engine.Name == "prosody")
+        if (engine.Name is "prosody")
         {
             Console.Error.WriteLine(
                 "note: prosody produces synthetic phoneme tones (buzzy speech-like blips), not human speech. " +
-                "Install espeak-ng on your system and use --engine espeak for spoken words.");
+                "Use --engine wordbank or composite for corpus + G2P vocal stems.");
         }
         return 0;
     }
@@ -662,6 +677,14 @@ static int VocalGenerate(string[] args)
 
 static int VocalBatch(string[] args)
 {
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
+        return 1;
+    }
+
+    EnsureEmbeddedCorpus();
+
     if (args.Length < 4)
         return PrintVocalUsage();
 
@@ -694,11 +717,11 @@ static int VocalBatch(string[] args)
         Console.WriteLine($"Generated {items.Count} vocal stem(s) ({engine.Name}) in {outDir}.");
         foreach (var item in items)
             Console.WriteLine($"  {Path.GetFileName(item.FilePath)} ← \"{item.Text}\"");
-        if (engine.Name == "prosody")
+        if (engine.Name is "prosody")
         {
             Console.Error.WriteLine(
                 "note: prosody produces synthetic phoneme tones (buzzy speech-like blips), not human speech. " +
-                "Install espeak-ng on your system and use --engine espeak for spoken words.");
+                "Use --engine wordbank or composite for corpus + G2P vocal stems.");
         }
         return 0;
     }
@@ -714,8 +737,9 @@ static VocalEngineOptions BuildVocalOptions(string[] args)
     var voice = TryGetFlagValue(args, "--voice", out var v) ? v
         : TryGetFlagValue(args, "--offline-tts-voice", out var ov) ? ov
         : "en";
+    var locale = TryGetFlagValue(args, "--locale", out var loc) ? loc : null;
     var seed = TryGetIntFlag(args, "--seed", out var s) ? s : 7;
-    return new VocalEngineOptions { Voice = voice, Seed = seed };
+    return new VocalEngineOptions { Voice = voice, Locale = locale, Seed = seed };
 }
 
 static bool TryGetOfflineTts(
@@ -788,8 +812,16 @@ static bool TryConfigureWordbankCatalog(string[] args, int startIndex, out strin
     if (!WordbankCatalog.TryLoadFromRoot(wordbankDir, out error))
         return false;
 
+    CorpusCatalog.TryLoadFromWordbankRoot(wordbankDir, out _);
+
     error = null;
     return true;
+}
+
+static void EnsureEmbeddedCorpus()
+{
+    if (!CorpusCatalog.IsLoaded)
+        CorpusCatalog.TryLoadEmbedded();
 }
 
 static bool TryGetIntFlag(string[] args, string flag, out int value)

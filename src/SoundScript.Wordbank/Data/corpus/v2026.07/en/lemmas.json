@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../schema/lemmas.schema.json",
+  "corpusId": "2026.07",
+  "locale": "en",
+  "version": 1,
+  "status": "pilot",
+  "description": "Pilot harvested pronunciations (CC0 / CC-BY) from Wikimedia Commons with G2P fallback for OOV words.",
+  "entries": [
+    {
+      "lemma": "hello",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons — En-us-hello.ogg",
+      "attribution": "Speaker on Wikimedia Commons; file En-us-hello.ogg",
+      "audio": "audio/en/hello.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "welcome",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons — En-us-welcome.ogg",
+      "attribution": "Speaker on Wikimedia Commons; file En-us-welcome.ogg",
+      "audio": "audio/en/welcome.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "test",
+      "license": "CC-BY-4.0",
+      "source": "Wikimedia Commons — En-uk-test.ogg",
+      "attribution": "Speaker on Wikimedia Commons; file En-uk-test.ogg",
+      "audio": "audio/en/test.wav",
+      "trimStartMs": 0,
+      "gain": 1.0
+    },
+    {
+      "lemma": "world",
+      "license": "CC0-1.0",
+      "source": "SoundScript pilot clip (v0.6.0) — replace with Commons/Lingua Libre harvest",
+      "attribution": "SoundScript project (pilot placeholder pending harvest)",
+      "audio": "audio/en/world.wav",
+      "trimStartMs": 0,
+      "gain": 0.95
+    }
+  ]
+}

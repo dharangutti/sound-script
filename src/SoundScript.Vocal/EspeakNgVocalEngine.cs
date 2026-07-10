@@ -73,6 +73,56 @@ public sealed class EspeakNgVocalEngine : IVocalEngine
         }
     }
 
+    /// <summary>Renders a short phrase to mono samples without writing a file.</summary>
+    internal static float[] SynthesizeToSamples(string text, VocalEngineOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new ArgumentException("Text must not be empty.", nameof(text));
+
+        var executable = ResolveExecutable()
+            ?? throw new InvalidOperationException("eSpeak is not installed.");
+
+        var tempPath = Path.Combine(Path.GetTempPath(), $"soundscript-espeak-{Guid.NewGuid():N}.wav");
+
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = executable,
+                ArgumentList = { "-v", options.Voice, "-w", tempPath, text },
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+
+            using var process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException($"Failed to start {executable}.");
+
+            var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0 || !File.Exists(tempPath))
+            {
+                throw new InvalidOperationException(
+                    string.IsNullOrWhiteSpace(stderr)
+                        ? $"{executable} failed with exit code {process.ExitCode}."
+                        : stderr.Trim());
+            }
+
+            var mono = WavReader.ReadMono(tempPath);
+            mono = VocalStemNormalizer.Normalize(mono, options.OutputGain);
+
+            if (VocalStemNormalizer.Peak(mono) <= 1e-6)
+                throw new InvalidOperationException($"{executable} produced a silent WAV.");
+
+            return mono;
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+                File.Delete(tempPath);
+        }
+    }
+
     internal static string? ResolveExecutable()
     {
         foreach (var name in new[] { "espeak-ng", "espeak" })

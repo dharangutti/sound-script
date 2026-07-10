@@ -23,4 +23,11 @@ for locale in "$SOURCE/data"/*; do
   fi
 done
 
+if [[ -d "$SOURCE/corpus/v2026.07" ]]; then
+  rm -rf "$TARGET/corpus"
+  mkdir -p "$TARGET/corpus"
+  cp -R "$SOURCE/corpus/v2026.07" "$TARGET/corpus/"
+  echo "Synced corpus v2026.07 (metadata + audio)"
+fi
+
 echo "Synced wordbank data from $SOURCE to $TARGET"

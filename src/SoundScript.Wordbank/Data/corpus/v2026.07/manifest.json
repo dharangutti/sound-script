@@ -1,0 +1,30 @@
+{
+  "$schema": "../../schema/corpus-manifest.schema.json",
+  "id": "2026.07",
+  "version": 0,
+  "status": "pilot",
+  "description": "July 2026 pilot corpus — curated 1k English lemmas before harvest automation.",
+  "released": "2026-07-10",
+  "locales": [
+    {
+      "code": "en",
+      "path": "en",
+      "lemmaFile": "lemmas.json",
+      "pilotFile": "pilot-1k.txt"
+    },
+    {
+      "code": "es",
+      "path": "es",
+      "lemmaFile": "lemmas.json"
+    },
+    {
+      "code": "fr",
+      "path": "fr",
+      "lemmaFile": "lemmas.json"
+    }
+  ],
+  "engineCompatibility": {
+    "soundscriptMin": "8.0.0",
+    "wordbankMin": "0.6.0"
+  }
+}

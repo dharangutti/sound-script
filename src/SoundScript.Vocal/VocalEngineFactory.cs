@@ -6,9 +6,11 @@ public static class VocalEngineFactory
     {
         var normalized = engineName?.Trim().ToLowerInvariant() switch
         {
-            null or "" => "prosody",
+            null or "" => "composite",
             "espeak" or "espeak-ng" or "espeakng" => "espeak",
             "prosody" or "builtin" or "built-in" => "prosody",
+            "wordbank" or "corpus" => "wordbank",
+            "composite" or "default" => "composite",
             var other => other,
         };
 
@@ -16,17 +18,14 @@ public static class VocalEngineFactory
         {
             "espeak" => new EspeakNgVocalEngine(),
             "prosody" => new ProsodyVocalEngine(),
+            "wordbank" => new WordbankVocalEngine(),
+            "composite" => new CompositeVocalEngine(),
             _ => throw new ArgumentException(
-                $"Unknown vocal engine '{engineName}'. Supported: espeak, prosody.",
+                $"Unknown vocal engine '{engineName}'. Supported: wordbank, composite, prosody, espeak.",
                 nameof(engineName)),
         };
     }
 
-    /// <summary>Default engine for CLI when --engine is omitted: espeak if installed, else prosody.</summary>
-    public static IVocalEngine CreateDefault()
-    {
-        return EspeakNgVocalEngine.ResolveExecutable() is not null
-            ? new EspeakNgVocalEngine()
-            : new ProsodyVocalEngine();
-    }
+    /// <summary>Default engine: wordbank corpus + G2P with espeak/prosody fallback per word.</summary>
+    public static IVocalEngine CreateDefault() => new CompositeVocalEngine();
 }
