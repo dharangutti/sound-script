@@ -52,10 +52,8 @@ to, SoundScript → eSpeak when installed (intelligible speech), else G2P timbre
 
 | Lemma | License | Source |
 |-------|---------|--------|
-| `hello` | CC-BY-4.0 | Wikimedia Commons |
-| `welcome` | CC-BY-4.0 | Wikimedia Commons |
-| `test` | CC-BY-4.0 | Wikimedia Commons |
-| `world` | CC0-1.0 | Pilot placeholder |
+| 32 pilot lemmas | CC0 / CC-BY | Wikimedia Commons (`scripts/harvest_commons_en.py`) |
+| CI coverage | 26/50 en | See `fixtures/ci-50.json` overlap |
 
 Harvest pipeline (future): Wiktionary → Wikimedia Commons / Lingua Libre → `corpus/vYYYY.MM/audio/{locale}/`.
 
