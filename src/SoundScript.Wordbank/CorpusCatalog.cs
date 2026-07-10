@@ -55,6 +55,57 @@ public static class CorpusCatalog
         return TryLoadFromCorpusRoot(corpusRoot, corpusId, error: out _);
     }
 
+    /// <summary>Re-reads corpus metadata from the currently loaded root (picks up on-disk edits).</summary>
+    public static bool Reload()
+    {
+        if (_loadedRoot is null)
+            return false;
+
+        return TryLoadFromCorpusRoot(_loadedRoot, _corpusId, out _);
+    }
+
+    /// <summary>
+    /// Resolves the on-disk lemma file (e.g. <c>en/lemmas.json</c>) for a locale
+    /// under the loaded corpus root, or null when the locale/root is unknown.
+    /// </summary>
+    public static string? ResolveLemmaFilePath(string localeCode)
+    {
+        EnsureLoaded();
+        if (_loadedRoot is null || _manifest is null)
+            return null;
+
+        foreach (var locale in _manifest.Locales)
+        {
+            if (string.Equals(locale.Code, localeCode, StringComparison.OrdinalIgnoreCase))
+                return Path.Combine(_loadedRoot, locale.Path, locale.LemmaFile);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Inserts or replaces a lemma entry in the in-memory index so lookups resolve
+    /// immediately after generation, without a full reload.
+    /// </summary>
+    public static void UpsertLemma(string localeCode, CorpusLemmaEntry entry)
+    {
+        if (string.IsNullOrWhiteSpace(entry.Lemma))
+            return;
+
+        EnsureLoaded();
+        lock (LoadLock)
+        {
+            _lemmaIndex ??= new Dictionary<string, Dictionary<string, CorpusLemmaEntry>>(StringComparer.Ordinal);
+            if (!_lemmaIndex.TryGetValue(localeCode, out var localeMap))
+            {
+                localeMap = new Dictionary<string, CorpusLemmaEntry>(StringComparer.OrdinalIgnoreCase);
+                _lemmaIndex[localeCode] = localeMap;
+            }
+
+            localeMap[entry.Lemma] = entry;
+        }
+    }
+
     /// <summary>Clears loaded corpus metadata.</summary>
     public static void Reset()
     {

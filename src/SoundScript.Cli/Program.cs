@@ -5,6 +5,7 @@ using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
 using SoundScript.Vocal;
+using SoundScript.Vocal.Wordbank;
 using SoundScript.Voice;
 using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
@@ -32,6 +33,7 @@ return args[0].ToLowerInvariant() switch
     "render" => Render(args),
     "wave" => Wave(args),
     "vocal" => Vocal(args),
+    "wordbank" => Wordbank(args),
     _ => PrintUsage()
 };
 
@@ -45,6 +47,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>]");
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
     Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
     return 1;
 }
 
@@ -735,6 +738,93 @@ static int VocalBatch(string[] args)
         return 1;
     }
 }
+
+static int Wordbank(string[] args)
+{
+    if (args.Length < 3)
+    {
+        PrintWordbankUsage();
+        return 1;
+    }
+
+    return args[1].ToLowerInvariant() switch
+    {
+        "ensure" => WordbankEnsure(args),
+        _ => PrintWordbankUsage(),
+    };
+}
+
+static int PrintWordbankUsage()
+{
+    Console.Error.WriteLine("Usage: soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
+    return 1;
+}
+
+static int WordbankEnsure(string[] args)
+{
+    if (!TryConfigureWordbankCatalog(args, startIndex: 2, out var wordbankError))
+    {
+        Console.Error.WriteLine(wordbankError);
+        return 1;
+    }
+
+    EnsureEmbeddedCorpus();
+
+    string? lemma = null;
+    for (var i = 2; i < args.Length; i++)
+    {
+        if (args[i].StartsWith("--", StringComparison.Ordinal))
+        {
+            if (IsWordbankValueFlag(args[i]) && i + 1 < args.Length)
+                i++;
+            continue;
+        }
+
+        lemma ??= args[i];
+    }
+
+    if (string.IsNullOrWhiteSpace(lemma))
+    {
+        Console.Error.WriteLine("Missing lemma.");
+        return PrintWordbankUsage();
+    }
+
+    var locale = TryGetFlagValue(args, "--locale", out var loc) && !string.IsNullOrWhiteSpace(loc)
+        ? loc
+        : WordbankCatalog.ActiveLocaleCode;
+    var autoGenerate = args.Contains("--auto-generate-missing", StringComparer.OrdinalIgnoreCase);
+    var voice = TryGetFlagValue(args, "--voice", out var v) && !string.IsNullOrWhiteSpace(v) ? v : null;
+
+    try
+    {
+        var options = new WordbankAutoGenerateOptions { Voice = voice };
+        var result = new WordbankAutoGenerate(options).EnsureLemma(lemma, locale, autoGenerate);
+
+        switch (result.Status)
+        {
+            case WordbankAutoGenerateStatus.AlreadyPresent:
+                Console.WriteLine($"Resolved '{lemma}' ({locale}) → {result.Path}");
+                return 0;
+            case WordbankAutoGenerateStatus.Generated:
+                Console.WriteLine(
+                    $"Generated '{lemma}' ({locale}) via {WordbankAutoGenerate.GeneratorName} {result.GeneratorVersion} → {result.Path}");
+                return 0;
+            default:
+                Console.Error.WriteLine(result.Reason);
+                return 1;
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static bool IsWordbankValueFlag(string arg) =>
+    string.Equals(arg, "--locale", StringComparison.OrdinalIgnoreCase)
+    || string.Equals(arg, "--voice", StringComparison.OrdinalIgnoreCase)
+    || string.Equals(arg, "--wordbank-dir", StringComparison.OrdinalIgnoreCase);
 
 static VocalEngineOptions BuildVocalOptions(string[] args)
 {

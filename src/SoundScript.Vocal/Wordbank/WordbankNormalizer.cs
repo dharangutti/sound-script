@@ -1,7 +1,6 @@
 using System.Text.Json;
 using SoundScript.Wave.Io;
 using SoundScript.Wordbank;
-using SoundScript.Wordbank.Models;
 
 namespace SoundScript.Vocal.Wordbank;
 
@@ -57,12 +56,39 @@ public sealed class WordbankNormalizer
                 "Auto-generation is handled by the wordbank generator.");
         }
 
+        var samples = WavReader.ReadMono(sourcePath);
+        return NormalizeSamples(samples, lemma, locale, entry.PitchSemitones);
+    }
+
+    /// <summary>
+    /// Normalizes an arbitrary source WAV (e.g. a freshly generated eSpeak clip
+    /// in staging) into the canonical location for <paramref name="lemma"/>. Used
+    /// by the auto-generator when a lemma has no corpus recording.
+    /// </summary>
+    public WordbankNormalizeResult NormalizeFromFile(
+        string sourceWavPath, string lemma, string locale, double pitchSemitones = 0.0)
+    {
+        if (string.IsNullOrWhiteSpace(sourceWavPath))
+            throw new ArgumentException("Source WAV path must not be empty.", nameof(sourceWavPath));
+        if (string.IsNullOrWhiteSpace(lemma))
+            throw new ArgumentException("Lemma must not be empty.", nameof(lemma));
+        if (string.IsNullOrWhiteSpace(locale))
+            throw new ArgumentException("Locale must not be empty.", nameof(locale));
+        if (!File.Exists(sourceWavPath))
+            return WordbankNormalizeResult.MissingResult($"Source WAV not found: {sourceWavPath}");
+
+        var samples = WavReader.ReadMono(sourceWavPath);
+        return NormalizeSamples(samples, lemma, locale, pitchSemitones);
+    }
+
+    private WordbankNormalizeResult NormalizeSamples(
+        float[] samples, string lemma, string locale, double pitchSemitones)
+    {
         var outputPath = CorpusCatalog.ResolveNormalizedAudioPath(locale, lemma)
             ?? throw new InvalidOperationException(
                 "Corpus root is not loaded; cannot resolve normalized output path.");
 
-        var samples = WavReader.ReadMono(sourcePath);
-        var normalized = Process(samples, entry);
+        var normalized = Process(samples, pitchSemitones);
         var metadata = BuildMetadata(normalized);
 
         Persist(outputPath, normalized, metadata);
@@ -71,13 +97,13 @@ public sealed class WordbankNormalizer
     }
 
     /// <summary>Runs the deterministic DSP pipeline on raw mono samples.</summary>
-    internal float[] Process(float[] samples, CorpusLemmaEntry entry)
+    internal float[] Process(float[] samples, double pitchSemitones)
     {
         var silenceThreshold = DbToLinear(_options.SilenceThresholdDbFs);
         var trimmed = AudioNormalizeOps.TrimSilence(samples, silenceThreshold, _options.EdgePaddingMs, SampleRate);
 
-        var centered = _options.ApplyPitchCentering && Math.Abs(entry.PitchSemitones) > PitchEpsilon
-            ? AudioNormalizeOps.PitchShift(trimmed, entry.PitchSemitones)
+        var centered = _options.ApplyPitchCentering && Math.Abs(pitchSemitones) > PitchEpsilon
+            ? AudioNormalizeOps.PitchShift(trimmed, pitchSemitones)
             : trimmed;
 
         var targetPeak = DbToLinear(_options.TargetPeakDbFs);
