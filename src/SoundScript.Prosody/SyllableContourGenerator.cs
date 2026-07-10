@@ -9,7 +9,7 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class SyllableContourGenerator
 {
-    private static readonly Dictionary<string, int> Offsets = WordbankCatalog.Default.WordProsody.SyllableStressOffsets;
+    private static Dictionary<string, int> Offsets => WordbankCatalog.Active.WordProsody.SyllableStressOffsets;
 
     /// <summary>Computes one semitone offset per syllable, from its stress level.</summary>
     public static IReadOnlyList<int> GenerateOffsets(IReadOnlyList<StressLevel> stress)

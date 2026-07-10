@@ -10,7 +10,7 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class PhraseContourEngine
 {
-    private static readonly Wordbank.Models.WordProsodyDocument Prosody = WordbankCatalog.Default.WordProsody;
+    private static Wordbank.Models.WordProsodyDocument Prosody => WordbankCatalog.Active.WordProsody;
 
     /// <summary>
     /// Detects sentence type from surface punctuation: a trailing '?' is a

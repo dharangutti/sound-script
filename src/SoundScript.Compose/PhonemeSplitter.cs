@@ -14,7 +14,7 @@ namespace SoundScript.Compose;
 /// </summary>
 public static class PhonemeSplitter
 {
-    private static readonly LocalePack Locale = WordbankCatalog.Default;
+    private static LocalePack Locale => WordbankCatalog.Active;
 
     /// <summary>Splits one syllable into canonical phoneme symbols.</summary>
     public static IReadOnlyList<string> Split(string syllable) =>

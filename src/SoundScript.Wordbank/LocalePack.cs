@@ -29,20 +29,20 @@ public sealed class LocalePack
 
     internal static LocalePack FromDirectory(string localeDirectory)
     {
-        var manifest = Deserialize<LocaleManifestDocument>(Path.Combine(localeDirectory, "locale.json"));
+        var manifest = DeserializeFile<LocaleManifestDocument>(Path.Combine(localeDirectory, "locale.json"));
         var pack = new LocalePack
         {
             Code = manifest.Code,
             Name = manifest.Name,
             Version = manifest.Version,
-            FunctionWords = Deserialize<FunctionWordsDocument>(Path.Combine(localeDirectory, manifest.Files.FunctionWords)),
-            StressPrefixes = Deserialize<StressPrefixesDocument>(Path.Combine(localeDirectory, manifest.Files.StressPrefixes)),
-            WordProsody = Deserialize<WordProsodyDocument>(Path.Combine(localeDirectory, manifest.Files.WordProsody)),
-            GraphemeRules = Deserialize<GraphemeRulesDocument>(Path.Combine(localeDirectory, manifest.Files.GraphemeRules)),
-            LegalOnsets = Deserialize<LegalOnsetsDocument>(Path.Combine(localeDirectory, manifest.Files.LegalOnsets)),
-            PhonemeCompose = Deserialize<PhonemeComposeDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeCompose)),
-            PhonemeWave = Deserialize<PhonemeWaveDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeWave)),
-            WordEntries = Deserialize<WordEntriesDocument>(Path.Combine(localeDirectory, manifest.Files.WordEntries)),
+            FunctionWords = DeserializeFile<FunctionWordsDocument>(Path.Combine(localeDirectory, manifest.Files.FunctionWords)),
+            StressPrefixes = DeserializeFile<StressPrefixesDocument>(Path.Combine(localeDirectory, manifest.Files.StressPrefixes)),
+            WordProsody = DeserializeFile<WordProsodyDocument>(Path.Combine(localeDirectory, manifest.Files.WordProsody)),
+            GraphemeRules = DeserializeFile<GraphemeRulesDocument>(Path.Combine(localeDirectory, manifest.Files.GraphemeRules)),
+            LegalOnsets = DeserializeFile<LegalOnsetsDocument>(Path.Combine(localeDirectory, manifest.Files.LegalOnsets)),
+            PhonemeCompose = DeserializeFile<PhonemeComposeDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeCompose)),
+            PhonemeWave = DeserializeFile<PhonemeWaveDocument>(Path.Combine(localeDirectory, manifest.Files.PhonemeWave)),
+            WordEntries = DeserializeFile<WordEntriesDocument>(Path.Combine(localeDirectory, manifest.Files.WordEntries)),
         };
 
         pack.BuildIndexes();
@@ -102,19 +102,25 @@ public sealed class LocalePack
         }
     }
 
-    private static T Deserialize<T>(string path)
+    private static T DeserializeFile<T>(string path)
     {
         var json = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<T>(json, JsonOptions)
-            ?? throw new InvalidOperationException($"Failed to deserialize {path}");
+        return Deserialize<T>(json);
     }
+
+    internal static T Deserialize<T>(string json) =>
+        JsonSerializer.Deserialize<T>(json, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize JSON document.");
+
+    internal static T Deserialize<T>(Stream stream) =>
+        JsonSerializer.Deserialize<T>(stream, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize JSON stream.");
 
     private static T DeserializeEmbedded<T>(Assembly assembly, string resourceName)
     {
         using var stream = assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Embedded resource not found: {resourceName}");
-        return JsonSerializer.Deserialize<T>(stream, JsonOptions)
-            ?? throw new InvalidOperationException($"Failed to deserialize embedded resource {resourceName}");
+        return Deserialize<T>(stream);
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()

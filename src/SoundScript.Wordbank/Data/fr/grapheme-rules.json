@@ -1,0 +1,34 @@
+{
+  "$schema": "../../schema/grapheme-rules.schema.json",
+  "version": 1,
+  "locale": "fr",
+  "description": "French grapheme-to-phoneme rules mapped to SoundScript canonical phoneme symbols.",
+  "digraphs": [
+    { "grapheme": "ch", "phonemes": ["sh"] },
+    { "grapheme": "ph", "phonemes": ["f"] },
+    { "grapheme": "gn", "phonemes": ["n", "j"] },
+    { "grapheme": "eau", "phonemes": ["oo"] },
+    { "grapheme": "ou", "phonemes": ["oo"] },
+    { "grapheme": "oi", "phonemes": ["au"] },
+    { "grapheme": "ai", "phonemes": ["ee"] },
+    { "grapheme": "ei", "phonemes": ["ee"] },
+    { "grapheme": "au", "phonemes": ["oo"] },
+    { "grapheme": "eu", "phonemes": ["oo"] },
+    { "grapheme": "an", "phonemes": ["aa"] },
+    { "grapheme": "en", "phonemes": ["aa"] },
+    { "grapheme": "in", "phonemes": ["ee"] },
+    { "grapheme": "on", "phonemes": ["au"] },
+    { "grapheme": "un", "phonemes": ["oo"] }
+  ],
+  "singleLetters": [
+    { "letter": "a", "phonemes": ["aa"] },
+    { "letter": "e", "phonemes": ["ee"] },
+    { "letter": "i", "phonemes": ["ee"] },
+    { "letter": "o", "phonemes": ["au"] },
+    { "letter": "u", "phonemes": ["oo"] },
+    { "letter": "y", "phonemes": ["ee"] },
+    { "letter": "c", "phonemes": ["k"] },
+    { "letter": "ç", "phonemes": ["s"] },
+    { "letter": "x", "phonemes": ["k", "s"] }
+  ]
+}

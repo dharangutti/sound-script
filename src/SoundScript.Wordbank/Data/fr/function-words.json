@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schema/function-words.schema.json",
+  "version": 1,
+  "locale": "fr",
+  "description": "Closed set of French function words.",
+  "categories": {
+    "articles": ["le", "la", "les", "un", "une", "des", "du", "au", "aux"],
+    "conjunctions": ["et", "ou", "mais", "donc", "car", "ni", "or"],
+    "prepositions": [
+      "de", "à", "en", "dans", "sur", "sous", "avec", "sans", "pour", "par",
+      "entre", "vers", "chez", "devant", "derrière"
+    ],
+    "pronouns": [
+      "je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles",
+      "me", "te", "se", "lui", "leur", "ce", "ça", "cela", "qui", "que", "quoi"
+    ],
+    "auxiliaries": [
+      "est", "sont", "était", "étaient", "être", "avoir", "ai", "as", "a", "ont",
+      "avez", "avons", "sera", "seront", "fut", "furent"
+    ]
+  }
+}

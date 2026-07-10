@@ -10,7 +10,7 @@ namespace SoundScript.Wave.Prosody;
 /// </summary>
 internal static class GraphemePhonemeSplitter
 {
-    private static readonly LocalePack Locale = WordbankCatalog.Default;
+    private static LocalePack Locale => WordbankCatalog.Active;
 
     /// <summary>
     /// Classifies a sung syllable for timbre selection. A sung note sustains on

@@ -38,12 +38,10 @@ public readonly record struct PhonemeFrequencyRange(
 /// </summary>
 public static class PhonemeFrequencyTable
 {
-    private static readonly LocalePack Locale = WordbankCatalog.Default;
-
+    private static LocalePack Locale => WordbankCatalog.Active;
     /// <summary>Fallback for phonemes without an explicit row.</summary>
-    public static readonly PhonemeFrequencyRange Default = ToRange(Locale.PhonemeWave.Default);
-
-    private static readonly Dictionary<string, PhonemeFrequencyRange> Table = BuildTable();
+    public static PhonemeFrequencyRange Default => ToRange(WordbankCatalog.Active.PhonemeWave.Default);
+    private static Dictionary<string, PhonemeFrequencyRange> Table => BuildTable();
 
     /// <summary>Total lookup — unknown symbols get <see cref="Default"/>.</summary>
     public static PhonemeFrequencyRange Lookup(string phoneme) =>

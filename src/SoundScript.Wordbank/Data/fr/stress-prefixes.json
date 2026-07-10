@@ -1,0 +1,7 @@
+{
+  "$schema": "../../schema/stress-prefixes.schema.json",
+  "version": 1,
+  "locale": "fr",
+  "description": "French prefixes that shift stress to the following syllable in two-syllable words.",
+  "prefixes": ["re", "dé", "de", "in", "im", "con", "com", "dis", "ex", "en", "em", "sur", "sous"]
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schema/word-entries.schema.json",
+  "version": 1,
+  "locale": "es",
+  "description": "Spanish per-word overrides for demo and common phrases.",
+  "entries": [
+    { "word": "hola", "syllables": ["ho", "la"], "stress": ["primary", "unstressed"] },
+    { "word": "mundo", "syllables": ["mun", "do"], "stress": ["primary", "unstressed"] },
+    { "word": "estrella", "syllables": ["es", "tre", "lla"], "stress": ["unstressed", "primary", "unstressed"] },
+    { "word": "pequeño", "syllables": ["pe", "que", "ño"], "stress": ["primary", "unstressed", "secondary"] },
+    { "word": "brilla", "syllables": ["bri", "lla"], "stress": ["primary", "unstressed"] },
+    { "word": "cielo", "syllables": ["cie", "lo"], "stress": ["primary", "unstressed"] },
+    { "word": "hermosa", "syllables": ["her", "mo", "sa"], "stress": ["unstressed", "primary", "unstressed"] },
+    { "word": "canción", "syllables": ["can", "ción"], "stress": ["unstressed", "primary"] },
+    { "word": "música", "syllables": ["mú", "si", "ca"], "stress": ["primary", "unstressed", "unstressed"] },
+    { "word": "mañana", "syllables": ["ma", "ña", "na"], "stress": ["primary", "unstressed", "unstressed"] }
+  ]
+}

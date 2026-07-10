@@ -10,7 +10,7 @@ namespace SoundScript.Prosody;
 /// </summary>
 public static class FunctionWords
 {
-    private static readonly HashSet<string> Words = WordbankCatalog.Default.FunctionWordSet;
+    private static HashSet<string> Words => WordbankCatalog.Active.FunctionWordSet;
 
     /// <summary>True when <paramref name="word"/> is a closed-class function word.</summary>
     public static bool Contains(string word) => Words.Contains(word);

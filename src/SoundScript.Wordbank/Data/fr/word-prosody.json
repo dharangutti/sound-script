@@ -1,0 +1,32 @@
+{
+  "$schema": "../../schema/word-prosody.schema.json",
+  "version": 1,
+  "locale": "en",
+  "centerMidi": 60,
+  "wordPitchOffsets": {
+    "content": {
+      "start": 4,
+      "middle": 0,
+      "end": -3
+    },
+    "function": {
+      "start": -7,
+      "middle": -7,
+      "end": -7
+    }
+  },
+  "phraseContours": {
+    "statement": { "from": 2, "to": -4 },
+    "question": { "from": -3, "to": 5 },
+    "listItem": { "step": 1, "max": 3 }
+  },
+  "syllableStressOffsets": {
+    "primary": 2,
+    "secondary": 1,
+    "unstressed": 0
+  },
+  "clamp": {
+    "maxAdjacentJump": 5,
+    "maxPhraseRange": 14
+  }
+}

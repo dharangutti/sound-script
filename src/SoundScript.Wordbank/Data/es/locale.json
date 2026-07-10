@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/locale.schema.json",
-  "code": "en",
-  "name": "English",
+  "code": "es",
+  "name": "Spanish",
   "version": "0.2.0",
   "files": {
     "functionWords": "function-words.json",

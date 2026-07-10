@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schema/word-entries.schema.json",
+  "version": 1,
+  "locale": "fr",
+  "description": "French per-word overrides for demo and common phrases.",
+  "entries": [
+    { "word": "bonjour", "syllables": ["bon", "jour"], "stress": ["primary", "unstressed"] },
+    { "word": "monde", "syllables": ["monde"], "stress": ["primary"] },
+    { "word": "étoile", "syllables": ["é", "toile"], "stress": ["unstressed", "primary"] },
+    { "word": "petite", "syllables": ["pe", "tite"], "stress": ["unstressed", "primary"] },
+    { "word": "brille", "syllables": ["brille"], "stress": ["primary"] },
+    { "word": "chanson", "syllables": ["chan", "son"], "stress": ["primary", "unstressed"] },
+    { "word": "musique", "syllables": ["mu", "sique"], "stress": ["primary", "unstressed"] },
+    { "word": "belle", "syllables": ["belle"], "stress": ["primary"] },
+    { "word": "merci", "syllables": ["mer", "ci"], "stress": ["primary", "unstressed"] },
+    { "word": "français", "syllables": ["fran", "çais"], "stress": ["primary", "unstressed"] }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "../../schema/grapheme-rules.schema.json",
+  "version": 1,
+  "locale": "es",
+  "description": "Spanish grapheme-to-phoneme rules mapped to SoundScript canonical phoneme symbols.",
+  "digraphs": [
+    { "grapheme": "sh", "phonemes": ["sh"] },
+    { "grapheme": "ch", "phonemes": ["ch"] },
+    { "grapheme": "ll", "phonemes": ["j"] },
+    { "grapheme": "rr", "phonemes": ["r"] },
+    { "grapheme": "qu", "phonemes": ["k"] },
+    { "grapheme": "gu", "phonemes": ["g"] },
+    { "grapheme": "ai", "phonemes": ["ai"] },
+    { "grapheme": "au", "phonemes": ["au"] },
+    { "grapheme": "ei", "phonemes": ["ee"] },
+    { "grapheme": "ie", "phonemes": ["ee"] },
+    { "grapheme": "ue", "phonemes": ["oo"] }
+  ],
+  "singleLetters": [
+    { "letter": "a", "phonemes": ["aa"] },
+    { "letter": "e", "phonemes": ["ee"] },
+    { "letter": "i", "phonemes": ["ai"] },
+    { "letter": "o", "phonemes": ["au"] },
+    { "letter": "u", "phonemes": ["oo"] },
+    { "letter": "y", "phonemes": ["ee"] },
+    { "letter": "c", "phonemes": ["k"] },
+    { "letter": "ñ", "phonemes": ["n", "j"] },
+    { "letter": "x", "phonemes": ["k", "s"] },
+    { "letter": "z", "phonemes": ["s"] }
+  ]
+}
