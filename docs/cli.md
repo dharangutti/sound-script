@@ -299,7 +299,8 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [word-prosody.md](word-prosody.md) — `ProsodyComposer` module reference (V5)
 - [whats-new-v6.md](whats-new-v6.md) — `--emit-ss` design and guarantees (V6)
 - [whats-new-v7.md](whats-new-v7.md) — SoundScript.Wave and the `wave` verb (V7)
-- [wave-grammar.md](wave-grammar.md) — `.ssw` grammar reference (V7)
+- [whats-new-v8.md](whats-new-v8.md) — vocal stems and `vocal` CLI (V8)
+- [wave-grammar.md](wave-grammar.md) — `.ssw` grammar reference (V7+)
 - [soundcss.md](soundcss.md) — SoundCSS timbre language (V4)
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`

@@ -114,6 +114,8 @@ MidiGenerator → output.mid
 | [examples/wave-humanize.ssw](examples/wave-humanize.ssw) | Wave grammar — seeded humanize + speak |
 | [examples/full-song-wave.ss](examples/full-song-wave.ss) | Four-part song rendered via the wave backend |
 | [examples/speech-only-wave.ss](examples/speech-only-wave.ss) | Speech + vocal song without a MIDI step |
+| [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw) | V8: `speak sample=` vocal stem mixing |
+| [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) | V8: Jingle Bells + offline vocal stems |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -249,6 +251,22 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
 
+## What's New in V8
+
+- **Vocal stems in Wave export** — `sample`, `speak sample=`, CLI `--vocal` / `--tts-dir` / `--offline-tts`
+- **`soundscript vocal`** — `generate` and `batch` for offline stem WAVs (`prosody` built-in, `espeak` optional)
+- Example: [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw)
+
+→ [docs/whats-new-v8.md](docs/whats-new-v8.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
+
+## What's New in V7
+
+- **SoundScript.Wave** — render `.ss` / `.ssw` directly to deterministic WAV (no MIDI step)
+- **`wave` CLI verb** — `soundscript wave script.ssw output.wav`
+- Playground auto-routes wave-only grammar (`speak`, `effect`, named `humanize`)
+
+→ [docs/whats-new-v7.md](docs/whats-new-v7.md) · [docs/wave-grammar.md](docs/wave-grammar.md)
+
 ## What's New in V3.1
 
 - **PhonemeComposer** — deterministic text-to-melody engine (`SoundScript.Compose`)
@@ -290,7 +308,10 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 |----------|-------------|
 | [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
-| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`) |
+| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`, `vocal`) |
+| [docs/whats-new-v8.md](docs/whats-new-v8.md) | V8 changelog — vocal stems in Wave export |
+| [docs/whats-new-v7.md](docs/whats-new-v7.md) | V7 changelog — SoundScript.Wave |
+| [docs/wave-grammar.md](docs/wave-grammar.md) | Wave grammar (`.ssw`) |
 | [docs/text-to-melody.md](docs/text-to-melody.md) | Text-to-melody pipeline (V3.1) |
 | [docs/phoneme-composer.md](docs/phoneme-composer.md) | PhonemeComposer module reference |
 | [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) | V3.1 changelog |
