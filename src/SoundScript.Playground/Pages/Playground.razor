@@ -10,7 +10,7 @@
 
     <div class="presets">
         <span class="preset-label">Example:</span>
-        <select class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExample">
+        <select class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExampleAsync">
             <optgroup label="V2">
                 <option value="v2-showcase">Showcase</option>
                 <option value="v2-blocks">Blocks</option>
@@ -90,19 +90,28 @@
                     @(IsRunning ? "Running…" : "Run")
                 </button>
                 <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
-                <button type="button" class="btn btn-secondary" @onclick="ClearEditor">Clear</button>
-                <button type="button" class="btn btn-secondary" @onclick="ResetEditor">Reset</button>
-                <button type="button" class="btn btn-secondary" @onclick="CopyScriptAsync">Copy</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => ClearEditorAsync(MidiEditorId)">Clear</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => ResetEditorAsync(MidiEditorId)">Reset</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => CopyEditorAsync(MidiEditorId)">Copy</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => UndoEditorAsync(MidiEditorId)">Undo</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => RedoEditorAsync(MidiEditorId)">Redo</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => ToggleThemeAsync(MidiEditorId)">Theme</button>
                 <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="DownloadCurrentScriptAsync">Download script</button>
                 <button type="button" class="btn btn-secondary" title="Load this example into the SoundCSS studio below"
                         @onclick="StyleInStudioAsync">Style in Studio ↓</button>
             </div>
-            <textarea id="script-input"
-                      @key="SelectedExampleKey"
-                      class="script-input script-input-main"
-                      @bind="ScriptText"
-                      spellcheck="false"
-                      placeholder="track melody { ... }"></textarea>
+            <div class="editor-mount" id="@MidiEditorId"></div>
+
+            <details class="midi-css-panel">
+                <summary>SoundCSS timbre (applied to <strong>Render Audio</strong>) ⓘ</summary>
+                <p class="hint">
+                    Phoneme-level rules (<code>p</code>, <code>aa</code>, …) shape the offline
+                    MIDI → SoundCSS → WAV render below. Leave empty to use the built-in default
+                    stylesheet. (Word rules like <code>"hello" { … }</code> apply to the Wave
+                    Studio's vocal engine, not the MIDI timbre pass.)
+                </p>
+                <div class="editor-mount editor-mount-css" id="@MidiCssEditorId"></div>
+            </details>
         </section>
 
         <section class="pane pane-output">
@@ -302,6 +311,53 @@
             · <a href="/doc.html?p=cli.md" target="_blank" rel="noopener noreferrer">CLI reference</a>
         </p>
     </details>
+
+    @* CLI Examples split into two sections: MIDI-rail and Wave-rail. *@
+    <div class="cli-examples-split">
+        <details class="example-cli-panel cli-examples-section">
+            <summary>A · MIDI examples — CLI (@MidiCliPresets.Count)</summary>
+            @foreach (var preset in MidiCliPresets)
+            {
+                <article class="text-workflow">
+                    <div class="example-cli-header">
+                        <span class="badge badge-rail">@preset.OutputRailLabel</span>
+                        <span class="example-cli-action">@preset.Title</span>
+                    </div>
+                    <ol class="cli-steps">
+                        @foreach (var line in preset.CliSteps)
+                        {
+                            <li>
+                                <code class="cli-line">@line</code>
+                                <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
+                            </li>
+                        }
+                    </ol>
+                </article>
+            }
+        </details>
+
+        <details class="example-cli-panel cli-examples-section">
+            <summary>B · Wave examples — CLI (@WaveCliPresets.Count)</summary>
+            @foreach (var preset in WaveCliPresets)
+            {
+                <article class="text-workflow">
+                    <div class="example-cli-header">
+                        <span class="badge badge-rail">@preset.OutputRailLabel</span>
+                        <span class="example-cli-action">@preset.Title</span>
+                    </div>
+                    <ol class="cli-steps">
+                        @foreach (var line in preset.CliSteps)
+                        {
+                            <li>
+                                <code class="cli-line">@line</code>
+                                <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
+                            </li>
+                        }
+                    </ol>
+                </article>
+            }
+        </details>
+    </div>
 
     @* ===================================================================
        V10 Studio — redesigned bottom section. Split SSW + SoundCSS editors,

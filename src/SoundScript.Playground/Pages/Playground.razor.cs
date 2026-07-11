@@ -1084,7 +1084,7 @@ public partial class Playground
       MidiBytes = midiStream.ToArray();
 
       var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText };
-      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
+      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, await GetMidiStylesheetAsync(), options);
 
       var syllableCount = PhonemeComposer.SplitSyllables(ComposeText).Count;
       try
@@ -1137,7 +1137,7 @@ public partial class Playground
       // "phonemes", so the timeline builder is told which track to align phonemes
       // against explicitly instead of relying on the default.
       var options = new OfflineRenderer.RenderOptions { SourceText = ComposeText, PreferredTrackName = "prosody" };
-      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, OfflineRenderer.DefaultStylesheet, options);
+      WavBytes = OfflineRenderer.RenderToWavBytes(MidiBytes, await GetMidiStylesheetAsync(), options);
 
       var syllableCount = WordTokenizer.Tokenize(ComposeText).Sum(w => w.Syllables.Count);
       try
@@ -1277,6 +1277,8 @@ public partial class Playground
       MidiBytes = null;
       WavBytes = null;
       UsedWaveBackend = false;
+
+      await SyncMidiEditorAsync();
 
       if (SourceDiagnostics.ContainsImport(ScriptText))
         WarningMessages.Add("Imports are not supported in the browser playground. Use the CLI (ProgramLoader) for multi-file projects.");
@@ -1583,6 +1585,7 @@ public partial class Playground
   // else through the MIDI rail — the same split RunAsync uses.
   private async Task DownloadCurrentScriptAsync()
   {
+    await SyncMidiEditorAsync();
     if (string.IsNullOrWhiteSpace(ScriptText))
     {
       ErrorMessage = "Nothing to download: the script is empty.";
@@ -1801,6 +1804,15 @@ public partial class Playground
     if (!firstRender)
       return;
 
+    // Top MIDI-rail editor (the "SoundScript" pane) — nice code editor matching
+    // the Studio, plus an optional SoundCSS timbre editor for Render Audio.
+    MidiEditorDefault = ScriptText;
+    await Js.InvokeVoidAsync("playgroundEditor.init", MidiEditorId,
+        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }" });
+    await Js.InvokeVoidAsync("playgroundEditor.init", MidiCssEditorId,
+        new { language = "soundcss", theme = "dark", placeholder = "aa { formant1: 700Hz; }  /  p { burst: 12ms; }" });
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", MidiEditorId, ScriptText);
+
     // Start the Studio with an original WordBank-only example.
     StudioSswDefault = SafeExamples[0].Ssw;
     StudioCssDefault = SafeExamples[0].Css;
@@ -1851,6 +1863,7 @@ public partial class Playground
   // upper example can be styled with word-level SoundCSS.
   private async Task StyleInStudioAsync()
   {
+    await SyncMidiEditorAsync();
     if (string.IsNullOrWhiteSpace(ScriptText))
     {
       ShowToast("The editor is empty — nothing to send to the Studio.", isError: true);
@@ -1865,8 +1878,67 @@ public partial class Playground
     ShowToast("Loaded into the Studio SSW editor — add SoundCSS on the right, then Play.", isError: false);
   }
 
-  private async Task ResetEditorAsync(string id) =>
-      await Js.InvokeVoidAsync("playgroundEditor.setValue", id, id == SswEditorId ? StudioSswDefault : StudioCssDefault);
+  private async Task ResetEditorAsync(string id)
+  {
+    var value = id switch
+    {
+      MidiEditorId => MidiEditorDefault,
+      MidiCssEditorId => "",
+      SswEditorId => StudioSswDefault,
+      _ => StudioCssDefault,
+    };
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", id, value);
+  }
+
+  // ==========================================================================
+  // Top MIDI-rail editor wiring: nice code editor + optional SoundCSS timbre
+  // stylesheet applied to the offline Render Audio pass. Non-breaking — an empty
+  // stylesheet falls back to the built-in default.
+  // ==========================================================================
+
+  private const string MidiEditorId = "midi-editor";
+  private const string MidiCssEditorId = "midi-css-editor";
+  private string MidiEditorDefault { get; set; } = "";
+
+  private static IReadOnlyList<PlaygroundPresetInfo> MidiCliPresets { get; } =
+      PlaygroundPresetCatalog.AllPresets
+          .Where(p => p.OutputRail == PlaygroundOutputRail.Midi)
+          .OrderBy(p => p.Title, StringComparer.OrdinalIgnoreCase)
+          .ToArray();
+
+  private static IReadOnlyList<PlaygroundPresetInfo> WaveCliPresets { get; } =
+      PlaygroundPresetCatalog.AllPresets
+          .Where(p => p.OutputRail is PlaygroundOutputRail.Wave or PlaygroundOutputRail.WaveAutoDetect)
+          .OrderBy(p => p.Title, StringComparer.OrdinalIgnoreCase)
+          .ToArray();
+
+  // Loads a top example and pushes it into the MIDI code editor.
+  private async Task LoadSelectedExampleAsync()
+  {
+    LoadSelectedExample();
+    MidiEditorDefault = ScriptText;
+    if (_editorsReady)
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", MidiEditorId, ScriptText);
+  }
+
+  // Pulls the current MIDI editor contents into ScriptText before an action that
+  // consumes it (Run, Download, Style in Studio).
+  private async Task SyncMidiEditorAsync()
+  {
+    if (_editorsReady)
+      ScriptText = await Js.InvokeAsync<string>("playgroundEditor.getValue", MidiEditorId);
+  }
+
+  // Returns the user's SoundCSS timbre stylesheet for the offline MIDI render,
+  // or the built-in default when the editor is empty.
+  private async Task<string> GetMidiStylesheetAsync()
+  {
+    if (!_editorsReady)
+      return OfflineRenderer.DefaultStylesheet;
+
+    var css = await Js.InvokeAsync<string>("playgroundEditor.getValue", MidiCssEditorId);
+    return string.IsNullOrWhiteSpace(css) ? OfflineRenderer.DefaultStylesheet : css;
+  }
 
   private async Task ClearEditorAsync(string id) =>
       await Js.InvokeVoidAsync("playgroundEditor.clear", id);
