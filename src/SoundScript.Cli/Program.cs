@@ -547,16 +547,44 @@ static int Wave(string[] args)
             additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, resolvedTtsDir);
         }
 
-        if (TryGetOfflineTts(args, scriptPath, scriptDirectory, out var offlineTtsDir, out var offlineEngineName))
+        var hasOfflineTts = TryGetOfflineTts(args, scriptPath, scriptDirectory, out var offlineTtsDir, out var offlineEngineName);
+        var cssProvided = TryGetFlagValue(args, "--css", out var cssPathArg) && !string.IsNullOrWhiteSpace(cssPathArg);
+
+        // A --css stylesheet only affects speak lines rendered through the
+        // wordbank/composite vocal engine (--offline-tts). Without that, --css
+        // was silently ignored — word rules "didn't take effect" and output was
+        // inconsistent. When --css is given without --offline-tts and the script
+        // has speak lines, auto-enable wordbank offline-tts so the rules apply.
+        var hasSpeakLines = false;
+        foreach (var (speak, _) in adapted.SpeakTimings)
         {
-            var resolvedOfflineTtsDir = WavePathResolver.Resolve(scriptDirectory, offlineTtsDir);
-            var engine = string.IsNullOrWhiteSpace(offlineEngineName)
+            if (string.IsNullOrWhiteSpace(speak.SamplePath))
+            {
+                hasSpeakLines = true;
+                break;
+            }
+        }
+
+        var autoCss = cssProvided && !hasOfflineTts && hasSpeakLines;
+
+        if (hasOfflineTts || autoCss)
+        {
+            var dir = hasOfflineTts ? offlineTtsDir : "vocal-stems";
+            var engineName = hasOfflineTts ? offlineEngineName : "wordbank";
+            var resolvedOfflineTtsDir = WavePathResolver.Resolve(scriptDirectory, dir);
+            var engine = string.IsNullOrWhiteSpace(engineName)
                 ? VocalEngineFactory.CreateDefault()
-                : VocalEngineFactory.Create(offlineEngineName);
+                : VocalEngineFactory.Create(engineName);
             var vocalOptions = BuildVocalOptions(args);
             VocalBatchExporter.ExportFromScript(scriptPath, resolvedOfflineTtsDir, engine, vocalOptions);
             additionalOverlays = TtsDirectoryMapper.BuildOverlays(adapted.SpeakTimings, resolvedOfflineTtsDir);
-            Console.Error.WriteLine($"offline-tts: generated vocal stems in {resolvedOfflineTtsDir} via {engine.Name}.");
+            Console.Error.WriteLine(autoCss
+                ? $"note: --css applies to speak lines via wordbank offline-tts (auto-enabled). Stems in {resolvedOfflineTtsDir}."
+                : $"offline-tts: generated vocal stems in {resolvedOfflineTtsDir} via {engine.Name}.");
+        }
+        else if (cssProvided && !hasSpeakLines)
+        {
+            Console.Error.WriteLine("note: --css only styles speak lines; this script has none, so it had no effect.");
         }
 
         if (TryGetFlagValue(args, "--vocal", out var vocalPath))

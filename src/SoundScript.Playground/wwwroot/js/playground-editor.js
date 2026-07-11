@@ -262,5 +262,11 @@
         }, { passive: true });
     };
 
+    // Smoothly scroll an element into view (used by "Style in Studio").
+    api.scrollTo = function (id) {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     window.playgroundEditor = api;
 })();
