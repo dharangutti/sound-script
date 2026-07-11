@@ -155,11 +155,18 @@ public partial class PlaygroundPresetsTests
     return scripts;
   }
 
+  // Only the example-preset dropdowns (class="example-select") map to catalog
+  // entries. Other <select> controls in the page — e.g. the V10 Studio's
+  // "Render option" CLI-pattern picker — are not presets and are excluded.
   private static IEnumerable<string> ExtractOptionValues(string razorMarkup)
   {
-    foreach (Match match in OptionValueRegex().Matches(razorMarkup))
-      yield return match.Groups[1].Value;
+    foreach (Match select in ExampleSelectRegex().Matches(razorMarkup))
+      foreach (Match option in OptionValueRegex().Matches(select.Value))
+        yield return option.Groups[1].Value;
   }
+
+  [GeneratedRegex("<select[^>]*example-select[^>]*>.*?</select>", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+  private static partial Regex ExampleSelectRegex();
 
   [GeneratedRegex("option value=\"([^\"]+)\"", RegexOptions.CultureInvariant)]
   private static partial Regex OptionValueRegex();
