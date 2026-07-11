@@ -44,9 +44,9 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
-    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>]");
-    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>] [--css <style.ssc>]");
+    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>]");
     Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
     Console.Error.WriteLine("       soundscript wordbank normalize <lemma>|--all [--locale <code>] [--wordbank-dir <path>]");
     return 1;
@@ -593,7 +593,7 @@ static int Wave(string[] args)
 
 static bool WaveFlagTakesValue(string flag) =>
     flag is "--vocal" or "--tts-dir" or "--vocal-at" or "--vocal-gain"
-        or "--offline-tts" or "--offline-tts-dir" or "--offline-tts-voice";
+        or "--offline-tts" or "--offline-tts-dir" or "--offline-tts-voice" or "--css";
 
 static int Vocal(string[] args)
 {
@@ -613,8 +613,8 @@ static int Vocal(string[] args)
 
 static int PrintVocalUsage()
 {
-    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]");
+    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>]");
     return 1;
 }
 
@@ -646,6 +646,10 @@ static int VocalGenerate(string[] args)
                 engineName = parsedEngine;
             continue;
         }
+
+        // Consume the value of any known value-flag so it isn't read as the text.
+        if (TryMatchFlag(args, ref i, "--css", out _))
+            continue;
 
         if (args[i].StartsWith("--", StringComparison.Ordinal))
             continue;
@@ -909,7 +913,39 @@ static VocalEngineOptions BuildVocalOptions(string[] args)
         : "en";
     var locale = TryGetFlagValue(args, "--locale", out var loc) ? loc : null;
     var seed = TryGetIntFlag(args, "--seed", out var s) ? s : 7;
-    return new VocalEngineOptions { Voice = voice, Locale = locale, Seed = seed };
+    return new VocalEngineOptions
+    {
+        Voice = voice,
+        Locale = locale,
+        Seed = seed,
+        Pronunciations = LoadWordPronunciations(args),
+    };
+}
+
+// Parses word-level SoundCSS rules from a --css stylesheet, if supplied. Phoneme
+// rules are ignored here (word rules only). Missing file → warning; invalid
+// syntax → warning + no rules (rendering still proceeds).
+static IReadOnlyDictionary<string, SoundCssPronunciation>? LoadWordPronunciations(string[] args)
+{
+    if (!TryGetFlagValue(args, "--css", out var cssPath) || string.IsNullOrWhiteSpace(cssPath))
+        return null;
+
+    if (!File.Exists(cssPath))
+    {
+        Console.Error.WriteLine($"warning: SoundCSS file not found: {cssPath}");
+        return null;
+    }
+
+    try
+    {
+        var pronunciations = SoundCSSParser.ParsePronunciations(File.ReadAllText(cssPath));
+        return pronunciations.Count > 0 ? pronunciations : null;
+    }
+    catch (FormatException ex)
+    {
+        Console.Error.WriteLine($"warning: could not parse word rules in {cssPath}: {ex.Message}");
+        return null;
+    }
 }
 
 static bool TryGetOfflineTts(

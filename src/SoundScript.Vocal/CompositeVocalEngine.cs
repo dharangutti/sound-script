@@ -37,8 +37,9 @@ public sealed class CompositeVocalEngine : IVocalEngine
             if (parts.Count > 0)
                 parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
 
-            parts.Add(WordbankVocalSynthesizer.PrepareWordStem(
-                SynthesizeWordWithFallback(word, locale, options)));
+            var stem = WordbankVocalSynthesizer.PrepareWordStem(
+                SynthesizeWordWithFallback(word, locale, options));
+            parts.Add(WordbankVocalSynthesizer.ApplyWordTransform(stem, word, options));
         }
 
         var samples = VocalStemProcessor.Concat(parts);
