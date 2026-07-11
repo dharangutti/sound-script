@@ -1649,4 +1649,349 @@ public partial class Playground
     SsText = null;
     UsedWaveBackend = false;
   }
+
+  // ==========================================================================
+  // V10 Studio — split SSW + SoundCSS editors, CLI pattern selector, Play/
+  // Download, SoundCSS info modal, and a WordBank-only example generator.
+  // The editors are owned by wwwroot/js/playground-editor.js (Blazor renders
+  // only the empty mount divs) so JS-managed DOM is never diffed away.
+  // ==========================================================================
+
+  private const string SswEditorId = "ssw-editor";
+  private const string CssEditorId = "soundcss-editor";
+
+  private bool ShowSyntaxInfo { get; set; }
+  private string? ToastMessage { get; set; }
+  private bool ToastIsError { get; set; }
+  private int _toastId;
+
+  private byte[]? StudioWavBytes { get; set; }
+  private string SelectedPattern { get; set; } = "default";
+  private string CliPreview { get; set; } = "soundscript wave song.ssw out.wav";
+  private string StudioSswDefault { get; set; } = "";
+  private string StudioCssDefault { get; set; } = "";
+  private int _generatorIndex;
+  private bool _editorsReady;
+
+  private sealed record RenderPattern(string Key, string Label, string Description, string Cli);
+
+  // The five selectable CLI patterns. Continuous/CSS imply --offline-tts wordbank
+  // because the word-level transforms operate on the WordBank vocal stems.
+  private static readonly RenderPattern[] AllRenderPatterns =
+  [
+    new("default", "Default (no flags)",
+        "Render the .ssw straight to WAV via SoundScript.Wave — no vocal flags.",
+        "soundscript wave song.ssw out.wav"),
+    new("continuous", "Continuous Rendering (--continuous)",
+        "Cross-word DSP smoothing: crossfade, carried vibrato phase, pitch/formant glide.",
+        "soundscript wave song.ssw out.wav --offline-tts wordbank --continuous"),
+    new("css", "CSS Enabled (--css)",
+        "Apply the word-level SoundCSS pronunciation rules from the right pane.",
+        "soundscript wave song.ssw out.wav --offline-tts wordbank --css style.ssc"),
+    new("css-continuous", "CSS + Continuous (--css --continuous)",
+        "Word-level SoundCSS plus continuous cross-word stitching.",
+        "soundscript wave song.ssw out.wav --offline-tts wordbank --css style.ssc --continuous"),
+    new("offline-tts", "Offline TTS Wordbank (--offline-tts wordbank)",
+        "Synthesize words from the WordBank corpus — offline and deterministic.",
+        "soundscript wave song.ssw out.wav --offline-tts wordbank"),
+  ];
+
+  private IReadOnlyList<RenderPattern> RenderPatterns => AllRenderPatterns;
+
+  private RenderPattern CurrentPattern =>
+      AllRenderPatterns.FirstOrDefault(p => p.Key == SelectedPattern) ?? AllRenderPatterns[0];
+
+  // SoundCSS attributes shown in the ⓘ modal.
+  private static readonly (string Name, string Values)[] SoundCssAttributes =
+  [
+    ("style", "normal | sing | whisper | shout"),
+    ("persona", "narrator | robot | soft | bright"),
+    ("pitch", "+N | -N  (semitones, -24..24)"),
+    ("speed", "fast | slow | x1.2 | x0.8"),
+    ("timbre", "bright | dark | flat"),
+    ("vibrato", "none | light | medium | strong"),
+    ("accent", "usa | uk | india"),
+    ("breath", "none | low | medium | high"),
+    ("emotion", "happy | sad | angry | calm | excited"),
+    ("gender", "male | female | neutral"),
+    ("age", "child | teen | adult | senior"),
+    ("energy", "high | medium | low"),
+  ];
+
+  private const string SyntaxExample =
+      """
+      "hello" {
+          style: sing;
+          pitch: +4;
+          persona: bright;
+      }
+      """;
+
+  // Original, WordBank-only starter songs (every quoted word exists in the
+  // embedded English corpus). No copyrighted lyrics, no external vocabulary.
+  private static readonly (string Ssw, string Css)[] SafeExamples =
+  [
+    (
+      """
+      tempo 120
+      time 4/4
+
+      track pad {
+          p
+          Cmaj w Gmaj w
+      }
+
+      speak "bright star little song" seed=7
+      """,
+      """
+      "bright" { style: sing; persona: bright; pitch: +3; }
+      "star"   { style: sing; vibrato: medium; }
+      "little" { style: normal; persona: soft; }
+      "song"   { style: sing; vibrato: strong; }
+      """
+    ),
+    (
+      """
+      tempo 112
+      time 4/4
+
+      track pad {
+          p
+          Cmaj w Fmaj w
+      }
+
+      speak "happy world welcome music" seed=11
+      """,
+      """
+      "happy"   { style: sing; pitch: +5; }
+      "world"   { style: sing; timbre: bright; }
+      "welcome" { style: normal; persona: narrator; }
+      "music"   { style: sing; vibrato: strong; }
+      """
+    ),
+    (
+      """
+      tempo 96
+      time 4/4
+
+      track pad {
+          p
+          Amin w Gmaj w
+      }
+
+      speak "snow sound love way" seed=5
+      """,
+      """
+      "snow"  { style: sing; timbre: dark; }
+      "sound" { style: sing; persona: bright; }
+      "love"  { style: sing; vibrato: medium; }
+      "way"   { style: normal; persona: soft; }
+      """
+    ),
+  ];
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (!firstRender)
+      return;
+
+    // Start the Studio with an original WordBank-only example.
+    StudioSswDefault = SafeExamples[0].Ssw;
+    StudioCssDefault = SafeExamples[0].Css;
+
+    await Js.InvokeVoidAsync("playgroundEditor.init", SswEditorId,
+        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }  /  speak \"...\"" });
+    await Js.InvokeVoidAsync("playgroundEditor.init", CssEditorId,
+        new { language = "soundcss", theme = "dark", placeholder = "\"word\" { style: sing; pitch: +2; }" });
+    await Js.InvokeVoidAsync("playgroundEditor.initSplit", "studio-divider", "studio-left", "studio-right");
+
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, StudioSswDefault);
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", CssEditorId, StudioCssDefault);
+
+    _editorsReady = true;
+    UpdatePatternPreview();
+  }
+
+  private void UpdatePatternPreview()
+  {
+    CliPreview = CurrentPattern.Cli;
+    StateHasChanged();
+  }
+
+  // Loads a built-in wave example into the SSW editor only (never touches the
+  // top showcase editor).
+  private async Task LoadStudioExampleAsync()
+  {
+    LoadSelectedWaveExample(syncMainEditor: false);
+    StudioSswDefault = WaveScriptText;
+    if (_editorsReady)
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, WaveScriptText);
+  }
+
+  private async Task GenerateSafeExampleAsync()
+  {
+    var example = SafeExamples[_generatorIndex % SafeExamples.Length];
+    _generatorIndex++;
+
+    StudioSswDefault = example.Ssw;
+    StudioCssDefault = example.Css;
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, example.Ssw);
+    await Js.InvokeVoidAsync("playgroundEditor.setValue", CssEditorId, example.Css);
+    ShowToast("Generated an original WordBank-only example.", isError: false);
+  }
+
+  private async Task ResetEditorAsync(string id) =>
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", id, id == SswEditorId ? StudioSswDefault : StudioCssDefault);
+
+  private async Task ClearEditorAsync(string id) =>
+      await Js.InvokeVoidAsync("playgroundEditor.clear", id);
+
+  private async Task UndoEditorAsync(string id) =>
+      await Js.InvokeVoidAsync("playgroundEditor.undo", id);
+
+  private async Task RedoEditorAsync(string id) =>
+      await Js.InvokeVoidAsync("playgroundEditor.redo", id);
+
+  private async Task ToggleThemeAsync(string id) =>
+      await Js.InvokeVoidAsync("playgroundEditor.toggleTheme", id);
+
+  private async Task CopyEditorAsync(string id)
+  {
+    var ok = await Js.InvokeAsync<bool>("playgroundEditor.copy", id);
+    ShowToast(ok ? "Copied editor contents." : "Clipboard access was blocked by the browser.", isError: !ok);
+  }
+
+  private async Task CopyCliPreviewAsync()
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("navigator.clipboard.writeText", CliPreview);
+      ShowToast("Copied CLI command.", isError: false);
+    }
+    catch
+    {
+      ShowToast("Clipboard access was blocked by the browser.", isError: true);
+    }
+  }
+
+  private async Task CopySyntaxExampleAsync()
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("navigator.clipboard.writeText", SyntaxExample);
+      ShowToast("Copied SoundCSS example.", isError: false);
+    }
+    catch
+    {
+      ShowToast("Clipboard access was blocked by the browser.", isError: true);
+    }
+  }
+
+  // Renders the SSW editor content in-browser via SoundScript.Wave (deterministic,
+  // the WASM pipeline is unchanged). The SoundCSS pane is validated with the real
+  // parser and reflected in the CLI preview; word-level vocal transforms take full
+  // effect through the CLI command shown below.
+  private async Task PlayStudioAsync()
+  {
+    try
+    {
+      IsRunning = true;
+      ToastMessage = null;
+
+      var ssw = await Js.InvokeAsync<string>("playgroundEditor.getValue", SswEditorId);
+      var css = await Js.InvokeAsync<string>("playgroundEditor.getValue", CssEditorId);
+
+      if (string.IsNullOrWhiteSpace(ssw))
+      {
+        ShowToast("SSW script is empty — nothing to render.", isError: true);
+        return;
+      }
+
+      // Validate SoundCSS word rules (error toast on parse failure).
+      if (!string.IsNullOrWhiteSpace(css))
+      {
+        try
+        {
+          SoundCSSParser.ParsePronunciations(css);
+        }
+        catch (FormatException ex)
+        {
+          ShowToast($"SoundCSS error: {ex.Message}", isError: true);
+          return;
+        }
+      }
+
+      ProgramNode program;
+      try
+      {
+        var tokens = new Tokenizer(ssw).Tokenize();
+        program = new SoundScript.Parser.Parser(tokens).Parse();
+      }
+      catch (Exception ex)
+      {
+        ShowToast($"SSW error: {ex.Message}", isError: true);
+        return;
+      }
+
+      if (!_waveRenderCache.TryGetValue(ssw, out var wav))
+      {
+        wav = WaveRenderer.RenderStereoToBytes(program, PlaygroundWaveOptions);
+        _waveRenderCache[ssw] = wav;
+      }
+
+      StudioWavBytes = wav;
+
+      var speechWords = WaveSpeechTimeline.Build(program);
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+        await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+        var duration = await Js.InvokeAsync<double>("startWavPlayback", StudioWavBytes);
+        if (speechWords.Count > 0)
+          await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechWords);
+
+        ShowToast($"Playing {duration:F1}s · {CurrentPattern.Label}.", isError: false);
+      }
+      catch
+      {
+        ShowToast("Rendered — playback failed on this device, but you can download the WAV.", isError: true);
+      }
+    }
+    catch (Exception ex)
+    {
+      ShowToast(ex.Message, isError: true);
+    }
+    finally
+    {
+      IsRunning = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task DownloadStudioAsync()
+  {
+    if (StudioWavBytes is null)
+      return;
+
+    var fileName = $"soundscript-output-{DateTime.UtcNow:yyyyMMdd-HHmmss}.wav";
+    var base64 = Convert.ToBase64String(StudioWavBytes);
+    await Js.InvokeVoidAsync("SoundScriptAudio.download", base64, fileName);
+  }
+
+  // Non-blocking toast with auto-dismiss. The token guards against an earlier
+  // toast clearing a newer one.
+  private void ShowToast(string message, bool isError)
+  {
+    ToastMessage = message;
+    ToastIsError = isError;
+    var token = ++_toastId;
+    _ = Task.Delay(4000).ContinueWith(_ =>
+    {
+      if (_toastId == token)
+      {
+        ToastMessage = null;
+        InvokeAsync(StateHasChanged);
+      }
+    });
+  }
 }
