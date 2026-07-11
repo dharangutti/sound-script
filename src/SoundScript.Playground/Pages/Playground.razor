@@ -94,6 +94,8 @@
                 <button type="button" class="btn btn-secondary" @onclick="ResetEditor">Reset</button>
                 <button type="button" class="btn btn-secondary" @onclick="CopyScriptAsync">Copy</button>
                 <button type="button" class="btn btn-secondary" disabled="@IsRunning" @onclick="DownloadCurrentScriptAsync">Download script</button>
+                <button type="button" class="btn btn-secondary" title="Load this example into the SoundCSS studio below"
+                        @onclick="StyleInStudioAsync">Style in Studio ↓</button>
             </div>
             <textarea id="script-input"
                       @key="SelectedExampleKey"
@@ -140,6 +142,8 @@
                 </details>
             }
 
+            <details class="pipeline-collapse" open>
+                <summary>Pipeline</summary>
             <div class="pipeline">
                 <span>Tokenizer</span>
                 <span class="arrow">→</span>
@@ -188,6 +192,7 @@
                     <span>WAV</span>
                 </div>
             }
+            </details>
 
             <details class="output-hint">
                 <summary>About this playground</summary>

@@ -1840,6 +1840,25 @@ public partial class Playground
     ShowToast("Generated an original WordBank-only example.", isError: false);
   }
 
+  // Bridges the top example showcase into the SoundCSS-capable Studio: loads the
+  // current top-editor script into the Studio SSW pane and scrolls to it, so any
+  // upper example can be styled with word-level SoundCSS.
+  private async Task StyleInStudioAsync()
+  {
+    if (string.IsNullOrWhiteSpace(ScriptText))
+    {
+      ShowToast("The editor is empty — nothing to send to the Studio.", isError: true);
+      return;
+    }
+
+    StudioSswDefault = ScriptText;
+    if (_editorsReady)
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, ScriptText);
+
+    await Js.InvokeVoidAsync("playgroundEditor.scrollTo", "studio-heading");
+    ShowToast("Loaded into the Studio SSW editor — add SoundCSS on the right, then Play.", isError: false);
+  }
+
   private async Task ResetEditorAsync(string id) =>
       await Js.InvokeVoidAsync("playgroundEditor.setValue", id, id == SswEditorId ? StudioSswDefault : StudioCssDefault);
 
