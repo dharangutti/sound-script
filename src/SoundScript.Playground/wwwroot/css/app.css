@@ -915,3 +915,24 @@ a:hover { text-decoration: underline; }
 .vocal-toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--accent); }
 .vocal-toggle-status { color: var(--muted); font-size: 0.8rem; }
 .vocal-toggle-status.vocal-on { color: var(--accent); }
+
+/* Top MIDI editor: SoundCSS timbre panel + CLI examples split (V10) */
+.midi-css-panel { margin-top: 0.6rem; }
+.midi-css-panel > summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+}
+.editor-mount-css.pge { min-height: 8rem; }
+
+.cli-examples-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+.cli-examples-section { margin: 0; }
+@media (max-width: 720px) {
+    .cli-examples-split { grid-template-columns: 1fr; }
+}
