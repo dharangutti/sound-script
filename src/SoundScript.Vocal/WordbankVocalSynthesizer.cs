@@ -1,3 +1,5 @@
+using SoundScript.Timbre;
+using SoundScript.Vocal.Wordbank;
 using SoundScript.Wave.Io;
 using SoundScript.Wordbank;
 
@@ -24,10 +26,35 @@ internal static class WordbankVocalSynthesizer
             if (parts.Count > 0)
                 parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
 
-            parts.Add(PrepareWordStem(SynthesizeWord(word, locale)));
+            var stem = PrepareWordStem(SynthesizeWord(word, locale));
+            parts.Add(ApplyWordTransform(stem, word, options));
         }
 
         return VocalStemProcessor.Concat(parts);
+    }
+
+    /// <summary>
+    /// Applies word-level SoundCSS transforms to a prepared stem when the options
+    /// carry a matching pronunciation rule. The canonical base pitch is estimated
+    /// from the stem (Prompt 1 metadata) so pitch transforms stay relative to the
+    /// recorded voice. Deterministic: no-op when no rule matches.
+    /// </summary>
+    internal static float[] ApplyWordTransform(float[] stem, string word, VocalEngineOptions options)
+    {
+        if (options.Pronunciations is null || stem.Length == 0)
+            return stem;
+
+        if (!options.Pronunciations.TryGetValue(word, out var pronunciation))
+            return stem;
+
+        var basePitch = AudioNormalizeOps.DetectBasePitchHz(stem, WavWriter.SampleRate);
+        var metadata = basePitch > 0
+            ? CanonicalVoiceMetadata.Default with { BasePitchHz = basePitch }
+            : CanonicalVoiceMetadata.Default;
+
+        var plan = SoundCssDspMapper.Map(pronunciation, metadata);
+        var transformed = DspTransformRenderer.Render(stem, plan, options.Seed);
+        return transformed.Length > 0 ? transformed : stem;
     }
 
     /// <summary>Corpus human audio when available; otherwise G2P timbre (wordbank-only path).</summary>

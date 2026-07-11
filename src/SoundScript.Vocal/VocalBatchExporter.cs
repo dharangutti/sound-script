@@ -53,8 +53,10 @@ public static class VocalBatchExporter
                 var stemOptions = new VocalEngineOptions
                 {
                     Voice = options.Voice,
+                    Locale = options.Locale,
                     Seed = speak.Seed ?? options.Seed,
                     OutputGain = options.OutputGain,
+                    Pronunciations = options.Pronunciations,
                 };
                 engine.Synthesize(speak.Text, filePath, stemOptions);
             }
