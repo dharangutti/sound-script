@@ -263,6 +263,29 @@ soundscript vocal generate "jingle bells" --out jb.wav --engine wordbank --css s
 Phoneme rules (`p`, `aa`, …) in the same file continue to feed the offline timbre
 renderer (`render --css`); the two layers are independent and can coexist.
 
+### Continuous rendering (`--continuous`)
+
+By default each word is rendered and concatenated independently with a short
+silence gap, which leaves audible boundaries — most noticeable in singing. Pass
+`--continuous` to stitch words with cross-word DSP smoothing instead:
+
+```bash
+soundscript vocal generate "jingle bells" --out jb.wav --engine wordbank --css style.ssc --continuous
+soundscript wave song.ssw out.wav --offline-tts wordbank --css style.ssc --continuous
+```
+
+The `ContinuousVocalRenderer` stage:
+
+- **equal-power crossfade** (default 10 ms, `Math.Sqrt`-based) overlaps adjacent
+  words, replacing the silence gap and softening attacks/releases;
+- carries the **vibrato LFO phase** across words so vibrato doesn't reset;
+- keeps a **continuous deterministic noise index** so the breath floor doesn't pop;
+- applies **pitch and formant glide** toward the previous word (`PitchSmoothing`
+  0.15, `FormantSmoothing` 0.2 by default) to avoid sudden jumps.
+
+It is opt-in and deterministic: identical input renders byte-identical output on
+every platform.
+
 ## Example file
 
 → [examples/default.ssc](../examples/default.ssc)

@@ -26,7 +26,23 @@ public static class DspTransformRenderer
         float[] input,
         DspTransformPlan plan,
         int seed = 0,
-        int sampleRate = WavWriter.SampleRate)
+        int sampleRate = WavWriter.SampleRate) =>
+        Render(input, plan, seed, sampleRate, initialVibratoPhase: 0.0, noiseIndexOffset: 0);
+
+    /// <summary>
+    /// Continuity-aware overload used by <see cref="ContinuousVocalRenderer"/>:
+    /// <paramref name="initialVibratoPhase"/> seeds the vibrato LFO so its phase
+    /// carries across word boundaries, and <paramref name="noiseIndexOffset"/>
+    /// advances the deterministic noise stream so the breath/noise floor is
+    /// continuous rather than restarting per word.
+    /// </summary>
+    public static float[] Render(
+        float[] input,
+        DspTransformPlan plan,
+        int seed,
+        int sampleRate,
+        double initialVibratoPhase,
+        int noiseIndexOffset)
     {
         if (input.Length == 0)
             return input;
@@ -41,7 +57,7 @@ public static class DspTransformRenderer
         buffer = ApplyFormantTilt(buffer, plan.FormantShift, sampleRate);
 
         if (plan.Vibrato.IsActive)
-            buffer = ApplyVibrato(buffer, plan.Vibrato, sampleRate);
+            buffer = ApplyVibrato(buffer, plan.Vibrato, sampleRate, initialVibratoPhase);
 
         var samples = new float[buffer.Length];
         for (var i = 0; i < buffer.Length; i++)
@@ -62,7 +78,7 @@ public static class DspTransformRenderer
         {
             var value = samples[i] * gain;
             if (noiseScale > 0)
-                value += DeterministicRandom.Unit(seed, i, NoiseSalt) * noiseScale;
+                value += DeterministicRandom.Unit(seed, noiseIndexOffset + i, NoiseSalt) * noiseScale;
 
             samples[i] = (float)Math.Clamp(value, -1.0, 1.0);
         }
@@ -117,7 +133,7 @@ public static class DspTransformRenderer
         return ApplyEqBand(x, band, sampleRate);
     }
 
-    private static double[] ApplyVibrato(double[] x, VibratoParams vibrato, int sampleRate)
+    private static double[] ApplyVibrato(double[] x, VibratoParams vibrato, int sampleRate, double initialPhase)
     {
         // Modulated fractional delay ≈ periodic pitch warble. Deterministic sine.
         var maxDelaySamples = vibrato.DepthSemitones * 0.004 * sampleRate;
@@ -126,12 +142,21 @@ public static class DspTransformRenderer
 
         for (var i = 0; i < x.Length; i++)
         {
-            var lfo = 0.5 + 0.5 * DeterministicMath.Sin(angularStep * i);
+            var lfo = 0.5 + 0.5 * DeterministicMath.Sin(initialPhase + angularStep * i);
             var position = i - maxDelaySamples * lfo;
             output[i] = SampleLinear(x, position);
         }
 
         return output;
+    }
+
+    /// <summary>Advances the vibrato LFO phase by <paramref name="sampleCount"/> samples.</summary>
+    internal static double AdvanceVibratoPhase(double phase, VibratoParams vibrato, int sampleCount, int sampleRate)
+    {
+        if (!vibrato.IsActive)
+            return phase;
+
+        return phase + 2.0 * Math.PI * vibrato.RateHz * sampleCount / sampleRate;
     }
 
     private static double[] LowPass(double[] x, double cutoffHz, int sampleRate) =>

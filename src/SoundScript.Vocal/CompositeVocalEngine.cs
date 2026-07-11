@@ -30,19 +30,35 @@ public sealed class CompositeVocalEngine : IVocalEngine
             throw new InvalidOperationException("Text must contain at least one letter.");
 
         var locale = WordbankVocalSynthesizer.ResolveLocale(options);
-        var parts = new List<float[]>();
+        float[] samples;
 
-        foreach (var word in words)
+        if (options.Continuous)
         {
-            if (parts.Count > 0)
-                parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
+            var stems = new List<float[]>(words.Count);
+            foreach (var word in words)
+            {
+                stems.Add(WordbankVocalSynthesizer.PrepareWordStem(
+                    SynthesizeWordWithFallback(word, locale, options)));
+            }
 
-            var stem = WordbankVocalSynthesizer.PrepareWordStem(
-                SynthesizeWordWithFallback(word, locale, options));
-            parts.Add(WordbankVocalSynthesizer.ApplyWordTransform(stem, word, options));
+            samples = ContinuousVocalRenderer.Assemble(words, stems, options);
+        }
+        else
+        {
+            var parts = new List<float[]>();
+            foreach (var word in words)
+            {
+                if (parts.Count > 0)
+                    parts.Add(VocalStemProcessor.Silence(WordGapSeconds));
+
+                var stem = WordbankVocalSynthesizer.PrepareWordStem(
+                    SynthesizeWordWithFallback(word, locale, options));
+                parts.Add(WordbankVocalSynthesizer.ApplyWordTransform(stem, word, options));
+            }
+
+            samples = VocalStemProcessor.Concat(parts);
         }
 
-        var samples = VocalStemProcessor.Concat(parts);
         samples = VocalStemNormalizer.Normalize(samples, options.OutputGain);
 
         if (VocalStemNormalizer.Peak(samples) <= 1e-6)

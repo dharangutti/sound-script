@@ -44,9 +44,9 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript compose \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
-    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>] [--css <style.ssc>]");
-    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>]");
+    Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>] [--css <style.ssc>] [--continuous]");
+    Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>] [--continuous]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
     Console.Error.WriteLine("       soundscript wordbank normalize <lemma>|--all [--locale <code>] [--wordbank-dir <path>]");
     return 1;
@@ -613,8 +613,8 @@ static int Vocal(string[] args)
 
 static int PrintVocalUsage()
 {
-    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>]");
-    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>]");
+    Console.Error.WriteLine("Usage: soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>] [--continuous]");
+    Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>] [--continuous]");
     return 1;
 }
 
@@ -919,6 +919,7 @@ static VocalEngineOptions BuildVocalOptions(string[] args)
         Locale = locale,
         Seed = seed,
         Pronunciations = LoadWordPronunciations(args),
+        Continuous = args.Contains("--continuous", StringComparer.OrdinalIgnoreCase),
     };
 }
 

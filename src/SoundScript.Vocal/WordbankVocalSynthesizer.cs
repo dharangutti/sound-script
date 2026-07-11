@@ -19,8 +19,17 @@ internal static class WordbankVocalSynthesizer
             throw new InvalidOperationException("Text must contain at least one letter.");
 
         var locale = ResolveLocale(options);
-        var parts = new List<float[]>();
 
+        if (options.Continuous)
+        {
+            var stems = new List<float[]>(words.Count);
+            foreach (var word in words)
+                stems.Add(PrepareWordStem(SynthesizeWord(word, locale)));
+
+            return ContinuousVocalRenderer.Assemble(words, stems, options);
+        }
+
+        var parts = new List<float[]>();
         foreach (var word in words)
         {
             if (parts.Count > 0)

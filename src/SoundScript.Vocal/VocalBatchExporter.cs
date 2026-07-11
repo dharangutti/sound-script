@@ -57,6 +57,10 @@ public static class VocalBatchExporter
                     Seed = speak.Seed ?? options.Seed,
                     OutputGain = options.OutputGain,
                     Pronunciations = options.Pronunciations,
+                    Continuous = options.Continuous,
+                    CrossfadeMs = options.CrossfadeMs,
+                    PitchSmoothing = options.PitchSmoothing,
+                    FormantSmoothing = options.FormantSmoothing,
                 };
                 engine.Synthesize(speak.Text, filePath, stemOptions);
             }
