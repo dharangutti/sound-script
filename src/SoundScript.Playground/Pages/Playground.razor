@@ -298,20 +298,26 @@
         </p>
     </details>
 
-    <section class="pane pane-wave" aria-labelledby="wave-heading">
-        <div class="pane-wave-header">
-            <h2 id="wave-heading">SoundScript.Wave — .ssw direct to WAV</h2>
+    @* ===================================================================
+       V10 Studio — redesigned bottom section. Split SSW + SoundCSS editors,
+       SoundCSS info modal, CLI pattern selector, Play/Download. The top
+       example showcase above is intentionally untouched.
+       =================================================================== *@
+    <section class="studio" aria-labelledby="studio-heading">
+        <div class="studio-head">
+            <h2 id="studio-heading">SoundScript Wave — Studio</h2>
             <p class="hint">
-                No MIDI step. <code>track</code>/<code>speak</code>/<code>effect</code>
-                scripts render straight to WAV through <code>AstToNoteEventAdapter →
-                Mixer → MasterEffectChain → WavWriter</code>. Deterministic —
-                identical script text always produces byte-identical audio.
+                Score on the left (<code>.ssw</code>), word-level
+                <code>SoundCSS</code> on the right. Play renders in-browser through
+                <code>SoundScript.Wave</code> (deterministic — identical input always
+                produces byte-identical audio); the CLI preview below is the exact
+                command for the selected render option.
             </p>
         </div>
 
         <div class="presets presets-wave">
             <span class="preset-label">Example:</span>
-            <select class="example-select" @bind="SelectedWaveExampleKey" @bind:after="() => LoadSelectedWaveExample()">
+            <select class="example-select" @bind="SelectedWaveExampleKey" @bind:after="LoadStudioExampleAsync">
                 <option value="wave-effects">Effects (delay + lowpass)</option>
                 <option value="wave-speak">Speak (phoneme tones)</option>
                 <option value="wave-humanize">Humanize</option>
@@ -323,64 +329,110 @@
                 <option value="jingle-bells-wordbank">Jingle Bells + WordBank vocal (V9)</option>
                 <option value="showcase-jingle-bells-wave">Jingle Bells — Wave rail</option>
             </select>
+            <button type="button" class="btn btn-secondary" @onclick="GenerateSafeExampleAsync">Generate example</button>
             @if (ActiveWavePreset is not null)
             {
                 <span class="preset-active-title">@ActiveWavePreset.Title</span>
             }
         </div>
 
-        @if (ActiveWavePreset is not null)
-        {
-            <details class="example-cli-panel example-cli-panel-wave">
-                <summary>Wave example CLI — @ActiveWavePreset.Title</summary>
-                <div class="example-cli-header">
-                    <span class="badge badge-rail">@ActiveWavePreset.OutputRailLabel</span>
-                    <span class="example-cli-action">Playground: <strong>@ActiveWavePreset.PlaygroundAction</strong></span>
+        <div class="studio-split">
+            <div class="studio-pane" id="studio-left">
+                <div class="studio-pane-header">
+                    <span class="studio-pane-title">SSW Script</span>
                 </div>
-                @if (ActiveWavePreset.ExampleFile is not null)
-                {
-                    <p class="example-cli-file">
-                        Example file:
-                        <a href="@ActiveWavePreset.ExampleRepoUrl" target="_blank" rel="noopener noreferrer">examples/@ActiveWavePreset.ExampleFile</a>
-                        · <a href="@ActiveWavePreset.DocsUrl" target="_blank" rel="noopener noreferrer">docs catalog</a>
-                    </p>
-                }
-                else
-                {
-                    <p class="example-cli-file example-cli-muted">No on-disk file — inline Playground preset only.</p>
-                }
-                @if (!string.IsNullOrWhiteSpace(ActiveWavePreset.Notes))
-                {
-                    <p class="example-cli-notes">@ActiveWavePreset.Notes</p>
-                }
-                <ol class="cli-steps">
-                    @foreach (var line in ActiveWavePreset.CliSteps)
+                <div class="studio-toolbar" role="toolbar" aria-label="SSW editor actions">
+                    <button type="button" class="btn btn-secondary" @onclick="() => ResetEditorAsync(SswEditorId)">Reset</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => ClearEditorAsync(SswEditorId)">Clear</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => CopyEditorAsync(SswEditorId)">Copy</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => UndoEditorAsync(SswEditorId)">Undo</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => RedoEditorAsync(SswEditorId)">Redo</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => ToggleThemeAsync(SswEditorId)">Theme</button>
+                </div>
+                <div class="editor-mount" id="@SswEditorId"></div>
+            </div>
+
+            <div class="studio-divider" id="studio-divider" role="separator" aria-orientation="vertical"></div>
+
+            <div class="studio-pane studio-pane-right" id="studio-right">
+                <div class="studio-pane-header">
+                    <span class="studio-pane-title">SoundCSS</span>
+                    <button type="button" class="icon-btn" title="SoundCSS syntax reference"
+                            aria-label="SoundCSS syntax reference" @onclick="() => ShowSyntaxInfo = true">ⓘ</button>
+                </div>
+                <div class="studio-toolbar" role="toolbar" aria-label="SoundCSS editor actions">
+                    <button type="button" class="btn btn-secondary" @onclick="() => ResetEditorAsync(CssEditorId)">Reset</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => ClearEditorAsync(CssEditorId)">Clear</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => CopyEditorAsync(CssEditorId)">Copy</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => UndoEditorAsync(CssEditorId)">Undo</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => RedoEditorAsync(CssEditorId)">Redo</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => ToggleThemeAsync(CssEditorId)">Theme</button>
+                </div>
+                <div class="editor-mount" id="@CssEditorId"></div>
+            </div>
+        </div>
+
+        <div class="studio-render">
+            <div class="render-row">
+                <label for="render-option">Render option:</label>
+                <select id="render-option" class="render-select" @bind="SelectedPattern" @bind:after="UpdatePatternPreview">
+                    @foreach (var pattern in RenderPatterns)
                     {
-                        <li>
-                            <code class="cli-line">@line</code>
-                            <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="() => CopyCliLineAsync(line)">Copy</button>
-                        </li>
+                        <option value="@pattern.Key">@pattern.Label</option>
                     }
-                </ol>
-            </details>
-        }
-
-        <textarea @key="SelectedWaveExampleKey"
-                  class="script-input script-input-wave"
-                  @bind="WaveScriptText"
-                  spellcheck="false"
-                  placeholder="effect delay time=0.25 feedback=0.35 mix=0.3"></textarea>
-
-        <div class="actions actions-wave">
-            <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="RunWaveAsync">
-                @(IsRunning ? "Rendering…" : "Render")
-            </button>
-            <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
-            @if (WaveOutputBytes is not null)
-            {
-                <button type="button" class="btn btn-secondary" @onclick="DownloadWaveOutputAsync">Download WAV</button>
-            }
-            <span class="badge badge-wave">SoundScript.Wave · no MIDI step</span>
+                </select>
+                <button type="button" class="btn btn-primary" disabled="@IsRunning" @onclick="PlayStudioAsync">
+                    @if (IsRunning)
+                    {
+                        <span class="spinner"></span><text>Rendering…</text>
+                    }
+                    else
+                    {
+                        <text>▶ Play</text>
+                    }
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="StopAsync">Stop</button>
+                <button type="button" class="btn btn-secondary" disabled="@(StudioWavBytes is null)" @onclick="DownloadStudioAsync">Download WAV</button>
+                <span class="badge badge-wave">SoundScript.Wave · no MIDI step</span>
+            </div>
+            <p class="render-desc">@CurrentPattern.Description</p>
+            <div class="cli-preview">
+                <code>@CliPreview</code>
+                <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="CopyCliPreviewAsync">Copy</button>
+            </div>
         </div>
     </section>
+
+    @if (ShowSyntaxInfo)
+    {
+        <div class="modal-backdrop" @onclick="() => ShowSyntaxInfo = false">
+            <div class="modal" @onclick:stopPropagation="true" role="dialog" aria-modal="true" aria-label="SoundCSS syntax">
+                <div class="modal-header">
+                    <h3>SoundCSS syntax</h3>
+                    <button type="button" class="icon-btn" aria-label="Close" @onclick="() => ShowSyntaxInfo = false">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="hint">Word rules use a quoted selector; each attribute is optional.</p>
+                    @foreach (var attr in SoundCssAttributes)
+                    {
+                        <div class="syntax-item">
+                            <h4>@attr.Name</h4>
+                            <span class="values">@attr.Values</span>
+                        </div>
+                    }
+                    <div class="syntax-example">
+                        <pre>@SyntaxExample</pre>
+                        <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="CopySyntaxExampleAsync">Copy example</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (ToastMessage is not null)
+    {
+        <div class="toast @(ToastIsError ? "" : "toast-success")" role="@(ToastIsError ? "alert" : "status")">
+            @ToastMessage
+        </div>
+    }
 </div>
