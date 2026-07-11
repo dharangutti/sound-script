@@ -886,3 +886,12 @@ a:hover { text-decoration: underline; }
     .studio-pane { flex: 1 1 auto !important; }
     .pge-input { font-size: 16px; } /* prevent iOS zoom */
 }
+
+/* Collapsible pipeline (V10 — partial-visible / collapsible output) */
+.pipeline-collapse { margin: 0.5rem 0; }
+.pipeline-collapse > summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+}
