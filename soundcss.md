@@ -243,6 +243,26 @@ reusing the shared one-pole filter (EQ), resampling (pitch shift / time-stretch)
 the deterministic sine LFO (vibrato), and the seeded PRNG (breath/noise) — so a
 given `(input, plan, seed)` renders byte-identical audio on every platform.
 
+### Applying word rules from the CLI
+
+Pass the stylesheet with `--css` to a vocal/wave command. Each spoken word whose
+text matches a quoted rule (case-insensitive) has its stem transformed
+(map → DSP render) before mixing; words without a rule are unchanged:
+
+```bash
+# Per-word transforms on generated stems
+soundscript vocal batch song.ssw --out-dir stems --engine wordbank --css style.ssc
+
+# ...and through the wave renderer's offline TTS
+soundscript wave song.ssw out.wav --offline-tts wordbank --css style.ssc
+
+# Single phrase
+soundscript vocal generate "jingle bells" --out jb.wav --engine wordbank --css style.ssc
+```
+
+Phoneme rules (`p`, `aa`, …) in the same file continue to feed the offline timbre
+renderer (`render --css`); the two layers are independent and can coexist.
+
 ## Example file
 
 → [examples/default.ssc](../examples/default.ssc)
