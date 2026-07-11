@@ -23,7 +23,28 @@
     <ProjectReference Include="..\SoundScript.Timbre\SoundScript.Timbre.csproj" />
     <ProjectReference Include="..\SoundScript.Prosody\SoundScript.Prosody.csproj" />
     <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
+    <ProjectReference Include="..\SoundScript.Vocal\SoundScript.Vocal.csproj" />
   </ItemGroup>
+
+  <!--
+    Extended in-browser vocal engine assets. The WordBank corpus (lemmas + audio)
+    is copied into wwwroot/vocal-corpus as static web assets so the browser can
+    fetch it ON DEMAND when the user enables the vocal engine. It is NOT part of
+    the initial download — OFF stays lightweight. Copied at build time (not
+    committed) to avoid duplicating the corpus already tracked under
+    src/SoundScript.Wordbank/Data.
+  -->
+  <Target Name="CopyVocalCorpus" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <_VocalCorpusAudio Include="..\SoundScript.Wordbank\Data\corpus\v2026.07\audio\en\*.wav" />
+    </ItemGroup>
+    <Copy SourceFiles="..\SoundScript.Wordbank\Data\corpus\v2026.07\en\lemmas.json"
+          DestinationFiles="$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\en\lemmas.json"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_VocalCorpusAudio)"
+          DestinationFiles="@(_VocalCorpusAudio->'$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\audio\en\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 
   <Target Name="FlattenPlaygroundPublish" AfterTargets="Publish">
     <ItemGroup>

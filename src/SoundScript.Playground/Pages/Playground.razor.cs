@@ -1,3 +1,5 @@
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -7,16 +9,20 @@ using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Prosody;
 using SoundScript.Timbre;
+using SoundScript.Vocal;
 using SoundScript.Voice;
 using SoundScript.Wave;
 using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Prosody;
+using SoundScript.Wordbank;
+using SoundScript.Wordbank.Models;
 
 namespace SoundScript.Playground.Pages;
 
 public partial class Playground
 {
   [Inject] private IJSRuntime Js { get; set; } = null!;
+  [Inject] private HttpClient Http { get; set; } = null!;
 
   private const string DefaultScript =
       """
@@ -1927,11 +1933,12 @@ public partial class Playground
       }
 
       // Validate SoundCSS word rules (error toast on parse failure).
+      IReadOnlyDictionary<string, SoundCssPronunciation>? pronunciations = null;
       if (!string.IsNullOrWhiteSpace(css))
       {
         try
         {
-          SoundCSSParser.ParsePronunciations(css);
+          pronunciations = SoundCSSParser.ParsePronunciations(css);
         }
         catch (FormatException ex)
         {
@@ -1950,6 +1957,32 @@ public partial class Playground
       {
         ShowToast($"SSW error: {ex.Message}", isError: true);
         return;
+      }
+
+      // In-browser vocal engine (toggle ON): render speak lines through
+      // SoundScript.Vocal so word-level SoundCSS actually shapes the audio.
+      if (VocalEngineEnabled && VocalCorpusReady)
+      {
+        try
+        {
+          var continuous = SelectedPattern is "continuous" or "css-continuous";
+          var vocal = await TryRenderWithVocalEngineAsync(program, pronunciations, continuous);
+          if (vocal is not null)
+          {
+            StudioWavBytes = vocal;
+            await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+            await Js.InvokeVoidAsync("SoundScriptVoice.stop");
+            var vocalDuration = await Js.InvokeAsync<double>("startWavPlayback", StudioWavBytes);
+            ShowToast($"Playing {vocalDuration:F1}s · in-browser vocal engine (SoundCSS applied).", isError: false);
+            return;
+          }
+
+          ShowToast("No speak lines to vocalize — playing instrumental preview.", isError: false);
+        }
+        catch (Exception ex)
+        {
+          ShowToast($"Vocal render failed ({ex.Message}); playing preview.", isError: true);
+        }
       }
 
       if (!_waveRenderCache.TryGetValue(ssw, out var wav))
@@ -1995,6 +2028,136 @@ public partial class Playground
     var fileName = $"soundscript-output-{DateTime.UtcNow:yyyyMMdd-HHmmss}.wav";
     var base64 = Convert.ToBase64String(StudioWavBytes);
     await Js.InvokeVoidAsync("SoundScriptAudio.download", base64, fileName);
+  }
+
+  // ==========================================================================
+  // In-Browser Vocal Engine toggle. OFF (default): lightweight preview via
+  // SoundScript.Wave, no corpus download. ON: lazily fetches the WordBank corpus
+  // (lemma index once, then per-word audio on demand) and renders speak lines
+  // through SoundScript.Vocal so word-level SoundCSS is audible in the browser.
+  // ==========================================================================
+
+  private const string VocalLocale = "en";
+
+  private bool VocalEngineEnabled { get; set; }
+  private bool VocalCorpusReady { get; set; }
+  private bool VocalCorpusLoading { get; set; }
+  private bool _corpusIndexLoaded;
+
+  private async Task OnToggleVocalEngineAsync(ChangeEventArgs e)
+  {
+    VocalEngineEnabled = e.Value is true;
+    if (VocalEngineEnabled)
+      await EnsureCorpusIndexAsync();
+  }
+
+  // Fetches the (small) lemma index once so lookups + audio paths resolve. Audio
+  // WAVs are fetched later, per word, only when actually rendered.
+  private async Task EnsureCorpusIndexAsync()
+  {
+    if (_corpusIndexLoaded)
+    {
+      VocalCorpusReady = true;
+      return;
+    }
+
+    try
+    {
+      VocalCorpusLoading = true;
+      StateHasChanged();
+
+      var doc = await Http.GetFromJsonAsync<CorpusLemmasDocument>("vocal-corpus/en/lemmas.json");
+      if (doc is null)
+        throw new InvalidOperationException("Empty corpus index.");
+
+      foreach (var entry in doc.Entries)
+        CorpusCatalog.UpsertLemma(VocalLocale, entry);
+
+      _corpusIndexLoaded = true;
+      VocalCorpusReady = true;
+      ShowToast("In-browser vocal engine ready — SoundCSS now applies to speak lines on Play.", isError: false);
+    }
+    catch (Exception ex)
+    {
+      VocalEngineEnabled = false;
+      VocalCorpusReady = false;
+      ShowToast($"Couldn't load the vocal corpus: {ex.Message}. Using preview.", isError: true);
+    }
+    finally
+    {
+      VocalCorpusLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  // Fetches WAV bytes for any corpus word not already in memory.
+  private async Task EnsureWordAudioAsync(IEnumerable<string> words)
+  {
+    foreach (var word in words.Distinct(StringComparer.OrdinalIgnoreCase))
+    {
+      if (!CorpusCatalog.TryGetLemma(VocalLocale, word, out var entry))
+        continue;
+      if (string.IsNullOrWhiteSpace(entry.Audio) || CorpusCatalog.HasAudio(entry))
+        continue;
+
+      try
+      {
+        var bytes = await Http.GetByteArrayAsync($"vocal-corpus/{entry.Audio}");
+        CorpusCatalog.RegisterAudio(entry.Audio!, bytes);
+      }
+      catch
+      {
+        // Missing/failed audio falls back to G2P inside the engine.
+      }
+    }
+  }
+
+  // Collects the words from all non-sample speak lines in the program.
+  private static List<string> CollectSpeakWords(IReadOnlyList<AstNode> statements)
+  {
+    var words = new List<string>();
+    Walk(statements, words);
+    return words;
+
+    static void Walk(IReadOnlyList<AstNode> nodes, List<string> acc)
+    {
+      foreach (var node in nodes)
+      {
+        switch (node)
+        {
+          case SpeakNode speak when string.IsNullOrWhiteSpace(speak.SamplePath) && !string.IsNullOrWhiteSpace(speak.Text):
+            acc.AddRange(speak.Text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+            break;
+          case TrackNode track: Walk(track.Body, acc); break;
+          case MelodyNode melody: Walk(melody.Body, acc); break;
+          case BlockNode block: Walk(block.Body, acc); break;
+          case LoopNode loop: Walk(loop.Body, acc); break;
+          case SequenceNode sequence: Walk(sequence.Body, acc); break;
+          case PhraseNode phrase: Walk(phrase.Body, acc); break;
+        }
+      }
+    }
+  }
+
+  // Renders the program's speak lines through the wordbank vocal engine with the
+  // word-level SoundCSS rules applied. Returns null when there is nothing to sing.
+  private async Task<byte[]?> TryRenderWithVocalEngineAsync(
+      ProgramNode program, IReadOnlyDictionary<string, SoundCssPronunciation>? pronunciations, bool continuous)
+  {
+    var words = CollectSpeakWords(program.Statements);
+    if (words.Count == 0)
+      return null;
+
+    await EnsureWordAudioAsync(words);
+
+    var options = new VocalEngineOptions
+    {
+      Locale = VocalLocale,
+      Pronunciations = pronunciations,
+      Continuous = continuous,
+    };
+
+    return new WordbankVocalEngine().SynthesizeToWavBytes(string.Join(' ', words), options);
   }
 
   // Non-blocking toast with auto-dismiss. The token guards against an earlier

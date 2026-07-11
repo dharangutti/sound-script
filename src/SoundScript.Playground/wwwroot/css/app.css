@@ -895,3 +895,23 @@ a:hover { text-decoration: underline; }
     font-size: 0.8rem;
     margin-bottom: 0.4rem;
 }
+
+/* In-Browser Vocal Engine toggle (V10) */
+.vocal-toggle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-top: 0.4rem;
+}
+.vocal-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.vocal-toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--accent); }
+.vocal-toggle-status { color: var(--muted); font-size: 0.8rem; }
+.vocal-toggle-status.vocal-on { color: var(--accent); }
