@@ -16,6 +16,11 @@ public static class CorpusCatalog
     private static CorpusManifestDocument? _manifest;
     private static Dictionary<string, Dictionary<string, CorpusLemmaEntry>>? _lemmaIndex;
 
+    // In-memory audio store keyed by the entry's relative Audio path (e.g.
+    // "audio/en/hello.wav"). Used where the corpus WAVs are not on disk — most
+    // notably the Blazor WebAssembly playground, which fetches them on demand.
+    private static Dictionary<string, byte[]>? _inMemoryAudio;
+
     /// <summary>True when lemma metadata has been loaded.</summary>
     public static bool IsLoaded => _lemmaIndex is not null;
 
@@ -114,6 +119,7 @@ public static class CorpusCatalog
             _loadedRoot = null;
             _manifest = null;
             _lemmaIndex = null;
+            _inMemoryAudio = null;
             _corpusId = DefaultCorpusId;
         }
     }
@@ -141,6 +147,63 @@ public static class CorpusCatalog
             return false;
 
         return localeMap.TryGetValue(lemma, out entry!);
+    }
+
+    /// <summary>
+    /// Registers raw WAV bytes for a lemma's audio path in memory (e.g. fetched
+    /// over HTTP in the browser). Takes precedence over any on-disk file.
+    /// </summary>
+    public static void RegisterAudio(string audioRelativePath, byte[] wavBytes)
+    {
+        if (string.IsNullOrWhiteSpace(audioRelativePath) || wavBytes.Length == 0)
+            return;
+
+        lock (LoadLock)
+        {
+            _inMemoryAudio ??= new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            _inMemoryAudio[audioRelativePath] = wavBytes;
+        }
+    }
+
+    /// <summary>True when in-memory audio bytes are registered for the entry's path.</summary>
+    public static bool HasAudio(CorpusLemmaEntry entry) =>
+        !string.IsNullOrWhiteSpace(entry.Audio)
+        && _inMemoryAudio is not null
+        && _inMemoryAudio.ContainsKey(entry.Audio);
+
+    /// <summary>
+    /// Returns the WAV bytes for a lemma entry — from the in-memory store first,
+    /// then the on-disk corpus. Enables corpus playback where no filesystem corpus
+    /// exists (WebAssembly) while preserving disk behavior for the CLI.
+    /// </summary>
+    public static bool TryGetAudioBytes(CorpusLemmaEntry entry, out byte[] bytes)
+    {
+        bytes = [];
+        if (string.IsNullOrWhiteSpace(entry.Audio))
+            return false;
+
+        lock (LoadLock)
+        {
+            if (_inMemoryAudio is not null && _inMemoryAudio.TryGetValue(entry.Audio, out var mem))
+            {
+                bytes = mem;
+                return true;
+            }
+        }
+
+        var path = ResolveAudioPath(entry);
+        if (path is null)
+            return false;
+
+        try
+        {
+            bytes = File.ReadAllBytes(path);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>Resolves the on-disk WAV path for a lemma entry, or null when unavailable.</summary>

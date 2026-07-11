@@ -30,4 +30,27 @@ public sealed class WordbankVocalEngine : IVocalEngine
 
         WavWriter.Write(outputWavPath, samples);
     }
+
+    /// <summary>
+    /// Renders to in-memory mono WAV bytes (no file I/O) — used by the Blazor
+    /// WebAssembly playground where writing to disk isn't available.
+    /// </summary>
+    public byte[] SynthesizeToWavBytes(string text, VocalEngineOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new ArgumentException("Text must not be empty.", nameof(text));
+
+        var samples = WordbankVocalSynthesizer.SynthesizePhrase(text, options);
+        samples = VocalStemNormalizer.Normalize(samples, options.OutputGain);
+
+        if (VocalStemNormalizer.Peak(samples) <= 1e-6)
+        {
+            throw new InvalidOperationException(
+                "Wordbank engine produced a silent stem — check corpus audio and text.");
+        }
+
+        using var stream = new MemoryStream();
+        WavWriter.WriteTo(stream, samples, WavWriter.SampleRate);
+        return stream.ToArray();
+    }
 }
