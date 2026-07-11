@@ -87,11 +87,13 @@ internal static class WordbankVocalSynthesizer
         if (!CorpusCatalog.TryGetLemma(locale, word, out var entry) || string.IsNullOrWhiteSpace(entry.Audio))
             return false;
 
-        var path = CorpusCatalog.ResolveAudioPath(entry);
-        if (path is null)
+        // Bytes-based read works for both the on-disk corpus (CLI) and an
+        // in-memory corpus fetched at runtime (WebAssembly playground).
+        if (!CorpusCatalog.TryGetAudioBytes(entry, out var wavBytes))
             return false;
 
-        audio = WavReader.ReadMono(path);
+        using var stream = new MemoryStream(wavBytes);
+        audio = WavReader.ReadMono(stream);
         audio = VocalStemProcessor.ApplyTransform(
             audio,
             entry.TrimStartMs,

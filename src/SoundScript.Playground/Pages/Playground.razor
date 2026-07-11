@@ -405,6 +405,25 @@
                 <code>@CliPreview</code>
                 <button type="button" class="btn btn-secondary btn-copy-cli" @onclick="CopyCliPreviewAsync">Copy</button>
             </div>
+
+            <div class="vocal-toggle-row">
+                <label class="vocal-toggle" title="Loads the WordBank corpus on demand and renders speak lines with the full SoundScript.Vocal engine (SoundCSS applies to audio).">
+                    <input type="checkbox" checked="@VocalEngineEnabled" @onchange="OnToggleVocalEngineAsync" disabled="@VocalCorpusLoading" />
+                    <span>Enable In-Browser Vocal Engine</span>
+                </label>
+                @if (VocalCorpusLoading)
+                {
+                    <span class="vocal-toggle-status"><span class="spinner"></span>Loading corpus…</span>
+                }
+                else if (VocalEngineEnabled && VocalCorpusReady)
+                {
+                    <span class="vocal-toggle-status vocal-on">On · SoundCSS applies to speak lines (WordBank corpus loaded on demand).</span>
+                }
+                else
+                {
+                    <span class="vocal-toggle-status">Off · lightweight preview (no corpus download). SoundCSS shown in the CLI command.</span>
+                }
+            </div>
         </div>
     </section>
 
