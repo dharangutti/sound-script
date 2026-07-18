@@ -28,7 +28,17 @@
     <url>
         <loc>https://soundscript.net/doc.html?p=SoundScript.md</loc>
         <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://soundscript.net/doc.html?p=whats-new-v9.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://soundscript.net/doc.html?p=examples.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
     </url>
     <url>
         <loc>https://soundscript.net/doc.html?p=language-reference.md</loc>
@@ -63,6 +73,21 @@
     <url>
         <loc>https://soundscript.net/doc.html?p=cli.md</loc>
         <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://soundscript.net/doc.html?p=architecture.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://soundscript.net/doc.html?p=wave-grammar.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://soundscript.net/doc.html?p=vocal.md</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
 </urlset>

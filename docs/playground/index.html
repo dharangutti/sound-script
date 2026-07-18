@@ -12,9 +12,49 @@
     <meta property="og:title" content="SoundScript Playground — Compile Text to MIDI in Your Browser" />
     <meta property="og:description" content="Write SoundScript, compile it to MIDI, and hear it instantly — client-side WebAssembly, works in every modern browser." />
     <meta property="og:url" content="https://soundscript.net/playground/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png" />
+    <meta property="og:image:alt" content="SoundScript logo" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="SoundScript Playground — Compile Text to MIDI in Your Browser" />
     <meta name="twitter:description" content="Write SoundScript, compile it to MIDI, and hear it instantly — client-side WebAssembly, works in every modern browser." />
+    <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png" />
+    <meta name="twitter:image:alt" content="SoundScript logo" />
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://soundscript.net/#software",
+                "name": "SoundScript",
+                "applicationCategory": "MultimediaApplication",
+                "operatingSystem": "Windows, macOS, Linux, Web",
+                "softwareVersion": "9.0.0",
+                "license": "https://opensource.org/licenses/MIT",
+                "url": "https://soundscript.net/"
+            },
+            {
+                "@type": "WebApplication",
+                "@id": "https://soundscript.net/playground/#application",
+                "name": "SoundScript Playground",
+                "url": "https://soundscript.net/playground/",
+                "applicationCategory": "MultimediaApplication",
+                "browserRequirements": "WebAssembly and Web Audio support",
+                "isAccessibleForFree": true,
+                "breadcrumb": { "@id": "https://soundscript.net/playground/#breadcrumb" }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://soundscript.net/playground/#breadcrumb",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "SoundScript", "item": "https://soundscript.net/" },
+                    { "@type": "ListItem", "position": 2, "name": "Playground", "item": "https://soundscript.net/playground/" }
+                ]
+            }
+        ]
+    }
+    </script>
     <script>
         (function () {
             var localHost = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "::1";
@@ -40,11 +80,12 @@
 
     <footer class="site-footer">
         <p>
-            © SoundScript<br>
-            Contact: <a href="mailto:info@dharangutti.in">info@dharangutti.in</a><br>
-            <a href="https://dharangutti.in">dharangutti.in</a><br>
-            Open to strategic conversations regarding future direction.
+            <a href="/">Home</a> · <a href="/industrial/">Industrial Audio</a> ·
+            <a href="/doc.html?p=SoundScript.md">Documentation</a> ·
+            <a href="https://github.com/dharangutti/sound-script">GitHub</a> · <a href="/contact/">Contact</a>
         </p>
+        <p>Independent Open Source Project · MIT License</p>
+        <p>© SoundScript · <a href="mailto:info@dharangutti.in">info@dharangutti.in</a> · <a href="https://dharangutti.in">dharangutti.in</a></p>
     </footer>
 
     <script src="js/soundfont-loader.js"></script>

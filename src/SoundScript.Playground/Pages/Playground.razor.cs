@@ -1817,9 +1817,9 @@ public partial class Playground
     // the Studio, plus an optional SoundCSS timbre editor for Render Audio.
     MidiEditorDefault = ScriptText;
     await Js.InvokeVoidAsync("playgroundEditor.init", MidiEditorId,
-        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }" });
+        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }", ariaLabel = "SoundScript MIDI editor" });
     await Js.InvokeVoidAsync("playgroundEditor.init", MidiCssEditorId,
-        new { language = "soundcss", theme = "dark", placeholder = "aa { formant1: 700Hz; }  /  p { burst: 12ms; }" });
+        new { language = "soundcss", theme = "dark", placeholder = "aa { formant1: 700Hz; }  /  p { burst: 12ms; }", ariaLabel = "MIDI SoundCSS editor" });
     await Js.InvokeVoidAsync("playgroundEditor.setValue", MidiEditorId, ScriptText);
 
     // Start the Studio with an original WordBank-only example.
@@ -1827,9 +1827,9 @@ public partial class Playground
     StudioCssDefault = SafeExamples[0].Css;
 
     await Js.InvokeVoidAsync("playgroundEditor.init", SswEditorId,
-        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }  /  speak \"...\"" });
+        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }  /  speak \"...\"", ariaLabel = "SoundScript Wave editor" });
     await Js.InvokeVoidAsync("playgroundEditor.init", CssEditorId,
-        new { language = "soundcss", theme = "dark", placeholder = "\"word\" { style: sing; pitch: +2; }" });
+        new { language = "soundcss", theme = "dark", placeholder = "\"word\" { style: sing; pitch: +2; }", ariaLabel = "Wave SoundCSS editor" });
     await Js.InvokeVoidAsync("playgroundEditor.initSplit", "studio-divider", "studio-left", "studio-right");
 
     await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, StudioSswDefault);
