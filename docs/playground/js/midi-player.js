@@ -245,7 +245,12 @@ window.SoundScriptMidi = (function () {
     }
 
     function download(base64, filename) {
-        window.SoundScriptDownload.fromBase64(base64, filename || 'soundscript.mid', 'audio/midi');
+        const link = document.createElement('a');
+        link.href = 'data:audio/midi;base64,' + base64;
+        link.download = filename || 'soundscript.mid';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     return {
