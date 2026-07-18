@@ -31,6 +31,12 @@ html, body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
 .boot-screen {
     display: flex;
     flex-direction: column;
@@ -724,7 +730,7 @@ a:hover { text-decoration: underline; }
     gap: 0.5rem;
     margin-bottom: 0.35rem;
 }
-.studio-pane-title { font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+.studio-pane-title { margin: 0; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
 
 .studio-toolbar {
     display: flex;
@@ -807,6 +813,10 @@ a:hover { text-decoration: underline; }
     color: transparent;
     caret-color: var(--accent);
     outline: none;
+}
+.pge-input:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: -3px;
 }
 .pge[data-theme="light"] .pge-input { caret-color: #2563eb; }
 
@@ -984,4 +994,13 @@ a:hover { text-decoration: underline; }
 .cli-examples-section { margin: 0; }
 @media (max-width: 720px) {
     .cli-examples-split { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
