@@ -5,7 +5,6 @@ window.SoundScriptMidi = (function () {
     let masterGain = null;
     let activeNodes = [];
     let stopTimer = null;
-    let soundfontLoaded = false;
 
     function readVarLen(data, offset) {
         let value = 0;
@@ -167,8 +166,9 @@ window.SoundScriptMidi = (function () {
             });
         }
 
+        const programs = [...new Set(scheduled.map(n => n.program))];
         const totalDuration = scheduled.reduce((max, n) => Math.max(max, n.start + n.duration), 0);
-        return { notes: scheduled, totalDuration };
+        return { notes: scheduled, programs, totalDuration };
     }
 
     function clearScheduled() {
@@ -186,8 +186,8 @@ window.SoundScriptMidi = (function () {
         }
     }
 
-    function scheduleNotes(midiBytes) {
-        const { notes, totalDuration } = parseMidi(midiBytes);
+    function scheduleNotes(parsedMidi) {
+        const { notes, totalDuration } = parsedMidi;
         const now = audioContext.currentTime + 0.05;
 
         for (const note of notes) {
@@ -211,6 +211,7 @@ window.SoundScriptMidi = (function () {
 
     async function startPlayback(midiBytes) {
         clearScheduled();
+        const parsedMidi = parseMidi(midiBytes);
 
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -226,12 +227,17 @@ window.SoundScriptMidi = (function () {
             return;
         }
 
-        if (!soundfontLoaded) {
-            await SoundScriptSoundfont.load(audioContext);
-            soundfontLoaded = true;
+        await SoundScriptSoundfont.load(audioContext, parsedMidi.programs);
+
+        scheduleNotes(parsedMidi);
+    }
+
+    async function primePrograms(programs) {
+        if (!SoundScriptSoundfont.prefetch) {
+            return;
         }
 
-        scheduleNotes(midiBytes);
+        await SoundScriptSoundfont.prefetch(programs);
     }
 
     function stop() {
@@ -244,6 +250,7 @@ window.SoundScriptMidi = (function () {
 
     return {
         startPlayback,
+        primePrograms,
         stop,
         download
     };
