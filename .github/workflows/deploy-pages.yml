@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -49,6 +51,10 @@ jobs:
           $updated = [regex]::Replace($index, $pattern, $replacement)
           Set-Content docs/index.html $updated -NoNewline
           Write-Host "Stamped homepage badge: $badgeText"
+
+      - name: Generate homepage repository metrics
+        shell: pwsh
+        run: ./scripts/update-site-metrics.ps1
 
       - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4

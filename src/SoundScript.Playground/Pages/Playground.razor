@@ -7,12 +7,12 @@
             <span class="badge">Playground · @VersionInfo.Label</span>
         </div>
         <h1>SoundScript Playground</h1>
-        <p class="lead">Type SoundScript V2, compile to MIDI, and hear it in your browser — fully client-side.</p>
+        <p class="lead">Type SoundScript, compile to MIDI or Wave audio, and hear it in your browser — fully client-side.</p>
     </header>
 
     <div class="presets">
-        <span class="preset-label">Example:</span>
-        <select class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExampleAsync">
+        <label class="preset-label" for="main-example-select">Example:</label>
+        <select id="main-example-select" class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExampleAsync">
             <optgroup label="V2">
                 <option value="v2-showcase">Showcase</option>
                 <option value="v2-blocks">Blocks</option>
@@ -85,8 +85,8 @@
     </div>
 
     <div class="panes">
-        <section class="pane pane-editor">
-            <label class="pane-label" for="script-input">SoundScript</label>
+        <section class="pane pane-editor" aria-labelledby="midi-editor-heading">
+            <h2 class="pane-label" id="midi-editor-heading">SoundScript</h2>
             <div class="editor-toolbar">
                 <button type="button" class="btn btn-primary btn-toolbar-run" disabled="@IsRunning" @onclick="RunAsync">
                     @(IsRunning ? "Running…" : "Run")
@@ -116,8 +116,8 @@
             </details>
         </section>
 
-        <section class="pane pane-output">
-            <label class="pane-label">Output</label>
+        <section class="pane pane-output" aria-labelledby="output-heading">
+            <h2 class="pane-label" id="output-heading">Output</h2>
 
             @if (!string.IsNullOrEmpty(StatusMessage))
             {
@@ -269,8 +269,8 @@
     }
 
     <div class="presets presets-text">
-        <span class="preset-label">Text-to-Melody:</span>
-        <input class="compose-input"
+        <label class="preset-label" for="compose-input">Text-to-Melody:</label>
+        <input id="compose-input" class="compose-input"
                @bind="ComposeText"
                spellcheck="false"
                placeholder="Type plain text to compose from" />
@@ -379,8 +379,8 @@
         </div>
 
         <div class="presets presets-wave">
-            <span class="preset-label">Example:</span>
-            <select class="example-select" @bind="SelectedWaveExampleKey" @bind:after="LoadStudioExampleAsync">
+            <label class="preset-label" for="wave-example-select">Example:</label>
+            <select id="wave-example-select" class="example-select" @bind="SelectedWaveExampleKey" @bind:after="LoadStudioExampleAsync">
                 <option value="wave-effects">Effects (delay + lowpass)</option>
                 <option value="wave-speak">Speak (phoneme tones)</option>
                 <option value="wave-humanize">Humanize</option>
@@ -402,7 +402,7 @@
         <div class="studio-split">
             <div class="studio-pane" id="studio-left">
                 <div class="studio-pane-header">
-                    <span class="studio-pane-title">SSW Script</span>
+                    <h3 class="studio-pane-title">SSW Script</h3>
                 </div>
                 <div class="studio-toolbar" role="toolbar" aria-label="SSW editor actions">
                     <button type="button" class="btn btn-secondary" @onclick="() => ResetEditorAsync(SswEditorId)">Reset</button>
@@ -419,7 +419,7 @@
 
             <div class="studio-pane studio-pane-right" id="studio-right">
                 <div class="studio-pane-header">
-                    <span class="studio-pane-title">SoundCSS</span>
+                    <h3 class="studio-pane-title">SoundCSS</h3>
                     <button type="button" class="icon-btn" title="SoundCSS syntax reference"
                             aria-label="SoundCSS syntax reference" @onclick="() => ShowSyntaxInfo = true">ⓘ</button>
                 </div>

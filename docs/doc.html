@@ -3,9 +3,56 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundScript Documentation</title>
-    <meta name="description" content="SoundScript documentation — deterministic text-to-MIDI music language.">
+    <title>SoundScript Documentation — Deterministic Audio Programming</title>
+    <meta name="description" content="SoundScript documentation for the deterministic audio programming language, including the language, CLI, MIDI and Wave pipelines, vocals, architecture, and examples.">
     <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://soundscript.net/doc.html?p=SoundScript.md">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="SoundScript">
+    <meta property="og:title" content="SoundScript Documentation — Deterministic Audio Programming">
+    <meta property="og:description" content="Language, CLI, MIDI, Wave, vocal, architecture, and example documentation for SoundScript.">
+    <meta property="og:url" content="https://soundscript.net/doc.html?p=SoundScript.md">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta property="og:image:alt" content="SoundScript logo">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="SoundScript Documentation — Deterministic Audio Programming">
+    <meta name="twitter:description" content="Language, CLI, MIDI, Wave, vocal, architecture, and example documentation for SoundScript.">
+    <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta name="twitter:image:alt" content="SoundScript logo">
+    <script id="structured-data" type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "TechArticle",
+                "@id": "https://soundscript.net/doc.html?p=SoundScript.md#article",
+                "url": "https://soundscript.net/doc.html?p=SoundScript.md",
+                "name": "SoundScript Documentation",
+                "isPartOf": { "@id": "https://soundscript.net/#website" },
+                "breadcrumb": { "@id": "https://soundscript.net/doc.html?p=SoundScript.md#breadcrumb" }
+            },
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://soundscript.net/#software",
+                "name": "SoundScript",
+                "applicationCategory": "MultimediaApplication",
+                "operatingSystem": "Windows, macOS, Linux, Web",
+                "softwareVersion": "9.0.0",
+                "license": "https://opensource.org/licenses/MIT",
+                "url": "https://soundscript.net/"
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://soundscript.net/doc.html?p=SoundScript.md#breadcrumb",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "SoundScript", "item": "https://soundscript.net/" },
+                    { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://soundscript.net/doc.html?p=SoundScript.md" }
+                ]
+            }
+        ]
+    }
+    </script>
     <style>
         :root {
             --bg: #0b0d12;
@@ -36,6 +83,27 @@
 
         a { color: var(--accent); text-decoration: none; }
         a:hover { text-decoration: underline; }
+
+        :focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 100;
+            padding: 0.65rem 1rem;
+            color: #052e1e;
+            background: var(--accent);
+            border-radius: 8px;
+            font-weight: 700;
+            transform: translateY(-180%);
+        }
+
+        .skip-link:focus { transform: translateY(0); }
 
         .wrap {
             max-width: 860px;
@@ -213,11 +281,21 @@
             #content h1 { font-size: 1.6rem; }
             .nav-links { gap: 0.8rem; }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#content">Skip to documentation</a>
     <div class="wrap">
-        <nav>
+        <nav aria-label="Primary navigation">
             <a class="logo" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
@@ -233,22 +311,19 @@
 
         <div class="doc-meta"><a id="source-link" href="#">View Markdown source</a></div>
 
-        <main id="content"><p style="color:var(--muted);">Loading…</p></main>
+        <main id="content" aria-live="polite"><p style="color:var(--muted);">Loading…</p></main>
 
         <footer>
             <p>
                 <a href="/">Home</a> ·
                 <a href="/playground/">Playground</a> ·
+                <a href="/industrial/">Industrial Audio</a> ·
                 <a href="/doc.html?p=SoundScript.md">Documentation</a> ·
-                <a href="https://github.com/dharangutti/sound-script">GitHub</a>
+                <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
+                <a href="/contact/">Contact</a>
             </p>
-            <p style="margin-top:0.4rem;">SoundScript · MIT License · Deterministic text to MIDI and Wave.</p>
-            <p style="margin-top:0.4rem;">
-                © SoundScript<br>
-                Contact: <a href="mailto:info@dharangutti.in">info@dharangutti.in</a><br>
-                <a href="https://dharangutti.in">dharangutti.in</a><br>
-                Open to strategic conversations regarding future direction.
-            </p>
+            <p style="margin-top:0.4rem;">Independent Open Source Project · MIT License · Deterministic text to MIDI and Wave.</p>
+            <p style="margin-top:0.4rem;">© SoundScript · <a href="mailto:info@dharangutti.in">info@dharangutti.in</a> · <a href="https://dharangutti.in">dharangutti.in</a></p>
         </footer>
     </div>
 
@@ -265,7 +340,62 @@
 
             var content = document.getElementById('content');
             var sourceLink = document.getElementById('source-link');
+            var canonicalLink = document.querySelector('link[rel="canonical"]');
             sourceLink.href = param;
+
+            function setMeta(selector, value) {
+                var element = document.querySelector(selector);
+                if (element) element.setAttribute('content', value);
+            }
+
+            function updatePageMetadata(title, description) {
+                var pageUrl = new URL(window.location.pathname, window.location.origin);
+                pageUrl.searchParams.set('p', param);
+                var canonicalUrl = pageUrl.href;
+                var pageTitle = title + ' — SoundScript';
+
+                document.title = pageTitle;
+                canonicalLink.href = canonicalUrl;
+                setMeta('meta[name="description"]', description);
+                setMeta('meta[property="og:title"]', pageTitle);
+                setMeta('meta[property="og:description"]', description);
+                setMeta('meta[property="og:url"]', canonicalUrl);
+                setMeta('meta[name="twitter:title"]', pageTitle);
+                setMeta('meta[name="twitter:description"]', description);
+
+                document.getElementById('structured-data').textContent = JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@graph': [
+                        {
+                            '@type': 'TechArticle',
+                            '@id': canonicalUrl + '#article',
+                            url: canonicalUrl,
+                            name: title,
+                            description: description,
+                            isPartOf: { '@id': 'https://soundscript.net/#website' },
+                            breadcrumb: { '@id': canonicalUrl + '#breadcrumb' }
+                        },
+                        {
+                            '@type': 'SoftwareApplication',
+                            '@id': 'https://soundscript.net/#software',
+                            name: 'SoundScript',
+                            applicationCategory: 'MultimediaApplication',
+                            operatingSystem: 'Windows, macOS, Linux, Web',
+                            softwareVersion: '9.0.0',
+                            license: 'https://opensource.org/licenses/MIT',
+                            url: 'https://soundscript.net/'
+                        },
+                        {
+                            '@type': 'BreadcrumbList',
+                            '@id': canonicalUrl + '#breadcrumb',
+                            itemListElement: [
+                                { '@type': 'ListItem', position: 1, name: 'SoundScript', item: 'https://soundscript.net/' },
+                                { '@type': 'ListItem', position: 2, name: title, item: canonicalUrl }
+                            ]
+                        }
+                    ]
+                });
+            }
 
             function fail(message) {
                 content.innerHTML = '<div class="error"><p>' + message + '</p>' +
@@ -281,7 +411,12 @@
                     content.innerHTML = marked.parse(markdown, { mangle: false, headerIds: true });
 
                     var heading = content.querySelector('h1');
-                    if (heading) document.title = heading.textContent + ' — SoundScript';
+                    var firstParagraph = content.querySelector('p');
+                    var pageTitle = heading ? heading.textContent.trim() : 'SoundScript Documentation';
+                    var pageDescription = firstParagraph
+                        ? firstParagraph.textContent.replace(/\s+/g, ' ').trim().slice(0, 180)
+                        : 'Technical documentation for the SoundScript deterministic audio programming language.';
+                    updatePageMetadata(pageTitle, pageDescription);
 
                     // Keep readers inside the HTML view: relative .md links go
                     // through this viewer; repo-relative example files go to GitHub.

@@ -116,6 +116,19 @@
         render(ed);
     }
 
+    function handleEscape(ed, e) {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        const selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+            'textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+        const focusable = Array.from(document.querySelectorAll(selector))
+            .filter((element) => element.offsetParent !== null);
+        const currentIndex = focusable.indexOf(ed.textarea);
+        const next = currentIndex >= 0 ? focusable[currentIndex + 1] : null;
+        if (next) next.focus();
+        else ed.textarea.blur();
+    }
+
     // Auto-indent: on Enter, copy the leading whitespace of the current line.
     function handleEnter(ed, e) {
         if (e.key !== "Enter") return;
@@ -163,6 +176,9 @@
             editors[mountId] = ed;
 
             if (opts.placeholder) ed.textarea.placeholder = opts.placeholder;
+            ed.textarea.setAttribute("aria-label", opts.ariaLabel || "Code editor");
+            ed.textarea.setAttribute("aria-keyshortcuts", "Escape");
+            ed.textarea.setAttribute("title", "Press Escape to leave the editor.");
 
             ed.textarea.addEventListener("input", () => {
                 render(ed);
@@ -171,6 +187,7 @@
             });
             ed.textarea.addEventListener("scroll", () => syncScroll(ed));
             ed.textarea.addEventListener("keydown", (e) => {
+                handleEscape(ed, e);
                 handleTab(ed, e);
                 handleEnter(ed, e);
             });

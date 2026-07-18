@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundScript — Write Music Like Code | Deterministic Text-to-MIDI Language</title>
-    <meta name="description" content="SoundScript is an open-source, deterministic music programming language that compiles plain text into professional-sounding MIDI. Write melodies, chords, phrases, and industrial audio cues as code — cross-platform CLI (.NET, Windows/macOS/Linux) and a playground that runs in any modern browser.">
+    <title>SoundScript — Deterministic Audio Programming Language</title>
+    <meta name="description" content="SoundScript is an independent open-source audio programming language for deterministic MIDI, WAV, vocal, and industrial audio workflows. Use the .NET 8 CLI or browser playground, entirely offline and without an account.">
     <meta name="keywords" content="SoundScript, music DSL, music programming language, text to MIDI, MIDI generator, deterministic music, C# music library, music as code, industrial audio cues, browser MIDI playground">
     <meta name="author" content="Anup Jayant Dharangutti">
     <meta name="robots" content="index, follow">
@@ -13,15 +13,19 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SoundScript">
-    <meta property="og:title" content="SoundScript — Write Music Like Code">
-    <meta property="og:description" content="An open-source, deterministic music language that turns plain text into professional-sounding MIDI. Cross-platform CLI and a playground for every modern browser — Chrome, Edge, Firefox, and Safari.">
+    <meta property="og:title" content="SoundScript — Deterministic Audio Programming Language">
+    <meta property="og:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 8 CLI and client-side browser playground.">
     <meta property="og:url" content="https://soundscript.net/">
     <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta property="og:image:alt" content="SoundScript logo">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="SoundScript — Write Music Like Code">
-    <meta name="twitter:description" content="An open-source, deterministic music language that turns plain text into professional-sounding MIDI. Cross-platform CLI and a browser playground — no DAW, no plugins.">
+    <meta name="twitter:title" content="SoundScript — Deterministic Audio Programming Language">
+    <meta name="twitter:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 8 CLI and browser playground.">
+    <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta name="twitter:image:alt" content="SoundScript logo">
 
     <!-- Structured data -->
     <script type="application/ld+json">
@@ -47,7 +51,9 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive V3 curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), word-level prosody composition (ProsodyComposer), editable .ss DSL export from composed text (--emit-ss), direct Wave synthesis to WAV (SoundScript.Wave), offline vocal stem mixing and vocal CLI (V8), browser playground, cross-platform CLI",
+                "softwareVersion": "9.0.0",
+                "programmingLanguage": "C#",
+                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), word-level prosody composition (ProsodyComposer), editable .ss DSL export from composed text (--emit-ss), direct Wave synthesis to WAV (SoundScript.Wave), offline WordBank vocal stems and mixing, browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
                 "codeRepository": "https://github.com/dharangutti/sound-script",
                 "author": {
@@ -91,6 +97,27 @@
         a { color: var(--accent); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
+        :focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 100;
+            padding: 0.65rem 1rem;
+            color: #052e1e;
+            background: var(--accent);
+            border-radius: 8px;
+            font-weight: 700;
+            transform: translateY(-180%);
+        }
+
+        .skip-link:focus { transform: translateY(0); }
+
         .wrap {
             max-width: 960px;
             margin: 0 auto;
@@ -99,8 +126,36 @@
 
         header {
             text-align: center;
-            padding: 3rem 0 2.5rem;
+            padding: 1.5rem 0 2.5rem;
         }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0 0 1.25rem;
+            margin-bottom: 2.25rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .nav-mark {
+            color: var(--text);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.9rem;
+            font-size: 0.88rem;
+        }
+
+        .nav-links a { color: var(--muted); }
+        .nav-links a:hover { color: var(--accent); text-decoration: none; }
 
         .brand-hero {
         display: flex;
@@ -166,6 +221,13 @@
             margin: 0 auto 2rem;
         }
 
+        .section-intro {
+            max-width: 42rem;
+            margin: -0.4rem 0 1.25rem;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
         .cta-row {
             display: flex;
             flex-wrap: wrap;
@@ -203,6 +265,25 @@
             background: var(--surface-2);
             color: var(--text);
             border-color: var(--border);
+        }
+
+        .trust-strip {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.45rem;
+            margin: 1.25rem auto 0;
+            max-width: 46rem;
+        }
+
+        .trust-badge {
+            padding: 0.3rem 0.65rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(20, 24, 32, 0.82);
+            font-size: 0.75rem;
+            font-weight: 650;
         }
 
         .hero-code {
@@ -304,6 +385,236 @@
             overflow-x: auto;
         }
 
+        .card p { color: var(--muted); font-size: 0.9rem; }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .demo-card {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .demo-card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+
+        .demo-card p {
+            margin: 0 0 0.85rem;
+            color: var(--muted);
+            font-size: 0.87rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: var(--text);
+            font-size: 0.73rem;
+            font-weight: 750;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .demo-input,
+        .script-details pre {
+            margin: 0;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--code-bg);
+            color: #c7d2e8;
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            overflow-x: auto;
+        }
+
+        .demo-card audio {
+            width: 100%;
+            height: 40px;
+            margin: 0.9rem 0;
+            color-scheme: dark;
+        }
+
+        .demo-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .demo-actions .btn,
+        .script-details summary {
+            min-height: 40px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.78rem;
+        }
+
+        .script-details { margin-top: 0.75rem; }
+
+        .script-details summary {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 650;
+            list-style: none;
+        }
+
+        .script-details summary::-webkit-details-marker { display: none; }
+        .script-details[open] summary { margin-bottom: 0.65rem; }
+        .script-details .source-note { margin: 0.6rem 0 0; }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric {
+            padding: 1rem 0.65rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            text-align: center;
+        }
+
+        .metric-value {
+            display: block;
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .metric-label { color: var(--muted); font-size: 0.76rem; }
+
+        .use-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .use-card {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+        }
+
+        .use-card h3 { margin: 0 0 0.3rem; color: var(--text); font-size: 0.95rem; }
+        .use-card p { margin: 0; color: var(--muted); font-size: 0.84rem; }
+
+        .architecture {
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            overflow-x: auto;
+        }
+
+        .flow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 620px;
+        }
+
+        .flow-row + .flow-row { margin-top: 0.8rem; }
+
+        .flow-node {
+            padding: 0.55rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-2);
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .flow-node strong { display: block; color: var(--accent); }
+        .flow-node small { color: var(--muted); font-weight: 500; }
+        .flow-arrow { color: var(--muted); font-weight: 800; }
+        .flow-label { width: 6.5rem; color: var(--muted); font-size: 0.74rem; text-align: right; }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .comparison-table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+            background: var(--surface);
+            font-size: 0.84rem;
+        }
+
+        .comparison-table caption {
+            padding: 0.75rem 1rem;
+            color: var(--muted);
+            text-align: left;
+            background: var(--code-bg);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem 0.9rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .comparison-table thead th { color: var(--text); background: var(--surface-2); }
+        .comparison-table tbody th { color: var(--accent); font-weight: 650; }
+        .comparison-table tr:last-child th,
+        .comparison-table tr:last-child td { border-bottom: 0; }
+
+        .compact-details {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            padding: 0 1.25rem;
+        }
+
+        .compact-details summary {
+            padding: 1rem 0;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .compact-details .steps { padding-bottom: 0.75rem; }
+
+        .release-current,
+        .release-previous { border-radius: 8px; }
+        .release-current { background: rgba(110, 231, 183, 0.06); }
+        .release-previous { background: rgba(129, 140, 248, 0.06); }
+
+        .release-label {
+            display: inline-block;
+            margin-left: 0.4rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            color: var(--accent);
+            background: rgba(110, 231, 183, 0.12);
+            font-size: 0.68rem;
+            font-weight: 750;
+            text-transform: uppercase;
+        }
+
         .steps {
             list-style: none;
             padding: 0;
@@ -377,7 +688,7 @@
             text-align: center;
         }
 
-        .industrial-promo h2 {
+        .industrial-promo h3 {
             font-size: 1.35rem;
             margin: 0 0 0.85rem;
         }
@@ -433,7 +744,10 @@
 
             .wrap { padding: 1.25rem 1rem 3rem; }
 
-            header { padding: 2rem 0 1.75rem; }
+            header { padding: 0.5rem 0 1.75rem; }
+
+            .top-nav { align-items: flex-start; margin-bottom: 1.75rem; }
+            .nav-links { max-width: 15rem; gap: 0.65rem; }
 
             .brand-hero img {
                 width: min(340px, 88vw);
@@ -465,44 +779,71 @@
                 line-height: 2;
             }
         }
+
+        @media (max-width: 820px) {
+            .demo-grid { grid-template-columns: 1fr; }
+            .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="wrap">
         <header>
+            <nav class="top-nav" aria-label="Primary navigation">
+                <a class="nav-mark" href="/">SoundScript</a>
+                <div class="nav-links">
+                    <a href="#live-demo">Live demo</a>
+                    <a href="#use-cases">Use cases</a>
+                    <a href="#architecture">Architecture</a>
+                    <a href="#documentation">Docs</a>
+                    <a href="https://github.com/dharangutti/sound-script">GitHub</a>
+                </div>
+            </nav>
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V8 — Vocal Stems in Wave Export<!--/VERSION_BADGE--></div>
-            <h1>Write music like <span>code</span></h1>
+            <div class="badge"><!--VERSION_BADGE-->Version: V9 — WordBank Vocal Engine<!--/VERSION_BADGE--></div>
+            <h1>Write audio like <span>code</span></h1>
             <p class="lead">
-                SoundScript is an open-source, deterministic music language — type a melody with notation,
-                dynamics, and articulations, get professional-sounding MIDI or WAV.
-                No DAW. No plugins. Just text → shaping → MIDI or Wave audio.
-                Runs on Windows, macOS, and Linux, and in any modern browser.
-                <strong style="color: var(--text);">V9 brings the WordBank vocal engine into the Playground</strong> —
-                deterministic, offline human-audio vocalization from a curated CC0/CC-BY corpus plus G2P timbre,
-                no eSpeak required.
+                SoundScript is an independent open-source audio programming language. Write melodies, phrases,
+                orchestration, vocal cues, and industrial sonification as plain text; compile them to deterministic
+                MIDI or WAV with the .NET CLI or a client-side browser playground.
             </p>
             <div class="cta-row">
-                <a class="btn btn-primary" href="playground/">Playground</a>
-                <a class="btn btn-secondary" href="doc.html?p=user-guide.md">User Guide</a>
-                <a class="btn btn-secondary" href="doc.html?p=whats-new-v9.md">What's New in V9</a>
+                <a class="btn btn-primary" href="playground/">Open the Playground</a>
+                <a class="btn btn-secondary" href="doc.html?p=user-guide.md">Read the User Guide</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
-                <a class="btn btn-secondary" href="doc.html?p=SoundScript.md">Documentation</a>
-                <a class="btn btn-secondary" href="/contact/">Contact</a>
             </div>
-            <div class="hero-code">
-                <div class="hero-code-bar">
+            <div class="trust-strip" aria-label="Project attributes">
+                <span class="trust-badge">Deterministic</span>
+                <span class="trust-badge">Offline</span>
+                <span class="trust-badge">Cross Platform</span>
+                <span class="trust-badge">Open Source</span>
+                <span class="trust-badge"><!--METRIC_TESTS-->505+<!--/METRIC_TESTS--> Tests</span>
+                <span class="trust-badge">.NET 8</span>
+                <span class="trust-badge">Browser Playground</span>
+                <span class="trust-badge">CLI</span>
+                <span class="trust-badge">MIT License</span>
+                <span class="trust-badge">Cross Platform CI</span>
+            </div>
+            <div class="hero-code" aria-label="SoundScript code example">
+                <div class="hero-code-bar" aria-hidden="true">
                     <span class="dot dot-r"></span>
                     <span class="dot dot-y"></span>
                     <span class="dot dot-g"></span>
                 </div>
                 <pre><span class="kw">block</span> intro {
-    <span class="kw">phrase</span> {
-        <span class="kw">mf</span>
-        <span class="kw">play</span> arp <span class="note">Cmaj</span> <span class="note">q</span>
-    }
+    <span class="kw">phrase</span> { <span class="kw">mf</span> <span class="kw">play</span> arp <span class="note">Cmaj</span> <span class="note">q</span> }
 }
 <span class="kw">pattern</span> arp { <span class="kw">up</span> }
 <span class="kw">track</span> melody {
@@ -513,559 +854,390 @@
             </div>
         </header>
 
-        <section>
-            <h2>Our Vision</h2>
-            <div class="about">
-                <p>SoundScript is an open-source micro-language for writing music like code. You describe notes,
-                chords, dynamics, patterns, and orchestration in plain text; the engine parses your script, applies
-                musical intelligence and playback refinement, and emits a standard MIDI file. Written in C# on
-                .NET, it runs on Windows, macOS, and Linux — plus a WebAssembly playground that runs fully
-                client-side in any modern browser.</p>
-                <p>What sets it apart is determinism. There is no randomness anywhere in the pipeline: the same
-                script produces byte-identical MIDI on every run, on every platform — a guarantee verified by
-                SHA-256 comparisons in the test suite. Even "humanization" (the subtle timing and velocity jitter
-                that makes playback feel natural) is computed deterministically, so it reproduces exactly.</p>
-                <p>The surface is deliberately minimal: <strong style="color: var(--text);">no DAW, no plugins, no
-                server, no account.</strong> Plain text in, standard MIDI out. That makes compositions behave like
-                software — you can version them in git, diff them, review them, and rebuild them identically
-                anywhere.</p>
-            </div>
-        </section>
+        <main id="main-content">
+            <section id="live-demo" aria-labelledby="live-demo-title">
+                <h2 id="live-demo-title">Live Demo</h2>
+                <p class="section-intro">These are repository-generated outputs, not stock or placeholder audio. Each card includes its input, source, MIDI, and WAV.</p>
+                <div class="demo-grid">
+                    <article class="demo-card">
+                        <h3>Playable Piano Example</h3>
+                        <p>One piano track with phrase shaping and legato articulation.</p>
+                        <span class="input-label">Input</span>
+                        <pre class="demo-input">tempo 112
+instrument piano
+C4 q E4 q G4 q C5 q</pre>
+                        <audio controls preload="metadata" aria-label="Play the SoundScript piano example">
+                            <source src="assets/demos/piano.wav" type="audio/wav">
+                            Your browser does not support WAV playback. <a href="assets/demos/piano.wav">Download the WAV</a>.
+                        </audio>
+                        <div class="demo-actions">
+                            <a class="btn btn-secondary" href="assets/demos/piano.mid" download>Download MIDI</a>
+                            <a class="btn btn-secondary" href="assets/demos/piano.wav" download>Download WAV</a>
+                        </div>
+                        <details class="script-details">
+                            <summary>View Script</summary>
+                            <pre>tempo 112
+time 4/4
+instrument piano
 
-        <section class="industrial-promo">
-            <h2>Industrial Sound Augmentation</h2>
-            <p>SoundScript is not just for songs. The same phrase engine — curves, articulations, dynamic
-            envelopes, and timing modifiers — turns machine data into non-speech audio cues an operator can
-            understand without looking at a screen. Because every cue is a short deterministic script, the sound
-            for "critical alarm" is byte-identical in the test lab and on the factory floor, and the cue library
-            lives in version control alongside the rest of the system.</p>
-            <p>The repository ships five complete, runnable industrial examples:</p>
-            <ul class="industrial-list">
-                <li><strong>Machine state sonification</strong> — idle, running, and critical rendered as distinct
-                    blocks with contrasting curve, articulation, and dynamics
-                    (<code>industrial-machine-state.ss</code>).</li>
-                <li><strong>Conveyor timing drift</strong> — swing, push, and pull modifiers make on-time versus
-                    drifting rhythm audibly different (<code>industrial-conveyor-drift.ss</code>).</li>
-                <li><strong>Robotic arm motion phases</strong> — approach, grip, and release as a rising swell,
-                    accented hits, and a falling fade (<code>industrial-robotic-arm.ss</code>).</li>
-                <li><strong>Temperature trend cues</strong> — rising, stable, and falling readings mapped to a
-                    crescendo climb, a level hold, and a decrescendo descent
-                    (<code>industrial-temperature-trend.ss</code>).</li>
-                <li><strong>Blind operator spatial awareness</strong> — an accessibility cue set of contrasting
-                    phrases, from gentle legato to sharp staccato alerts (<code>industrial-blind-assist.ss</code>).</li>
-            </ul>
-            <a href="/industrial">Explore Industrial Applications →</a>
-        </section>
-
-        <section>
-            <h2>How it works</h2>
-            <div class="pipeline">
-                <span>Import</span>
-                <span class="arrow">→</span>
-                <span>Parser</span>
-                <span class="arrow">→</span>
-                <span>Interpreter</span>
-                <span class="arrow">→</span>
-                <span>PhraseShaper</span>
-                <span class="arrow">→</span>
-                <span>PatternExpander</span>
-                <span class="arrow">→</span>
-                <span>Orchestration</span>
-                <span class="arrow">→</span>
-                <span>Layers</span>
-                <span class="arrow">→</span>
-                <span>Humanize</span>
-                <span class="arrow">→</span>
-                <span>MIDI</span>
-            </div>
-            <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
-                V2 adds imports, blocks, patterns, phrases, orchestration, layers, and deterministic humanization.
-                <a href="doc.html?p=pipeline.md">Full pipeline reference →</a>
-            </p>
-        </section>
-
-        <section>
-            <h2>Cycle-Accurate Timbre Engine <span style="color: var(--muted); font-weight: 500; font-size: 0.95rem;">— V4.1.1</span></h2>
-            <div class="about">
-                <p>Beyond MIDI, SoundScript can render actual audio — deterministic WAV or OGG — with no neural
-                networks and no cloud service. V4 introduced the timbre engine: you pair a MIDI file with a
-                SoundCSS stylesheet, a small CSS-like language that describes how each speech sound should be
-                voiced (its resonances, its noise, its attack).</p>
-                <p>V4.1 changed how that audio is built. The first version painted sound in 8-millisecond slices,
-                each one an averaged snapshot — accurate on paper, but flat to the ear. V4.1 instead rebuilds the
-                waveform one vibration at a time: at 440 Hz a single vibration lasts about 2.27 ms, so each slice
-                contains several complete cycles, and the engine constructs every one individually — layering its
-                overtones, shaping it through vowel-like resonances, adding the hiss or burst of consonants — then
-                stitches them seamlessly together.</p>
-                <p>V4.1.1 tuned that engine for realism: overtones now taper naturally per sound rather than all
-                ringing equally (harmonic rolloff), resonances have controllable sharpness with a slight per-cycle
-                drift (formant filtering), noise is filtered into the frequency bands real fricatives and plosives
-                occupy (noise shaping), and consonant attacks are sharpened (transient modeling). Every stage
-                remains fully deterministic — rendered audio is verified stable by SHA-256 regression tests.</p>
-                <p style="margin-top: 0.75rem;">
-                    <a href="doc.html?p=whats-new-v4.1.1.md">What's new in V4.1.1 →</a> ·
-                    <a href="doc.html?p=timbre-engine.md">Timbre engine reference →</a>
-                </p>
-            </div>
-        </section>
-
-        <section>
-            <h2>SoundScript.Wave <span style="color: var(--muted); font-weight: 500; font-size: 0.95rem;">— V7</span></h2>
-            <div class="about">
-                <p>V7 adds a second output rail: render <code>.ss</code> / <code>.ssw</code> scripts directly to
-                deterministic WAV — no MIDI step. The Playground auto-routes wave-only grammar (<code>speak</code>,
-                <code>effect</code>, named <code>humanize</code>) through SoundScript.Wave and can download the mix.</p>
-                <p style="margin-top: 0.75rem;">
-                    <a href="doc.html?p=whats-new-v7.md">What's new in V7 →</a> ·
-                    <a href="doc.html?p=wave-grammar.md">Wave grammar →</a> ·
-                    <a href="doc.html?p=cli.md#wave--script-to-wav-v8">CLI <code>wave</code> verb →</a>
-                </p>
-            </div>
-        </section>
-
-        <section>
-            <h2>Vocal Stems in Wave Export <span style="color: var(--muted); font-weight: 500; font-size: 0.95rem;">— V8</span></h2>
-            <div class="about">
-                <p>V8 mixes <strong style="color: var(--text);">real vocal audio</strong> into exported Wave files:
-                your own recordings via <code>sample</code> / <code>speak sample=</code>, or offline stems from the new
-                <code>soundscript vocal generate|batch</code> commands (<code>prosody</code> built-in, or
-                <code>espeak</code> when installed). One-step mixing:
-                <code>wave song.ssw out.wav --offline-tts prosody</code>.</p>
-                <p style="margin-top: 0.75rem;">
-                    <a href="doc.html?p=whats-new-v8.md">What's new in V8 →</a> ·
-                    <a href="doc.html?p=cli.md#vocal--offline-stem-generation-v8">CLI <code>vocal</code> verb →</a> ·
-                    <a href="doc.html?p=examples.md">Jingle Bells vocal example →</a> ·
-                    <a href="https://github.com/dharangutti/sound-script/blob/main/RELEASE_NOTES.md">Release notes →</a>
-                </p>
-            </div>
-        </section>
-
-        <section>
-            <h2>V2 Features</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <h3>Imports &amp; Blocks</h3>
-                    <pre>import "lib.ss"
-block intro { ... }
-play intro</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="doc.html?p=imports.md">Imports</a> ·
-                        <a href="doc.html?p=blocks.md">Blocks</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Patterns &amp; Phrases</h3>
-                    <pre>pattern arp { up }
-play arp Cmaj q
-phrase { curve soft }</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="doc.html?p=patterns.md">Patterns</a> ·
-                        <a href="doc.html?p=phrases.md">Phrases</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Metadata &amp; Layers</h3>
-                    <pre>gain 0.9
-humanize 0.03
-layer piano
-layer cello</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="doc.html?p=track-metadata.md">Metadata</a> ·
-                        <a href="doc.html?p=layers.md">Layers</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Orchestration &amp; Chords</h3>
-                    <pre>double octave
-Cmaj drop2
-tempo 120 → 140 over 4 bars</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        <a href="doc.html?p=orchestration.md">Orchestration</a> ·
-                        <a href="doc.html?p=advanced-chords.md">Advanced chords</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Vocal Track — New</h3>
-                    <pre>voice lead {
-    vocal choir
-    sing "Twinkle twinkle" C4 q C4 q G4 q G4 q
-}</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        Lyrics bound to notes by a deterministic phonetics engine; spoken aloud in the
-                        <a href="playground/">Playground</a>, exported as karaoke lyric events.
-                        <a href="doc.html?p=vocal.md">Vocal track docs</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Text-to-Melody Engine — V3.1</h3>
-                    <pre>compose "Twinkle twinkle little star"</pre>
-                    <p style="color: var(--muted); font-size: 0.85rem; margin: 0.5rem 0 0;">
-                        Deterministic composition from plain English: text → syllables → phonemes →
-                        musical gestures → MIDI. Identical text yields identical MIDI bytes.
-                        <a href="doc.html?p=text-to-melody.md">Text-to-melody docs</a>
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>How SoundScript Compares</h2>
-            <p style="color: var(--muted); font-size: 0.95rem; margin-top: -0.5rem; margin-bottom: 1.25rem;">
-                SoundScript overlaps with several categories of tools without belonging to any of them. The
-                differences below are architectural, not marketing claims.
-            </p>
-            <div class="grid-2 compare-grid">
-                <div class="card">
-                    <h3>vs. TTS engines</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        Modern text-to-speech systems are probabilistic — neural models whose output can vary
-                        between versions and runs. SoundScript's text pipelines (phoneme-based melody in V3.1,
-                        word-level prosody in V5, timbre rendering in V4) are rule-based and deterministic:
-                        identical text produces byte-identical output, with no model downloads and no cloud
-                        inference.
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>vs. DAWs</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        A DAW is a GUI environment built around project files, plugins, and manual arrangement.
-                        SoundScript is code: compositions are plain-text scripts you can diff, review, and version
-                        in git, compiled to standard MIDI by a CLI or in the browser — no audio workstation
-                        installation required.
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>vs. MIDI tools</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        Typical MIDI utilities edit or transform existing MIDI event data. SoundScript is a
-                        language above MIDI: you write musical intent — phrases, patterns, chord voicings, tempo
-                        automation, orchestration — and the interpreter compiles it to MIDI, with an optional
-                        deterministic MIDI-to-audio renderer on top.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>Try it now</h2>
-            <ul class="steps">
-                <li>
-                    <span class="step-num">1</span>
-                    <div>
-                        <strong>Clone &amp; build</strong><br>
-                        <code>git clone https://github.com/dharangutti/sound-script.git</code><br>
-                        <code>cd sound-script &amp;&amp; dotnet build</code>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">2</span>
-                    <div>
-                        <strong>Run the CLI</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss</code>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">3</span>
-                    <div>
-                        <strong>Or try the browser playground</strong><br>
-                        <a href="playground/">Open the Playground</a><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">Type SoundScript, compile to MIDI, and hear it instantly — runs entirely client-side at <code>/playground/</code> in any modern browser (Chrome, Edge, Firefox, Safari — desktop and mobile).</span>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">4</span>
-                    <div>
-                        <strong>Compose from plain text</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"</code><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">The V3.1 PhonemeComposer turns the sounds of the words into a melody — or type text into the Playground's <em>Text-to-Melody</em> box and press <em>Compose from text</em>. <a href="doc.html?p=text-to-melody.md">Text-to-melody docs →</a></span>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">5</span>
-                    <div>
-                        <strong>Export it as editable source (V6)</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss</code><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">Add <code>--emit-ss &lt;path&gt;</code> to <code>compose</code>/<code>prosody</code> and get a human-readable <code>.ss</code> file alongside the MIDI — hand-tweak a note, then run it with <code>run twinkle.ss</code>. The Playground's compose buttons offer the same export inline. <a href="doc.html?p=whats-new-v6.md">What's new in V6 →</a></span>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">6</span>
-                    <div>
-                        <strong>Make it sing</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss</code><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">Or click the <em>Voice</em> preset in the Playground and press Run — the lyrics are spoken over the melody, and the downloaded MIDI carries them as karaoke lyric events. <a href="doc.html?p=vocal.md">Vocal track docs →</a></span>
-                    </div>
-                </li>
-                <li>
-                    <span class="step-num">7</span>
-                    <div>
-                        <strong>Render to WAV with vocal stems (V8)</strong><br>
-                        <code>dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-vocal.ssw jingle.wav --offline-tts prosody</code><br>
-                        <span style="color: var(--muted); font-size: 0.9rem;">Or batch stems first with <code>vocal batch … --engine prosody</code> (or <code>espeak</code> for spoken words). <a href="doc.html?p=whats-new-v8.md">What's new in V8 →</a></span>
-                    </div>
-                </li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Showcase Examples</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <span class="cat-tag">General</span>
-                    <h3>full-v2-showcase.ss</h3>
-                    <pre>tempo 120 → 140 over 2 bars
-
-block verse {
+track piano {
     phrase {
-        curve balanced
-        play arp Cmaj q
+        curve gentle
+        articulation legato
+        mf
+        C4 q E4 q G4 q C5 q
+        G4 q E4 q D4 q C4 q
     }
-}
-track melody {
-    layer flute
-    layer cello
-    play verse
 }</pre>
-                </div>
-                <div class="card">
-                    <span class="cat-tag">Vocal</span>
-                    <h3>vocal-song.ss</h3>
-                    <pre>track accompaniment {
-    instrument piano
-    Cmaj h Fmaj h
-}
+                            <p class="source-note"><a href="assets/demos/piano.ss" download>Download piano.ss</a></p>
+                        </details>
+                    </article>
 
-voice lead {
+                    <article class="demo-card">
+                        <h3>Playable Orchestra Example</h3>
+                        <p>Violin, cello, and piano rendered from three deterministic tracks.</p>
+                        <span class="input-label">Input</span>
+                        <pre class="demo-input">track strings { instrument violin … }
+track harmony { instrument cello … }
+track pulse { instrument piano … }</pre>
+                        <audio controls preload="metadata" aria-label="Play the SoundScript orchestra example">
+                            <source src="assets/demos/orchestra.wav" type="audio/wav">
+                            Your browser does not support WAV playback. <a href="assets/demos/orchestra.wav">Download the WAV</a>.
+                        </audio>
+                        <div class="demo-actions">
+                            <a class="btn btn-secondary" href="assets/demos/orchestra.mid" download>Download MIDI</a>
+                            <a class="btn btn-secondary" href="assets/demos/orchestra.wav" download>Download WAV</a>
+                        </div>
+                        <details class="script-details">
+                            <summary>View Script</summary>
+                            <pre>tempo 92
+time 4/4
+
+track strings {
+    instrument violin
+    mp
+    C4 q E4 q G4 q C5 q
+    A4 q F4 q D4 q G4 q
+}
+track harmony {
+    instrument cello
+    p
+    C3 h G3 h
+    F3 h G3 h
+}
+track pulse {
+    instrument piano
+    mp
+    Cmaj h Fmaj h
+    Amin h Gmaj h
+}</pre>
+                            <p class="source-note"><a href="assets/demos/orchestra.ss" download>Download orchestra.ss</a></p>
+                        </details>
+                    </article>
+
+                    <article class="demo-card">
+                        <h3>Playable Vocal Example</h3>
+                        <p>V9 Jingle Bells mix rendered from the bundled WordBank human-audio corpus and deterministic G2P pipeline.</p>
+                        <span class="input-label">Input</span>
+                        <pre class="demo-input">speak "Jingle bells jingle bells"
+speak "Jingle all the way"
+speak "Oh what fun it is"</pre>
+                        <audio controls preload="metadata" aria-label="Play the SoundScript WordBank vocal example">
+                            <source src="assets/demos/vocal.wav" type="audio/wav">
+                            Your browser does not support WAV playback. <a href="assets/demos/vocal.wav">Download the WAV</a>.
+                        </audio>
+                        <div class="demo-actions">
+                            <a class="btn btn-secondary" href="assets/demos/vocal.mid" download>Download MIDI</a>
+                            <a class="btn btn-secondary" href="assets/demos/vocal.wav" download>Download WAV</a>
+                        </div>
+                        <details class="script-details">
+                            <summary>View Script</summary>
+                            <pre>tempo 132
+time 4/4
+
+track melody {
+    instrument violin
+    mf
+    phrase { curve soft transition smooth play hook }
+}
+track harmony { instrument piano p Cmaj w Cmaj w }
+track bass { instrument bass mf C2 w C2 w }
+
+speak "Jingle bells jingle bells" seed=7 gain=1.05
+speak "Jingle all the way" seed=8 gain=1.05
+speak "Oh what fun it is" seed=9 gain=1.0</pre>
+                            <p class="source-note">
+                                <a href="assets/demos/vocal.ssw" download>Download Wave script</a> ·
+                                <a href="assets/demos/vocal-midi.ss" download>Download karaoke MIDI source</a>
+                            </p>
+                        </details>
+                    </article>
+                </div>
+            </section>
+
+            <section id="benefits" aria-labelledby="benefits-title">
+                <h2 id="benefits-title">Key Benefits</h2>
+                <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
+                <div class="metric-grid" aria-label="Repository engineering metrics">
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->271+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->14<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->505+<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
+                    <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
+                    <div class="metric"><span class="metric-value">2 rails</span><span class="metric-label">MIDI and Wave</span></div>
+                </div>
+                <div class="grid-2">
+                    <article class="card">
+                        <h3>Deterministic rendering</h3>
+                        <p>Identical scripts produce byte-identical MIDI. Seeded humanization and audio regression checks preserve reproducibility across runs and platforms.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Offline by design</h3>
+                        <p>The CLI, MIDI compiler, Wave renderer, timbre engine, and WordBank pipeline run locally. The browser playground runs client-side with no account.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Git-friendly source</h3>
+                        <p>Compositions are reviewable plain-text <code>.ss</code> and <code>.ssw</code> files that can be diffed, versioned, and rebuilt like code.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Standard outputs</h3>
+                        <p>Compile to MIDI with karaoke lyric events, render direct WAV, or use SoundCSS for deterministic MIDI-to-WAV/OGG timbre synthesis.</p>
+                    </article>
+                </div>
+
+                <h3 style="margin:2rem 0 0.75rem;">How SoundScript Compares</h3>
+                <div class="table-wrap">
+                    <table class="comparison-table">
+                        <caption>Architectural comparison. DAW and AI-generator capabilities vary by product and configuration.</caption>
+                        <thead>
+                            <tr><th scope="col">Property</th><th scope="col">Traditional DAW</th><th scope="col">AI Generator</th><th scope="col">SoundScript</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><th scope="row">Reproducibility</th><td>Depends on project, plug-ins, and versions</td><td>Depends on model, seed, and service version</td><td>Byte-stable outputs covered by regression tests</td></tr>
+                            <tr><th scope="row">Git friendly</th><td>Project-format dependent</td><td>Prompts can be versioned; outputs are media files</td><td>Plain-text scripts are diffable</td></tr>
+                            <tr><th scope="row">Offline</th><td>Common after installation</td><td>Product and model dependent</td><td>CLI and synthesis pipelines run locally</td></tr>
+                            <tr><th scope="row">Deterministic</th><td>Depends on plug-ins and workflow</td><td>Model and seed dependent</td><td>Explicit product invariant</td></tr>
+                            <tr><th scope="row">Programmable</th><td>Automation and scripting vary</td><td>API availability varies</td><td>Purpose-built language and C# libraries</td></tr>
+                            <tr><th scope="row">Automation</th><td>Host-specific</td><td>Service-specific</td><td>Cross-platform CLI and text files</td></tr>
+                            <tr><th scope="row">Accessibility</th><td>Interface and host dependent</td><td>Service interface dependent</td><td>Text input, CLI, and keyboard-operable browser UI</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="examples" aria-labelledby="examples-title">
+                <h2 id="examples-title">Output Examples</h2>
+                <p class="section-intro">The repository includes runnable <code>.ss</code> and <code>.ssw</code> examples spanning composition, vocals, Wave synthesis, and industrial cues.</p>
+                <div class="grid-2">
+                    <article class="card">
+                        <span class="cat-tag">Composition</span>
+                        <h3>full-v2-showcase.ss</h3>
+                        <pre>tempo 120 → 140 over 2 bars
+block verse { phrase { curve balanced play arp Cmaj q } }
+track melody { layer flute layer cello play verse }</pre>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">Vocal MIDI</span>
+                        <h3>vocal-song.ss</h3>
+                        <pre>voice lead {
     vocal choir
     sing "Twinkle twinkle little star"
          C4 q C4 q G4 q G4 q
 }</pre>
-                </div>
-                <div class="card">
-                    <span class="cat-tag">Industrial cue</span>
-                    <h3>industrial-machine-state.ss</h3>
-                    <pre>block idle {
-    phrase { curve gentle articulation legato
-        mp C4 q E4 q G4 h }
-}
-block critical {
-    phrase { transition sharp articulation staccato
-        f G4 e G4 e G4 e rest e }
-}
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">Industrial cue</span>
+                        <h3>industrial-machine-state.ss</h3>
+                        <pre>block idle { phrase { curve gentle articulation legato … } }
+block critical { phrase { transition sharp articulation staccato … } }
 track machine { play idle · play running · play critical }</pre>
-                </div>
-                <div class="card">
-                    <span class="cat-tag">Industrial cue</span>
-                    <h3>industrial-blind-assist.ss</h3>
-                    <pre>track spatial {
-    phrase { curve gentle articulation legato
-        mp C4 q E4 q G4 h }
-    phrase { transition sharp articulation staccato
-        f C5 e C5 e C5 e }
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">Accessibility</span>
+                        <h3>industrial-blind-assist.ss</h3>
+                        <pre>track spatial {
+    phrase { curve gentle articulation legato … }
+    phrase { transition sharp articulation staccato … }
 }</pre>
-                </div>
-                <div class="card">
-                    <span class="cat-tag">Timbre / expressive</span>
-                    <h3>phrases-v3.ss</h3>
-                    <pre>phrase {
-    curve swell
-    transition expressive
-    mf
-    C4 q E4 q G4 q
-}
-phrase {
-    curve fade
-    decrescendo
-    f
-    C5 q G4 q E4 q
-}</pre>
-                </div>
-                <div class="card">
-                    <span class="cat-tag">General</span>
-                    <h3>patterns.ss</h3>
-                    <pre>pattern arp { up }
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">Expressive shaping</span>
+                        <h3>phrases-v3.ss</h3>
+                        <pre>phrase { curve swell transition expressive mf C4 q E4 q G4 q }
+phrase { curve fade decrescendo f C5 q G4 q E4 q }</pre>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">Patterns</span>
+                        <h3>patterns.ss</h3>
+                        <pre>pattern arp { up }
 pattern strumPat { strum }
-pattern rhythm8 { rhythm e e q }
+track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
+                    </article>
+                </div>
+                <p style="color:var(--muted);margin-top:1rem;"><a href="doc.html?p=examples.md">Browse the complete example catalog →</a></p>
+            </section>
 
-track melody {
-    instrument guitar
-    play arp Cmaj q
-    play strumPat Cmaj q
-}</pre>
+            <section id="use-cases" aria-labelledby="use-cases-title">
+                <h2 id="use-cases-title">Who Is It For?</h2>
+                <div class="use-grid">
+                    <article class="use-card"><h3>Developers</h3><p>Versioned compositions, CLI workflows, and reusable C# libraries.</p></article>
+                    <article class="use-card"><h3>Researchers</h3><p>Repeatable rule-based audio experiments and inspectable pipelines.</p></article>
+                    <article class="use-card"><h3>Education</h3><p>Plain-text notation, harmony, orchestration, and synthesis examples.</p></article>
+                    <article class="use-card"><h3>Accessibility</h3><p>Text and keyboard workflows plus non-speech spatial cue examples.</p></article>
+                    <article class="use-card"><h3>Industrial Systems</h3><p>Versionable machine-state, timing-drift, and process-trend cues.</p></article>
+                    <article class="use-card"><h3>Music Technology</h3><p>MIDI, Wave, SoundCSS, phonetics, and programmatic arrangement.</p></article>
+                    <article class="use-card"><h3>Interactive Installations</h3><p>Deterministic cue generation for repeatable interactive behavior.</p></article>
                 </div>
-            </div>
-            <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
-                39 runnable example scripts in the repository, including five industrial audio cues.
-                <a href="doc.html?p=examples.md">Full example catalog →</a> ·
-                <a href="doc.html?p=user-guide.md">User Guide →</a>
-            </p>
-        </section>
 
-        <section>
-            <h2>Version History</h2>
-            <ul class="steps">
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V2</span>
-                    <div>Composition and production features: multi-file imports, named blocks, patterns,
-                    phrases, orchestration helpers, track metadata, tempo automation, instrument layers,
-                    deterministic humanization, and advanced chord voicing.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V3.1</span>
-                    <div>Text-to-melody: the deterministic PhonemeComposer engine and <code>compose</code> CLI
-                    verb turn plain text into melody via syllables, phonemes, and musical gestures.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4</span>
-                    <div>Offline timbre synthesis: deterministic MIDI-to-WAV/OGG rendering driven by SoundCSS
-                    stylesheets, via the new <code>render</code> verb.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4.1</span>
-                    <div>Cycle-accurate synthesis: audio is reconstructed per pitch cycle (3–10 cycles per
-                    frame) with per-cycle harmonics, formants, and noise instead of flat per-frame snapshots.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V4.1.1</span>
-                    <div>Timbre quality tuning: harmonic rolloff curves, formant Q and drift, band-shaped noise,
-                    sharpened transients, and cycle/frame crossfading — additive, no new modules.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V5</span>
-                    <div>Word-level prosody: the ProsodyComposer plans pitch top-down (phrase → word → syllable)
-                    with stress detection, adding the <code>prosody</code> CLI verb alongside <code>compose</code>.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V6</span>
-                    <div>Editable <code>.ss</code> export:
-                    <code>--emit-ss</code> serializes composed output back to hand-editable SoundScript source
-                    that round-trips to byte-identical MIDI.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem;">V7</span>
-                    <div>SoundScript.Wave: render <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV
-                    via the <code>wave</code> CLI verb — <code>speak</code>, <code>effect</code>, and seeded
-                    <code>humanize</code> in the Playground.</div>
-                </li>
-                <li>
-                    <span class="step-num" style="width: auto; padding: 0 0.6rem; background: rgba(110, 231, 183, 0.2); color: var(--accent);">V8</span>
-                    <div><strong style="color: var(--text);">Current.</strong> Vocal stems in Wave export:
-                    mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems
-                    with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div>
-                </li>
-            </ul>
-            <p style="color: var(--muted); margin-top: 1rem; font-size: 0.95rem;">
-                <a href="doc.html?p=whats-new-v8.md">What's new in V8 →</a> ·
-                <a href="https://github.com/dharangutti/sound-script/blob/main/RELEASE_NOTES.md">Full release notes →</a>
-            </p>
-        </section>
+                <div class="industrial-promo">
+                    <h3>SoundScript Industrial Audio</h3>
+                    <p>The phrase engine maps machine data to non-speech cues using curves, articulation, dynamic envelopes, and timing modifiers. Cue libraries remain plain text and can live in version control beside system code.</p>
+                    <ul class="industrial-list">
+                        <li><strong>Machine states</strong> — idle, running, and critical blocks.</li>
+                        <li><strong>Conveyor timing drift</strong> — swing, push, and pull modifiers.</li>
+                        <li><strong>Robotic motion</strong> — swell, accent, and fade phases.</li>
+                        <li><strong>Temperature trends</strong> — crescendo, hold, and decrescendo contours.</li>
+                        <li><strong>Blind-operator spatial awareness</strong> — contrasting legato and staccato cues.</li>
+                    </ul>
+                    <a href="/industrial/">Explore the Industrial Audio Toolkit →</a>
+                </div>
 
-        <section>
-            <h2>Documentation</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <h3>Start Here</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=user-guide.md"><strong>User Guide</strong> — from first note to industrial cues</a><br>
-                        <a href="doc.html?p=SoundScript.md">Documentation hub</a><br>
-                        <a href="doc.html?p=examples.md">Example catalog</a>
-                    </p>
+                <h3 style="margin:2rem 0 0.75rem;">Independent Open Source Project</h3>
+                <div class="about">
+                    <p>SoundScript is an MIT-licensed engineering platform for writing audio like code. Notes, chords, dynamics, patterns, orchestration, vocals, and industrial cues pass through explicit, inspectable stages rather than a generative model.</p>
+                    <p>It runs on Windows, macOS, and Linux through .NET 8, plus WebAssembly in Chrome, Edge, Firefox, and Safari. No server, account, DAW, or plug-in is required for the core workflow.</p>
+                    <p>SoundScript is created by Anup Jayant Dharangutti, a music enthusiast and architect of enterprise-grade automation systems. He also created <a href="https://universeglance.com">UniverseGlance</a> and <a href="https://automationglance.com">AutomationGlance</a>.</p>
                 </div>
-                <div class="card">
-                    <h3>Language &amp; Syntax</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=language-reference.md">Language reference</a><br>
-                        <a href="doc.html?p=cli.md">CLI reference — run, compose, prosody, render &amp; wave</a><br>
-                        <a href="doc.html?p=notation.md">Notation engine</a><br>
-                        <a href="doc.html?p=expressive-notation.md">Expressive notation</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>V3.1 &amp; V2 Features</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=text-to-melody.md">Text-to-melody — compose from plain text</a><br>
-                        <a href="doc.html?p=phoneme-composer.md">PhonemeComposer module reference</a><br>
-                        <a href="doc.html?p=whats-new-v2.md">What's new in V2</a> · <a href="doc.html?p=imports.md">Imports</a><br>
-                        <a href="doc.html?p=phrases.md">Phrases</a> · <a href="doc.html?p=orchestration.md">Orchestration</a><br>
-                        <a href="doc.html?p=vocal.md">Vocal track — lyrics &amp; phonetics</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>V6 — Editable .ss Export</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=whats-new-v6.md">What's new in V6</a><br>
-                        <a href="doc.html?p=cli.md">CLI reference — <code>--emit-ss</code></a><br>
-                        <a href="doc.html?p=examples.md">Worked .ss export example</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>V7 — SoundScript.Wave</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=whats-new-v7.md">What's new in V7</a><br>
-                        <a href="doc.html?p=wave-grammar.md">Wave grammar (<code>.ssw</code>)</a><br>
-                        <a href="doc.html?p=cli.md#wave--script-to-wav-v8">CLI <code>wave</code> verb</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>V8 — Vocal Stems in Wave</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=whats-new-v8.md">What's new in V8</a><br>
-                        <a href="doc.html?p=cli.md#vocal--offline-stem-generation-v8">CLI <code>vocal</code> verb</a><br>
-                        <a href="doc.html?p=examples.md">Jingle Bells + vocal stems example</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Engine &amp; Architecture</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">
-                        <a href="doc.html?p=architecture.md">Architecture</a><br>
-                        <a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br>
-                        <a href="doc.html?p=whats-new-v1.2.md">v1.2 foundation</a>
-                    </p>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section>
-            <h2>About the Project</h2>
-            <div class="about">
-                <p>SoundScript is an open-source (MIT), deterministic music DSL that turns simple text into
-                professional-sounding MIDI. Imports, blocks, patterns, phrases, layers, orchestration, and
-                V3 expressive shaping extend the v1.2 engine — intentionally minimal and designed for clarity,
-                reproducibility, and joy.</p>
-                <p>It runs everywhere: the CLI is built on cross-platform .NET (Windows, macOS, Linux), and the
-                playground compiles to WebAssembly, so it works in any modern browser — Chrome, Edge, Firefox,
-                and Safari, on desktop and mobile — with no server, no account, and no installation.</p>
-            </div>
-        </section>
+            <section id="architecture" aria-labelledby="architecture-title">
+                <h2 id="architecture-title">Architecture</h2>
+                <p class="section-intro">A shared parser builds the AST. Independent output rails then produce MIDI, direct Wave audio, or vocal-enhanced mixes.</p>
+                <div class="architecture" role="img" aria-label="SoundScript architecture: text passes through the parser to an abstract syntax tree, then branches to MIDI, Wave, and WordBank vocal outputs">
+                    <div class="flow-row">
+                        <span class="flow-node"><strong>Text</strong><small>.ss / .ssw</small></span><span class="flow-arrow">→</span>
+                        <span class="flow-node"><strong>Parser</strong><small>syntax + imports</small></span><span class="flow-arrow">→</span>
+                        <span class="flow-node"><strong>AST</strong><small>shared program model</small></span>
+                    </div>
+                    <div class="flow-row"><span class="flow-label">MIDI rail</span><span class="flow-node">Interpreter</span><span class="flow-arrow">→</span><span class="flow-node">Composer + shaping</span><span class="flow-arrow">→</span><span class="flow-node"><strong>MIDI</strong><small>standard file</small></span></div>
+                    <div class="flow-row"><span class="flow-label">Wave rail</span><span class="flow-node">AST adapter</span><span class="flow-arrow">→</span><span class="flow-node">Synth + effects</span><span class="flow-arrow">→</span><span class="flow-node"><strong>WAV</strong><small>direct render</small></span></div>
+                    <div class="flow-row"><span class="flow-label">Vocal rail</span><span class="flow-node">WordBank</span><span class="flow-arrow">→</span><span class="flow-node">Vocal stems</span><span class="flow-arrow">→</span><span class="flow-node"><strong>WAV mix</strong><small>offline vocals</small></span></div>
+                </div>
+                <div class="pipeline" style="margin-top:1rem;" aria-label="Detailed MIDI processing pipeline">
+                    <span>Import</span><span class="arrow">→</span><span>Parser</span><span class="arrow">→</span>
+                    <span>Interpreter</span><span class="arrow">→</span><span>PhraseShaper</span><span class="arrow">→</span>
+                    <span>PatternExpander</span><span class="arrow">→</span><span>Orchestration</span><span class="arrow">→</span>
+                    <span>Layers</span><span class="arrow">→</span><span>Humanize</span><span class="arrow">→</span><span>MIDI</span>
+                </div>
+                <p style="color:var(--muted);margin-top:1rem;"><a href="doc.html?p=architecture.md">Architecture reference</a> · <a href="doc.html?p=pipeline.md">Interpreter pipeline</a></p>
+            </section>
 
-        <section>
-            <h2>About the Author</h2>
-            <div class="about">
-                <p>SoundScript is created by Anup Jayant Dharangutti, Music Enthusiast,
-                architect of enterprise‑grade automation systems, and creator of
-                <a href="https://universeglance.com">UniverseGlance</a> and
-                <a href="https://automationglance.com">AutomationGlance</a>.
-                He builds deterministic tools, micro‑languages, and creative engines as part of his unified research project.</p>
-            </div>
-        </section>
+            <section id="technical-highlights" aria-labelledby="technical-title">
+                <h2 id="technical-title">Technical Highlights</h2>
+                <div class="grid-2">
+                    <article class="card">
+                        <span class="cat-tag">V9</span>
+                        <h3>WordBank Vocal Engine</h3>
+                        <p>Offline, deterministic human-audio vocalization combines a curated CC0/CC-BY corpus with rule-based G2P timbre. V9 adds the Jingle Bells WordBank preset and corpus coverage in the Playground workflow.</p>
+                        <p><a href="doc.html?p=whats-new-v9.md">What's new in V9 →</a></p>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">V7–V8</span>
+                        <h3>SoundScript.Wave and Vocal Stems</h3>
+                        <p>Render <code>.ss</code> or <code>.ssw</code> directly to deterministic WAV. Mix recordings through <code>sample</code> / <code>speak sample=</code>, or generate stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</p>
+                        <p><a href="doc.html?p=wave-grammar.md">Wave grammar</a> · <a href="doc.html?p=cli.md#wave--script-to-wav-v8">CLI wave verb</a></p>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">V4–V4.1.1</span>
+                        <h3>Cycle-Accurate Timbre Engine</h3>
+                        <p>SoundCSS controls deterministic MIDI-to-WAV/OGG synthesis. Per-cycle harmonics, formant Q and drift, band-shaped noise, transient modeling, and crossfading replace flat frame snapshots.</p>
+                        <p><a href="doc.html?p=timbre-engine.md">Timbre engine reference →</a></p>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">V3.1–V6</span>
+                        <h3>Text Composition and Editable Export</h3>
+                        <p>PhonemeComposer maps text to syllables, phonemes, gestures, and MIDI. ProsodyComposer plans phrase, word, and syllable pitch. <code>--emit-ss</code> round-trips composed output to editable source.</p>
+                        <p><a href="doc.html?p=text-to-melody.md">Text-to-melody</a> · <a href="doc.html?p=whats-new-v6.md">Editable export</a></p>
+                    </article>
+                </div>
+
+                <h3 style="margin:2rem 0 0.75rem;">Language Surface</h3>
+                <div class="grid-2">
+                    <article class="card"><h3>Imports &amp; Blocks</h3><pre>import "lib.ss"
+block intro { ... }
+play intro</pre><p><a href="doc.html?p=imports.md">Imports</a> · <a href="doc.html?p=blocks.md">Blocks</a></p></article>
+                    <article class="card"><h3>Patterns &amp; Phrases</h3><pre>pattern arp { up }
+play arp Cmaj q
+phrase { curve soft }</pre><p><a href="doc.html?p=patterns.md">Patterns</a> · <a href="doc.html?p=phrases.md">Phrases</a></p></article>
+                    <article class="card"><h3>Metadata &amp; Layers</h3><pre>gain 0.9
+humanize 0.03
+layer piano
+layer cello</pre><p><a href="doc.html?p=track-metadata.md">Metadata</a> · <a href="doc.html?p=layers.md">Layers</a></p></article>
+                    <article class="card"><h3>Orchestration &amp; Chords</h3><pre>double octave
+Cmaj drop2
+tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orchestration</a> · <a href="doc.html?p=advanced-chords.md">Chords</a></p></article>
+                    <article class="card"><h3>Vocal Tracks</h3><pre>voice lead {
+    vocal choir
+    sing "Twinkle twinkle" C4 q C4 q G4 q G4 q
+}</pre><p>Lyrics bind to notes deterministically and export as karaoke events. <a href="doc.html?p=vocal.md">Vocal docs</a></p></article>
+                    <article class="card"><h3>Text to Melody</h3><pre>compose "Twinkle twinkle little star"</pre><p>Identical text yields identical MIDI bytes through the rule-based PhonemeComposer. <a href="doc.html?p=phoneme-composer.md">Composer reference</a></p></article>
+                </div>
+
+                <details class="compact-details" style="margin-top:1rem;">
+                    <summary>CLI quick start and output workflows</summary>
+                    <ul class="steps">
+                        <li><span class="step-num">1</span><div><strong>Clone and build</strong><br><code>git clone https://github.com/dharangutti/sound-script.git</code><br><code>cd sound-script &amp;&amp; dotnet build</code></div></li>
+                        <li><span class="step-num">2</span><div><strong>Compile a script to MIDI</strong><br><code>dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss</code></div></li>
+                        <li><span class="step-num">3</span><div><strong>Use the browser</strong><br><a href="playground/">Open the Playground</a> to compile and preview client-side in Chrome, Edge, Firefox, or Safari.</div></li>
+                        <li><span class="step-num">4</span><div><strong>Compose from text</strong><br><code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"</code></div></li>
+                        <li><span class="step-num">5</span><div><strong>Export editable source</strong><br><code>dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss</code></div></li>
+                        <li><span class="step-num">6</span><div><strong>Create karaoke MIDI</strong><br><code>dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss</code></div></li>
+                        <li><span class="step-num">7</span><div><strong>Render WordBank vocal WAV</strong><br><code>dotnet run --project src/SoundScript.Cli -- wave examples/jingle-bells-wordbank.ssw jingle.wav --tts-dir vocal-stems/wordbank</code></div></li>
+                    </ul>
+                </details>
+            </section>
+
+            <section id="documentation" aria-labelledby="documentation-title">
+                <h2 id="documentation-title">Documentation</h2>
+                <div class="grid-2">
+                    <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=user-guide.md"><strong>User Guide</strong></a><br><a href="doc.html?p=SoundScript.md">Documentation hub</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
+                    <article class="card"><h3>Language &amp; CLI</h3><p><a href="doc.html?p=language-reference.md">Language reference</a><br><a href="doc.html?p=cli.md">CLI reference</a><br><a href="doc.html?p=notation.md">Notation engine</a><br><a href="doc.html?p=expressive-notation.md">Expressive notation</a></p></article>
+                    <article class="card"><h3>Current Release — V9</h3><p><a href="doc.html?p=whats-new-v9.md">WordBank Vocal Engine</a><br><a href="doc.html?p=phase8-wordbank-vocal.md">WordBank architecture</a><br><a href="doc.html?p=examples.md">Jingle Bells demo</a></p></article>
+                    <article class="card"><h3>Wave &amp; Vocals</h3><p><a href="doc.html?p=wave-grammar.md">Wave grammar</a><br><a href="doc.html?p=vocal.md">Vocal tracks</a><br><a href="doc.html?p=whats-new-v8.md">V8 vocal stems</a><br><a href="doc.html?p=playback-quality.md">Playback quality</a></p></article>
+                    <article class="card"><h3>Composition</h3><p><a href="doc.html?p=text-to-melody.md">Text-to-melody</a><br><a href="doc.html?p=phrases.md">Phrases</a><br><a href="doc.html?p=orchestration.md">Orchestration</a><br><a href="doc.html?p=tempo-automation.md">Tempo automation</a></p></article>
+                    <article class="card"><h3>Engine Internals</h3><p><a href="doc.html?p=architecture.md">Architecture</a><br><a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br><a href="doc.html?p=timbre-engine.md">Timbre engine</a><br><a href="doc.html?p=whats-new-v1.2.md">v1.2 foundation</a></p></article>
+                </div>
+            </section>
+
+            <section id="version-history" aria-labelledby="version-title">
+                <h2 id="version-title">Version History</h2>
+                <ul class="steps">
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V9</span><div><strong>WordBank Vocal Engine</strong><span class="release-label">Current</span><br>Brings the WordBank workflow and Jingle Bells preset to the Playground, with complete corpus coverage for the bundled song and a CLI path-resolution fix. <a href="doc.html?p=whats-new-v9.md">Release details →</a></div></li>
+                    <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V7</span><div>SoundScript.Wave renders <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV through <code>speak</code>, effects, and seeded humanization.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V6</span><div><code>--emit-ss</code> serializes composed output to editable source that round-trips to byte-identical MIDI.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V5</span><div>ProsodyComposer plans pitch from phrase to word to syllable with stress detection and the <code>prosody</code> CLI verb.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V4.1.1</span><div>Harmonic rolloff, formant Q and drift, band-shaped noise, sharpened transients, and cycle/frame crossfading tune the timbre engine.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V4.1</span><div>Cycle-accurate synthesis reconstructs audio per pitch cycle with per-cycle harmonics, formants, and noise.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V4</span><div>SoundCSS-driven offline timbre synthesis adds deterministic MIDI-to-WAV/OGG rendering.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V3.1</span><div>PhonemeComposer and the <code>compose</code> verb turn plain text into melody through syllables, phonemes, and musical gestures.</div></li>
+                    <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V2</span><div>Imports, blocks, patterns, phrases, orchestration, metadata, tempo automation, layers, deterministic humanization, and advanced chord voicing.</div></li>
+                </ul>
+                <p style="color:var(--muted);margin-top:1rem;"><a href="https://github.com/dharangutti/sound-script/blob/main/RELEASE_NOTES.md">Full release notes →</a></p>
+            </section>
+        </main>
 
         <footer>
             <p>
                 <a href="playground/">Playground</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide</a> ·
-                <a href="/industrial">Industrial Applications</a> ·
-                <a href="doc.html?p=whats-new-v8.md">What's New</a> ·
+                <a href="/industrial/">Industrial Audio</a> ·
+                <a href="doc.html?p=whats-new-v9.md">What's New in V9</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
-                <a href="https://www.dharangutti.in">dharangutti.in</a>
+                <a href="/contact/">Contact</a>
             </p>
-            <p style="margin-top: 0.5rem;">MIT License · Built with curiosity, creativity, and play.</p>
-            <p style="margin-top: 0.5rem;">
-                © SoundScript<br>
-                Contact: <a href="mailto:info@dharangutti.in">info@dharangutti.in</a><br>
-                <a href="https://dharangutti.in">dharangutti.in</a><br>
-                Open to strategic conversations regarding future direction.
-            </p>
+            <p style="margin-top:0.5rem;">Independent Open Source Project · MIT License · Deterministic Audio Programming Language</p>
+            <p style="margin-top:0.5rem;">© SoundScript · <a href="mailto:info@dharangutti.in">info@dharangutti.in</a> · <a href="https://dharangutti.in">dharangutti.in</a></p>
         </footer>
     </div>
 </body>

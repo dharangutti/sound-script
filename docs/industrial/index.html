@@ -3,27 +3,55 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundScript — Expressive Audio for Industrial Awareness</title>
-    <meta name="description" content="SoundScript V3 — expressive, deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows. Map process parameters to phrase-level constructs and export reproducible MIDI.">
+    <title>SoundScript Industrial Audio — Deterministic Audio Toolkit</title>
+    <meta name="description" content="SoundScript Industrial Audio maps machine states, motion, process trends, and accessibility signals to deterministic, versionable MIDI cues using a browser playground or cross-platform CLI.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://soundscript.net/industrial/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SoundScript">
-    <meta property="og:title" content="SoundScript — Expressive Audio for Industrial Awareness">
-    <meta property="og:description" content="Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows — prototyped in the browser, exported as reproducible MIDI.">
+    <meta property="og:title" content="SoundScript Industrial Audio — Deterministic Audio Toolkit">
+    <meta property="og:description" content="Map machines, robots, process trends, and accessibility signals to deterministic, versionable audio cues.">
     <meta property="og:url" content="https://soundscript.net/industrial/">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta property="og:image:alt" content="SoundScript logo">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="SoundScript — Expressive Audio for Industrial Awareness">
-    <meta name="twitter:description" content="Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows — prototyped in the browser, exported as reproducible MIDI.">
+    <meta name="twitter:title" content="SoundScript Industrial Audio — Deterministic Audio Toolkit">
+    <meta name="twitter:description" content="Map machines, robots, process trends, and accessibility signals to deterministic, versionable audio cues.">
+    <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
+    <meta name="twitter:image:alt" content="SoundScript logo">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "WebPage",
-        "@id": "https://soundscript.net/industrial/",
-        "url": "https://soundscript.net/industrial/",
-        "name": "SoundScript — Expressive Audio for Industrial Awareness",
-        "isPartOf": { "@id": "https://soundscript.net/#website" },
-        "description": "SoundScript V3 industrial applications: deterministic, expressive audio cues for machine states, conveyor timing drift, robotic motion phases, temperature trends, and blind-operator spatial awareness."
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": "https://soundscript.net/industrial/#webpage",
+                "url": "https://soundscript.net/industrial/",
+                "name": "SoundScript Industrial Audio — Deterministic Audio Toolkit",
+                "isPartOf": { "@id": "https://soundscript.net/#website" },
+                "breadcrumb": { "@id": "https://soundscript.net/industrial/#breadcrumb" },
+                "description": "Deterministic, versionable audio cues for machine states, conveyor timing drift, robotic motion, process trends, and accessibility workflows."
+            },
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://soundscript.net/#software",
+                "name": "SoundScript",
+                "applicationCategory": "MultimediaApplication",
+                "operatingSystem": "Windows, macOS, Linux, Web",
+                "softwareVersion": "9.0.0",
+                "license": "https://opensource.org/licenses/MIT",
+                "url": "https://soundscript.net/"
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://soundscript.net/industrial/#breadcrumb",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "SoundScript", "item": "https://soundscript.net/" },
+                    { "@type": "ListItem", "position": 2, "name": "Industrial Audio", "item": "https://soundscript.net/industrial/" }
+                ]
+            }
+        ]
     }
     </script>
     <style>
@@ -60,6 +88,27 @@
 
         a { color: var(--accent); text-decoration: none; }
         a:hover { text-decoration: underline; }
+
+        :focus-visible {
+            outline: 3px solid var(--warm);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 100;
+            padding: 0.65rem 1rem;
+            color: #052e2b;
+            background: var(--accent);
+            border-radius: 8px;
+            font-weight: 700;
+            transform: translateY(-180%);
+        }
+
+        .skip-link:focus { transform: translateY(0); }
 
         .wrap {
             max-width: var(--max);
@@ -579,36 +628,47 @@
 
             footer p { line-height: 2; }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="wrap">
-        <nav>
+        <nav aria-label="Primary navigation">
             <a class="logo" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
-                <span class="logo-version">V3</span>
+                <span class="logo-version">Industrial Audio</span>
             </a>
             <div class="nav-links">
                 <a href="/">Home</a>
                 <a href="/playground/">Playground</a>
                 <a href="/doc.html?p=user-guide.md">User Guide</a>
-                <a href="/doc.html?p=phrases-v3.md">V3 Reference</a>
+                <a href="/doc.html?p=phrases-v3.md">Phrase Reference</a>
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a>
             </div>
         </nav>
 
-        <!-- SECTION 1 — HERO -->
-        <header class="hero">
-            <div class="badge">V3 · Deterministic · Industrial Audio</div>
-            <h1>SoundScript — Expressive Audio for Industrial Awareness</h1>
-            <p class="subtitle">Deterministic audio cues for machines, robots, conveyors, QC stations, and accessibility workflows.</p>
-        </header>
+        <main id="main-content">
+            <!-- SECTION 1 — HERO -->
+            <header class="hero">
+                <div class="badge">Deterministic · Versionable · Industrial Audio</div>
+                <h1>SoundScript Industrial Audio</h1>
+                <p class="subtitle">A toolkit for deterministic audio cues across machines, robots, conveyors, QC stations, and accessibility workflows.</p>
+            </header>
 
         <!-- SECTION 2 — HOW USERS EXPLORE -->
         <section>
-            <h2>How Users Explore SoundScript.net</h2>
+            <h2>How Engineers Prototype Cues</h2>
             <div class="prose">
-                <p>SoundScript.net is a precision surface where industrial teams prototype audible awareness — phrase by phrase, deterministically, before a single line reaches production.</p>
+                <p>Industrial teams can prototype audible state and trend cues in the browser, validate them as plain text, and carry the same scripts into CLI workflows.</p>
             </div>
             <ol class="journey">
                 <li>
@@ -626,7 +686,7 @@
                 <li>
                     <div>
                         <strong>Map process parameters to constructs</strong>
-                        <span>Translate machine state, motion rhythm, temperature trend, or spatial proximity into V3 phrase keywords — curve, articulation, transition, crescendo, swing.</span>
+                        <span>Translate machine state, motion rhythm, temperature trend, or spatial proximity into phrase constructs such as curve, articulation, transition, crescendo, and swing.</span>
                     </div>
                 </li>
                 <li>
@@ -654,7 +714,7 @@
         <section>
             <h2>How Users Map Process Parameters to SoundScript</h2>
             <div class="prose">
-                <p>Industrial awareness begins with a disciplined translation: real-world signals become phrase-level constructs. V3 gives engineers a compact vocabulary — no orchestration layer required for a working cue.</p>
+                <p>Industrial awareness begins with a disciplined translation: real-world signals become phrase-level constructs. SoundScript provides a compact vocabulary; the examples use the established V3 phrase syntax where those constructs were introduced.</p>
             </div>
             <div class="mapping-grid">
                 <div class="mapping-card">
@@ -693,7 +753,7 @@
                     <thead>
                         <tr>
                             <th>Process Parameter</th>
-                            <th>SoundScript V3 Construct</th>
+                            <th>SoundScript Construct</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -726,7 +786,7 @@
         <section>
             <h2>How Users Write a Script</h2>
             <div class="prose">
-                <p>SoundScript V3 composes from the inside out. A few lines carry full expressive intent — engineers write snippets, not suites.</p>
+                <p>SoundScript Industrial Audio composes from the inside out. A few lines can carry the full expressive intent of a cue.</p>
             </div>
             <div class="model-row">
                 <div class="model-card">
@@ -747,9 +807,9 @@
 
         <!-- SECTION 6 — CASE STUDIES -->
         <section>
-            <h2>Case Studies — Artistic Form, Engineering Substance</h2>
+            <h2>Industrial Cue Case Studies</h2>
             <div class="prose">
-                <p>Five industrial scenarios, five complete scripts. Each maps a real process parameter to V3 constructs and produces a deterministic cue. Every snippet below is a full, runnable program — paste it into the <a href="/playground/" style="color:var(--accent);">Playground</a> or run it from the repository with <code style="font-family:monospace;color:var(--accent);font-size:0.85rem;">dotnet run --project src/SoundScript.Cli -- run examples/industrial-*.ss</code>.</p>
+                <p>Five industrial scenarios map real process parameters to phrase constructs and produce deterministic cues. Every snippet below is a full, runnable program — paste it into the <a href="/playground/" style="color:var(--accent);">Playground</a> or run it from the repository with <code style="font-family:monospace;color:var(--accent);font-size:0.85rem;">dotnet run --project src/SoundScript.Cli -- run examples/industrial-*.ss</code>.</p>
             </div>
 
             <!-- Case Study 1 -->
@@ -1046,9 +1106,9 @@ soundscript compose "line clear"               cue-clear.mid</pre>
 
         <!-- SECTION 7 — NARRATIVE -->
         <section>
-            <h2>The SoundScript Transformation</h2>
+            <h2>Engineering Outcomes</h2>
             <div class="narrative">
-                <p>SoundScript V3 does not add noise to the factory floor. It adds language — a deterministic, phrase-level vocabulary that manufacturing leaders, automation engineers, robotics integrators, accessibility teams, and Industrial IoT prospects can prototype in minutes and deploy with confidence.</p>
+                <p>SoundScript Industrial Audio provides a deterministic phrase vocabulary for manufacturing teams, automation engineers, robotics integrators, accessibility teams, and Industrial IoT workflows.</p>
                 <ul class="narrative-list">
                     <li>Machines become audible.</li>
                     <li>Robots become expressive.</li>
@@ -1057,7 +1117,7 @@ soundscript compose "line clear"               cue-clear.mid</pre>
                     <li>Temperature trends become musical contours.</li>
                     <li>Blind operators gain spatial awareness.</li>
                 </ul>
-                <p style="margin-top:1.5rem;">Every cue is a script. Every script is reproducible. Every construct maps to an existing V3 keyword — curve, transition, articulation, envelope, swing, push, pull, dynamic level. Artistic enough for human perception. Engineering-credible enough for production audit trails. This is expressive industrial audio: minimal surface, maximum clarity.</p>
+                <p style="margin-top:1.5rem;">Every cue is a script. Every script is reproducible. Each construct maps to an existing phrase keyword — curve, transition, articulation, envelope, swing, push, pull, or dynamic level — so the source remains inspectable and versionable.</p>
             </div>
         </section>
 
@@ -1068,21 +1128,22 @@ soundscript compose "line clear"               cue-clear.mid</pre>
             <div class="cta-row">
                 <a class="btn btn-primary" href="/playground/">Explore SoundScript.net Playground</a>
                 <a class="btn btn-secondary" href="/doc.html?p=user-guide.md">User Guide</a>
-                <a class="btn btn-secondary" href="/doc.html?p=phrases-v3.md">V3 Phrase Reference</a>
-                <a class="btn btn-secondary" href="/doc.html?p=whats-new-v3.md">What's New in V3</a>
+                <a class="btn btn-secondary" href="/doc.html?p=phrases-v3.md">Phrase Reference</a>
+                <a class="btn btn-secondary" href="/doc.html?p=architecture.md">Architecture</a>
             </div>
         </section>
+        </main>
 
         <footer>
             <p>
                 <a href="/">Home</a> ·
                 <a href="/playground/">Playground</a> ·
                 <a href="/doc.html?p=user-guide.md">User Guide</a> ·
-                <a href="/doc.html?p=phrases-v3.md">V3 Reference</a> ·
+                <a href="/doc.html?p=phrases-v3.md">Phrase Reference</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="https://www.dharangutti.in">dharangutti.in</a>
             </p>
-            <p style="margin-top:0.5rem;">SoundScript V3 · MIT License · Deterministic text to MIDI.</p>
+            <p style="margin-top:0.5rem;">SoundScript Industrial Audio · MIT License · Deterministic text to MIDI.</p>
             <p style="margin-top:0.5rem;">
                 © SoundScript<br>
                 Contact: <a href="mailto:info@dharangutti.in">info@dharangutti.in</a><br>
