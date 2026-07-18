@@ -102,6 +102,29 @@
             padding: 3rem 0 2.5rem;
         }
 
+        .brand-hero {
+            display: inline-flex;
+            margin-bottom: 1.25rem;
+            border-radius: 14px;
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(110, 231, 183, 0.16);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .brand-hero:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 22px 58px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(110, 231, 183, 0.28);
+            text-decoration: none;
+        }
+
+        .brand-hero img {
+            display: block;
+            width: min(420px, 84vw);
+            height: 142px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 14px;
+        }
+
         .badge {
             display: inline-block;
             font-size: 0.75rem;
@@ -407,6 +430,11 @@
 
             header { padding: 2rem 0 1.75rem; }
 
+            .brand-hero img {
+                width: min(340px, 88vw);
+                height: 112px;
+            }
+
             section { margin-top: 2.5rem; }
 
             .lead { font-size: 1.05rem; }
@@ -437,6 +465,9 @@
 <body>
     <div class="wrap">
         <header>
+            <a class="brand-hero" href="/" aria-label="SoundScript home">
+                <img src="/assets/soundscript-logo.png" alt="SoundScript">
+            </a>
             <div class="badge"><!--VERSION_BADGE-->Version: V8 — Vocal Stems in Wave Export<!--/VERSION_BADGE--></div>
             <h1>Write music like <span>code</span></h1>
             <p class="lead">

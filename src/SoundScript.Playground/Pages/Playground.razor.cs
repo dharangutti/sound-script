@@ -1277,6 +1277,9 @@ public partial class Playground
       MidiBytes = null;
       WavBytes = null;
       UsedWaveBackend = false;
+      StatusMessage = "Compiling...";
+      await InvokeAsync(StateHasChanged);
+      await Task.Yield();
 
       await SyncMidiEditorAsync();
 
@@ -1292,6 +1295,9 @@ public partial class Playground
       // would otherwise throw NotSupportedException on EffectNode/SpeakNode.
       if (ContainsWaveOnlyDirectives(program.Statements))
       {
+        StatusMessage = "Rendering Wave audio...";
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
         await RunWaveProgramAsync(program);
         return;
       }
@@ -1311,9 +1317,12 @@ public partial class Playground
 
       var noteCount = interpreted.Tracks.Sum(t => t.Notes.Count);
 
-      var status = $"Playing — {noteCount} note(s) across {interpreted.Tracks.Count} track(s)";
+      var playbackSummary = $"{noteCount} note(s) across {interpreted.Tracks.Count} track(s)";
       if (interpreted.VocalTracks.Count > 0)
-        status += $", {interpreted.VocalTracks.Sum(v => v.Syllables.Count)} sung syllable(s)";
+        playbackSummary += $", {interpreted.VocalTracks.Sum(v => v.Syllables.Count)} sung syllable(s)";
+      StatusMessage = $"Compiled {playbackSummary}. Preparing playback...";
+      await InvokeAsync(StateHasChanged);
+      await Task.Yield();
 
       // Playback is decoupled from compilation: MidiBytes is already computed
       // above, so a playback failure (common on mobile — AudioContext autoplay
@@ -1332,7 +1341,7 @@ public partial class Playground
             WarningMessages.Add("This browser has no speech synthesis — lyrics play as melody only. The downloaded MIDI still contains the lyric events.");
         }
 
-        StatusMessage = $"{status} at {interpreted.Tempo} BPM.";
+        StatusMessage = $"Playing — {playbackSummary} at {interpreted.Tempo} BPM.";
       }
       catch (Exception)
       {
@@ -1828,6 +1837,15 @@ public partial class Playground
 
     _editorsReady = true;
     UpdatePatternPreview();
+
+    try
+    {
+      await Js.InvokeVoidAsync("SoundScriptMidi.primePrograms", new[] { 0, 42 });
+    }
+    catch
+    {
+      // Playback still lazy-loads samples on demand if prefetch is unavailable.
+    }
   }
 
   private void UpdatePatternPreview()

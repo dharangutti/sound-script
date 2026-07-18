@@ -6,11 +6,23 @@ window.SoundScriptSoundfont = (function () {
     const BASE_MIDI = 48; // C3
     const DEFAULT_PROGRAM = 0;
     const PROGRAMS = [0, 19, 24, 32, 40, 42, 56, 73, 80];
+    const PROGRAM_SET = new Set(PROGRAMS);
     const SAMPLE_ROOT = 'soundfont/samples/';
 
     let audioContext = null;
     const buffers = {};
-    let loadPromise = null;
+    const rawBuffers = {};
+    const fetchPromises = {};
+    const loadPromises = {};
+
+    function resolveProgram(program) {
+        return PROGRAM_SET.has(program) ? program : DEFAULT_PROGRAM;
+    }
+
+    function normalizePrograms(programs) {
+        const requested = Array.isArray(programs) && programs.length > 0 ? programs : [DEFAULT_PROGRAM];
+        return [...new Set(requested.map(resolveProgram))];
+    }
 
     function programBuffers(program) {
         if (!buffers[program]) {
@@ -19,42 +31,71 @@ window.SoundScriptSoundfont = (function () {
         return buffers[program];
     }
 
-    async function loadProgram(program) {
-        const samples = programBuffers(program);
-        if (samples[0]) {
+    function programRawBuffers(program) {
+        if (!rawBuffers[program]) {
+            rawBuffers[program] = new Array(12).fill(null);
+        }
+        return rawBuffers[program];
+    }
+
+    async function fetchProgram(program) {
+        const resolvedProgram = resolveProgram(program);
+        const rawSamples = programRawBuffers(resolvedProgram);
+        if (rawSamples[0]) {
             return;
         }
 
-        await Promise.all(PITCH_CLASSES.map(async (pitch, index) => {
-            const url = SAMPLE_ROOT + program + '/' + pitch + '.wav';
+        if (fetchPromises[resolvedProgram]) {
+            await fetchPromises[resolvedProgram];
+            return;
+        }
+
+        fetchPromises[resolvedProgram] = Promise.all(PITCH_CLASSES.map(async (pitch, index) => {
+            const url = SAMPLE_ROOT + resolvedProgram + '/' + pitch + '.wav';
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Failed to load soundfont sample: ' + url);
             }
-            const data = await response.arrayBuffer();
-            samples[index] = await audioContext.decodeAudioData(data);
+            rawSamples[index] = await response.arrayBuffer();
         }));
+
+        await fetchPromises[resolvedProgram];
     }
 
-    async function load(context) {
-        if (buffers[DEFAULT_PROGRAM] && buffers[DEFAULT_PROGRAM][0]) {
-            audioContext = context;
+    async function loadProgram(program) {
+        const resolvedProgram = resolveProgram(program);
+        const samples = programBuffers(resolvedProgram);
+        if (samples[0]) {
             return;
         }
 
-        if (loadPromise) {
-            await loadPromise;
-            audioContext = context;
+        if (loadPromises[resolvedProgram]) {
+            await loadPromises[resolvedProgram];
             return;
         }
 
+        loadPromises[resolvedProgram] = (async () => {
+            await fetchProgram(resolvedProgram);
+            const rawSamples = programRawBuffers(resolvedProgram);
+            await Promise.all(rawSamples.map(async (data, index) => {
+                samples[index] = await audioContext.decodeAudioData(data.slice(0));
+            }));
+        })();
+
+        await loadPromises[resolvedProgram];
+    }
+
+    async function prefetch(programs) {
+        await Promise.all(normalizePrograms(programs).map(fetchProgram));
+    }
+
+    async function load(context, programs) {
         audioContext = context;
-        loadPromise = Promise.all(PROGRAMS.map(loadProgram));
-        await loadPromise;
+        await Promise.all(normalizePrograms(programs).map(loadProgram));
     }
 
     function playNote(midiNote, velocity, startTime, duration, destination, program) {
-        const resolvedProgram = PROGRAMS.includes(program) ? program : DEFAULT_PROGRAM;
+        const resolvedProgram = resolveProgram(program);
         const samples = programBuffers(resolvedProgram);
         const pitchClass = ((midiNote % 12) + 12) % 12;
         const buffer = samples[pitchClass];
@@ -86,6 +127,7 @@ window.SoundScriptSoundfont = (function () {
 
     return {
         load,
+        prefetch,
         playNote
     };
 })();

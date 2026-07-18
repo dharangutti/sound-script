@@ -38,6 +38,17 @@ a:hover { text-decoration: underline; }
     justify-content: center;
     min-height: 100vh;
     color: var(--muted);
+    gap: 1rem;
+}
+
+.boot-logo {
+    display: block;
+    width: min(300px, 80vw);
+    height: 92px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(110, 231, 183, 0.16);
 }
 
 .boot-spinner {
@@ -47,7 +58,6 @@ a:hover { text-decoration: underline; }
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    margin-bottom: 1rem;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -65,13 +75,33 @@ a:hover { text-decoration: underline; }
 .header-top {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 0.9rem;
+    flex-wrap: wrap;
     margin-bottom: 0.75rem;
 }
 
-.home-link {
-    color: var(--muted);
-    font-size: 0.9rem;
+.brand-link {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 12px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(110, 231, 183, 0.14);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.brand-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(110, 231, 183, 0.26);
+    text-decoration: none;
+}
+
+.brand-logo {
+    display: block;
+    width: min(250px, 72vw);
+    height: 74px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
 }
 
 .badge {
@@ -111,6 +141,234 @@ a:hover { text-decoration: underline; }
 .preset-label {
     color: var(--muted);
     font-size: 0.9rem;
+}
+
+.compose-input {
+    flex: 1 1 16rem;
+    min-width: 12rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-bg);
+    color: #c7d2e8;
+    font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+}
+
+.compose-input:focus {
+    outline: 2px solid rgba(110, 231, 183, 0.35);
+    outline-offset: 2px;
+}
+
+.example-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-bg);
+    color: #c7d2e8;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+    min-width: 12rem;
+}
+
+.example-select:focus {
+    outline: 2px solid rgba(110, 231, 183, 0.35);
+    outline-offset: 2px;
+}
+
+.example-cli-panel {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.example-cli-panel > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.example-cli-panel[open] > summary {
+    margin-bottom: 0.75rem;
+}
+
+.preset-active-title {
+    color: var(--muted);
+    font-size: 0.88rem;
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playground-playbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0.5rem;
+    z-index: 20;
+}
+
+.badge-playbar {
+    margin-left: auto;
+}
+
+.btn-toolbar-run {
+    min-width: 5.5rem;
+}
+
+.script-input-main {
+    min-height: 24rem;
+}
+
+.output-hint {
+    margin-top: auto;
+}
+
+.output-hint > summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+}
+
+.pane-wave {
+    margin-top: 1.25rem;
+}
+
+.pane-wave-header {
+    margin-bottom: 0.75rem;
+}
+
+.pane-wave-header h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.presets-wave {
+    margin-bottom: 0.75rem;
+}
+
+.script-input-wave {
+    min-height: 16rem;
+    margin-bottom: 0.75rem;
+}
+
+.actions-wave {
+    margin-bottom: 0;
+}
+
+.badge-wave {
+    margin-left: auto;
+}
+
+.example-cli-panel.text-workflows {
+    margin-bottom: 1.25rem;
+}
+
+.example-cli-panel-wave {
+    margin-top: 0.75rem;
+}
+
+.example-cli-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.badge-rail {
+    color: var(--accent-2);
+    background: rgba(129, 140, 248, 0.12);
+    border-color: rgba(129, 140, 248, 0.3);
+}
+
+.example-cli-action {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.example-cli-file {
+    margin: 0 0 0.5rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+.example-cli-file code {
+    font-size: 0.85em;
+}
+
+.example-cli-muted {
+    font-style: italic;
+}
+
+.example-cli-notes {
+    margin: 0 0 0.65rem;
+    font-size: 0.88rem;
+    color: var(--text);
+}
+
+.text-workflow {
+    padding: 0.65rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.text-workflow:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.cli-steps {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.cli-steps li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cli-line {
+    flex: 1 1 16rem;
+    display: block;
+    padding: 0.35rem 0.55rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #c7d2e8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.btn-copy-cli {
+    flex: 0 0 auto;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.55rem;
 }
 
 .panes {
@@ -166,6 +424,13 @@ a:hover { text-decoration: underline; }
     margin-bottom: 1rem;
 }
 
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -210,6 +475,21 @@ a:hover { text-decoration: underline; }
     margin-bottom: 1rem;
 }
 
+.warning {
+    padding: 0.75rem 1rem;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: var(--gold);
+    font-size: 0.9rem;
+}
+
+.warning ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.25rem;
+}
+
 .error {
     padding: 0.75rem 1rem;
     background: rgba(248, 113, 113, 0.08);
@@ -231,6 +511,28 @@ a:hover { text-decoration: underline; }
     font-family: "SF Mono", Consolas, monospace;
     font-size: 0.85rem;
     color: #fecaca;
+}
+
+.ss-preview {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.ss-preview summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.ss-preview pre {
+    margin: 0.75rem 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 0.85rem;
 }
 
 .pipeline {
@@ -306,6 +608,10 @@ a:hover { text-decoration: underline; }
         grid-template-columns: 1fr;
     }
 
+    .script-input-main {
+        min-height: 18rem;
+    }
+
     .script-input {
         min-height: 16rem;
     }
@@ -318,6 +624,11 @@ a:hover { text-decoration: underline; }
 
     .playground-header {
         margin-bottom: 1rem;
+    }
+
+    .brand-logo {
+        width: min(220px, 82vw);
+        height: 64px;
     }
 
     .presets {
@@ -346,7 +657,14 @@ a:hover { text-decoration: underline; }
         padding: 0.85rem;
     }
 
-    .actions .btn {
+    .playground-playbar {
+        top: 0;
+        padding: 0.55rem 0.65rem;
+    }
+
+    .playground-playbar .btn,
+    .actions .btn,
+    .editor-toolbar .btn {
         flex: 1 1 auto;
         min-height: 44px;
     }
@@ -354,4 +672,316 @@ a:hover { text-decoration: underline; }
     .pipeline {
         font-size: 0.72rem;
     }
+}
+
+/* ============================================================================
+   V10 Playground — Studio (split SSW + SoundCSS editors, CLI selector, modal)
+   Applies only to the redesigned bottom "SoundScript.Wave" section.
+   ============================================================================ */
+.studio {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+}
+
+.studio-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.studio-head h2 { margin: 0; font-size: 1.25rem; }
+
+.studio-split {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    min-height: 20rem;
+}
+
+.studio-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 50%;
+}
+
+.studio-pane-right { flex: 1 1 auto; }
+
+.studio-divider {
+    flex: 0 0 8px;
+    cursor: col-resize;
+    background: linear-gradient(var(--border), var(--border)) center / 2px 100% no-repeat;
+}
+.studio-divider:hover { background: linear-gradient(var(--accent-2), var(--accent-2)) center / 2px 100% no-repeat; }
+
+.studio-pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+.studio-pane-title { font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+
+.studio-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+}
+.studio-toolbar .btn { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem; height: 1.6rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.icon-btn:hover { border-color: var(--accent); }
+
+/* --- code editor widget (owned by playground-editor.js) ------------------- */
+.pge {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 16rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--code-bg);
+    font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.pge[data-theme="light"] { background: #f8fafc; color: #1e293b; }
+
+.pge-gutter {
+    flex: 0 0 auto;
+    padding: 0.6rem 0.5rem;
+    text-align: right;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.02);
+    white-space: pre;
+    overflow: hidden;
+    user-select: none;
+    min-width: 2.5rem;
+}
+.pge[data-theme="light"] .pge-gutter { color: #94a3b8; background: #eef2f7; }
+
+.pge-scroll { position: relative; flex: 1 1 auto; min-width: 0; }
+
+.pge-highlight, .pge-input {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    line-height: inherit;
+    white-space: pre;
+    overflow: auto;
+    border: 0;
+    tab-size: 4;
+}
+
+.pge-highlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: var(--text);
+    background: transparent;
+}
+.pge[data-theme="light"] .pge-highlight { color: #1e293b; }
+
+.pge-input {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    resize: none;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--accent);
+    outline: none;
+}
+.pge[data-theme="light"] .pge-input { caret-color: #2563eb; }
+
+/* token colors */
+.tok-comment { color: #6b7280; font-style: italic; }
+.tok-string  { color: var(--gold); }
+.tok-keyword { color: var(--accent-2); font-weight: 600; }
+.tok-prop    { color: var(--accent); font-weight: 600; }
+.tok-note    { color: #f0abfc; }
+.tok-number  { color: #fca5a5; }
+.tok-punct   { color: var(--muted); }
+.pge[data-theme="light"] .tok-keyword { color: #4f46e5; }
+.pge[data-theme="light"] .tok-prop { color: #0d9488; }
+.pge[data-theme="light"] .tok-string { color: #b45309; }
+
+/* --- CLI pattern selector ------------------------------------------------- */
+.studio-render {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.render-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+}
+.render-select {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+}
+.render-desc { color: var(--muted); font-size: 0.82rem; margin: 0; }
+.cli-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    overflow-x: auto;
+}
+.cli-preview code { color: var(--accent); white-space: pre; font-size: 0.82rem; }
+
+/* --- spinner + toast ------------------------------------------------------ */
+.spinner {
+    display: inline-block;
+    width: 1rem; height: 1rem;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: pge-spin 0.7s linear infinite;
+    vertical-align: -2px;
+    margin-right: 0.4rem;
+}
+@keyframes pge-spin { to { transform: rotate(360deg); } }
+
+.toast {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--danger);
+    color: var(--text);
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    max-width: 90vw;
+}
+.toast-success { border-left-color: var(--accent); }
+
+/* --- info modal ----------------------------------------------------------- */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 900;
+    padding: 1rem;
+}
+.modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: min(640px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { margin: 0; font-size: 1.1rem; }
+.modal-body { padding: 1rem 1.1rem; overflow-y: auto; }
+.syntax-item { margin-bottom: 0.9rem; }
+.syntax-item h4 { margin: 0 0 0.2rem; font-size: 0.9rem; color: var(--accent); }
+.syntax-item .values { color: var(--muted); font-size: 0.82rem; }
+.syntax-example {
+    position: relative;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+.syntax-example pre { margin: 0; white-space: pre; overflow-x: auto; font-size: 0.82rem; }
+
+@media (max-width: 720px) {
+    .studio-split { flex-direction: column; }
+    .studio-divider { display: none; }
+    .studio-pane { flex: 1 1 auto !important; }
+    .pge-input { font-size: 16px; } /* prevent iOS zoom */
+}
+
+/* Collapsible pipeline (V10 — partial-visible / collapsible output) */
+.pipeline-collapse { margin: 0.5rem 0; }
+.pipeline-collapse > summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+}
+
+/* In-Browser Vocal Engine toggle (V10) */
+.vocal-toggle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-top: 0.4rem;
+}
+.vocal-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.vocal-toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--accent); }
+.vocal-toggle-status { color: var(--muted); font-size: 0.8rem; }
+.vocal-toggle-status.vocal-on { color: var(--accent); }
+
+/* Top MIDI editor: SoundCSS timbre panel + CLI examples split (V10) */
+.midi-css-panel { margin-top: 0.6rem; }
+.midi-css-panel > summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+}
+.editor-mount-css.pge { min-height: 8rem; }
+
+.cli-examples-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+.cli-examples-section { margin: 0; }
+@media (max-width: 720px) {
+    .cli-examples-split { grid-template-columns: 1fr; }
 }
