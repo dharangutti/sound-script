@@ -15,12 +15,18 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="SoundScript Playground — Compile Text to MIDI in Your Browser" />
     <meta name="twitter:description" content="Write SoundScript, compile it to MIDI, and hear it instantly — client-side WebAssembly, works in every modern browser." />
-    <base href="/playground/" />
+    <script>
+        (function () {
+            var localHost = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "::1";
+            document.write('<base href="' + (localHost ? "/" : "/playground/") + '" />');
+        }());
+    </script>
     <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
     <div id="app">
         <div class="boot-screen">
+            <img class="boot-logo" src="assets/soundscript-logo.png" alt="SoundScript" />
             <div class="boot-spinner"></div>
             <p>Loading SoundScript Playground…</p>
         </div>

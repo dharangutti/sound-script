@@ -78,13 +78,35 @@
         }
 
         .logo {
-            font-weight: 700;
-            font-size: 0.95rem;
-            letter-spacing: -0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            border-radius: 10px;
             color: var(--text);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(94, 234, 212, 0.12);
+            transition: transform 0.15s, box-shadow 0.15s;
         }
 
-        .logo span { color: var(--accent); }
+        .logo:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36), 0 0 0 1px rgba(94, 234, 212, 0.24);
+            text-decoration: none;
+        }
+
+        .logo img {
+            display: block;
+            width: 156px;
+            height: 50px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 10px;
+        }
+
+        .logo-version {
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
 
         .nav-links {
             display: flex;
@@ -562,7 +584,10 @@
 <body>
     <div class="wrap">
         <nav>
-            <div class="logo">Sound<span>Script</span> <span style="color:var(--muted);font-weight:400;">V3</span></div>
+            <a class="logo" href="/" aria-label="SoundScript home">
+                <img src="/assets/soundscript-logo.png" alt="SoundScript">
+                <span class="logo-version">V3</span>
+            </a>
             <div class="nav-links">
                 <a href="/">Home</a>
                 <a href="/playground/">Playground</a>
