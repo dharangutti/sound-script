@@ -1119,6 +1119,21 @@ a:hover { text-decoration: underline; }
 
 .visual-playback-readout strong { color: var(--accent); }
 .visual-clock-note { margin-left: auto; color: var(--muted); font-size: 0.78rem; }
+.visual-export-fps {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.visual-export-fps select {
+    padding: 0.32rem 0.42rem;
+    color: var(--text);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
 
 .visual-demo-grid,
 .visual-inspector-grid {

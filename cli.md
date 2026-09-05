@@ -26,6 +26,7 @@ dotnet run --project src/SoundScript.Cli -- -v
 | `render` | Offline timbre synthesis: MIDI + SoundCSS → WAV/OGG ([V4](whats-new-v4.md)) |
 | `wave` | Direct wave synthesis: `.ss`/`.ssw` → WAV via [SoundScript.Wave](wave-grammar.md) ([V7](whats-new-v7.md)) |
 | `visual` | Inspect a deterministic temporal visual program without rendering frames ([temporal visual](visual-temporal.md)) |
+| `video` | Export a synchronized WebM clip through a downstream FFmpeg adapter ([temporal visual](visual-temporal.md)) |
 
 ## `run` — compile a script
 
@@ -68,6 +69,44 @@ dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv 
 
 Use either `1.5` or `1.5s` after `--at`. See [visual-temporal.md](visual-temporal.md)
 for source syntax and synchronization semantics.
+
+## `video` — render a WebM clip
+
+```
+soundscript video <script.ss|script.ssv> --output <clip.webm> [--fps 24|30|60] [--width <even-pixels>] [--height <even-pixels>] [--ffmpeg <path>]
+```
+
+`video` produces a real, decode-verified WebM containing a VP9 video stream and
+Opus audio stream. It first builds an immutable export plan by evaluating the
+authoritative `VisualTimeline.StateAt(t)` function at the requested output
+rate; a renderer rasterizes only those snapshots, while the existing
+SoundScript.Wave rail renders audio from the same parsed program and elapsed
+time basis. FFmpeg combines the generated images and padded/truncated audio to
+the visual timeline duration.
+
+```bash
+dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
+  --output demo.webm --fps 30
+```
+
+FFmpeg is a required external encoder because .NET does not provide VP9 and
+Opus WebM codecs. Install an FFmpeg build with `libvpx-vp9` and `libopus` on
+`PATH`, set `SOUNDSCRIPT_FFMPEG`, or pass `--ffmpeg <path>`. The CLI explicitly
+decodes both output streams after encoding and fails if either stream is absent
+or unreadable.
+
+On Windows, one supported installation is:
+
+```powershell
+winget install --id Gyan.FFmpeg.Shared --exact
+```
+
+FPS stays at the rendering boundary:
+
+```text
+Authoring: VisualState = StateAt(t)
+Rendering: Frame[n] = StateAt(n / outputFPS)
+```
 
 ## `compose` — text to melody (V3.1)
 

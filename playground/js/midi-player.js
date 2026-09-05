@@ -186,7 +186,7 @@ window.SoundScriptMidi = (function () {
         }
     }
 
-    function scheduleNotes(parsedMidi, offsetSeconds) {
+    function scheduleNotes(parsedMidi, offsetSeconds, destination = masterGain) {
         const { notes, totalDuration } = parsedMidi;
         const now = audioContext.currentTime + 0.05;
         let remainingDuration = 0;
@@ -205,7 +205,7 @@ window.SoundScriptMidi = (function () {
                 note.velocity,
                 now + elapsedStart,
                 remainingNoteDuration,
-                masterGain,
+                destination,
                 note.program
             );
             if (nodes) {
@@ -248,6 +248,35 @@ window.SoundScriptMidi = (function () {
         return scheduleNotes(parsedMidi, offset);
     }
 
+    // The video adapter shares this established MIDI/Web Audio timing rail. It
+    // simply adds a MediaStream destination beside the normal speaker output;
+    // it does not create a second timing engine or synthesize unrelated audio.
+    async function startExportPlayback(midiBytes) {
+        clearScheduled();
+        const parsedMidi = parseMidi(midiBytes);
+
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioContext.createGain();
+            masterGain.gain.value = 0.85;
+            masterGain.connect(audioContext.destination);
+        }
+
+        await audioContext.resume();
+        if (audioContext.state === 'suspended') {
+            throw new Error('AudioContext is unavailable. Interact with the page and try export again.');
+        }
+
+        await SoundScriptSoundfont.load(audioContext, parsedMidi.programs);
+        const mediaDestination = audioContext.createMediaStreamDestination();
+        const exportGain = audioContext.createGain();
+        exportGain.gain.value = 0.85;
+        exportGain.connect(audioContext.destination);
+        exportGain.connect(mediaDestination);
+        const timing = scheduleNotes(parsedMidi, 0, exportGain);
+        return { stream: mediaDestination.stream, durationSeconds: timing.durationSeconds };
+    }
+
     async function primePrograms(programs) {
         if (!SoundScriptSoundfont.prefetch) {
             return;
@@ -267,6 +296,7 @@ window.SoundScriptMidi = (function () {
     return {
         startPlayback,
         startPlaybackFromOffset: startPlayback,
+        startExportPlayback,
         primePrograms,
         stop,
         download
