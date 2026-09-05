@@ -13,6 +13,7 @@ using SoundScript.Wave.Io;
 using SoundScript.Wave.Tts;
 using SoundScript.Wordbank;
 using SoundScript.Visual;
+using SoundScript.Media;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -34,6 +35,7 @@ return args[0].ToLowerInvariant() switch
     "render" => Render(args),
     "wave" => Wave(args),
     "visual" => Visual(args),
+    "video" => Video(args),
     "vocal" => Vocal(args),
     "wordbank" => Wordbank(args),
     _ => PrintUsage()
@@ -48,6 +50,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript visual <script.ss|script.ssv> [--at <seconds>]...");
+    Console.Error.WriteLine("       soundscript video <script.ss|script.ssv> --output <clip.webm> [--fps 24|30|60] [--width <even-pixels>] [--height <even-pixels>] [--ffmpeg <path>]");
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
@@ -182,6 +185,123 @@ static int Visual(string[] args)
         Console.Error.WriteLine(ex.Message);
         return 1;
     }
+}
+
+// Renders the temporal plan through a codec adapter. The command deliberately
+// samples StateAt(t) only through SoundScript.Media; FFmpeg has no knowledge of
+// SoundScript syntax, intervals, or automation.
+static int Video(string[] args)
+{
+    var scriptPath = args[1];
+    if (!File.Exists(scriptPath))
+    {
+        Console.Error.WriteLine($"Script not found: {scriptPath}");
+        return 1;
+    }
+
+    string? outputPath = null;
+    string? ffmpegPath = null;
+    var fps = 30;
+    var width = 640;
+    var height = 360;
+    for (var index = 2; index < args.Length; index++)
+    {
+        if (TryMatchFlag(args, ref index, "--output", out var parsedOutput) ||
+            TryMatchFlag(args, ref index, "--out", out parsedOutput))
+        {
+            outputPath = parsedOutput;
+            continue;
+        }
+        if (TryMatchFlag(args, ref index, "--ffmpeg", out var parsedFfmpeg))
+        {
+            ffmpegPath = parsedFfmpeg;
+            continue;
+        }
+        if (TryMatchFlag(args, ref index, "--fps", out var parsedFps) &&
+            int.TryParse(parsedFps, out var requestedFps))
+        {
+            fps = requestedFps;
+            continue;
+        }
+        if (TryMatchFlag(args, ref index, "--width", out var parsedWidth) &&
+            int.TryParse(parsedWidth, out var requestedWidth))
+        {
+            width = requestedWidth;
+            continue;
+        }
+        if (TryMatchFlag(args, ref index, "--height", out var parsedHeight) &&
+            int.TryParse(parsedHeight, out var requestedHeight))
+        {
+            height = requestedHeight;
+            continue;
+        }
+
+        Console.Error.WriteLine($"Unknown or incomplete video argument: {args[index]}");
+        return 1;
+    }
+
+    if (string.IsNullOrWhiteSpace(outputPath))
+    {
+        Console.Error.WriteLine("video requires --output <clip.webm>.");
+        return 1;
+    }
+    if (!string.Equals(Path.GetExtension(outputPath), ".webm", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.Error.WriteLine("video output must use the .webm extension.");
+        return 1;
+    }
+
+    try
+    {
+        var loaded = ProgramLoader.Load(scriptPath);
+        var timeline = VisualInterpreter.Interpret(loaded.Program);
+        var plan = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(fps));
+        var resolvedFfmpeg = string.IsNullOrWhiteSpace(ffmpegPath)
+            ? Environment.GetEnvironmentVariable("SOUNDSCRIPT_FFMPEG") ?? "ffmpeg"
+            : ffmpegPath;
+        FfmpegWebmExporter.EnsureAvailable(resolvedFfmpeg);
+
+        var temporaryDirectory = Path.Combine(Path.GetTempPath(), $"soundscript-video-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(temporaryDirectory);
+        try
+        {
+            var audioPath = Path.Combine(temporaryDirectory, "audio.wav");
+            TemporalVideoFrameRenderer.WritePpmFrames(plan, temporaryDirectory, width, height);
+
+            // Reuse the existing SoundScript.Wave audio renderer, whose timing
+            // is derived from the same parsed program as the visual timeline.
+            WaveRenderer.Render(loaded.Program, audioPath, new WaveRenderOptions
+            {
+                ScriptDirectory = Path.GetDirectoryName(Path.GetFullPath(scriptPath)),
+            });
+            FitVideoAudioToDuration(audioPath, timeline.Duration);
+            FfmpegWebmExporter.EncodeAndVerify(resolvedFfmpeg, temporaryDirectory, audioPath, outputPath, plan);
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+
+        foreach (var warning in loaded.Warnings)
+            Console.Error.WriteLine($"warning: {warning}");
+
+        Console.WriteLine($"Rendered and decode-verified {outputPath}: {plan.Samples.Count} StateAt(t) samples at {plan.FramesPerSecond} FPS with synchronized SoundScript audio.");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static void FitVideoAudioToDuration(string audioPath, TimeSpan duration)
+{
+    var desiredSampleCount = checked((int)Math.Ceiling(duration.TotalSeconds * WavWriter.SampleRate));
+    var rendered = WavReader.ReadMono(audioPath);
+    var fitted = new float[desiredSampleCount];
+    Array.Copy(rendered, fitted, Math.Min(rendered.Length, fitted.Length));
+    WavWriter.Write(audioPath, fitted);
 }
 
 static bool TryParseVisualQueryTime(string? text, out TimeSpan time)

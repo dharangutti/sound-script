@@ -27,6 +27,7 @@
     <ProjectReference Include="..\SoundScript.Playground\SoundScript.Playground.csproj" />
     <ProjectReference Include="..\SoundScript.Wordbank\SoundScript.Wordbank.csproj" />
     <ProjectReference Include="..\SoundScript.Visual\SoundScript.Visual.csproj" />
+    <ProjectReference Include="..\SoundScript.Media\SoundScript.Media.csproj" />
   </ItemGroup>
 
   <ItemGroup>

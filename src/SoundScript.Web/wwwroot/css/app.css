@@ -124,6 +124,36 @@ code {
     margin-bottom: 2rem;
 }
 
+.demo-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 650;
+}
+
+.demo-feature {
+    margin: 0 0 1.5rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #eff6ff, #ecfdf5);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+}
+
+.demo-feature-kicker {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.demo-feature h2 { margin: 0 0 0.45rem; font-size: 1.2rem; }
+.demo-feature p { margin: 0 0 0.9rem; color: #475569; }
+
 .demo-brand {
     display: inline-flex;
     margin-bottom: 1rem;

@@ -11,6 +11,7 @@
     <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
     <ProjectReference Include="..\SoundScript.Vocal\SoundScript.Vocal.csproj" />
     <ProjectReference Include="..\SoundScript.Visual\SoundScript.Visual.csproj" />
+    <ProjectReference Include="..\SoundScript.Media\SoundScript.Media.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

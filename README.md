@@ -307,6 +307,27 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
 
+## What's New in V11
+
+- **Playable temporal media** — the Visual Timeline Playground now exports a
+  synchronized WebM clip using browser-native Canvas capture, MediaRecorder,
+  and the existing local MIDI/Web Audio rail.
+- **Renderer-only sampling** — `SoundScript.Media` creates export plans from
+  `VisualTimeline.StateAt(t)` at 24, 30, or 60 FPS; no FPS or frames enter the
+  DSL, parser, AST, or temporal timeline.
+- **CLI WebM export** — `soundscript video` rasterizes the deterministic plan,
+  renders synchronized SoundScript audio, and uses FFmpeg only as a downstream
+  VP9/Opus WebM encoder with post-encode stream verification.
+
+```bash
+dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
+  --output demo.webm --fps 30
+```
+
+The browser media encoder can produce different container bytes across browser
+versions, but the temporal state supplied to it is deterministic. →
+[docs/visual-temporal.md](docs/visual-temporal.md)
+
 ## What's New in V10
 
 - **Temporal Visual Playground** — the Visual Timeline tab now pairs a
@@ -389,7 +410,7 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 |----------|-------------|
 | [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
 | [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
-| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`, `vocal`) |
+| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`, `video`, `vocal`) |
 | [docs/whats-new-v8.md](docs/whats-new-v8.md) | V8 changelog — vocal stems in Wave export |
 | [docs/whats-new-v7.md](docs/whats-new-v7.md) | V7 changelog — SoundScript.Wave |
 | [docs/wave-grammar.md](docs/wave-grammar.md) | Wave grammar (`.ssw`) |
