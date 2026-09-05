@@ -202,8 +202,12 @@ static int Video(string[] args)
     string? outputPath = null;
     string? ffmpegPath = null;
     var fps = 30;
-    var width = 640;
-    var height = 360;
+    // Keep the CLI's default raster size aligned with the canonical visual
+    // scene profile.  The frame renderer scales from a 1280x720 logical
+    // viewport, so rendering at that size preserves text and edge detail
+    // through the final VP9 encode.
+    var width = 1280;
+    var height = 720;
     for (var index = 2; index < args.Length; index++)
     {
         if (TryMatchFlag(args, ref index, "--output", out var parsedOutput) ||

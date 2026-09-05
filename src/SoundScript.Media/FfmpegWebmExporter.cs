@@ -120,7 +120,10 @@ public static class FfmpegWebmExporter
             "-i", Path.Combine(framesDirectory, "frame-%06d.ppm"),
             "-i", audioWavPath,
             "-map", "0:v:0", "-map", "1:a:0",
-            "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-b:v", "1M",
+            // Match the browser export's quality envelope.  A 1 Mbps target
+            // is visibly soft at the canonical 1280x720 scene size, especially
+            // around bitmap text and high-contrast card edges.
+            "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-b:v", "4M",
             "-c:a", "libopus", "-b:a", "96k",
             "-t", durationSeconds.ToString("0.#########", CultureInfo.InvariantCulture),
             outputWebmPath,

@@ -299,8 +299,31 @@ public class VisualTimelineTests
         Assert.Contains("-framerate", arguments);
         Assert.Contains("30", arguments);
         Assert.Contains("libvpx-vp9", arguments);
+        Assert.Contains("4M", arguments);
         Assert.Contains("libopus", arguments);
         Assert.Equal("clip.webm", arguments[^1]);
+    }
+
+    [Fact]
+    public void TemporalVideoFrameRenderer_RendersCanonicalNativeSize()
+    {
+        var timeline = Compile("visual \"product\" for 1s");
+        var plan = TemporalVisualSceneBuilder.Build(
+            TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(30)));
+        var outputDirectory = Path.Combine(Path.GetTempPath(), "soundscript-frame-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(outputDirectory);
+        try
+        {
+            TemporalVideoFrameRenderer.WritePpmFrames(plan, outputDirectory, 1280, 720);
+            var frame = File.ReadAllBytes(Path.Combine(outputDirectory, "frame-000000.ppm"));
+            const string header = "P6\n1280 720\n255\n";
+            Assert.StartsWith(header, System.Text.Encoding.ASCII.GetString(frame, 0, header.Length));
+            Assert.Equal(header.Length + 1280 * 720 * 3, frame.Length);
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
     }
 
     private static VisualTimeline Compile(string source) => VisualInterpreter.Interpret(Parse(source));
