@@ -55,12 +55,15 @@ soundscript visual <script.ss|script.ssv> [--at <seconds>]...
 ```
 
 `visual` compiles visual intervals and automation to a deterministic timeline;
-it deliberately does not choose an FPS or encode a video. Query one or more
-arbitrary moments to see the state a future renderer would receive:
+it deliberately does not choose an FPS or encode a video. A source may also
+contain a normal MIDI track, as in `examples/visual-temporal.ssv`; the CLI
+inspects the visual rail while the Playground can audition that same audio
+rail. Query one or more arbitrary moments to see the state a future renderer
+would receive:
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv \
-  --at 0 --at 1.5 --at 4.5 --at 5
+  --at 0 --at 1.5 --at 4 --at 4.5 --at 5 --at 8.75
 ```
 
 Use either `1.5` or `1.5s` after `--at`. See [visual-temporal.md](visual-temporal.md)
