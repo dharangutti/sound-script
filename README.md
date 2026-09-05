@@ -284,10 +284,13 @@ dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv 
   --at 0 --at 1.5 --at 4 --at 5
 ```
 
-The example includes sequential cues, an intentional delay, an independently
-pinned overlay, a `radius` animation, and an audio synchronization marker.
-Future video renderers can sample this same state model at their own output
-rate. → [docs/visual-temporal.md](docs/visual-temporal.md)
+The example includes an actual piano rail, sequential cues, an intentional
+delay, an independently pinned overlay, property automation, and an audio
+synchronization marker. In the browser Playground, Play/Pause/Resume/Restart
+and scrubbing all use the same elapsed-time model: the visual stage evaluates
+`StateAt(t)` while the existing local MIDI player is scheduled from that same
+offset. Future video renderers can sample this same state model at their own
+  output rate. → [docs/visual-temporal.md](docs/visual-temporal.md)
 
 ## Getting Started
 
@@ -303,6 +306,18 @@ dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss
 Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, fully client-side:
 
 **[soundscript.net/playground](https://soundscript.net/playground/)**
+
+## What's New in V10
+
+- **Temporal Visual Playground** — the Visual Timeline tab now pairs a
+  deterministic 12-second visual program with a real local MIDI rail.
+- **Playback and inspection** — Play, Pause, Resume, Restart, exact scrubbing,
+  half-open interval lanes, and the `StateAt(t)` inspector use one shared
+  temporal clock.
+- **No frame authoring** — browser repaint cadence is a rendering detail; the
+  SoundScript source remains time-based and renderer-neutral.
+
+→ [docs/visual-temporal.md](docs/visual-temporal.md) · [docs/PLAYGROUND.md](docs/PLAYGROUND.md)
 
 ## What's New in V9
 

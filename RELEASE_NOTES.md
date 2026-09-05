@@ -1,5 +1,15 @@
 # SoundScript Release Notes
 
+## V10 — Temporal Visual Playground
+
+- **Audio + visual Playground demo:** a 12-second piano-backed temporal program
+  now demonstrates sequential cues, overlap, property automation, and an
+  explicit audio synchronization anchor.
+- **Live playback controls:** Visual Timeline supports Play, Pause, Resume,
+  Restart, exact scrubbing, and audio rescheduling from the selected time.
+- **Frame-free semantics:** playback continuously evaluates `StateAt(t)`; FPS
+  and authored frame tracks remain outside the SoundScript model.
+
 ## V9 — WordBank vocal engine in the Playground
 
 - **New Playground preset:** *Jingle Bells + WordBank vocal* — offline, deterministic

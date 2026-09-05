@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Globalization;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Compose;
@@ -22,7 +23,7 @@ using SoundScript.Visual;
 
 namespace SoundScript.Playground.Pages;
 
-public partial class Playground
+public partial class Playground : IDisposable
 {
   private enum PlaygroundTab
   {
@@ -80,18 +81,31 @@ public partial class Playground
       """
       tempo 120
 
-      sync audio
-
-      visual "intro" for 4s
-      wait 1s
-      visual "product" for 5s
-
-      visual "circle" for 5s at 0s {
-          animate radius 20 -> 200 over 3s
+      track music {
+          instrument piano
+          mf
+          C4 h E4 h G4 h C5 h
+          G4 h E4 h C4 h G4 h
+          C5 h G4 h E4 h C4 h
       }
 
-      visual "sparkle" for 1s at 7.5s {
-          animate opacity 0 -> 1 over 0.5s
+      sync audio
+
+      visual "intro" for 3s
+      wait 1s
+      visual "product" for 4s
+
+      visual "circle" for 8s at 0s {
+          animate radius 28 -> 170 over 3s
+          animate opacity 0.35 -> 1 over 1.5s
+      }
+
+      visual "sparkle" for 2s at 4.5s {
+          animate opacity 0 -> 1 over 0.4s
+      }
+
+      visual "outro" for 4s {
+          animate opacity 1 -> 0 over 2s
       }
       """;
 
@@ -107,6 +121,10 @@ public partial class Playground
   private string? VisualStatusMessage { get; set; }
   private double VisualTimeSeconds { get; set; } = 1.5;
   private double VisualAudioBeat { get; set; } = 10;
+  private bool VisualIsPlaying { get; set; }
+  private bool VisualIsPreparing { get; set; }
+  private CancellationTokenSource? _visualPlaybackCancellation;
+  private Task? _visualPlaybackTask;
 
   private string VisualRangeMaximum =>
       (CompiledVisualTimeline?.Duration.TotalSeconds ?? 0)
@@ -129,6 +147,9 @@ public partial class Playground
 
   private void CompileVisualTimeline()
   {
+    CancelVisualPlayback();
+    _ = StopVisualAudioAsync();
+
     try
     {
       var tokens = new Tokenizer(VisualScriptText).Tokenize();
@@ -157,6 +178,8 @@ public partial class Playground
 
   private void ResetVisualDemo()
   {
+    CancelVisualPlayback();
+    _ = StopVisualAudioAsync();
     VisualScriptText = VisualDemoScript;
     VisualTimeSeconds = 1.5;
     VisualAudioBeat = 10;
@@ -176,11 +199,181 @@ public partial class Playground
     }
   }
 
-  private void ProbeVisualTime(double seconds)
+  private async Task ProbeVisualTimeAsync(double seconds)
   {
+    CancelVisualPlayback();
+    await StopVisualAudioAsync();
     VisualTimeSeconds = seconds;
     UpdateVisualState();
+    await InvokeAsync(StateHasChanged);
   }
+
+  private async Task ScrubVisualTimeAsync()
+  {
+    if (VisualIsPlaying || VisualIsPreparing)
+    {
+      CancelVisualPlayback();
+      await StopVisualAudioAsync();
+    }
+
+    UpdateVisualState();
+  }
+
+  private async Task PlayVisualAsync()
+  {
+    if (CompiledVisualTimeline is null || VisualIsPlaying || VisualIsPreparing)
+      return;
+
+    var timeline = CompiledVisualTimeline;
+    var startSeconds = ClampFinite(VisualTimeSeconds, 0, timeline.Duration.TotalSeconds);
+    if (startSeconds >= timeline.Duration.TotalSeconds)
+    {
+      VisualTimeSeconds = 0;
+      UpdateVisualState();
+      startSeconds = 0;
+    }
+
+    CancelVisualPlayback();
+    VisualIsPreparing = true;
+    VisualErrorMessage = null;
+    VisualStatusMessage = startSeconds > 0
+        ? $"Preparing audio from {FormatVisualTime(SecondsToTimeSpan(startSeconds))}..."
+        : "Preparing the shared audio/visual clock...";
+    await InvokeAsync(StateHasChanged);
+
+    var cancellation = new CancellationTokenSource();
+    _visualPlaybackCancellation = cancellation;
+    _visualPlaybackTask = RunVisualPlaybackAsync(timeline, startSeconds, cancellation);
+    await Task.CompletedTask;
+  }
+
+  private async Task PauseVisualAsync()
+  {
+    if (!VisualIsPlaying && !VisualIsPreparing)
+      return;
+
+    CancelVisualPlayback();
+    await StopVisualAudioAsync();
+    VisualStatusMessage = $"Paused at {FormatVisualTime(SecondsToTimeSpan(VisualTimeSeconds))}. Press Resume to continue from this exact time.";
+    await InvokeAsync(StateHasChanged);
+  }
+
+  private async Task RestartVisualAsync()
+  {
+    CancelVisualPlayback();
+    await StopVisualAudioAsync();
+    VisualTimeSeconds = 0;
+    UpdateVisualState();
+    VisualStatusMessage = "Reset to t = 0s. Press Play to start audio and visuals together.";
+    await InvokeAsync(StateHasChanged);
+  }
+
+  private async Task RunVisualPlaybackAsync(VisualTimeline timeline, double startSeconds, CancellationTokenSource cancellation)
+  {
+    try
+    {
+      var program = new SoundScript.Parser.Parser(new Tokenizer(VisualScriptText).Tokenize()).Parse();
+      if (ContainsWaveOnlyDirectives(program.Statements))
+        throw new InvalidOperationException("Visual playback currently uses the MIDI/Web Audio rail. Remove wave-only effect or speak directives from this visual source.");
+
+      var interpreted = Interpreter.Interpret(program, "playground-visual.ss");
+      using var stream = new MemoryStream();
+      MidiGenerator.Write(interpreted, stream);
+      var midiBytes = stream.ToArray();
+
+      var playback = await Js.InvokeAsync<VisualPlaybackStart>(
+          "SoundScriptMidi.startPlaybackFromOffset", midiBytes, startSeconds);
+      cancellation.Token.ThrowIfCancellationRequested();
+
+      VisualIsPreparing = false;
+      VisualIsPlaying = true;
+      VisualStatusMessage = startSeconds > 0
+          ? $"Playing audio + visuals from {FormatVisualTime(SecondsToTimeSpan(startSeconds))}. The stage is evaluating StateAt(t)."
+          : "Playing audio + visuals from the shared t = 0 clock. The stage is evaluating StateAt(t).";
+      await InvokeAsync(StateHasChanged);
+
+      // midi-player schedules notes at audioContext.currentTime + its small
+      // start-ahead buffer and returns that buffer. Waiting the same amount
+      // starts this monotonic semantic clock at the first audible instant.
+      if (playback.StartDelayMs > 0)
+        await Task.Delay(TimeSpan.FromMilliseconds(playback.StartDelayMs), cancellation.Token);
+
+      var clock = Stopwatch.StartNew();
+      var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(33));
+      try
+      {
+        while (await timer.WaitForNextTickAsync(cancellation.Token))
+        {
+          var elapsed = startSeconds + clock.Elapsed.TotalSeconds;
+          VisualTimeSeconds = Math.Min(timeline.Duration.TotalSeconds, elapsed);
+          UpdateVisualState();
+          await InvokeAsync(StateHasChanged);
+
+          if (elapsed >= timeline.Duration.TotalSeconds)
+            break;
+        }
+      }
+      finally
+      {
+        timer.Dispose();
+      }
+
+      if (!cancellation.IsCancellationRequested)
+      {
+        VisualTimeSeconds = timeline.Duration.TotalSeconds;
+        UpdateVisualState();
+        await StopVisualAudioAsync();
+        VisualStatusMessage = $"Finished at {FormatVisualTime(timeline.Duration)}. Scrub anywhere and press Play to audition from that time.";
+      }
+    }
+    catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+    {
+      // Pause, restart, and scrubbing intentionally cancel this loop.
+    }
+    catch (Exception ex)
+    {
+      VisualIsPreparing = false;
+      VisualIsPlaying = false;
+      VisualErrorMessage = ex.Message;
+      VisualStatusMessage = null;
+      await StopVisualAudioAsync();
+      await InvokeAsync(StateHasChanged);
+    }
+    finally
+    {
+      if (ReferenceEquals(_visualPlaybackCancellation, cancellation))
+      {
+        VisualIsPlaying = false;
+        VisualIsPreparing = false;
+        _visualPlaybackCancellation = null;
+      }
+
+      cancellation.Dispose();
+      await InvokeAsync(StateHasChanged);
+    }
+  }
+
+  private void CancelVisualPlayback()
+  {
+    _visualPlaybackCancellation?.Cancel();
+    _visualPlaybackCancellation = null;
+    VisualIsPlaying = false;
+    VisualIsPreparing = false;
+  }
+
+  private async Task StopVisualAudioAsync()
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+    }
+    catch (JSDisconnectedException)
+    {
+      // The component may be leaving the page; there is no audio to clean up.
+    }
+  }
+
+  private sealed record VisualPlaybackStart(double StartDelayMs, double DurationSeconds);
 
   private void UpdateVisualState()
   {
@@ -1737,11 +1930,18 @@ public partial class Playground
 
   private async Task StopAsync()
   {
+    CancelVisualPlayback();
     await Js.InvokeVoidAsync("SoundScriptMidi.stop");
     await Js.InvokeVoidAsync("SoundScriptVoice.stop");
     await Js.InvokeVoidAsync("SoundScriptAudio.stop");
     StatusMessage = "Stopped.";
     StateHasChanged();
+  }
+
+  public void Dispose()
+  {
+    CancelVisualPlayback();
+    _ = StopVisualAudioAsync();
   }
 
   private async Task DownloadAsync()

@@ -1,6 +1,13 @@
 # SoundScript Documentation
 
-SoundScript is an open-source, deterministic music DSL that compiles text to MIDI (or, as of V7, directly to WAV). V8 adds **vocal stem mixing** into exported Wave files; V9 brings the **WordBank vocal engine** (corpus human audio + G2P timbre) into the Playground. It runs as a cross-platform .NET CLI (Windows, macOS, Linux) and as a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari). This is the documentation hub for **V9**.
+SoundScript is an open-source, deterministic media DSL that compiles text to MIDI (or, as of V7, directly to WAV). V8 adds **vocal stem mixing**, V9 brings the **WordBank vocal engine** into the Playground, and V10 adds the **Temporal Visual Playground**. It runs as a cross-platform .NET CLI (Windows, macOS, Linux) and as a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari). This is the documentation hub for **V10**.
+
+### V10 Features
+
+| Document | Description |
+|----------|-------------|
+| [visual-temporal.md](visual-temporal.md) | Frame-free temporal visual programs, `StateAt(t)`, and audio synchronization |
+| [PLAYGROUND.md](PLAYGROUND.md) | Playground playback and sanity checklist |
 
 ## Documentation Index
 

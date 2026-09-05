@@ -550,6 +550,19 @@
             }
         </div>
 
+        <div class="visual-playback-bar" role="toolbar" aria-label="Visual timeline playback controls">
+            <button type="button" class="btn btn-primary" disabled="@(CompiledVisualTimeline is null || VisualIsPlaying || VisualIsPreparing)" @onclick="PlayVisualAsync">
+                @(VisualIsPreparing ? "Preparing…" : VisualTimeSeconds > 0 && !VisualIsPlaying ? "▶ Resume" : "▶ Play")
+            </button>
+            <button type="button" class="btn btn-secondary" disabled="@(!VisualIsPlaying && !VisualIsPreparing)" @onclick="PauseVisualAsync">⏸ Pause</button>
+            <button type="button" class="btn btn-secondary" disabled="@(CompiledVisualTimeline is null)" @onclick="RestartVisualAsync">↺ Restart</button>
+            <span class="visual-playback-readout">
+                <strong>@FormatVisualTime(VisualStateAtCursor?.Time ?? TimeSpan.Zero)</strong>
+                <span>/ @(CompiledVisualTimeline is null ? "0s" : FormatVisualTime(CompiledVisualTimeline.Duration))</span>
+            </span>
+            <span class="visual-clock-note">Shared clock · MIDI audio + <code>StateAt(t)</code></span>
+        </div>
+
         <div class="visual-demo-grid">
             <section class="visual-card visual-source-card" aria-labelledby="visual-source-heading">
                 <div class="visual-card-heading">
@@ -608,17 +621,17 @@
                 <div class="visual-scrubber">
                     <label for="visual-time-scrubber">Scrub the program clock</label>
                     <div class="visual-scrubber-controls">
-                        <input id="visual-time-scrubber" type="range" min="0" max="@VisualRangeMaximum" step="0.01"
-                               @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="UpdateVisualState" />
-                        <input class="visual-time-input" type="number" min="0" max="@VisualRangeMaximum" step="0.01"
-                               aria-label="Timeline time in seconds" @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="UpdateVisualState" />
+                         <input id="visual-time-scrubber" type="range" min="0" max="@VisualRangeMaximum" step="0.01"
+                                @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="ScrubVisualTimeAsync" />
+                         <input class="visual-time-input" type="number" min="0" max="@VisualRangeMaximum" step="0.01"
+                                aria-label="Timeline time in seconds" @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="ScrubVisualTimeAsync" />
                         <span class="visual-seconds-label">s</span>
                     </div>
                     <div class="visual-probe-buttons" aria-label="Timeline checkpoints">
                         @foreach (var probeTime in VisualProbeTimes)
                         {
                             <button type="button" class="visual-probe @(Math.Abs(VisualTimeSeconds - probeTime) < 0.005 ? "is-active" : "")"
-                                    @onclick="() => ProbeVisualTime(probeTime)">@probeTime.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)s</button>
+                                    @onclick="() => ProbeVisualTimeAsync(probeTime)">@probeTime.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)s</button>
                         }
                     </div>
                 </div>
@@ -635,8 +648,15 @@
                     </div>
                     <span class="visual-half-open">Intervals are [start, end)</span>
                 </div>
-                <div class="visual-timeline-ruler" role="img" aria-label="Visual timeline with evaluated playhead">
-                    @foreach (var visual in CompiledVisualTimeline.Visuals)
+                 <div class="visual-timeline-ruler" role="img" aria-label="Visual timeline with evaluated playhead">
+                     <div class="visual-timeline-lane visual-audio-lane">
+                         <span class="visual-lane-name">audio · MIDI</span>
+                         <div class="visual-timeline-track">
+                             <span class="visual-timeline-bar visual-audio-bar" style="left:0%;width:100%;">shared audio clock</span>
+                             <span class="visual-timeline-playhead" style="@VisualPlayheadStyle()" aria-hidden="true"></span>
+                         </div>
+                     </div>
+                     @foreach (var visual in CompiledVisualTimeline.Visuals)
                     {
                         <div class="visual-timeline-lane">
                             <span class="visual-lane-name">@visual.Name</span>
