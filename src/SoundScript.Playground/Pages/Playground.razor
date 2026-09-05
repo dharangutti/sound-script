@@ -570,7 +570,7 @@
                 <strong>@FormatVisualTime(VisualStateAtCursor?.Time ?? TimeSpan.Zero)</strong>
                 <span>/ @(CompiledVisualTimeline is null ? "0s" : FormatVisualTime(CompiledVisualTimeline.Duration))</span>
             </span>
-            <span class="visual-clock-note">Shared clock · MIDI audio + <code>StateAt(t)</code></span>
+            <span class="visual-clock-note">Shared clock · deterministic audio + <code>StateAt(t)</code></span>
         </div>
 
         <div class="visual-demo-grid">
@@ -613,18 +613,11 @@
                 </div>
 
                 <div class="visual-stage" aria-live="polite" aria-label="Evaluated visual state">
-                    @if (VisualStateAtCursor is null || VisualStateAtCursor.Elements.Count == 0)
+                    <canvas @ref="_visualStageCanvas" class="visual-stage-canvas" width="1280" height="720" role="img"
+                            aria-label="Canonical SoundScript visual scene"></canvas>
+                    @if (VisualSceneAtCursor is null || VisualSceneAtCursor.Primitives.Count == 0)
                     {
                         <div class="visual-stage-empty">No active visual at this instant.</div>
-                    }
-                    else
-                    {
-                        @foreach (var element in VisualStateAtCursor.Elements)
-                        {
-                            <div class="visual-stage-element @VisualPreviewClass(element)" style="@VisualPreviewStyle(element)">
-                                <span>@VisualPreviewLabel(element)</span>
-                            </div>
-                        }
                     }
                 </div>
 
@@ -660,7 +653,7 @@
                 </div>
                  <div class="visual-timeline-ruler" role="img" aria-label="Visual timeline with evaluated playhead">
                      <div class="visual-timeline-lane visual-audio-lane">
-                         <span class="visual-lane-name">audio · MIDI</span>
+                         <span class="visual-lane-name">audio · Wave PCM</span>
                          <div class="visual-timeline-track">
                              <span class="visual-timeline-bar visual-audio-bar" style="left:0%;width:100%;">shared audio clock</span>
                              <span class="visual-timeline-playhead" style="@VisualPlayheadStyle()" aria-hidden="true"></span>

@@ -255,7 +255,8 @@ static int Video(string[] args)
     {
         var loaded = ProgramLoader.Load(scriptPath);
         var timeline = VisualInterpreter.Interpret(loaded.Program);
-        var plan = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(fps));
+        var statePlan = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(fps));
+        var plan = TemporalVisualSceneBuilder.Build(statePlan);
         var resolvedFfmpeg = string.IsNullOrWhiteSpace(ffmpegPath)
             ? Environment.GetEnvironmentVariable("SOUNDSCRIPT_FFMPEG") ?? "ffmpeg"
             : ffmpegPath;
@@ -268,13 +269,10 @@ static int Video(string[] args)
             var audioPath = Path.Combine(temporaryDirectory, "audio.wav");
             TemporalVideoFrameRenderer.WritePpmFrames(plan, temporaryDirectory, width, height);
 
-            // Reuse the existing SoundScript.Wave audio renderer, whose timing
-            // is derived from the same parsed program as the visual timeline.
-            WaveRenderer.Render(loaded.Program, audioPath, new WaveRenderOptions
-            {
-                ScriptDirectory = Path.GetDirectoryName(Path.GetFullPath(scriptPath)),
-            });
-            FitVideoAudioToDuration(audioPath, timeline.Duration);
+            // This exact deterministic PCM rail is also used by the Visual
+            // Timeline Playground and its browser encoder. Audio is fitted to
+            // the temporal program duration before either codec sees it.
+            File.WriteAllBytes(audioPath, TemporalAudioRenderer.RenderToWavBytes(loaded.Program, timeline.Duration));
             FfmpegWebmExporter.EncodeAndVerify(resolvedFfmpeg, temporaryDirectory, audioPath, outputPath, plan);
         }
         finally
@@ -285,7 +283,7 @@ static int Video(string[] args)
         foreach (var warning in loaded.Warnings)
             Console.Error.WriteLine($"warning: {warning}");
 
-        Console.WriteLine($"Rendered and decode-verified {outputPath}: {plan.Samples.Count} StateAt(t) samples at {plan.FramesPerSecond} FPS with synchronized SoundScript audio.");
+        Console.WriteLine($"Rendered and decode-verified {outputPath}: {plan.Samples.Count} StateAt(t) scenes at {plan.FramesPerSecond} FPS with synchronized deterministic SoundScript audio.");
         return 0;
     }
     catch (Exception ex)
@@ -293,15 +291,6 @@ static int Video(string[] args)
         Console.Error.WriteLine(ex.Message);
         return 1;
     }
-}
-
-static void FitVideoAudioToDuration(string audioPath, TimeSpan duration)
-{
-    var desiredSampleCount = checked((int)Math.Ceiling(duration.TotalSeconds * WavWriter.SampleRate));
-    var rendered = WavReader.ReadMono(audioPath);
-    var fitted = new float[desiredSampleCount];
-    Array.Copy(rendered, fitted, Math.Min(rendered.Length, fitted.Length));
-    WavWriter.Write(audioPath, fitted);
 }
 
 static bool TryParseVisualQueryTime(string? text, out TimeSpan time)

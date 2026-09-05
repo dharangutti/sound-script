@@ -284,13 +284,12 @@ dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv 
   --at 0 --at 1.5 --at 4 --at 5
 ```
 
-The example includes an actual piano rail, sequential cues, an intentional
+The example includes a temporal audio rail, sequential cues, an intentional
 delay, an independently pinned overlay, property automation, and an audio
-synchronization marker. In the browser Playground, Play/Pause/Resume/Restart
-and scrubbing all use the same elapsed-time model: the visual stage evaluates
-`StateAt(t)` while the existing local MIDI player is scheduled from that same
-offset. Future video renderers can sample this same state model at their own
-  output rate. → [docs/visual-temporal.md](docs/visual-temporal.md)
+synchronization marker. In the browser Playground, Play/Pause/Resume/Restart,
+scrubbing, browser export, and CLI export all consume one elapsed-time model:
+the visual stage evaluates `StateAt(t)` and the deterministic SoundScript.Wave
+rail is shared by playback and WebM rendering. → [docs/visual-temporal.md](docs/visual-temporal.md)
 
 ## Getting Started
 
@@ -311,13 +310,13 @@ Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, 
 
 - **Playable temporal media** — the Visual Timeline Playground now exports a
   synchronized WebM clip using browser-native Canvas capture, MediaRecorder,
-  and the existing local MIDI/Web Audio rail.
+  and the shared deterministic SoundScript.Wave PCM rail.
 - **Renderer-only sampling** — `SoundScript.Media` creates export plans from
   `VisualTimeline.StateAt(t)` at 24, 30, or 60 FPS; no FPS or frames enter the
   DSL, parser, AST, or temporal timeline.
-- **CLI WebM export** — `soundscript video` rasterizes the deterministic plan,
-  renders synchronized SoundScript audio, and uses FFmpeg only as a downstream
-  VP9/Opus WebM encoder with post-encode stream verification.
+- **CLI WebM export** — `soundscript video` rasterizes the same canonical scene
+  plan and PCM rail, then uses FFmpeg only as a downstream VP9/Opus WebM
+  encoder with post-encode stream verification.
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \

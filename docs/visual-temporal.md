@@ -99,12 +99,13 @@ FPS are both output samplers—not authoring primitives.
 
 The Playground's **Export Clip** action is a downstream browser renderer. It
 builds an immutable export plan by evaluating `VisualTimeline.StateAt(t)` at
-24, 30, or 60 samples per second (30 is the default), rasterizes those supplied
-states to a canvas, and combines the canvas stream with the existing local
-MIDI/Web Audio rail. Browsers with Canvas capture and MediaRecorder support
-(Chrome, Edge, and Firefox) download a playable WebM clip with audio and
-visuals. The encoder is intentionally browser-native; no FFmpeg or native codec
-dependency is added.
+24, 30, or 60 samples per second (30 is the default), projects each supplied
+state into the canonical Playground scene profile, and rasterizes those same
+primitives to a canvas. The browser uses the same deterministic SoundScript.Wave
+PCM rail as the CLI video exporter, so the live stage, browser WebM, and CLI
+WebM share visual layout, labels, opacity, and audio timing. Browsers with
+Canvas capture and MediaRecorder support (Chrome, Edge, and Firefox) download
+a playable WebM clip with audio and visuals.
 
 ```text
 Authoring: VisualState = StateAt(t)
@@ -124,23 +125,36 @@ dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
   --output demo.webm --fps 30
 ```
 
-The CLI rasterizer consumes only the deterministic plan—never the timeline
-internals—and the existing SoundScript.Wave renderer supplies audio from the
-same parsed program. FFmpeg is required to encode VP9/Opus WebM; after encoding,
-the command decode-verifies both streams. FFmpeg may vary encoded bytes across
-versions, but the temporal states and renderer inputs remain deterministic.
+The CLI rasterizer consumes only the canonical scene plan—never timeline
+internals—and the shared SoundScript.Wave renderer supplies the same fitted PCM
+audio as the browser. FFmpeg is required to encode VP9/Opus WebM; after
+encoding, the command decode-verifies both streams. FFmpeg may vary encoded
+bytes across versions, but the temporal states, scene primitives, and PCM
+source remain deterministic.
 
 ## Playground playback
 
 The Playground's Visual Timeline tab compiles the source once, then uses the
-existing local MIDI/Web Audio player for the `track music` rail. **Play** starts
-audio and a monotonic visual clock together; **Pause** stops both while keeping
-the exact current `t`; **Resume** schedules audio from that time; **Restart**
-returns to `t = 0`. Dragging or typing in the scrubber pauses playback, evaluates
-`StateAt(t)` immediately, and leaves the next Play/Resume at that same time.
+shared deterministic SoundScript.Wave PCM rail for the `track music` rail.
+**Play** starts audio and a monotonic visual clock together; **Pause** stops both
+while keeping the exact current `t`; **Resume** schedules audio from that time;
+**Restart** returns to `t = 0`. Dragging or typing in the scrubber pauses
+playback, evaluates `StateAt(t)` immediately, and leaves the next Play/Resume at
+that same time.
 
 The browser repaint interval is only a display mechanism. It is not stored in
 the source, does not create authored frames, and does not change the temporal
-meaning of the program. Audio seeking is implemented by rescheduling the
-remaining MIDI notes from the selected offset; sustained notes are restarted
-from their remaining duration.
+meaning of the program. Audio seeking starts the same PCM buffer at the selected
+offset, so sustained content and export audio cannot drift onto a second timing
+model.
+
+## Canonical presentation profile
+
+The Media layer projects each sampled state into ordered primitives in a logical
+1280×720 viewport. The Playground canvas, browser exporter, and CLI rasterizer
+all consume these primitives. Known names (`intro`, `circle`, `product`, and
+`sparkle`) use the demo's pill/orb/card/star treatment; other names use the
+generic card fallback. `opacity` is applied uniformly, while `x`, `y`, `width`,
+`height`, `size`, and `rotation` are renderer-profile properties. This keeps the
+demo and exported clips visually aligned without adding frames or FPS to the
+language.

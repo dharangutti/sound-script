@@ -117,6 +117,8 @@ public partial class Playground : IDisposable
   private VisualTimeline? CompiledVisualTimeline { get; set; }
   private TempoAutomationMap? VisualTempoMap { get; set; }
   private VisualState? VisualStateAtCursor { get; set; }
+  private ElementReference _visualStageCanvas;
+  private bool _visualStageRenderPending = true;
   private VisualState? VisualStateAtAudioBeat { get; set; }
   private string? VisualErrorMessage { get; set; }
   private string? VisualStatusMessage { get; set; }
@@ -287,19 +289,15 @@ public partial class Playground : IDisposable
       await InvokeAsync(StateHasChanged);
 
       var program = new SoundScript.Parser.Parser(new Tokenizer(VisualScriptText).Tokenize()).Parse();
-      if (ContainsWaveOnlyDirectives(program.Statements))
-        throw new InvalidOperationException("Clip export currently uses the MIDI/Web Audio rail. Remove wave-only effect or speak directives from this visual source.");
-
-      var plan = TemporalVideoExportPlanBuilder.Build(
+      var statePlan = TemporalVideoExportPlanBuilder.Build(
           CompiledVisualTimeline,
           new TemporalVideoExportSettings(VisualExportFps));
-      var interpreted = Interpreter.Interpret(program, "playground-visual.ss");
-      using var stream = new MemoryStream();
-      MidiGenerator.Write(interpreted, stream);
+      var plan = TemporalVisualSceneBuilder.Build(statePlan);
+      var audioBytes = TemporalAudioRenderer.RenderToWavBytes(program, CompiledVisualTimeline.Duration);
 
       VisualStatusMessage = "Encoding WebM audio + visual stream…";
       await InvokeAsync(StateHasChanged);
-      await Js.InvokeVoidAsync("SoundScriptVideoExporter.exportWebm", plan, stream.ToArray(), "soundscript-temporal-clip.webm");
+      await Js.InvokeVoidAsync("SoundScriptVideoExporter.exportWebm", plan, audioBytes, "soundscript-temporal-clip.webm");
       VisualStatusMessage = "Ready — your audio-visual WebM clip has downloaded.";
     }
     catch (Exception ex)
@@ -319,16 +317,10 @@ public partial class Playground : IDisposable
     try
     {
       var program = new SoundScript.Parser.Parser(new Tokenizer(VisualScriptText).Tokenize()).Parse();
-      if (ContainsWaveOnlyDirectives(program.Statements))
-        throw new InvalidOperationException("Visual playback currently uses the MIDI/Web Audio rail. Remove wave-only effect or speak directives from this visual source.");
-
-      var interpreted = Interpreter.Interpret(program, "playground-visual.ss");
-      using var stream = new MemoryStream();
-      MidiGenerator.Write(interpreted, stream);
-      var midiBytes = stream.ToArray();
+      var audioBytes = TemporalAudioRenderer.RenderToWavBytes(program, timeline.Duration);
 
       var playback = await Js.InvokeAsync<VisualPlaybackStart>(
-          "SoundScriptMidi.startPlaybackFromOffset", midiBytes, startSeconds);
+          "SoundScriptAudio.playWavBytesFromOffset", audioBytes, startSeconds);
       cancellation.Token.ThrowIfCancellationRequested();
 
       VisualIsPreparing = false;
@@ -338,9 +330,9 @@ public partial class Playground : IDisposable
           : "Playing audio + visuals from the shared t = 0 clock. The stage is evaluating StateAt(t).";
       await InvokeAsync(StateHasChanged);
 
-      // midi-player schedules notes at audioContext.currentTime + its small
-      // start-ahead buffer and returns that buffer. Waiting the same amount
-      // starts this monotonic semantic clock at the first audible instant.
+      // The shared PCM player schedules its source a small amount ahead and
+      // returns that buffer. Waiting the same amount starts this monotonic
+      // semantic clock at the first audible instant.
       if (playback.StartDelayMs > 0)
         await Task.Delay(TimeSpan.FromMilliseconds(playback.StartDelayMs), cancellation.Token);
 
@@ -412,6 +404,7 @@ public partial class Playground : IDisposable
     try
     {
       await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+      await Js.InvokeVoidAsync("SoundScriptAudio.stop");
     }
     catch (JSDisconnectedException)
     {
@@ -429,6 +422,7 @@ public partial class Playground : IDisposable
     var durationSeconds = CompiledVisualTimeline.Duration.TotalSeconds;
     VisualTimeSeconds = ClampFinite(VisualTimeSeconds, 0, durationSeconds);
     VisualStateAtCursor = CompiledVisualTimeline.StateAt(SecondsToTimeSpan(VisualTimeSeconds));
+    _visualStageRenderPending = true;
   }
 
   private void UpdateVisualAudioBeatState()
@@ -467,39 +461,8 @@ public partial class Playground : IDisposable
   private static string FormatVisualValue(decimal value) =>
       value.ToString("0.##", CultureInfo.InvariantCulture);
 
-  private static string VisualPreviewClass(VisualElementState element) =>
-      element.Name.ToLowerInvariant() switch
-      {
-        "intro" => "visual-preview-intro",
-        "circle" => "visual-preview-circle",
-        "product" => "visual-preview-product",
-        "sparkle" => "visual-preview-sparkle",
-        _ => "visual-preview-generic"
-      };
-
-  private static string VisualPreviewLabel(VisualElementState element) =>
-      element.Name.ToLowerInvariant() switch
-      {
-        "intro" => "A visual idea begins",
-        "circle" => "●",
-        "product" => "PRODUCT",
-        "sparkle" => "✦",
-        _ => element.Name
-      };
-
-  private static string VisualPreviewStyle(VisualElementState element)
-  {
-    var radius = GetVisualProperty(element, "radius", fallback: 72m);
-    var opacity = GetVisualProperty(element, "opacity", fallback: 1m);
-    radius = Math.Clamp(radius, 12m, 220m);
-    opacity = Math.Clamp(opacity, 0m, 1m);
-
-    return $"--visual-radius:{radius.ToString(CultureInfo.InvariantCulture)}px;--visual-opacity:{opacity.ToString(CultureInfo.InvariantCulture)};";
-  }
-
-  private static decimal GetVisualProperty(VisualElementState element, string property, decimal fallback) =>
-      element.Properties.FirstOrDefault(value => string.Equals(value.Property, property, StringComparison.OrdinalIgnoreCase))?.Value
-      ?? fallback;
+  private TemporalVisualScene? VisualSceneAtCursor =>
+      VisualStateAtCursor is null ? null : TemporalVisualSceneBuilder.Build(VisualStateAtCursor);
 
   private string VisualBarStyle(ScheduledVisual visual)
   {
@@ -2265,41 +2228,50 @@ public partial class Playground : IDisposable
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    if (!firstRender)
-      return;
-
-    // Top MIDI-rail editor (the "SoundScript" pane) — nice code editor matching
-    // the Studio, plus an optional SoundCSS timbre editor for Render Audio.
-    MidiEditorDefault = ScriptText;
-    await Js.InvokeVoidAsync("playgroundEditor.init", MidiEditorId,
-        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }", ariaLabel = "SoundScript MIDI editor" });
-    await Js.InvokeVoidAsync("playgroundEditor.init", MidiCssEditorId,
-        new { language = "soundcss", theme = "dark", placeholder = "aa { formant1: 700Hz; }  /  p { burst: 12ms; }", ariaLabel = "MIDI SoundCSS editor" });
-    await Js.InvokeVoidAsync("playgroundEditor.setValue", MidiEditorId, ScriptText);
-
-    // Start the Studio with an original WordBank-only example.
-    StudioSswDefault = SafeExamples[0].Ssw;
-    StudioCssDefault = SafeExamples[0].Css;
-
-    await Js.InvokeVoidAsync("playgroundEditor.init", SswEditorId,
-        new { language = "ssw", theme = "dark", placeholder = "track melody { ... }  /  speak \"...\"", ariaLabel = "SoundScript Wave editor" });
-    await Js.InvokeVoidAsync("playgroundEditor.init", CssEditorId,
-        new { language = "soundcss", theme = "dark", placeholder = "\"word\" { style: sing; pitch: +2; }", ariaLabel = "Wave SoundCSS editor" });
-    await Js.InvokeVoidAsync("playgroundEditor.initSplit", "studio-divider", "studio-left", "studio-right");
-
-    await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, StudioSswDefault);
-    await Js.InvokeVoidAsync("playgroundEditor.setValue", CssEditorId, StudioCssDefault);
-
-    _editorsReady = true;
-    UpdatePatternPreview();
-
-    try
+    if (firstRender)
     {
-      await Js.InvokeVoidAsync("SoundScriptMidi.primePrograms", new[] { 0, 42 });
+      // Top MIDI-rail editor (the "SoundScript" pane) — nice code editor matching
+      // the Studio, plus an optional SoundCSS timbre editor for Render Audio.
+      MidiEditorDefault = ScriptText;
+      await Js.InvokeVoidAsync("playgroundEditor.init", MidiEditorId,
+          new { language = "ssw", theme = "dark", placeholder = "track melody { ... }", ariaLabel = "SoundScript MIDI editor" });
+      await Js.InvokeVoidAsync("playgroundEditor.init", MidiCssEditorId,
+          new { language = "soundcss", theme = "dark", placeholder = "aa { formant1: 700Hz; }  /  p { burst: 12ms; }", ariaLabel = "MIDI SoundCSS editor" });
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", MidiEditorId, ScriptText);
+
+      // Start the Studio with an original WordBank-only example.
+      StudioSswDefault = SafeExamples[0].Ssw;
+      StudioCssDefault = SafeExamples[0].Css;
+
+      await Js.InvokeVoidAsync("playgroundEditor.init", SswEditorId,
+          new { language = "ssw", theme = "dark", placeholder = "track melody { ... }  /  speak \"...\"", ariaLabel = "SoundScript Wave editor" });
+      await Js.InvokeVoidAsync("playgroundEditor.init", CssEditorId,
+          new { language = "soundcss", theme = "dark", placeholder = "\"word\" { style: sing; pitch: +2; }", ariaLabel = "Wave SoundCSS editor" });
+      await Js.InvokeVoidAsync("playgroundEditor.initSplit", "studio-divider", "studio-left", "studio-right");
+
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", SswEditorId, StudioSswDefault);
+      await Js.InvokeVoidAsync("playgroundEditor.setValue", CssEditorId, StudioCssDefault);
+
+      _editorsReady = true;
+      UpdatePatternPreview();
+
+      try
+      {
+        await Js.InvokeVoidAsync("SoundScriptMidi.primePrograms", new[] { 0, 42 });
+      }
+      catch
+      {
+        // Playback still lazy-loads samples on demand if prefetch is unavailable.
+      }
     }
-    catch
+
+    if (_visualStageRenderPending)
     {
-      // Playback still lazy-loads samples on demand if prefetch is unavailable.
+      _visualStageRenderPending = false;
+      await Js.InvokeVoidAsync(
+          "SoundScriptVisualRenderer.renderScene",
+          _visualStageCanvas,
+          VisualSceneAtCursor ?? new TemporalVisualScene(VisualTimeSeconds, Array.Empty<TemporalVisualPrimitive>()));
     }
   }
 

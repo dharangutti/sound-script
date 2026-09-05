@@ -1243,7 +1243,8 @@ a:hover { text-decoration: underline; }
 .visual-stage {
     position: relative;
     isolation: isolate;
-    min-height: 19rem;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
     overflow: hidden;
     border: 1px solid rgba(129, 140, 248, 0.32);
     border-radius: 12px;
@@ -1273,80 +1274,11 @@ a:hover { text-decoration: underline; }
     font-size: 0.9rem;
 }
 
-.visual-stage-element {
-    position: absolute;
-    display: grid;
-    place-items: center;
-    max-width: calc(100% - 1.5rem);
-    transition: width 0.08s linear, height 0.08s linear, opacity 0.08s linear, transform 0.08s linear;
-}
-
-.visual-preview-intro {
-    top: 13%;
-    left: 8%;
-    width: min(72%, 23rem);
-    padding: 0.7rem 1rem;
-    color: #eef6ff;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 999px;
-    background: rgba(15, 24, 43, 0.72);
-    font-size: clamp(1.05rem, 3vw, 1.45rem);
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
-}
-
-.visual-preview-circle {
-    right: 8%;
-    bottom: 9%;
-    width: calc(var(--visual-radius) * 2);
-    height: calc(var(--visual-radius) * 2);
-    color: rgba(255,255,255,0.75);
-    border: 1px solid rgba(255,255,255,0.64);
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #d9fff0, #6ee7b7 28%, #4f46e5 70%, #1e1b4b);
-    box-shadow: 0 0 0 0.5rem rgba(110, 231, 183, 0.09), 0 22px 40px rgba(0,0,0,0.38);
-    opacity: var(--visual-opacity);
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
-}
-
-.visual-preview-product {
-    left: 9%;
-    bottom: 13%;
-    width: min(52%, 16rem);
-    min-height: 7.5rem;
-    padding: 1rem;
-    color: #071b17;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 14px;
-    background: linear-gradient(145deg, #fef3c7, #fbbf24 40%, #fb7185 120%);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.34);
-    font-weight: 900;
-    letter-spacing: 0.13em;
-    transform: rotate(-3deg);
-}
-
-.visual-preview-sparkle {
-    top: 8%;
-    right: 13%;
-    width: 4.5rem;
-    height: 4.5rem;
-    color: #fef3c7;
-    font-size: 4rem;
-    line-height: 1;
-    opacity: var(--visual-opacity);
-    text-shadow: 0 0 1.2rem rgba(251, 191, 36, 0.95);
-}
-
-.visual-preview-generic {
-    inset: auto 1rem 1rem auto;
-    min-width: 7rem;
-    min-height: 3rem;
-    padding: 0.6rem;
-    color: var(--text);
-    border: 1px solid var(--accent-2);
-    border-radius: 8px;
-    background: rgba(15, 19, 26, 0.8);
+.visual-stage-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
 }
 
 .visual-scrubber { margin-top: 0.85rem; }
