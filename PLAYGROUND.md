@@ -28,9 +28,9 @@ edit the source, choose **Evaluate timeline**, then use **Play**, **Pause**,
 **Resume**, **Restart**, or scrub an exact program time. It does not author or
 play frames. Instead, the stage and inspector show the immutable `StateAt(t)`
 result, while interval lanes make the half-open `[start, end)` boundaries and
-the shared MIDI audio rail visible.
+the shared deterministic Wave audio rail visible.
 
-The default demo is a 12-second piano-backed composition with sequential
+The default demo is a 12-second audio-backed composition with sequential
 `intro`/`product`/`outro` cues, a deliberate `wait` gap, an absolute `circle`
 overlay with radius and opacity curves, and a `sparkle` transition. The
 checkpoint chips expose boundary cases at 0, 1.5, 4, 4.5, 5, and 8.75
@@ -44,7 +44,7 @@ anchor used by playback.
 - [ ] Score beat 10 at the default 120 BPM maps to `t = 5s` and reports `product`, `circle`, and `sparkle`
 - [ ] **Play** advances the playhead and stage; **Pause** holds the exact time; **Resume** continues audio and visuals
 - [ ] **Restart** returns to `t = 0s`; scrubbing pauses audio and evaluates the selected exact time immediately
-- [ ] The audio lane spans the 12-second visual timeline and uses the existing local MIDI soundfont
+- [ ] The audio lane spans the 12-second visual timeline and uses the shared deterministic SoundScript.Wave rail used by browser and CLI export
 - [ ] Introduce invalid visual syntax and choose **Evaluate timeline**; a local error appears without affecting the music workspace
 
 ## Text-to-Melody (V3.1)
