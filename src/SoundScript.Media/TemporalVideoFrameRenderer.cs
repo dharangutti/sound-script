@@ -127,7 +127,7 @@ public static class TemporalVideoFrameRenderer
                 PaintRoundedCard(pixels, width, height, left, top, elementWidth, elementHeight,
                     new Rgb(15, 24, 43), new Rgb(255, 255, 255), opacity * .72, .40, elementHeight / 2);
                 DrawText(pixels, width, height, primitive.Label, left + elementWidth * .07, top + elementHeight * .31,
-                    elementWidth * .86, elementHeight * .38, new Rgb(238, 246, 255), opacity);
+                    elementWidth * .86, elementHeight * .48, new Rgb(238, 246, 255), opacity);
                 break;
             case "circle":
                 PaintOrb(pixels, width, height, left, top, elementWidth, elementHeight, opacity);
@@ -135,8 +135,8 @@ public static class TemporalVideoFrameRenderer
             case "product":
                 PaintProductCard(pixels, width, height, left, top, elementWidth, elementHeight,
                     (double)primitive.RotationDegrees, opacity);
-                DrawText(pixels, width, height, primitive.Label, left + elementWidth * .15, top + elementHeight * .42,
-                    elementWidth * .70, elementHeight * .18, new Rgb(7, 27, 23), opacity);
+                DrawText(pixels, width, height, primitive.Label, left + elementWidth * .04, top + elementHeight * .35,
+                    elementWidth * .92, elementHeight * .30, new Rgb(7, 27, 23), opacity);
                 break;
             case "sparkle":
                 PaintSparkle(pixels, width, height, left, top, elementWidth, elementHeight, opacity);
@@ -145,7 +145,7 @@ public static class TemporalVideoFrameRenderer
                 PaintRoundedCard(pixels, width, height, left, top, elementWidth, elementHeight,
                     new Rgb(15, 19, 26), new Rgb(110, 231, 183), opacity * .80, 1, Math.Min(8 * scaleX, elementHeight / 3));
                 DrawText(pixels, width, height, primitive.Label, left + elementWidth * .10, top + elementHeight * .34,
-                    elementWidth * .80, elementHeight * .32, new Rgb(232, 236, 244), opacity);
+                    elementWidth * .80, elementHeight * .36, new Rgb(232, 236, 244), opacity);
                 break;
         }
     }
@@ -283,8 +283,12 @@ public static class TemporalVideoFrameRenderer
         var normalized = text.ToUpperInvariant();
         if (string.IsNullOrWhiteSpace(normalized) || maxWidth < 5 || maxHeight < 7)
             return;
-        var scale = Math.Max(1, (int)Math.Floor(Math.Min(maxHeight / 7d, maxWidth / Math.Max(1, normalized.Length * 6d))));
-        var textWidth = normalized.Length * 6 * scale - scale;
+        // The glyphs are five cells wide. Keep only a half-cell of advance as
+        // spacing so longer labels can use the same visual scale as the
+        // browser's system-ui text without becoming cramped or blurry.
+        const double glyphAdvance = 5.5;
+        var scale = Math.Max(1, (int)Math.Floor(Math.Min(maxHeight / 7d, maxWidth / Math.Max(1, normalized.Length * glyphAdvance))));
+        var textWidth = normalized.Length * glyphAdvance * scale - .5 * scale;
         var x = left + Math.Max(0, (maxWidth - textWidth) / 2);
         foreach (var character in normalized)
         {
@@ -293,7 +297,7 @@ public static class TemporalVideoFrameRenderer
             for (var column = 0; column < glyph[row].Length; column++)
                 if (glyph[row][column] == '1')
                     FillRect(pixels, width, height, x + column * scale, top + row * scale, scale, scale, color, opacity);
-            x += 6 * scale;
+            x += glyphAdvance * scale;
         }
     }
 
@@ -342,12 +346,20 @@ public static class TemporalVideoFrameRenderer
     private static void FillRect(byte[] pixels, int width, int height, double left, double top, double rectWidth, double rectHeight, Rgb color, double opacity)
     {
         var minX = Math.Max(0, (int)Math.Floor(left));
-        var maxX = Math.Min(width - 1, (int)Math.Ceiling(left + rectWidth));
+        var maxX = Math.Min(width - 1, (int)Math.Ceiling(left + rectWidth) - 1);
         var minY = Math.Max(0, (int)Math.Floor(top));
-        var maxY = Math.Min(height - 1, (int)Math.Ceiling(top + rectHeight));
+        var maxY = Math.Min(height - 1, (int)Math.Ceiling(top + rectHeight) - 1);
+        var right = left + rectWidth;
+        var bottom = top + rectHeight;
         for (var y = minY; y <= maxY; y++)
         for (var x = minX; x <= maxX; x++)
-            BlendPixel(pixels, width, x, y, color, opacity);
+        {
+            var coveredWidth = Math.Clamp(Math.Min(x + 1d, right) - Math.Max(x, left), 0d, 1d);
+            var coveredHeight = Math.Clamp(Math.Min(y + 1d, bottom) - Math.Max(y, top), 0d, 1d);
+            var coverage = coveredWidth * coveredHeight;
+            if (coverage > 0)
+                BlendPixel(pixels, width, x, y, color, opacity * coverage);
+        }
     }
 
     private static void BlendPixel(byte[] pixels, int width, int x, int y, Rgb color, double opacity)

@@ -76,6 +76,10 @@ for source syntax and synchronization semantics.
 soundscript video <script.ss|script.ssv> --output <clip.webm> [--fps 24|30|60] [--width <even-pixels>] [--height <even-pixels>] [--ffmpeg <path>]
 ```
 
+The default output size is 1280×720, matching the canonical visual scene
+viewport used by the Playground. Use `--width` and `--height` when a smaller
+CLI render is required.
+
 `video` produces a real, decode-verified WebM containing a VP9 video stream and
 Opus audio stream. It first builds an immutable export plan by evaluating the
 authoritative `VisualTimeline.StateAt(t)` function at the requested output
