@@ -186,32 +186,48 @@ window.SoundScriptMidi = (function () {
         }
     }
 
-    function scheduleNotes(parsedMidi) {
+    function scheduleNotes(parsedMidi, offsetSeconds) {
         const { notes, totalDuration } = parsedMidi;
         const now = audioContext.currentTime + 0.05;
+        let remainingDuration = 0;
 
         for (const note of notes) {
+            const noteEnd = note.start + note.duration;
+            if (noteEnd <= offsetSeconds) {
+                continue;
+            }
+
+            const elapsedStart = Math.max(0, note.start - offsetSeconds);
+            const elapsedOffset = Math.max(0, offsetSeconds - note.start);
+            const remainingNoteDuration = Math.max(0.05, note.duration - elapsedOffset);
             const nodes = SoundScriptSoundfont.playNote(
                 note.note,
                 note.velocity,
-                now + note.start,
-                note.duration,
+                now + elapsedStart,
+                remainingNoteDuration,
                 masterGain,
                 note.program
             );
             if (nodes) {
                 activeNodes.push(nodes);
             }
+            remainingDuration = Math.max(remainingDuration, elapsedStart + remainingNoteDuration);
         }
 
         stopTimer = setTimeout(() => {
             clearScheduled();
-        }, (totalDuration + 0.5) * 1000);
+        }, (remainingDuration + 0.5) * 1000);
+
+        return {
+            startDelayMs: 50,
+            durationSeconds: Math.max(0, Math.min(totalDuration, remainingDuration))
+        };
     }
 
-    async function startPlayback(midiBytes) {
+    async function startPlayback(midiBytes, offsetSeconds = 0) {
         clearScheduled();
         const parsedMidi = parseMidi(midiBytes);
+        const offset = Number.isFinite(offsetSeconds) ? Math.max(0, offsetSeconds) : 0;
 
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -229,7 +245,7 @@ window.SoundScriptMidi = (function () {
 
         await SoundScriptSoundfont.load(audioContext, parsedMidi.programs);
 
-        scheduleNotes(parsedMidi);
+        return scheduleNotes(parsedMidi, offset);
     }
 
     async function primePrograms(programs) {
@@ -250,6 +266,7 @@ window.SoundScriptMidi = (function () {
 
     return {
         startPlayback,
+        startPlaybackFromOffset: startPlayback,
         primePrograms,
         stop,
         download

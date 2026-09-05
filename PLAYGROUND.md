@@ -1,4 +1,4 @@
-# SoundScript Playground — Verification Checklist (V9)
+# SoundScript Playground — Verification Checklist (V10)
 
 Use this checklist after building or deploying the playground.
 
@@ -24,22 +24,27 @@ The playground ships with **V2** and **Core** preset groups (see `Playground.raz
 ## Visual Timeline tab
 
 The **Visual Timeline** tab is a renderer-neutral, temporal-programming demo:
-edit the source, choose **Evaluate timeline**, and scrub an exact program time.
-It does not author or play frames. Instead, the stage and inspector show the
-immutable `StateAt(t)` result, while interval lanes make the half-open
-`[start, end)` boundaries visible.
+edit the source, choose **Evaluate timeline**, then use **Play**, **Pause**,
+**Resume**, **Restart**, or scrub an exact program time. It does not author or
+play frames. Instead, the stage and inspector show the immutable `StateAt(t)`
+result, while interval lanes make the half-open `[start, end)` boundaries and
+the shared MIDI audio rail visible.
 
-The default demo includes sequential `intro`/`product` cues, a deliberate
-`wait` gap, an absolute `circle` overlay with a `radius` curve, and a
-`sparkle` opacity curve. The checkpoint chips expose its boundary cases at
-0, 1.5, 4, 4.5, 5, and 8.75 seconds. Its **Audio bridge** uses the existing
-tempo map to convert a score beat into the same elapsed-time query; `sync
-audio` is shown as a declared anchor, not claimed as live browser playback.
+The default demo is a 12-second piano-backed composition with sequential
+`intro`/`product`/`outro` cues, a deliberate `wait` gap, an absolute `circle`
+overlay with radius and opacity curves, and a `sparkle` transition. The
+checkpoint chips expose boundary cases at 0, 1.5, 4, 4.5, 5, and 8.75
+seconds. Its **Audio bridge** uses the existing tempo map to convert a score
+beat into the same elapsed-time query; `sync audio` is the declared shared
+anchor used by playback.
 
 - [ ] Switch between **Music & Wave** and **Visual Timeline**; the existing code editors remain usable after switching back
-- [ ] At `t = 1.5s`, the stage/inspector show `intro` plus `circle(radius=110)`
-- [ ] At `t = 4s`, only `circle(radius=200)` remains; at `t = 5s`, only `product` remains
-- [ ] Score beat 10 at the default 120 BPM maps to `t = 5s` and reports `product`
+- [ ] At `t = 1.5s`, the stage/inspector show `intro` plus `circle(radius=99)`
+- [ ] At `t = 4s`, `product` and `circle` overlap; at `t = 8.75s`, only `outro` remains
+- [ ] Score beat 10 at the default 120 BPM maps to `t = 5s` and reports `product`, `circle`, and `sparkle`
+- [ ] **Play** advances the playhead and stage; **Pause** holds the exact time; **Resume** continues audio and visuals
+- [ ] **Restart** returns to `t = 0s`; scrubbing pauses audio and evaluates the selected exact time immediately
+- [ ] The audio lane spans the 12-second visual timeline and uses the existing local MIDI soundfont
 - [ ] Introduce invalid visual syntax and choose **Evaluate timeline**; a local error appears without affecting the music workspace
 
 ## Text-to-Melody (V3.1)

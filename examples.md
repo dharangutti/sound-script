@@ -1,4 +1,4 @@
-# SoundScript Examples (V9)
+# SoundScript Examples (V10)
 
 Runnable example scripts for every major feature.
 
@@ -25,7 +25,7 @@ Runnable example scripts for every major feature.
 
 | Example | Feature | Run |
 |---------|---------|-----|
-| [visual-temporal.ssv](../examples/visual-temporal.ssv) | Frame-free visual events, delays, overlay, animation, audio anchor | `dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv --at 0 --at 1.5 --at 5` |
+| [visual-temporal.ssv](../examples/visual-temporal.ssv) | 12-second piano + frame-free visual events, overlap, transitions, animation, audio anchor | `dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv --at 0 --at 1.5 --at 4 --at 4.5 --at 5 --at 8.75` |
 
 → [visual-temporal.md](visual-temporal.md)
 

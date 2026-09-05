@@ -37,6 +37,16 @@ SoundScript.Cli           run | compose | render
 SoundScript.Playground    browser MIDI + offline WAV preview
 ```
 
+## Temporal visual rail (V10)
+
+`SoundScript.Visual` is a renderer-neutral rail alongside MIDI, Voice, Timbre,
+and Wave. The parser adds visual AST nodes; `VisualInterpreter` compiles them
+into a `VisualTimeline`; and `VisualTimeline.StateAt(t)` evaluates active
+intervals and automation at an arbitrary exact `TimeSpan`. The Playground uses
+the existing MIDI/Web Audio rail and advances this same temporal clock during
+playback. A future renderer may sample the timeline at a requested FPS, but FPS
+is not part of the authoring model.
+
 ## MIDI → timbre contract
 
 The timbre engine **reads** MIDI; it never writes or patches MIDI files.
