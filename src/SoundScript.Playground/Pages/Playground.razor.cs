@@ -20,6 +20,7 @@ using SoundScript.Wave.Prosody;
 using SoundScript.Wordbank;
 using SoundScript.Wordbank.Models;
 using SoundScript.Visual;
+using SoundScript.Media;
 
 namespace SoundScript.Playground.Pages;
 
@@ -123,6 +124,8 @@ public partial class Playground : IDisposable
   private double VisualAudioBeat { get; set; } = 10;
   private bool VisualIsPlaying { get; set; }
   private bool VisualIsPreparing { get; set; }
+  private bool VisualIsExporting { get; set; }
+  private int VisualExportFps { get; set; } = 30;
   private CancellationTokenSource? _visualPlaybackCancellation;
   private Task? _visualPlaybackTask;
 
@@ -266,6 +269,49 @@ public partial class Playground : IDisposable
     UpdateVisualState();
     VisualStatusMessage = "Reset to t = 0s. Press Play to start audio and visuals together.";
     await InvokeAsync(StateHasChanged);
+  }
+
+  private async Task ExportVisualClipAsync()
+  {
+    if (CompiledVisualTimeline is null || VisualIsExporting)
+      return;
+
+    CancelVisualPlayback();
+    await StopVisualAudioAsync();
+    VisualIsExporting = true;
+    VisualErrorMessage = null;
+
+    try
+    {
+      VisualStatusMessage = "Rendering deterministic StateAt(t) samples…";
+      await InvokeAsync(StateHasChanged);
+
+      var program = new SoundScript.Parser.Parser(new Tokenizer(VisualScriptText).Tokenize()).Parse();
+      if (ContainsWaveOnlyDirectives(program.Statements))
+        throw new InvalidOperationException("Clip export currently uses the MIDI/Web Audio rail. Remove wave-only effect or speak directives from this visual source.");
+
+      var plan = TemporalVideoExportPlanBuilder.Build(
+          CompiledVisualTimeline,
+          new TemporalVideoExportSettings(VisualExportFps));
+      var interpreted = Interpreter.Interpret(program, "playground-visual.ss");
+      using var stream = new MemoryStream();
+      MidiGenerator.Write(interpreted, stream);
+
+      VisualStatusMessage = "Encoding WebM audio + visual stream…";
+      await InvokeAsync(StateHasChanged);
+      await Js.InvokeVoidAsync("SoundScriptVideoExporter.exportWebm", plan, stream.ToArray(), "soundscript-temporal-clip.webm");
+      VisualStatusMessage = "Ready — your audio-visual WebM clip has downloaded.";
+    }
+    catch (Exception ex)
+    {
+      VisualErrorMessage = ex.Message;
+      VisualStatusMessage = null;
+    }
+    finally
+    {
+      VisualIsExporting = false;
+      await InvokeAsync(StateHasChanged);
+    }
   }
 
   private async Task RunVisualPlaybackAsync(VisualTimeline timeline, double startSeconds, CancellationTokenSource cancellation)

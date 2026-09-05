@@ -556,6 +556,16 @@
             </button>
             <button type="button" class="btn btn-secondary" disabled="@(!VisualIsPlaying && !VisualIsPreparing)" @onclick="PauseVisualAsync">⏸ Pause</button>
             <button type="button" class="btn btn-secondary" disabled="@(CompiledVisualTimeline is null)" @onclick="RestartVisualAsync">↺ Restart</button>
+            <label class="visual-export-fps" for="visual-export-fps">Export
+                <select id="visual-export-fps" @bind="VisualExportFps" disabled="@VisualIsExporting" aria-label="Video export frame rate">
+                    <option value="24">24 FPS</option>
+                    <option value="30">30 FPS</option>
+                    <option value="60">60 FPS</option>
+                </select>
+            </label>
+            <button type="button" class="btn btn-secondary" disabled="@(CompiledVisualTimeline is null || VisualIsExporting)" @onclick="ExportVisualClipAsync">
+                @(VisualIsExporting ? "Exporting…" : "Export Clip")
+            </button>
             <span class="visual-playback-readout">
                 <strong>@FormatVisualTime(VisualStateAtCursor?.Time ?? TimeSpan.Zero)</strong>
                 <span>/ @(CompiledVisualTimeline is null ? "0s" : FormatVisualTime(CompiledVisualTimeline.Duration))</span>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundScript — Deterministic Audio Programming Language</title>
-    <meta name="description" content="SoundScript is an independent open-source audio programming language for deterministic MIDI, WAV, vocal, and industrial audio workflows. Use the .NET 8 CLI or browser playground, entirely offline and without an account.">
+    <meta name="description" content="SoundScript is an independent open-source temporal media language for deterministic MIDI, WAV, visual timelines, and browser-playable audio-visual clips. Use the .NET 8 CLI or browser playground, entirely offline and without an account.">
     <meta name="keywords" content="SoundScript, music DSL, music programming language, text to MIDI, MIDI generator, deterministic music, C# music library, music as code, industrial audio cues, browser MIDI playground">
     <meta name="author" content="Anup Jayant Dharangutti">
     <meta name="robots" content="index, follow">
@@ -51,9 +51,9 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "softwareVersion": "9.0.0",
+                "softwareVersion": "11.0.0",
                 "programmingLanguage": "C#",
-                "featureList": "Text-to-MIDI compilation, deterministic output, phrases and patterns, instrument layers, tempo automation, orchestration helpers, expressive curves and envelopes, industrial audio cues, vocal tracks with phonetic lyric alignment, karaoke MIDI lyric export, text-to-melody composition from plain English (PhonemeComposer), word-level prosody composition (ProsodyComposer), editable .ss DSL export from composed text (--emit-ss), direct Wave synthesis to WAV (SoundScript.Wave), offline WordBank vocal stems and mixing, browser playground, cross-platform CLI",
+                "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
                 "codeRepository": "https://github.com/dharangutti/sound-script",
                 "author": {
@@ -812,15 +812,16 @@
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V9 — WordBank Vocal Engine<!--/VERSION_BADGE--></div>
+            <div class="badge"><!--VERSION_BADGE-->Version: V11 — Temporal Media Export<!--/VERSION_BADGE--></div>
             <h1>Write audio like <span>code</span></h1>
             <p class="lead">
                 SoundScript is an independent open-source audio programming language. Write melodies, phrases,
                 orchestration, vocal cues, and industrial sonification as plain text; compile them to deterministic
-                MIDI or WAV with the .NET CLI or a client-side browser playground.
+                MIDI, WAV, or a browser-playable audio-visual clip with the .NET CLI or a client-side browser playground.
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Open the Playground</a>
+                <a class="btn btn-secondary" href="playground/#visual-workspace-tab">Try Visual Timeline Export</a>
                 <a class="btn btn-secondary" href="doc.html?p=user-guide.md">Read the User Guide</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
             </div>
@@ -832,6 +833,7 @@
                 <span class="trust-badge"><!--METRIC_TESTS-->505+<!--/METRIC_TESTS--> Tests</span>
                 <span class="trust-badge">.NET 8</span>
                 <span class="trust-badge">Browser Playground</span>
+                <span class="trust-badge">Temporal A/V Export</span>
                 <span class="trust-badge">CLI</span>
                 <span class="trust-badge">MIT License</span>
                 <span class="trust-badge">Cross Platform CI</span>
@@ -1029,6 +1031,20 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <p class="section-intro">The repository includes runnable <code>.ss</code> and <code>.ssw</code> examples spanning composition, vocals, Wave synthesis, and industrial cues.</p>
                 <div class="grid-2">
                     <article class="card">
+                        <span class="cat-tag">Temporal media · V11</span>
+                        <h3>visual-temporal.ssv</h3>
+                        <pre>visual "intro" for 3s
+visual "circle" for 8s at 0s {
+    animate radius 28 -> 170 over 3s
+}</pre><p>Author deterministic state over time, then sample it in the Playground at 24, 30, or 60 FPS to export a WebM clip with the existing MIDI audio rail.</p>
+                    </article>
+                    <article class="card">
+                        <span class="cat-tag">V11</span>
+                        <h3>Temporal Media Export</h3>
+                        <p>Visual programs remain a deterministic <code>StateAt(t)</code> function. The Playground samples that function only in its WebM renderer, combines it with the established MIDI/Web Audio rail, and downloads a playable clip.</p>
+                        <p><a href="doc.html?p=visual-temporal.md">Visual timeline and export model →</a></p>
+                    </article>
+                    <article class="card">
                         <span class="cat-tag">Composition</span>
                         <h3>full-v2-showcase.ss</h3>
                         <pre>tempo 120 → 140 over 2 bars
@@ -1201,7 +1217,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <div class="grid-2">
                     <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=user-guide.md"><strong>User Guide</strong></a><br><a href="doc.html?p=SoundScript.md">Documentation hub</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
                     <article class="card"><h3>Language &amp; CLI</h3><p><a href="doc.html?p=language-reference.md">Language reference</a><br><a href="doc.html?p=cli.md">CLI reference</a><br><a href="doc.html?p=notation.md">Notation engine</a><br><a href="doc.html?p=expressive-notation.md">Expressive notation</a></p></article>
-                    <article class="card"><h3>Current Release — V9</h3><p><a href="doc.html?p=whats-new-v9.md">WordBank Vocal Engine</a><br><a href="doc.html?p=phase8-wordbank-vocal.md">WordBank architecture</a><br><a href="doc.html?p=examples.md">Jingle Bells demo</a></p></article>
+                    <article class="card"><h3>Current Release — V11</h3><p><a href="doc.html?p=visual-temporal.md">Temporal media export</a><br><a href="playground/">Visual Timeline Playground</a><br><a href="doc.html?p=examples.md">Runnable examples</a></p></article>
                     <article class="card"><h3>Wave &amp; Vocals</h3><p><a href="doc.html?p=wave-grammar.md">Wave grammar</a><br><a href="doc.html?p=vocal.md">Vocal tracks</a><br><a href="doc.html?p=whats-new-v8.md">V8 vocal stems</a><br><a href="doc.html?p=playback-quality.md">Playback quality</a></p></article>
                     <article class="card"><h3>Composition</h3><p><a href="doc.html?p=text-to-melody.md">Text-to-melody</a><br><a href="doc.html?p=phrases.md">Phrases</a><br><a href="doc.html?p=orchestration.md">Orchestration</a><br><a href="doc.html?p=tempo-automation.md">Tempo automation</a></p></article>
                     <article class="card"><h3>Engine Internals</h3><p><a href="doc.html?p=architecture.md">Architecture</a><br><a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br><a href="doc.html?p=timbre-engine.md">Timbre engine</a><br><a href="doc.html?p=whats-new-v1.2.md">v1.2 foundation</a></p></article>
@@ -1211,7 +1227,8 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V9</span><div><strong>WordBank Vocal Engine</strong><span class="release-label">Current</span><br>Brings the WordBank workflow and Jingle Bells preset to the Playground, with complete corpus coverage for the bundled song and a CLI path-resolution fix. <a href="doc.html?p=whats-new-v9.md">Release details →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V11</span><div><strong>Temporal Media Export</strong><span class="release-label">Current</span><br>Visual programs stay time-based and deterministic while the Playground samples them at a selected output FPS to create a browser-playable WebM clip with synchronized MIDI audio. <a href="doc.html?p=visual-temporal.md">Release details →</a></div></li>
+                    <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
                     <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V7</span><div>SoundScript.Wave renders <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV through <code>speak</code>, effects, and seeded humanization.</div></li>
                     <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V6</span><div><code>--emit-ss</code> serializes composed output to editable source that round-trips to byte-identical MIDI.</div></li>
@@ -1231,7 +1248,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <a href="playground/">Playground</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide</a> ·
                 <a href="/industrial/">Industrial Audio</a> ·
-                <a href="doc.html?p=whats-new-v9.md">What's New in V9</a> ·
+                <a href="doc.html?p=visual-temporal.md">What's New in V11</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
                 <a href="/contact/">Contact</a>

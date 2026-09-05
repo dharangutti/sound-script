@@ -2,6 +2,7 @@ using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Parser;
 using SoundScript.Visual;
+using SoundScript.Media;
 using Xunit;
 using SoundScriptParser = SoundScript.Parser.Parser;
 
@@ -147,6 +148,102 @@ public class VisualTimelineTests
         Assert.Contains("lasts longer", exception.Message);
     }
 
+    [Fact]
+    public void VideoExportPlan_SamplesTheAuthoritativeStateAtFunctionAtThirtyFps()
+    {
+        var timeline = Compile("""
+            visual "intro" for 1s
+            visual "overlay" for 0.5s at 0.5s {
+                animate opacity 0 -> 1 over 0.5s
+            }
+            """);
+
+        var plan = TemporalVideoExportPlanBuilder.Build(timeline);
+
+        Assert.Equal(30, plan.FramesPerSecond);
+        Assert.Equal(1d, plan.DurationSeconds);
+        Assert.Equal(30, plan.Samples.Count);
+        Assert.Equal(0d, plan.Samples[0].TimeSeconds);
+        Assert.Equal(TimeSpan.FromSeconds(1d / 30d).TotalSeconds, plan.Samples[1].TimeSeconds, 12);
+        Assert.Equal(TimeSpan.FromSeconds(29d / 30d).TotalSeconds, plan.Samples[^1].TimeSeconds, 12);
+        Assert.Equal(["intro", "overlay"], plan.Samples[15].Elements.Select(element => element.Name));
+        Assert.Equal(0m, PlanProperty(plan.Samples[15], "overlay", "opacity"));
+    }
+
+    [Fact]
+    public void VideoExportPlan_AlternateRatesObserveEquivalentTemporalStateWithoutMutation()
+    {
+        var timeline = Compile("""
+            visual "circle" for 2s {
+                animate radius 20 -> 200 over 2s
+            }
+            """);
+
+        var atThirty = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(30));
+        var atSixty = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(60));
+
+        var thirtyAtOneSecond = Assert.Single(atThirty.Samples, sample => sample.TimeSeconds == 1d);
+        var sixtyAtOneSecond = Assert.Single(atSixty.Samples, sample => sample.TimeSeconds == 1d);
+        Assert.Equal(thirtyAtOneSecond.Elements.Select(Describe), sixtyAtOneSecond.Elements.Select(Describe));
+        Assert.Equal(110m, PlanProperty(thirtyAtOneSecond, "circle", "radius"));
+        Assert.Equal(110m, Property(timeline.StateAt(TimeSpan.FromSeconds(1)), "circle", "radius"));
+        Assert.Empty(timeline.StateAt(TimeSpan.FromSeconds(2)).Elements);
+    }
+
+    [Fact]
+    public void VideoExportPlan_RejectsUnsupportedOutputRate()
+    {
+        var timeline = Compile("visual \"still\" for 1s");
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(25)));
+    }
+
+    [Fact]
+    public void VideoFrameRenderer_RasterizesSuppliedSnapshotsWithoutChangingTheTimeline()
+    {
+        var timeline = Compile("""
+            visual "circle" for 1s {
+                animate radius 8 -> 12 over 1s
+                animate opacity 0.5 -> 1 over 1s
+            }
+            visual "sparkle" for 1s at 0s
+            """);
+        var plan = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(24));
+        var before = timeline.StateAt(TimeSpan.Zero).Elements.Select(Describe).ToArray();
+        var outputDirectory = Path.Combine(Path.GetTempPath(), $"soundscript-ppm-{Guid.NewGuid():N}");
+
+        try
+        {
+            TemporalVideoFrameRenderer.WritePpmFrames(plan, outputDirectory, width: 32, height: 24);
+
+            var firstFrame = File.ReadAllBytes(Path.Combine(outputDirectory, "frame-000000.ppm"));
+            Assert.StartsWith("P6\n32 24\n255\n", System.Text.Encoding.ASCII.GetString(firstFrame, 0, 13));
+            Assert.Equal(13 + 32 * 24 * 3, firstFrame.Length);
+            Assert.Equal(plan.Samples.Count, Directory.GetFiles(outputDirectory, "*.ppm").Length);
+            Assert.NotEqual(firstFrame.Skip(13).First(), firstFrame.Skip(13).Last());
+            Assert.Equal(before, timeline.StateAt(TimeSpan.Zero).Elements.Select(Describe));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void FfmpegWebmExporter_BuildsWebmArgumentsAtTheRenderingBoundary()
+    {
+        var timeline = Compile("visual \"still\" for 1s");
+        var plan = TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(30));
+
+        var arguments = FfmpegWebmExporter.BuildEncodeArguments("frames", "audio.wav", "clip.webm", plan);
+
+        Assert.Contains("-framerate", arguments);
+        Assert.Contains("30", arguments);
+        Assert.Contains("libvpx-vp9", arguments);
+        Assert.Contains("libopus", arguments);
+        Assert.Equal("clip.webm", arguments[^1]);
+    }
+
     private static VisualTimeline Compile(string source) => VisualInterpreter.Interpret(Parse(source));
 
     private static ProgramNode Parse(string source) =>
@@ -158,6 +255,13 @@ public class VisualTimelineTests
     private static decimal Property(VisualState state, string visualName, string propertyName) =>
         Assert.Single(Assert.Single(state.Elements.Where(element => element.Name == visualName)).Properties
             .Where(property => property.Property == propertyName)).Value;
+
+    private static decimal PlanProperty(TemporalVideoSample sample, string visualName, string propertyName) =>
+        Assert.Single(Assert.Single(sample.Elements, element => element.Name == visualName).Properties,
+            property => property.Name == propertyName).Value;
+
+    private static string Describe(TemporalVideoElement element) =>
+        $"{element.Name}:{string.Join(",", element.Properties.Select(property => $"{property.Name}={property.Value}"))}";
 
     private static string Describe(ScheduledVisual visual) =>
         $"{visual.Name}@{visual.Start.Ticks}:{visual.End.Ticks}:" +

@@ -95,9 +95,40 @@ tempo-ramp-aware `TempoAutomationMap` for elapsed milliseconds and evaluates
 the same absolute visual clock. In other words, audio sample rate and video
 FPS are both output samplers—not authoring primitives.
 
-The initial capability intentionally stops before MP4/FFmpeg integration.
-`SoundScript.Visual` is a small Core-only temporal rail, ready for future text,
-procedural graphics, transitions, and renderer/export adapters.
+## Video export
+
+The Playground's **Export Clip** action is a downstream browser renderer. It
+builds an immutable export plan by evaluating `VisualTimeline.StateAt(t)` at
+24, 30, or 60 samples per second (30 is the default), rasterizes those supplied
+states to a canvas, and combines the canvas stream with the existing local
+MIDI/Web Audio rail. Browsers with Canvas capture and MediaRecorder support
+(Chrome, Edge, and Firefox) download a playable WebM clip with audio and
+visuals. The encoder is intentionally browser-native; no FFmpeg or native codec
+dependency is added.
+
+```text
+Authoring: VisualState = StateAt(t)
+Rendering: Frame[n] = StateAt(n / outputFPS)
+```
+
+The second equation exists only in `SoundScript.Media`, the export-plan adapter.
+There are no FPS, frames, frame tracks, codecs, or canvas concepts in the parser,
+AST, `VisualTimeline`, or visual DSL. The encoded WebM bytes may vary by browser
+and media encoder; the source timeline states and export plan are deterministic.
+
+The command line can render the same plan into a real WebM through a deliberately
+separate FFmpeg adapter:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
+  --output demo.webm --fps 30
+```
+
+The CLI rasterizer consumes only the deterministic plan—never the timeline
+internals—and the existing SoundScript.Wave renderer supplies audio from the
+same parsed program. FFmpeg is required to encode VP9/Opus WebM; after encoding,
+the command decode-verifies both streams. FFmpeg may vary encoded bytes across
+versions, but the temporal states and renderer inputs remain deterministic.
 
 ## Playground playback
 
