@@ -12,6 +12,7 @@ using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Io;
 using SoundScript.Wave.Tts;
 using SoundScript.Wordbank;
+using SoundScript.Visual;
 
 if (args.Length >= 1 && (args[0] == "--version" || args[0] == "-v"))
 {
@@ -32,6 +33,7 @@ return args[0].ToLowerInvariant() switch
     "prosody" => Prosody(args),
     "render" => Render(args),
     "wave" => Wave(args),
+    "visual" => Visual(args),
     "vocal" => Vocal(args),
     "wordbank" => Wordbank(args),
     _ => PrintUsage()
@@ -45,6 +47,7 @@ static int PrintUsage()
     Console.Error.WriteLine("       soundscript prosody \"<text>\" [output.mid|output.wav] [--wordbank-dir <path>] [--locale <code>] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]");
     Console.Error.WriteLine("       soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text \"<source text>\"]");
     Console.Error.WriteLine("       soundscript wave <script.ss|script.ssw> [output.wav] [--stereo] [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>] [--tts-dir <folder>] [--offline-tts [wordbank|composite|espeak|prosody]] [--offline-tts-dir <folder>] [--css <style.ssc>] [--continuous]");
+    Console.Error.WriteLine("       soundscript visual <script.ss|script.ssv> [--at <seconds>]...");
     Console.Error.WriteLine("       soundscript vocal generate \"<text>\" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing] [--css <style.ssc>] [--continuous]");
     Console.Error.WriteLine("       soundscript wordbank ensure <lemma> [--locale <code>] [--auto-generate-missing] [--wordbank-dir <path>] [--voice <id>]");
@@ -95,6 +98,145 @@ static int Run(string[] args)
         return 1;
     }
 }
+
+static int Visual(string[] args)
+{
+    var scriptPath = args[1];
+    if (!File.Exists(scriptPath))
+    {
+        Console.Error.WriteLine($"Script not found: {scriptPath}");
+        return 1;
+    }
+
+    var queryTimes = new List<TimeSpan>();
+    for (var i = 2; i < args.Length; i++)
+    {
+        string? queryText = null;
+        if (string.Equals(args[i], "--at", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Length)
+            {
+                Console.Error.WriteLine("--at requires a non-negative number of seconds: visual story.ssv --at 1.5");
+                return 1;
+            }
+
+            queryText = args[++i];
+        }
+        else if (args[i].StartsWith("--at=", StringComparison.OrdinalIgnoreCase))
+        {
+            queryText = args[i][5..];
+        }
+        else
+        {
+            Console.Error.WriteLine($"Unknown visual argument: {args[i]}");
+            return 1;
+        }
+
+        if (!TryParseVisualQueryTime(queryText, out var queryTime))
+        {
+            Console.Error.WriteLine($"Invalid visual query time '{queryText}'. Use a non-negative number of seconds, such as 1.5 or 1.5s.");
+            return 1;
+        }
+
+        queryTimes.Add(queryTime);
+    }
+
+    try
+    {
+        var loaded = ProgramLoader.Load(scriptPath);
+        var timeline = VisualInterpreter.Interpret(loaded.Program);
+
+        foreach (var warning in loaded.Warnings)
+            Console.Error.WriteLine($"warning: {warning}");
+
+        Console.WriteLine(
+            $"Temporal storyboard: {FormatVisualTime(timeline.Duration)} total, " +
+            $"{timeline.Visuals.Count} visual interval(s), {timeline.AudioSyncPoints.Count} audio anchor(s).");
+
+        foreach (var visual in timeline.Visuals)
+        {
+            var automation = visual.Automations.Count == 0
+                ? string.Empty
+                : " | " + string.Join(", ", visual.Automations.Select(curve =>
+                    $"{curve.Property} {FormatVisualNumber(curve.From)} -> {FormatVisualNumber(curve.To)} over {FormatVisualTime(curve.Duration)}"));
+            Console.WriteLine($"  [{FormatVisualTime(visual.Start)}..{FormatVisualTime(visual.End)}) {visual.Name}{automation}");
+        }
+
+        foreach (var anchor in timeline.AudioSyncPoints)
+            Console.WriteLine($"  audio sync at {FormatVisualTime(anchor.Time)}");
+
+        if (queryTimes.Count == 0)
+        {
+            Console.WriteLine("Query any moment without rendering frames: --at 0 --at 1.5 --at 4.5");
+        }
+        else
+        {
+            foreach (var time in queryTimes)
+                Console.WriteLine($"  t={FormatVisualTime(time)} => {FormatVisualState(timeline.StateAt(time))}");
+        }
+
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        return 1;
+    }
+}
+
+static bool TryParseVisualQueryTime(string? text, out TimeSpan time)
+{
+    time = TimeSpan.Zero;
+    if (string.IsNullOrWhiteSpace(text))
+        return false;
+
+    var valueText = text.Trim();
+    if (valueText.EndsWith("s", StringComparison.OrdinalIgnoreCase))
+        valueText = valueText[..^1];
+
+    if (!decimal.TryParse(valueText, System.Globalization.NumberStyles.AllowDecimalPoint,
+            System.Globalization.CultureInfo.InvariantCulture, out var seconds) || seconds < 0)
+    {
+        return false;
+    }
+
+    try
+    {
+        var ticks = decimal.ToInt64(decimal.Round(
+            seconds * TimeSpan.TicksPerSecond,
+            0,
+            MidpointRounding.AwayFromZero));
+        time = TimeSpan.FromTicks(ticks);
+        return true;
+    }
+    catch (OverflowException)
+    {
+        return false;
+    }
+}
+
+static string FormatVisualState(VisualState state)
+{
+    if (state.Elements.Count == 0)
+        return "<empty>";
+
+    return string.Join(" + ", state.Elements.Select(element =>
+    {
+        if (element.Properties.Count == 0)
+            return element.Name;
+
+        var properties = string.Join(", ", element.Properties.Select(property =>
+            $"{property.Property}={FormatVisualNumber(property.Value)}"));
+        return $"{element.Name}({properties})";
+    }));
+}
+
+static string FormatVisualTime(TimeSpan time) =>
+    ((decimal)time.Ticks / TimeSpan.TicksPerSecond).ToString(
+        "0.#########", System.Globalization.CultureInfo.InvariantCulture) + "s";
+
+static string FormatVisualNumber(decimal value) =>
+    value.ToString("0.#########", System.Globalization.CultureInfo.InvariantCulture);
 
 static int Compose(string[] args)
 {

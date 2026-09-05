@@ -13,6 +13,7 @@ System overview for the SoundScript engine and documentation suite.
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer + submodules (V3.1)
     SoundScript.Timbre/     # Offline timbre: SoundCSS + SpectralEngine (V4)
     SoundScript.Prosody/    # Word-level prosody: ProsodyComposer + submodules (V5)
+    SoundScript.Visual/     # Frame-free visual temporal program + state evaluator
     SoundScript.Cli/        # Command-line runner (run + compose + prosody + render + wave)
     SoundScript.Playground/ # Browser playground (Blazor WASM)
     SoundScript.Web/        # Local Blazor demo
@@ -56,6 +57,8 @@ System overview for the SoundScript engine and documentation suite.
 | `PhraseContourEngine` | Prosody | Sentence → phrase-level pitch ramp |
 | `SyllableContourGenerator` | Prosody | Syllable → stress-driven micro-pitch |
 | `ProsodyComposer` | Prosody | Facade: plain text → AST → InterpretedTrack (V5) |
+| `VisualInterpreter` | Visual | Visual AST → immutable absolute-time VisualTimeline |
+| `VisualTimeline` | Visual | Pure `StateAt(t)` evaluation; a future renderer owns FPS/export |
 
 ## Layer Diagram (V4)
 

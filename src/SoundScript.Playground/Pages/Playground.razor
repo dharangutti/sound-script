@@ -7,9 +7,30 @@
             <span class="badge">Playground · @VersionInfo.Label</span>
         </div>
         <h1>SoundScript Playground</h1>
-        <p class="lead">Type SoundScript, compile to MIDI or Wave audio, and hear it in your browser — fully client-side.</p>
+        <p class="lead">Write SoundScript, hear MIDI or Wave audio, or explore a deterministic visual timeline — fully client-side.</p>
     </header>
 
+    <nav class="playground-tabs" role="tablist" aria-label="Playground workspaces">
+        <button type="button" role="tab" id="music-workspace-tab"
+                class="playground-tab @(ActiveTab == PlaygroundTab.Music ? "is-active" : "")"
+                aria-selected="@(ActiveTab == PlaygroundTab.Music ? "true" : "false")"
+                aria-controls="music-workspace-panel"
+                tabindex="@(ActiveTab == PlaygroundTab.Music ? "0" : "-1")"
+                @onclick="() => SelectTab(PlaygroundTab.Music)">
+            Music &amp; Wave
+        </button>
+        <button type="button" role="tab" id="visual-workspace-tab"
+                class="playground-tab @(ActiveTab == PlaygroundTab.VisualTimeline ? "is-active" : "")"
+                aria-selected="@(ActiveTab == PlaygroundTab.VisualTimeline ? "true" : "false")"
+                aria-controls="visual-workspace-panel"
+                tabindex="@(ActiveTab == PlaygroundTab.VisualTimeline ? "0" : "-1")"
+                @onclick="() => SelectTab(PlaygroundTab.VisualTimeline)">
+            Visual Timeline <span aria-hidden="true">✦</span>
+        </button>
+    </nav>
+
+    <section class="playground-tab-panel" id="music-workspace-panel" role="tabpanel"
+             aria-labelledby="music-workspace-tab" hidden="@(ActiveTab != PlaygroundTab.Music)">
     <div class="presets">
         <label class="preset-label" for="main-example-select">Example:</label>
         <select id="main-example-select" class="example-select" @bind="SelectedExampleKey" @bind:after="LoadSelectedExampleAsync">
@@ -510,6 +531,210 @@
             </div>
         </div>
     }
+    </section>
+
+    <section class="playground-tab-panel visual-tab-panel" id="visual-workspace-panel" role="tabpanel"
+             aria-labelledby="visual-workspace-tab" hidden="@(ActiveTab != PlaygroundTab.VisualTimeline)">
+        <div class="visual-tab-heading">
+            <div>
+                <span class="badge badge-visual">Temporal visual program</span>
+                <h2>Visual Timeline</h2>
+                <p class="hint">Author intervals and curves once; inspect the same program at any exact moment. There are no frame or FPS controls here.</p>
+            </div>
+            @if (CompiledVisualTimeline is not null)
+            {
+                <div class="visual-duration-summary" aria-label="Compiled timeline summary">
+                    <strong>@FormatVisualTime(CompiledVisualTimeline.Duration)</strong>
+                    <span>@CompiledVisualTimeline.Visuals.Count interval(s)</span>
+                </div>
+            }
+        </div>
+
+        <div class="visual-demo-grid">
+            <section class="visual-card visual-source-card" aria-labelledby="visual-source-heading">
+                <div class="visual-card-heading">
+                    <div>
+                        <span class="visual-eyebrow">Source</span>
+                        <h3 id="visual-source-heading">A small temporal script</h3>
+                    </div>
+                    <span class="visual-frame-free">Frame-free</span>
+                </div>
+                <textarea id="visual-timeline-source" class="visual-code-input" @bind="VisualScriptText" @bind:event="oninput"
+                          spellcheck="false" aria-label="Visual timeline source code"></textarea>
+                <div class="visual-source-actions" role="toolbar" aria-label="Visual timeline source actions">
+                    <button type="button" class="btn btn-primary" @onclick="CompileVisualTimeline">Evaluate timeline</button>
+                    <button type="button" class="btn btn-secondary" @onclick="ResetVisualDemo">Reset demo</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CopyVisualScriptAsync">Copy</button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(VisualStatusMessage))
+                {
+                    <p class="visual-status" role="status">@VisualStatusMessage</p>
+                }
+                @if (!string.IsNullOrEmpty(VisualErrorMessage))
+                {
+                    <div class="visual-error" role="alert">
+                        <strong>Couldn’t evaluate that timeline</strong>
+                        <pre>@VisualErrorMessage</pre>
+                    </div>
+                }
+            </section>
+
+            <section class="visual-card visual-stage-card" aria-labelledby="visual-stage-heading">
+                <div class="visual-card-heading">
+                    <div>
+                        <span class="visual-eyebrow">StateAt(t)</span>
+                        <h3 id="visual-stage-heading">Semantic stage</h3>
+                    </div>
+                    <span class="visual-time-readout">t = @FormatVisualTime(VisualStateAtCursor?.Time ?? TimeSpan.Zero)</span>
+                </div>
+
+                <div class="visual-stage" aria-live="polite" aria-label="Evaluated visual state">
+                    @if (VisualStateAtCursor is null || VisualStateAtCursor.Elements.Count == 0)
+                    {
+                        <div class="visual-stage-empty">No active visual at this instant.</div>
+                    }
+                    else
+                    {
+                        @foreach (var element in VisualStateAtCursor.Elements)
+                        {
+                            <div class="visual-stage-element @VisualPreviewClass(element)" style="@VisualPreviewStyle(element)">
+                                <span>@VisualPreviewLabel(element)</span>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="visual-scrubber">
+                    <label for="visual-time-scrubber">Scrub the program clock</label>
+                    <div class="visual-scrubber-controls">
+                        <input id="visual-time-scrubber" type="range" min="0" max="@VisualRangeMaximum" step="0.01"
+                               @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="UpdateVisualState" />
+                        <input class="visual-time-input" type="number" min="0" max="@VisualRangeMaximum" step="0.01"
+                               aria-label="Timeline time in seconds" @bind="VisualTimeSeconds" @bind:event="oninput" @bind:after="UpdateVisualState" />
+                        <span class="visual-seconds-label">s</span>
+                    </div>
+                    <div class="visual-probe-buttons" aria-label="Timeline checkpoints">
+                        @foreach (var probeTime in VisualProbeTimes)
+                        {
+                            <button type="button" class="visual-probe @(Math.Abs(VisualTimeSeconds - probeTime) < 0.005 ? "is-active" : "")"
+                                    @onclick="() => ProbeVisualTime(probeTime)">@probeTime.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)s</button>
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        @if (CompiledVisualTimeline is not null)
+        {
+            <section class="visual-card visual-timeline-card" aria-labelledby="visual-timeline-heading">
+                <div class="visual-card-heading">
+                    <div>
+                        <span class="visual-eyebrow">Compiled intervals</span>
+                        <h3 id="visual-timeline-heading">One program, arbitrary queries</h3>
+                    </div>
+                    <span class="visual-half-open">Intervals are [start, end)</span>
+                </div>
+                <div class="visual-timeline-ruler" role="img" aria-label="Visual timeline with evaluated playhead">
+                    @foreach (var visual in CompiledVisualTimeline.Visuals)
+                    {
+                        <div class="visual-timeline-lane">
+                            <span class="visual-lane-name">@visual.Name</span>
+                            <div class="visual-timeline-track">
+                                <span class="visual-timeline-bar" style="@VisualBarStyle(visual)">
+                                    @FormatVisualTime(visual.Start)–@FormatVisualTime(visual.End)
+                                </span>
+                                <span class="visual-timeline-playhead" style="@VisualPlayheadStyle()" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="visual-timeline-scale" aria-hidden="true">
+                    <span>0s</span>
+                    <span>@FormatVisualTime(CompiledVisualTimeline.Duration)</span>
+                </div>
+            </section>
+
+            <div class="visual-inspector-grid">
+                <section class="visual-card visual-state-card" aria-labelledby="visual-state-heading">
+                    <div class="visual-card-heading">
+                        <div>
+                            <span class="visual-eyebrow">Exact result</span>
+                            <h3 id="visual-state-heading">State at @FormatVisualTime(VisualStateAtCursor?.Time ?? TimeSpan.Zero)</h3>
+                        </div>
+                    </div>
+                    @if (VisualStateAtCursor is null || VisualStateAtCursor.Elements.Count == 0)
+                    {
+                        <p class="hint">The cursor sits in a deliberate gap. Move it to a checkpoint or scrub again.</p>
+                    }
+                    else
+                    {
+                        <ul class="visual-state-list">
+                            @foreach (var element in VisualStateAtCursor.Elements)
+                            {
+                                <li>
+                                    <div>
+                                        <strong>@element.Name</strong>
+                                        <span>@FormatVisualTime(element.Start)–@FormatVisualTime(element.End)</span>
+                                    </div>
+                                    @if (element.Properties.Count == 0)
+                                    {
+                                        <span class="visual-no-properties">static</span>
+                                    }
+                                    else
+                                    {
+                                        <dl class="visual-properties">
+                                            @foreach (var property in element.Properties)
+                                            {
+                                                <div><dt>@property.Property</dt><dd>@FormatVisualValue(property.Value)</dd></div>
+                                            }
+                                        </dl>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+
+                <section class="visual-card visual-audio-card" aria-labelledby="visual-audio-heading">
+                    <div class="visual-card-heading">
+                        <div>
+                            <span class="visual-eyebrow">Audio bridge</span>
+                            <h3 id="visual-audio-heading">Score beat → elapsed time</h3>
+                        </div>
+                    </div>
+                    <p class="hint"><code>sync audio</code> declares a shared anchor. This is a deterministic timing query, not browser playback.</p>
+                    <div class="visual-audio-controls">
+                        <label for="visual-audio-beat">Score beat</label>
+                        <input id="visual-audio-beat" type="number" min="0" step="0.25" @bind="VisualAudioBeat"
+                               @bind:event="oninput" @bind:after="UpdateVisualAudioBeatState" />
+                    </div>
+                    @if (VisualStateAtAudioBeat is not null)
+                    {
+                        <p class="visual-audio-result">Beat @VisualAudioBeat.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) maps to <strong>@FormatVisualTime(VisualStateAtAudioBeat.Time)</strong>.</p>
+                        <p class="visual-audio-elements">
+                            @(VisualStateAtAudioBeat.Elements.Count == 0
+                                ? "No visual is active there."
+                                : $"Active: {string.Join(", ", VisualStateAtAudioBeat.Elements.Select(element => element.Name))}.")
+                        </p>
+                    }
+                    <div class="visual-sync-markers">
+                        @if (CompiledVisualTimeline.AudioSyncPoints.Count == 0)
+                        {
+                            <span>No explicit audio anchors in this source.</span>
+                        }
+                        else
+                        {
+                            @foreach (var marker in CompiledVisualTimeline.AudioSyncPoints)
+                            {
+                                <span class="visual-sync-marker">↔ audio sync @FormatVisualTime(marker.Time)</span>
+                            }
+                        }
+                    </div>
+                </section>
+            </div>
+        }
+    </section>
 
     @if (ToastMessage is not null)
     {

@@ -1,0 +1,10 @@
+sync audio
+visual "intro" for 4s
+wait 1s
+visual "product" for 5s
+visual "circle" for 5s at 0s {
+    animate radius 20 -> 200 over 3s
+}
+visual "sparkle" for 1s at 7.5s {
+    animate opacity 0 -> 1 over 0.5s
+}

@@ -21,6 +21,14 @@ Runnable example scripts for every major feature.
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 | [vocal-song.ss](../examples/vocal-song.ss) | Vocal track — lyrics + phonetic syllable alignment | `... run examples/vocal-song.ss` |
 
+## Temporal Visual Example
+
+| Example | Feature | Run |
+|---------|---------|-----|
+| [visual-temporal.ssv](../examples/visual-temporal.ssv) | Frame-free visual events, delays, overlay, animation, audio anchor | `dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv --at 0 --at 1.5 --at 5` |
+
+→ [visual-temporal.md](visual-temporal.md)
+
 ## SoundCSS Examples (V4)
 
 SoundCSS (`.ssc`) styles phonemes for the offline timbre renderer. The default

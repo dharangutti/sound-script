@@ -33,6 +33,19 @@ public sealed class Parser
 
     private AstNode ParseTopLevelStatement()
     {
+        // Visual words intentionally remain contextual identifiers instead of
+        // global keywords. That keeps existing programs free to use names such
+        // as "visual" or "wait", while giving the top-level temporal rail a
+        // small, readable syntax.
+        if (MatchContextualWord("visual"))
+            return ParseVisualStatement();
+
+        if (MatchContextualWord("wait"))
+            return ParseVisualWaitStatement();
+
+        if (MatchContextualWord("sync"))
+            return ParseAudioSyncStatement();
+
         if (Match(TokenType.Import))
             return ParseImportStatement();
 
@@ -122,6 +135,135 @@ public sealed class Parser
     {
         var pathToken = Expect(TokenType.StringLiteral, "import path");
         return new ImportNode { Path = pathToken.Value };
+    }
+
+    /// <summary>
+    /// Parses a frame-free visual interval such as
+    /// <c>visual "intro" for 4s</c> or a visual with a local property curve.
+    /// An explicit <c>at</c> pin is absolute and deliberately does not move
+    /// the narrative cursor in <c>SoundScript.Visual</c>, making overlays
+    /// predictable rather than timeline-editor-like.
+    /// </summary>
+    private VisualNode ParseVisualStatement()
+    {
+        var nameToken = Expect(TokenType.StringLiteral, "visual name (a quoted string)");
+        Expect(TokenType.For, "for");
+        var duration = ParseSeconds("visual duration", allowZero: false);
+
+        TimeSpan? at = null;
+        if (MatchContextualWord("at"))
+            at = ParseSeconds("visual placement", allowZero: true);
+
+        var visual = new VisualNode
+        {
+            Name = nameToken.Value,
+            Duration = duration,
+            At = at
+        };
+
+        if (!Match(TokenType.LeftBrace))
+            return visual;
+
+        var properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
+        {
+            var automation = ParseVisualAutomationStatement(out var propertyToken);
+            if (!properties.Add(automation.Property))
+                throw Invalid(propertyToken, $"Visual '{visual.Name}' animates '{automation.Property}' more than once.");
+
+            if (automation.Duration > duration)
+            {
+                throw Invalid(propertyToken,
+                    $"Animation '{automation.Property}' lasts longer than visual '{visual.Name}'.");
+            }
+
+            visual.Automations.Add(automation);
+        }
+
+        Expect(TokenType.RightBrace, "}");
+        return visual;
+    }
+
+    private VisualAutomationNode ParseVisualAutomationStatement(out Token propertyToken)
+    {
+        ExpectContextualWord("animate", "animate");
+        propertyToken = Peek();
+        var property = ParseName("visual property");
+        var fromToken = Expect(TokenType.Number, "animation start value");
+        Expect(TokenType.Arrow, "-> or →");
+        var toToken = Expect(TokenType.Number, "animation target value");
+        Expect(TokenType.Over, "over");
+        var duration = ParseSeconds("animation duration", allowZero: false);
+
+        return new VisualAutomationNode
+        {
+            Property = property,
+            From = ParseDecimal(fromToken, "animation start value"),
+            To = ParseDecimal(toToken, "animation target value"),
+            Duration = duration
+        };
+    }
+
+    private VisualWaitNode ParseVisualWaitStatement() => new()
+    {
+        Duration = ParseSeconds("wait duration", allowZero: false)
+    };
+
+    private AudioSyncNode ParseAudioSyncStatement()
+    {
+        ExpectContextualWord("audio", "audio after sync");
+        return new AudioSyncNode();
+    }
+
+    /// <summary>
+    /// Parses an exact wall-clock duration. The tokenizer already represents
+    /// <c>1.5s</c> as Number(1.5) + Identifier(s), so this stays a parser-only
+    /// grammar addition and avoids changing musical tokenization.
+    /// </summary>
+    private TimeSpan ParseSeconds(string description, bool allowZero)
+    {
+        var valueToken = Expect(TokenType.Number, description);
+        var unitToken = Expect(TokenType.Identifier, "seconds unit (s, sec, or seconds)");
+        var unit = unitToken.Value.ToLowerInvariant();
+        var scale = unit switch
+        {
+            "s" or "sec" or "secs" or "second" or "seconds" => 1m,
+            "ms" or "millisecond" or "milliseconds" => 0.001m,
+            _ => throw Invalid(unitToken, $"Unknown temporal unit '{unitToken.Value}'. Use s or ms.")
+        };
+
+        var value = ParseDecimal(valueToken, description);
+        if (value < 0 || (!allowZero && value == 0))
+        {
+            throw Invalid(valueToken,
+                allowZero
+                    ? $"{description} must be non-negative."
+                    : $"{description} must be greater than zero.");
+        }
+
+        try
+        {
+            var ticks = decimal.ToInt64(decimal.Round(
+                value * scale * TimeSpan.TicksPerSecond,
+                0,
+                MidpointRounding.AwayFromZero));
+            return TimeSpan.FromTicks(ticks);
+        }
+        catch (OverflowException)
+        {
+            throw Invalid(valueToken, $"{description} is outside SoundScript's supported time range.");
+        }
+    }
+
+    private static decimal ParseDecimal(Token token, string description)
+    {
+        if (!decimal.TryParse(token.Value, NumberStyles.AllowDecimalPoint,
+                CultureInfo.InvariantCulture, out var value))
+        {
+            throw Invalid(token, $"{description} must be a decimal number.");
+        }
+
+        return value;
     }
 
     private MelodyNode ParseMelodyBlock()
@@ -1365,6 +1507,28 @@ public sealed class Parser
 
         Advance();
         return true;
+    }
+
+    /// <summary>
+    /// Matches a contextual word without reserving it globally in the lexer.
+    /// Temporal visual syntax is deliberately top-level and should not take
+    /// ordinary names away from the rest of the music language.
+    /// </summary>
+    private bool MatchContextualWord(string word)
+    {
+        if (!Check(TokenType.Identifier) || !string.Equals(Peek().Value, word, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        Advance();
+        return true;
+    }
+
+    private Token ExpectContextualWord(string word, string description)
+    {
+        if (!Check(TokenType.Identifier) || !string.Equals(Peek().Value, word, StringComparison.OrdinalIgnoreCase))
+            throw Invalid(Peek(), $"Expected {description}.");
+
+        return Advance();
     }
 
     private bool Check(TokenType type) => Peek().Type == type;
