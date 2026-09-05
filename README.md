@@ -260,6 +260,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
     SoundScript.Core/       # AST, TempoAutomationMap, InstrumentMap
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
     SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
+    SoundScript.Visual/     # Frame-free temporal visual programs + state queries
     SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
     SoundScript.Compose/    # Text-to-melody: PhonemeComposer, PhonemeSplitter, PhonemeMapper
     SoundScript.Wordbank/   # Embedded linguistic data from soundscript-wordbank
@@ -271,6 +272,22 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
 /docs                       # Documentation + website
 /examples                   # Example scripts
 ```
+
+## Temporal Visual Programs
+
+SoundScript can also describe a visual story as deterministic intervals and
+property curves—never as source frames. The `visual` CLI verb prints a
+temporal storyboard and evaluates any instant without choosing an FPS:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv \
+  --at 0 --at 1.5 --at 4 --at 5
+```
+
+The example includes sequential cues, an intentional delay, an independently
+pinned overlay, a `radius` animation, and an audio synchronization marker.
+Future video renderers can sample this same state model at their own output
+rate. → [docs/visual-temporal.md](docs/visual-temporal.md)
 
 ## Getting Started
 

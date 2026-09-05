@@ -25,6 +25,7 @@ dotnet run --project src/SoundScript.Cli -- -v
 | `prosody` | Compose plain text to MIDI via the word-level [ProsodyComposer](word-prosody.md) (V5) |
 | `render` | Offline timbre synthesis: MIDI + SoundCSS → WAV/OGG ([V4](whats-new-v4.md)) |
 | `wave` | Direct wave synthesis: `.ss`/`.ssw` → WAV via [SoundScript.Wave](wave-grammar.md) ([V7](whats-new-v7.md)) |
+| `visual` | Inspect a deterministic temporal visual program without rendering frames ([temporal visual](visual-temporal.md)) |
 
 ## `run` — compile a script
 
@@ -46,6 +47,24 @@ Output:
 ```
 Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vocal-song.mid at 100 BPM.
 ```
+
+## `visual` — inspect a temporal visual program
+
+```
+soundscript visual <script.ss|script.ssv> [--at <seconds>]...
+```
+
+`visual` compiles visual intervals and automation to a deterministic timeline;
+it deliberately does not choose an FPS or encode a video. Query one or more
+arbitrary moments to see the state a future renderer would receive:
+
+```bash
+dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv \
+  --at 0 --at 1.5 --at 4.5 --at 5
+```
+
+Use either `1.5` or `1.5s` after `--at`. See [visual-temporal.md](visual-temporal.md)
+for source syntax and synchronization semantics.
 
 ## `compose` — text to melody (V3.1)
 

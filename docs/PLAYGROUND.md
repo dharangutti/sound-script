@@ -21,6 +21,27 @@ The playground ships with **V2** and **Core** preset groups (see `Playground.raz
 
 **Note:** Imports require the CLI (`ProgramLoader`); they are not available in the browser playground.
 
+## Visual Timeline tab
+
+The **Visual Timeline** tab is a renderer-neutral, temporal-programming demo:
+edit the source, choose **Evaluate timeline**, and scrub an exact program time.
+It does not author or play frames. Instead, the stage and inspector show the
+immutable `StateAt(t)` result, while interval lanes make the half-open
+`[start, end)` boundaries visible.
+
+The default demo includes sequential `intro`/`product` cues, a deliberate
+`wait` gap, an absolute `circle` overlay with a `radius` curve, and a
+`sparkle` opacity curve. The checkpoint chips expose its boundary cases at
+0, 1.5, 4, 4.5, 5, and 8.75 seconds. Its **Audio bridge** uses the existing
+tempo map to convert a score beat into the same elapsed-time query; `sync
+audio` is shown as a declared anchor, not claimed as live browser playback.
+
+- [ ] Switch between **Music & Wave** and **Visual Timeline**; the existing code editors remain usable after switching back
+- [ ] At `t = 1.5s`, the stage/inspector show `intro` plus `circle(radius=110)`
+- [ ] At `t = 4s`, only `circle(radius=200)` remains; at `t = 5s`, only `product` remains
+- [ ] Score beat 10 at the default 120 BPM maps to `t = 5s` and reports `product`
+- [ ] Introduce invalid visual syntax and choose **Evaluate timeline**; a local error appears without affecting the music workspace
+
 ## Text-to-Melody (V3.1)
 
 The playground has a **Text-to-Melody** row above the editor:

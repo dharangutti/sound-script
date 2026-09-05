@@ -141,6 +141,14 @@ public static class Interpreter
                     CloseMeasure(defaultTrack, bar.Line);
                     break;
 
+                // Visual directives are a parallel temporal rail. MIDI keeps
+                // rendering the musical statements in a mixed media source;
+                // SoundScript.Visual consumes these nodes independently.
+                case VisualNode:
+                case VisualWaitNode:
+                case AudioSyncNode:
+                    break;
+
                 // v3 wave-only grammar: reject with a clear, descriptive error
                 // rather than silently skipping (safeguards doc) — these
                 // directives have no MIDI equivalent by design.

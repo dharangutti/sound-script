@@ -1,9 +1,11 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SoundScript.Compose;
+using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Midi;
 using SoundScript.Parser;
@@ -16,11 +18,18 @@ using SoundScript.Wave.Adapter;
 using SoundScript.Wave.Prosody;
 using SoundScript.Wordbank;
 using SoundScript.Wordbank.Models;
+using SoundScript.Visual;
 
 namespace SoundScript.Playground.Pages;
 
 public partial class Playground
 {
+  private enum PlaygroundTab
+  {
+    Music,
+    VisualTimeline
+  }
+
   [Inject] private IJSRuntime Js { get; set; } = null!;
   [Inject] private HttpClient Http { get; set; } = null!;
 
@@ -64,6 +73,45 @@ public partial class Playground
   // doc's grammar-isolation rule.
   private bool UsedWaveBackend { get; set; }
 
+  // The visual rail intentionally owns an independent, seconds-based editor.
+  // It is not a frame editor: each interaction queries a compiled timeline at
+  // an exact time, so changing the display refresh rate cannot change meaning.
+  private const string VisualDemoScript =
+      """
+      tempo 120
+
+      sync audio
+
+      visual "intro" for 4s
+      wait 1s
+      visual "product" for 5s
+
+      visual "circle" for 5s at 0s {
+          animate radius 20 -> 200 over 3s
+      }
+
+      visual "sparkle" for 1s at 7.5s {
+          animate opacity 0 -> 1 over 0.5s
+      }
+      """;
+
+  private static readonly double[] VisualProbeTimes = [0, 1.5, 4, 4.5, 5, 8.75];
+
+  private PlaygroundTab ActiveTab { get; set; } = PlaygroundTab.Music;
+  private string VisualScriptText { get; set; } = VisualDemoScript;
+  private VisualTimeline? CompiledVisualTimeline { get; set; }
+  private TempoAutomationMap? VisualTempoMap { get; set; }
+  private VisualState? VisualStateAtCursor { get; set; }
+  private VisualState? VisualStateAtAudioBeat { get; set; }
+  private string? VisualErrorMessage { get; set; }
+  private string? VisualStatusMessage { get; set; }
+  private double VisualTimeSeconds { get; set; } = 1.5;
+  private double VisualAudioBeat { get; set; } = 10;
+
+  private string VisualRangeMaximum =>
+      (CompiledVisualTimeline?.Duration.TotalSeconds ?? 0)
+      .ToString("0.###", CultureInfo.InvariantCulture);
+
   private PlaygroundPresetInfo? ActiveMainPreset { get; set; }
   private PlaygroundPresetInfo? ActiveWavePreset { get; set; }
 
@@ -71,6 +119,167 @@ public partial class Playground
   {
     LoadSelectedExample();
     LoadSelectedWaveExample(syncMainEditor: false);
+    CompileVisualTimeline();
+  }
+
+  private void SelectTab(PlaygroundTab tab)
+  {
+    ActiveTab = tab;
+  }
+
+  private void CompileVisualTimeline()
+  {
+    try
+    {
+      var tokens = new Tokenizer(VisualScriptText).Tokenize();
+      var program = new SoundScript.Parser.Parser(tokens).Parse();
+
+      CompiledVisualTimeline = VisualInterpreter.Interpret(program);
+      // The MIDI interpreter is the authoritative producer of SoundScript's
+      // tempo map. Visual directives are deliberately a no-op there, allowing
+      // this bridge to stay correct for tempo ramps without duplicating timing.
+      VisualTempoMap = Interpreter.Interpret(program, "playground-visual.ssv").TempoMap;
+      VisualErrorMessage = null;
+      UpdateVisualState();
+      UpdateVisualAudioBeatState();
+      VisualStatusMessage = $"Compiled {CompiledVisualTimeline.Visuals.Count} visual interval(s) into a {FormatVisualTime(CompiledVisualTimeline.Duration)} deterministic timeline.";
+    }
+    catch (Exception ex)
+    {
+      CompiledVisualTimeline = null;
+      VisualTempoMap = null;
+      VisualStateAtCursor = null;
+      VisualStateAtAudioBeat = null;
+      VisualStatusMessage = null;
+      VisualErrorMessage = ex.Message;
+    }
+  }
+
+  private void ResetVisualDemo()
+  {
+    VisualScriptText = VisualDemoScript;
+    VisualTimeSeconds = 1.5;
+    VisualAudioBeat = 10;
+    CompileVisualTimeline();
+  }
+
+  private async Task CopyVisualScriptAsync()
+  {
+    try
+    {
+      await Js.InvokeVoidAsync("navigator.clipboard.writeText", VisualScriptText);
+      VisualStatusMessage = "Copied the visual timeline source to your clipboard.";
+    }
+    catch
+    {
+      VisualErrorMessage = "Clipboard access was blocked by the browser.";
+    }
+  }
+
+  private void ProbeVisualTime(double seconds)
+  {
+    VisualTimeSeconds = seconds;
+    UpdateVisualState();
+  }
+
+  private void UpdateVisualState()
+  {
+    if (CompiledVisualTimeline is null)
+      return;
+
+    var durationSeconds = CompiledVisualTimeline.Duration.TotalSeconds;
+    VisualTimeSeconds = ClampFinite(VisualTimeSeconds, 0, durationSeconds);
+    VisualStateAtCursor = CompiledVisualTimeline.StateAt(SecondsToTimeSpan(VisualTimeSeconds));
+  }
+
+  private void UpdateVisualAudioBeatState()
+  {
+    if (CompiledVisualTimeline is null || VisualTempoMap is null)
+      return;
+
+    VisualAudioBeat = Math.Max(0, double.IsFinite(VisualAudioBeat) ? VisualAudioBeat : 0);
+    VisualStateAtAudioBeat = CompiledVisualTimeline.StateAtAudioBeat(VisualAudioBeat, VisualTempoMap);
+  }
+
+  private static double ClampFinite(double value, double minimum, double maximum)
+  {
+    if (!double.IsFinite(value))
+      return minimum;
+
+    return Math.Clamp(value, minimum, Math.Max(minimum, maximum));
+  }
+
+  private static TimeSpan SecondsToTimeSpan(double seconds)
+  {
+    var clampedSeconds = Math.Max(0, double.IsFinite(seconds) ? seconds : 0);
+    var ticks = decimal.ToInt64(decimal.Round(
+        (decimal)clampedSeconds * TimeSpan.TicksPerSecond,
+        0,
+        MidpointRounding.AwayFromZero));
+    return TimeSpan.FromTicks(ticks);
+  }
+
+  private static string FormatVisualTime(TimeSpan time)
+  {
+    var seconds = time.TotalSeconds;
+    return $"{seconds.ToString(seconds % 1 == 0 ? "0" : "0.##", CultureInfo.InvariantCulture)}s";
+  }
+
+  private static string FormatVisualValue(decimal value) =>
+      value.ToString("0.##", CultureInfo.InvariantCulture);
+
+  private static string VisualPreviewClass(VisualElementState element) =>
+      element.Name.ToLowerInvariant() switch
+      {
+        "intro" => "visual-preview-intro",
+        "circle" => "visual-preview-circle",
+        "product" => "visual-preview-product",
+        "sparkle" => "visual-preview-sparkle",
+        _ => "visual-preview-generic"
+      };
+
+  private static string VisualPreviewLabel(VisualElementState element) =>
+      element.Name.ToLowerInvariant() switch
+      {
+        "intro" => "A visual idea begins",
+        "circle" => "●",
+        "product" => "PRODUCT",
+        "sparkle" => "✦",
+        _ => element.Name
+      };
+
+  private static string VisualPreviewStyle(VisualElementState element)
+  {
+    var radius = GetVisualProperty(element, "radius", fallback: 72m);
+    var opacity = GetVisualProperty(element, "opacity", fallback: 1m);
+    radius = Math.Clamp(radius, 12m, 220m);
+    opacity = Math.Clamp(opacity, 0m, 1m);
+
+    return $"--visual-radius:{radius.ToString(CultureInfo.InvariantCulture)}px;--visual-opacity:{opacity.ToString(CultureInfo.InvariantCulture)};";
+  }
+
+  private static decimal GetVisualProperty(VisualElementState element, string property, decimal fallback) =>
+      element.Properties.FirstOrDefault(value => string.Equals(value.Property, property, StringComparison.OrdinalIgnoreCase))?.Value
+      ?? fallback;
+
+  private string VisualBarStyle(ScheduledVisual visual)
+  {
+    if (CompiledVisualTimeline is null || CompiledVisualTimeline.Duration <= TimeSpan.Zero)
+      return "";
+
+    var total = CompiledVisualTimeline.Duration.TotalMilliseconds;
+    var start = 100 * visual.Start.TotalMilliseconds / total;
+    var width = 100 * visual.Duration.TotalMilliseconds / total;
+    return $"left:{start.ToString("0.###", CultureInfo.InvariantCulture)}%;width:{width.ToString("0.###", CultureInfo.InvariantCulture)}%;";
+  }
+
+  private string VisualPlayheadStyle()
+  {
+    if (CompiledVisualTimeline is null || CompiledVisualTimeline.Duration <= TimeSpan.Zero)
+      return "left:0%;";
+
+    var percent = 100 * VisualTimeSeconds / CompiledVisualTimeline.Duration.TotalSeconds;
+    return $"left:{Math.Clamp(percent, 0, 100).ToString("0.###", CultureInfo.InvariantCulture)}%;";
   }
 
   private void RefreshMainPresetInfo() =>

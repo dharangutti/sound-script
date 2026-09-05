@@ -18,6 +18,7 @@
         "vocal", "curve", "transition", "crescendo", "decrescendo", "articulation",
         "swing", "staccato", "legato", "accent", "double", "reinforce", "brighten",
         "rest", "over", "bars", "for", "up", "down", "strum", "rhythm", "wordbank",
+        "visual", "wait", "sync", "audio", "animate", "at",
     ];
     const SOUNDCSS_PROPS = [
         "style", "persona", "pitch", "speed", "timbre", "vibrato", "accent",
