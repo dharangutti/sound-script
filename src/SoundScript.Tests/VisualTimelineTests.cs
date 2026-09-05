@@ -3,6 +3,7 @@ using SoundScript.Core.Ast;
 using SoundScript.Parser;
 using SoundScript.Visual;
 using SoundScript.Media;
+using SoundScript.Wave.Io;
 using Xunit;
 using SoundScriptParser = SoundScript.Parser.Parser;
 
@@ -199,6 +200,64 @@ public class VisualTimelineTests
     }
 
     [Fact]
+    public void VisualScene_UsesTheSameProjectionForDirectStateAndExportSamples()
+    {
+        var timeline = Compile("""
+            visual "intro" for 3s
+            visual "circle" for 8s at 0s {
+                animate radius 28 -> 170 over 3s
+                animate opacity 0.35 -> 1 over 1.5s
+            }
+            visual "product" for 4s at 3s
+            """);
+        var plan = TemporalVisualSceneBuilder.Build(
+            TemporalVideoExportPlanBuilder.Build(timeline, new TemporalVideoExportSettings(30)));
+
+        foreach (var seconds in new[] { 0d, 1.5d, 3d, 4.5d, 5d, 7.5d })
+        {
+            var direct = TemporalVisualSceneBuilder.Build(timeline.StateAt(TimeSpan.FromSeconds(seconds)));
+            var sampled = Assert.Single(plan.Samples, sample => Math.Abs(sample.TimeSeconds - seconds) < 1e-9);
+            Assert.Equal(direct.TimeSeconds, sampled.TimeSeconds);
+            Assert.Equal(direct.Primitives.Select(Describe), sampled.Primitives.Select(Describe));
+        }
+
+        var arbitrary = TemporalVisualSceneBuilder.Build(timeline.StateAt(TimeSpan.FromSeconds(8.75)));
+        Assert.Equal(0.0, arbitrary.Primitives.Count);
+    }
+
+    [Fact]
+    public void VisualScene_AppliesAnimatedOpacityToEveryPresentationKind()
+    {
+        var timeline = Compile("""
+            visual "outro" for 2s {
+                animate opacity 1 -> 0 over 2s
+            }
+            """);
+
+        var scene = TemporalVisualSceneBuilder.Build(timeline.StateAt(TimeSpan.FromSeconds(1)));
+
+        var primitive = Assert.Single(scene.Primitives);
+        Assert.Equal("generic", primitive.Kind);
+        Assert.Equal(0.5m, primitive.Opacity);
+    }
+
+    [Fact]
+    public void TemporalAudioRenderer_IsDeterministicAndFitsTheVisualDuration()
+    {
+        var program = Parse("""
+            tempo 120
+            track music { C4 h E4 h }
+            """);
+
+        var first = TemporalAudioRenderer.RenderToWavBytes(program, TimeSpan.FromSeconds(1.25));
+        var second = TemporalAudioRenderer.RenderToWavBytes(program, TimeSpan.FromSeconds(1.25));
+
+        Assert.Equal(first, second);
+        using var stream = new MemoryStream(first, writable: false);
+        Assert.Equal((int)(1.25 * WavWriter.SampleRate), WavReader.ReadMono(stream).Length);
+    }
+
+    [Fact]
     public void VideoFrameRenderer_RasterizesSuppliedSnapshotsWithoutChangingTheTimeline()
     {
         var timeline = Compile("""
@@ -262,6 +321,10 @@ public class VisualTimelineTests
 
     private static string Describe(TemporalVideoElement element) =>
         $"{element.Name}:{string.Join(",", element.Properties.Select(property => $"{property.Name}={property.Value}"))}";
+
+    private static string Describe(TemporalVisualPrimitive primitive) =>
+        $"{primitive.Name}:{primitive.Kind}:{primitive.Label}:{primitive.Left}:{primitive.Top}:" +
+        $"{primitive.Width}:{primitive.Height}:{primitive.Opacity}:{primitive.RotationDegrees}";
 
     private static string Describe(ScheduledVisual visual) =>
         $"{visual.Name}@{visual.Start.Ticks}:{visual.End.Ticks}:" +

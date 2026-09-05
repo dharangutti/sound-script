@@ -59,6 +59,8 @@ System overview for the SoundScript engine and documentation suite.
 | `ProsodyComposer` | Prosody | Facade: plain text → AST → InterpretedTrack (V5) |
 | `VisualInterpreter` | Visual | Visual AST → immutable absolute-time VisualTimeline |
 | `VisualTimeline` | Visual | Pure `StateAt(t)` evaluation; a future renderer owns FPS/export |
+| `TemporalVisualSceneBuilder` | Media | Projects sampled `StateAt(t)` observations into the shared 1280×720 Playground presentation profile |
+| `TemporalAudioRenderer` | Media | Fits one deterministic SoundScript.Wave PCM rail for browser and CLI media export |
 
 ## Layer Diagram (V4)
 

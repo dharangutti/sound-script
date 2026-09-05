@@ -18,13 +18,51 @@ public static class FfmpegWebmExporter
         string outputWebmPath,
         TemporalVideoExportPlan plan)
     {
+        ArgumentNullException.ThrowIfNull(plan);
+        EncodeAndVerify(
+            ffmpegPath,
+            framesDirectory,
+            audioWavPath,
+            outputWebmPath,
+            plan.FramesPerSecond,
+            plan.DurationSeconds,
+            plan.Samples.Count);
+    }
+
+    /// <summary>Encodes a canonical visual-scene plan through the same codec boundary.</summary>
+    public static void EncodeAndVerify(
+        string ffmpegPath,
+        string framesDirectory,
+        string audioWavPath,
+        string outputWebmPath,
+        TemporalVisualExportPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        EncodeAndVerify(
+            ffmpegPath,
+            framesDirectory,
+            audioWavPath,
+            outputWebmPath,
+            plan.FramesPerSecond,
+            plan.DurationSeconds,
+            plan.Samples.Count);
+    }
+
+    private static void EncodeAndVerify(
+        string ffmpegPath,
+        string framesDirectory,
+        string audioWavPath,
+        string outputWebmPath,
+        int framesPerSecond,
+        double durationSeconds,
+        int sampleCount)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(ffmpegPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(framesDirectory);
         ArgumentException.ThrowIfNullOrWhiteSpace(audioWavPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputWebmPath);
-        ArgumentNullException.ThrowIfNull(plan);
 
-        if (plan.Samples.Count == 0)
+        if (sampleCount == 0)
             throw new InvalidOperationException("A video export requires at least one temporal sample.");
         if (!File.Exists(audioWavPath))
             throw new FileNotFoundException("The rendered audio WAV is missing.", audioWavPath);
@@ -33,7 +71,7 @@ public static class FfmpegWebmExporter
         if (!string.IsNullOrEmpty(outputDirectory))
             Directory.CreateDirectory(outputDirectory);
 
-        Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, outputWebmPath, plan).ToArray());
+        Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, outputWebmPath, framesPerSecond, durationSeconds).ToArray());
 
         if (!File.Exists(outputWebmPath) || new FileInfo(outputWebmPath).Length == 0)
             throw new InvalidOperationException("FFmpeg completed without creating a WebM file.");
@@ -54,16 +92,37 @@ public static class FfmpegWebmExporter
         TemporalVideoExportPlan plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        return BuildEncodeArguments(framesDirectory, audioWavPath, outputWebmPath, plan.FramesPerSecond, plan.DurationSeconds);
+    }
+
+    /// <summary>Builds codec arguments from the canonical visual-scene export plan.</summary>
+    public static IReadOnlyList<string> BuildEncodeArguments(
+        string framesDirectory,
+        string audioWavPath,
+        string outputWebmPath,
+        TemporalVisualExportPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        return BuildEncodeArguments(framesDirectory, audioWavPath, outputWebmPath, plan.FramesPerSecond, plan.DurationSeconds);
+    }
+
+    private static IReadOnlyList<string> BuildEncodeArguments(
+        string framesDirectory,
+        string audioWavPath,
+        string outputWebmPath,
+        int framesPerSecond,
+        double durationSeconds)
+    {
         return [
             "-hide_banner", "-loglevel", "error", "-y",
-            "-framerate", plan.FramesPerSecond.ToString(CultureInfo.InvariantCulture),
+            "-framerate", framesPerSecond.ToString(CultureInfo.InvariantCulture),
             "-start_number", "0",
             "-i", Path.Combine(framesDirectory, "frame-%06d.ppm"),
             "-i", audioWavPath,
             "-map", "0:v:0", "-map", "1:a:0",
             "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-b:v", "1M",
             "-c:a", "libopus", "-b:a", "96k",
-            "-t", plan.DurationSeconds.ToString("0.#########", CultureInfo.InvariantCulture),
+            "-t", durationSeconds.ToString("0.#########", CultureInfo.InvariantCulture),
             outputWebmPath,
         ];
     }

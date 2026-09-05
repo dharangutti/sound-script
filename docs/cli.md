@@ -79,10 +79,10 @@ soundscript video <script.ss|script.ssv> --output <clip.webm> [--fps 24|30|60] [
 `video` produces a real, decode-verified WebM containing a VP9 video stream and
 Opus audio stream. It first builds an immutable export plan by evaluating the
 authoritative `VisualTimeline.StateAt(t)` function at the requested output
-rate; a renderer rasterizes only those snapshots, while the existing
-SoundScript.Wave rail renders audio from the same parsed program and elapsed
-time basis. FFmpeg combines the generated images and padded/truncated audio to
-the visual timeline duration.
+rate, then projects those snapshots into the canonical 1280×720 Playground
+scene profile. The same fitted deterministic SoundScript.Wave PCM rail is used
+by the browser Playground and CLI. FFmpeg combines the generated images and
+audio to the visual timeline duration.
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
