@@ -161,6 +161,17 @@ language.
 
 ## Supported presentation primitives and properties (V11)
 
+### Explicit shapes and appearance
+
+Visual blocks now accept optional `shape`, `fill`, `stroke`, `strokeWidth`,
+`text`, and `fontSize` declarations alongside `animate`. The explicit shapes are
+`rectangle`, `roundedRectangle`, `ellipse`, `circle`, `triangle`, `line`, `arrow`,
+`ring`, and `text`. These are opt-in; existing names retain their presentations.
+See [Media Primitives](media-primitives.md) for the complete grammar, defaults,
+property ranges, portable text rules, and four new application demos.
+
+### Legacy named treatments (without `shape`)
+
 | Visual name (case-insensitive) | Presentation |
 |---|---|
 | `intro` | Pill labelled “A visual idea begins” |
@@ -186,8 +197,9 @@ from radius or size. Properties are case-insensitive. Other numeric property
 curves can be stored and inspected, but the scene renderer does not display them.
 
 Media constructs are top-level `visual`, `wait`, and `sync audio` statements.
-A visual block contains only `animate property from -> to over duration`
-directives (`→` is also accepted). Values interpolate linearly from the visual's
+A visual block accepts `animate property from -> to over duration`
+directives (`→` is also accepted) and optional [static presentation settings](media-primitives.md).
+Animated values interpolate linearly from the visual's
 local start, then hold their target until the interval ends. For a constant
 property, use equal endpoints: `animate x 0.5 -> 0.5 over 2s`.
 Durations must be positive; absolute placement may be zero. Each property
@@ -207,7 +219,8 @@ Output FPS and codecs belong to the exporter.
 ## Audio/Visual Example Library
 
 Use the Playground's **Audio/Visual** selector, or **Example Library →
-Audio/Visual** in Music & Wave. Each example includes a piano score:
+Audio/Visual** in Music & Wave. Each example includes a piano score. The four
+original demos below are joined by [four shape-and-style application demos](media-primitives.md):
 
 | Example | What to inspect |
 |---|---|

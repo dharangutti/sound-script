@@ -2,6 +2,11 @@
 
 ## Audio/Visual media (V10/V11)
 
+Visual blocks also support explicit shapes and static appearance declarations:
+`shape rectangle`, `fill "#6ee7b7"`, `stroke "#ffffff"`, `strokeWidth 2`,
+`text "READY"`, and `fontSize 42`. Text/font size apply to `shape text`.
+See [Media Primitives](media-primitives.md) for all supported shapes and validation rules.
+
 The audio grammar below remains available. Media programs add top-level
 `visual "name" for 2s`, `wait 1s`, `visual "name" for 2s at 0s`, and
 `sync audio`. Visual blocks accept linear numeric curves such as
