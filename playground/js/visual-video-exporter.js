@@ -97,9 +97,9 @@ window.SoundScriptVideoExporter = (function () {
             throw new Error('The browser could not create a 2D canvas for video export.');
         }
 
-        // Manual canvas capture prevents the browser repaint cadence from
-        // silently adding, dropping, or resampling StateAt observations. One
-        // supplied plan sample becomes exactly one requested video frame.
+        // Request each supplied observation explicitly. This avoids relying
+        // on repaint cadence, but MediaRecorder can still drop/coalesce frames
+        // under load; only the supplied scene plan is deterministic.
         const canvasStream = canvas.captureStream(0);
         const videoTrack = canvasStream.getVideoTracks()[0];
         if (!videoTrack || typeof videoTrack.requestFrame !== 'function') {

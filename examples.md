@@ -2,6 +2,12 @@
 
 ## Audio/Visual Example Library — V10/V11
 
+The [practical composition library](audio-visual-compositions.md) adds 20
+editable sources across diagrams, business dashboards, explainers/presentations,
+audio integration and scale studies. Each is six seconds long. These use `set`
+for constant properties and preserve the existing temporal semantics. Voice
+examples use synthetic phoneme cues with captions, not natural narration.
+
 The library now also includes [Progress indicator](../examples/visual-progress.ssv),
 [Process diagram](../examples/visual-process.ssv),
 [Instruction sequence](../examples/visual-instructions.ssv), and
