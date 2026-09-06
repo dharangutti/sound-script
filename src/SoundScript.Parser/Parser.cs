@@ -165,8 +165,29 @@ public sealed class Parser
             return visual;
 
         var properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var settings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        VisualPresentation? presentation = null;
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
+            var settingToken = Peek();
+            var setting = settingToken.Value.ToLowerInvariant();
+            if (setting is "shape" or "fill" or "stroke" or "strokewidth" or "text" or "fontsize")
+            {
+                Advance();
+                if (!settings.Add(setting))
+                    throw Invalid(settingToken, $"Visual '{visual.Name}' declares '{setting}' more than once.");
+                presentation ??= new VisualPresentation();
+                presentation = setting switch
+                {
+                    "shape" => presentation with { Shape = VisualPresentation.NormalizeShape(ParseName("shape name")) },
+                    "fill" => presentation with { Fill = Expect(TokenType.StringLiteral, "quoted fill color").Value.ToLowerInvariant() },
+                    "stroke" => presentation with { Stroke = Expect(TokenType.StringLiteral, "quoted stroke color").Value.ToLowerInvariant() },
+                    "text" => presentation with { Text = Expect(TokenType.StringLiteral, "quoted text").Value },
+                    "strokewidth" => presentation with { StrokeWidth = ParseDecimal(Expect(TokenType.Number, "stroke width"), "stroke width") },
+                    _ => presentation with { FontSize = ParseDecimal(Expect(TokenType.Number, "font size"), "font size") }
+                };
+                continue;
+            }
             var automation = ParseVisualAutomationStatement(out var propertyToken);
             if (!properties.Add(automation.Property))
                 throw Invalid(propertyToken, $"Visual '{visual.Name}' animates '{automation.Property}' more than once.");
@@ -181,7 +202,14 @@ public sealed class Parser
         }
 
         Expect(TokenType.RightBrace, "}");
-        return visual;
+        if (presentation is not null)
+        {
+            try { presentation.Validate(); }
+            catch (ArgumentException ex) { throw Invalid(nameToken, ex.Message); }
+            if (settings.Contains("fontsize") && presentation.Shape != "text")
+                throw Invalid(nameToken, "fontSize requires shape text.");
+        }
+        return visual with { Presentation = presentation };
     }
 
     private VisualAutomationNode ParseVisualAutomationStatement(out Token propertyToken)

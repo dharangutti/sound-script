@@ -1,5 +1,9 @@
 # V11 — Temporal Media Export
 
+The [media primitives extension](media-primitives.md) adds opt-in geometric
+shapes, fill/outline settings, portable text, and four application demos.
+It preserves the existing named visual treatments and audio pipelines.
+
 V11 extends V10's temporal Audio/Visual Playground with WebM export using a
 shared scene profile and deterministic SoundScript.Wave PCM audio. Existing
 MIDI, Wave, vocals, SoundCSS, and composition workflows remain available.

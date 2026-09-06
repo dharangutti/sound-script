@@ -1,0 +1,35 @@
+tempo 120
+track music { instrument piano mf C4 h E4 h G4 h C5 h G4 h C4 h }
+sync audio
+visual "direction" for 6s {
+    shape triangle
+    fill "#fbbf24"
+    stroke "#f8fafc"
+    strokeWidth 2
+    animate y 260 -> 260 over 6s
+    animate size 100 -> 160 over 3s
+    animate rotation 0 -> 90 over 6s
+}
+visual "first instruction" for 2s at 0s {
+    shape text
+    text "1. GET READY"
+    fontSize 42
+    fill "#f8fafc"
+    animate y 470 -> 470 over 2s
+    animate opacity 0 -> 1 over 500ms
+}
+visual "second instruction" for 2s at 2s {
+    shape text
+    text "2. FOLLOW THE CUE"
+    fontSize 36
+    fill "#fbbf24"
+    animate y 470 -> 470 over 2s
+}
+visual "third instruction" for 2s at 4s {
+    shape text
+    text "3. DONE!"
+    fontSize 42
+    fill "#6ee7b7"
+    animate y 470 -> 470 over 2s
+    animate opacity 1 -> 0 over 2s
+}

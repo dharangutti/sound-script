@@ -2,6 +2,11 @@
 
 ## Audio/Visual examples
 
+The four original demos are joined by **Progress indicator**, **Process diagram**,
+**Instruction sequence**, and **Status display**. All eight load from the same
+repository sources as the CLI. Use the **Shapes, colors, and text** documentation
+link or expand **Use a custom shape** in the source pane for syntax help.
+
 Select **Audio/Visual** to load the showcase, moving orb, Ready/Go/Done story,
 or layered product cue. The same four appear under **Example Library** in
 Music & Wave. Each selection resets the visual time to zero and compiles the

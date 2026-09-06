@@ -35,7 +35,7 @@ public static class VisualInterpreter
                         start,
                         end,
                         sourceOrder++,
-                        automations));
+                        automations, visual.Presentation));
 
                     if (!visual.At.HasValue)
                         cursor = end;
@@ -72,6 +72,7 @@ public static class VisualInterpreter
 
     private static void ValidateVisual(VisualNode visual)
     {
+        visual.Presentation?.Validate();
         if (string.IsNullOrWhiteSpace(visual.Name))
             throw new InvalidOperationException("Visual name cannot be empty.");
 

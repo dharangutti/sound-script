@@ -1,4 +1,5 @@
 using SoundScript.Core;
+using SoundScript.Core.Ast;
 
 namespace SoundScript.Visual;
 
@@ -56,7 +57,7 @@ public sealed class VisualTimeline
                 visual.Name,
                 visual.Start,
                 visual.End,
-                properties));
+                properties, visual.Presentation));
         }
 
         return new VisualState(time, Array.AsReadOnly(elements.ToArray()));
@@ -104,7 +105,8 @@ public sealed record ScheduledVisual(
     TimeSpan Start,
     TimeSpan End,
     int SourceOrder,
-    IReadOnlyList<ScheduledVisualAutomation> Automations)
+    IReadOnlyList<ScheduledVisualAutomation> Automations,
+    VisualPresentation? Presentation = null)
 {
     public TimeSpan Duration => End - Start;
 }
@@ -139,7 +141,8 @@ public sealed record VisualElementState(
     string Name,
     TimeSpan Start,
     TimeSpan End,
-    IReadOnlyList<VisualPropertyValue> Properties);
+    IReadOnlyList<VisualPropertyValue> Properties,
+    VisualPresentation? Presentation = null);
 
 /// <summary>A sampled automation value at a particular instant.</summary>
 public sealed record VisualPropertyValue(string Property, decimal Value);

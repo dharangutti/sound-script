@@ -110,6 +110,11 @@ public static class TemporalVideoFrameRenderer
 
     private static void PaintPrimitive(byte[] pixels, int width, int height, TemporalVisualPrimitive primitive)
     {
+        if (primitive.Paths is not null)
+        {
+            PaintPaths(pixels, width, height, primitive);
+            return;
+        }
         var opacity = (double)Math.Clamp(primitive.Opacity, 0m, 1m);
         if (opacity <= 0)
             return;
@@ -149,6 +154,76 @@ public static class TemporalVideoFrameRenderer
                 break;
         }
     }
+
+    private static void PaintPaths(byte[] pixels, int width, int height, TemporalVisualPrimitive primitive)
+    {
+        var scaleX = width / 1280d;
+        var scaleY = height / 720d;
+        var opacity = (double)primitive.Opacity;
+        if (opacity <= 0) return;
+        foreach (var path in primitive.Paths!)
+        {
+            if (path.Points.Count < 2) continue;
+            var hasFill = path.Closed && path.Fill != "none";
+            var hasStroke = path.Stroke != "none" && path.StrokeWidth > 0;
+            if (!hasFill && !hasStroke) continue;
+            var fill = hasFill ? ParseColor(path.Fill) : default;
+            var stroke = hasStroke ? ParseColor(path.Stroke) : default;
+            var pad = hasStroke ? path.StrokeWidth / 2 : 0;
+            var pixelSize = Math.Max(1 / scaleX, 1 / scaleY);
+            var boundsPad = pad + (hasStroke ? pixelSize / 2 : 0);
+            var minX = (int)Math.Clamp(Math.Floor((path.Points.Min(p => p.X) - boundsPad) * scaleX), 0, width);
+            var maxX = (int)Math.Clamp(Math.Ceiling((path.Points.Max(p => p.X) + boundsPad) * scaleX), 0, width);
+            var minY = (int)Math.Clamp(Math.Floor((path.Points.Min(p => p.Y) - boundsPad) * scaleY), 0, height);
+            var maxY = (int)Math.Clamp(Math.Ceiling((path.Points.Max(p => p.Y) + boundsPad) * scaleY), 0, height);
+            for (var y = minY; y < maxY; y++)
+            for (var x = minX; x < maxX; x++)
+            {
+                var px = (x + .5) / scaleX;
+                var py = (y + .5) / scaleY;
+                if (hasFill && InsidePolygon(path.Points, px, py))
+                    BlendPixel(pixels, width, x, y, fill, opacity);
+                if (hasStroke)
+                    BlendPixel(pixels, width, x, y, stroke,
+                        opacity * Math.Clamp((pad + pixelSize / 2 - PathDistance(path, px, py)) / pixelSize, 0, 1));
+            }
+        }
+    }
+
+    private static bool InsidePolygon(IReadOnlyList<TemporalPoint> points, double x, double y)
+    {
+        var inside = false;
+        for (int i = 0, j = points.Count - 1; i < points.Count; j = i++)
+        {
+            var a = points[i];
+            var b = points[j];
+            if ((a.Y > y) != (b.Y > y) && x < (b.X - a.X) * (y - a.Y) / (b.Y - a.Y) + a.X)
+                inside = !inside;
+        }
+        return inside;
+    }
+
+    private static double PathDistance(TemporalShapePath path, double x, double y)
+    {
+        var closestSquared = double.MaxValue;
+        var segments = path.Closed ? path.Points.Count : path.Points.Count - 1;
+        for (var i = 0; i < segments; i++)
+        {
+            var a = path.Points[i];
+            var b = path.Points[(i + 1) % path.Points.Count];
+            var dx = b.X - a.X;
+            var dy = b.Y - a.Y;
+            var lengthSquared = dx * dx + dy * dy;
+            var t = lengthSquared == 0 ? 0 : Math.Clamp(((x - a.X) * dx + (y - a.Y) * dy) / lengthSquared, 0, 1);
+            var ox = x - a.X - t * dx;
+            var oy = y - a.Y - t * dy;
+            closestSquared = Math.Min(closestSquared, ox * ox + oy * oy);
+        }
+        return Math.Sqrt(closestSquared);
+    }
+
+    private static Rgb ParseColor(string color) => new(
+        Convert.ToByte(color.Substring(1, 2), 16), Convert.ToByte(color.Substring(3, 2), 16), Convert.ToByte(color.Substring(5, 2), 16));
 
     private static void PaintRoundedCard(byte[] pixels, int width, int height, double left, double top, double cardWidth, double cardHeight, Rgb fill, Rgb border, double fillOpacity, double borderOpacity, double radius)
     {
@@ -292,7 +367,7 @@ public static class TemporalVideoFrameRenderer
         var x = left + Math.Max(0, (maxWidth - textWidth) / 2);
         foreach (var character in normalized)
         {
-            var glyph = Glyph(character);
+            var glyph = MediaGlyphFont.Glyph(character);
             for (var row = 0; row < glyph.Length; row++)
             for (var column = 0; column < glyph[row].Length; column++)
                 if (glyph[row][column] == '1')
@@ -300,48 +375,6 @@ public static class TemporalVideoFrameRenderer
             x += glyphAdvance * scale;
         }
     }
-
-    private static string[] Glyph(char character) => character switch
-    {
-        'A' => ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
-        'B' => ["11110", "10001", "10001", "11110", "10001", "10001", "11110"],
-        'C' => ["01111", "10000", "10000", "10000", "10000", "10000", "01111"],
-        'D' => ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
-        'E' => ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
-        'F' => ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
-        'G' => ["01111", "10000", "10000", "10111", "10001", "10001", "01111"],
-        'H' => ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
-        'I' => ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
-        'J' => ["00111", "00010", "00010", "00010", "10010", "10010", "01100"],
-        'K' => ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
-        'L' => ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
-        'M' => ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
-        'N' => ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
-        'O' => ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
-        'P' => ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
-        'Q' => ["01110", "10001", "10001", "10001", "10101", "10010", "01101"],
-        'R' => ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
-        'S' => ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
-        'T' => ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
-        'U' => ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
-        'V' => ["10001", "10001", "10001", "10001", "10001", "01010", "00100"],
-        'W' => ["10001", "10001", "10001", "10101", "10101", "10101", "01010"],
-        'X' => ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
-        'Y' => ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
-        'Z' => ["11111", "00001", "00010", "00100", "01000", "10000", "11111"],
-        '0' => ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
-        '1' => ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
-        '2' => ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
-        '3' => ["11110", "00001", "00001", "01110", "00001", "00001", "11110"],
-        '4' => ["00010", "00110", "01010", "10010", "11111", "00010", "00010"],
-        '5' => ["11111", "10000", "10000", "11110", "00001", "00001", "11110"],
-        '6' => ["01110", "10000", "10000", "11110", "10001", "10001", "01110"],
-        '7' => ["11111", "00001", "00010", "00100", "01000", "01000", "01000"],
-        '8' => ["01110", "10001", "10001", "01110", "10001", "10001", "01110"],
-        '9' => ["01110", "10001", "10001", "01111", "00001", "00001", "01110"],
-        ' ' => ["00000", "00000", "00000", "00000", "00000", "00000", "00000"],
-        _ => ["11111", "10001", "00110", "00100", "00100", "00000", "00100"],
-    };
 
     private static void FillRect(byte[] pixels, int width, int height, double left, double top, double rectWidth, double rectHeight, Rgb color, double opacity)
     {

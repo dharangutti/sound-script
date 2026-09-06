@@ -20,6 +20,8 @@ public sealed record VisualNode : AstNode
     /// </summary>
     public TimeSpan? At { get; init; }
 
+    public VisualPresentation? Presentation { get; init; }
+
     /// <summary>Property automations evaluated over this visual's interval.</summary>
     public List<VisualAutomationNode> Automations { get; } = [];
 }
