@@ -1,0 +1,166 @@
+tempo 120
+
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#f1f5f9"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "WEEKLY DELIVERY SCORECARD"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "metric-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 260
+    set y 240
+    set width 340
+    set height 100
+}
+
+visual "metric-0-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "UPTIME"
+    fontSize 26
+    set x 260
+    set y 240
+    set width 316
+    set height 40
+}
+
+visual "value-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "99.95%"
+    fontSize 58
+    set x 260
+    set y 375
+    set width 320
+    set height 72
+}
+
+visual "target-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "TARGET: 99.9%"
+    fontSize 22
+    set x 260
+    set y 490
+    set width 340
+    set height 36
+}
+
+visual "metric-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 240
+    set width 340
+    set height 100
+}
+
+visual "metric-1-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "LEAD TIME"
+    fontSize 26
+    set x 640
+    set y 240
+    set width 316
+    set height 40
+}
+
+visual "value-1" for 5s at 1s {
+    shape text
+    fill "#0f172a"
+    text "2.4 DAYS"
+    fontSize 58
+    set x 640
+    set y 375
+    set width 320
+    set height 72
+}
+
+visual "target-1" for 5s at 1s {
+    shape text
+    fill "#0f172a"
+    text "TARGET: 3 DAYS"
+    fontSize 22
+    set x 640
+    set y 490
+    set width 340
+    set height 36
+}
+
+visual "metric-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1020
+    set y 240
+    set width 340
+    set height 100
+}
+
+visual "metric-2-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "CHANGE FAILURE"
+    fontSize 26
+    set x 1020
+    set y 240
+    set width 316
+    set height 40
+}
+
+visual "value-2" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "3%"
+    fontSize 58
+    set x 1020
+    set y 375
+    set width 320
+    set height 72
+}
+
+visual "target-2" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "TARGET: UNDER 5%"
+    fontSize 22
+    set x 1020
+    set y 490
+    set width 340
+    set height 36
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "AUTHORED SNAPSHOT - WEEK 36"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

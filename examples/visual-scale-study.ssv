@@ -1,0 +1,1522 @@
+tempo 120
+track completion { rest:10 C5 q E5 q }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "COMPONENT ROLLOUT - 48 SERVICES"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "component-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 01"
+    fontSize 26
+    set x 122
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-0" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-1-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 02"
+    fontSize 26
+    set x 270
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-1" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-2-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 03"
+    fontSize 26
+    set x 418
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-2" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-3" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-3-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 04"
+    fontSize 26
+    set x 566
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-3" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-4" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-4-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 05"
+    fontSize 26
+    set x 714
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-4" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-5" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-5-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 06"
+    fontSize 26
+    set x 862
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-5" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-6" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-6-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 07"
+    fontSize 26
+    set x 1010
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-6" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-7" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 190
+    set width 132
+    set height 52
+}
+
+visual "component-7-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 08"
+    fontSize 26
+    set x 1158
+    set y 190
+    set width 108
+    set height 40
+}
+
+visual "ready-7" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 173
+    set width 10
+    set height 10
+}
+
+visual "component-8" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-8-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 09"
+    fontSize 26
+    set x 122
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-8" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-9" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-9-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 10"
+    fontSize 26
+    set x 270
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-9" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-10" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-10-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 11"
+    fontSize 26
+    set x 418
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-10" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-11" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-11-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 12"
+    fontSize 26
+    set x 566
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-11" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-12" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-12-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 13"
+    fontSize 26
+    set x 714
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-12" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-13" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-13-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 14"
+    fontSize 26
+    set x 862
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-13" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-14" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-14-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 15"
+    fontSize 26
+    set x 1010
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-14" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-15" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 256
+    set width 132
+    set height 52
+}
+
+visual "component-15-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 16"
+    fontSize 26
+    set x 1158
+    set y 256
+    set width 108
+    set height 40
+}
+
+visual "ready-15" for 5.25s at 0.75s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 239
+    set width 10
+    set height 10
+}
+
+visual "component-16" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-16-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 17"
+    fontSize 26
+    set x 122
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-16" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-17" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-17-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 18"
+    fontSize 26
+    set x 270
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-17" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-18" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-18-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 19"
+    fontSize 26
+    set x 418
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-18" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-19" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-19-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 20"
+    fontSize 26
+    set x 566
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-19" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-20" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-20-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 21"
+    fontSize 26
+    set x 714
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-20" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-21" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-21-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 22"
+    fontSize 26
+    set x 862
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-21" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-22" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-22-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 23"
+    fontSize 26
+    set x 1010
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-22" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-23" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 322
+    set width 132
+    set height 52
+}
+
+visual "component-23-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 24"
+    fontSize 26
+    set x 1158
+    set y 322
+    set width 108
+    set height 40
+}
+
+visual "ready-23" for 4.5s at 1.5s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 305
+    set width 10
+    set height 10
+}
+
+visual "component-24" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-24-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 25"
+    fontSize 26
+    set x 122
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-24" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-25" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-25-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 26"
+    fontSize 26
+    set x 270
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-25" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-26" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-26-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 27"
+    fontSize 26
+    set x 418
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-26" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-27" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-27-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 28"
+    fontSize 26
+    set x 566
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-27" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-28" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-28-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 29"
+    fontSize 26
+    set x 714
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-28" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-29" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-29-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 30"
+    fontSize 26
+    set x 862
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-29" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-30" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-30-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 31"
+    fontSize 26
+    set x 1010
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-30" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-31" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 388
+    set width 132
+    set height 52
+}
+
+visual "component-31-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 32"
+    fontSize 26
+    set x 1158
+    set y 388
+    set width 108
+    set height 40
+}
+
+visual "ready-31" for 3.75s at 2.25s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 371
+    set width 10
+    set height 10
+}
+
+visual "component-32" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-32-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 33"
+    fontSize 26
+    set x 122
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-32" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-33" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-33-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 34"
+    fontSize 26
+    set x 270
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-33" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-34" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-34-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 35"
+    fontSize 26
+    set x 418
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-34" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-35" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-35-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 36"
+    fontSize 26
+    set x 566
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-35" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-36" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-36-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 37"
+    fontSize 26
+    set x 714
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-36" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-37" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-37-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 38"
+    fontSize 26
+    set x 862
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-37" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-38" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-38-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 39"
+    fontSize 26
+    set x 1010
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-38" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-39" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 454
+    set width 132
+    set height 52
+}
+
+visual "component-39-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 40"
+    fontSize 26
+    set x 1158
+    set y 454
+    set width 108
+    set height 40
+}
+
+visual "ready-39" for 3s at 3s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 437
+    set width 10
+    set height 10
+}
+
+visual "component-40" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 122
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-40-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 41"
+    fontSize 26
+    set x 122
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-40" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 173
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-41" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 270
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-41-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 42"
+    fontSize 26
+    set x 270
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-41" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 321
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-42" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 418
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-42-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 43"
+    fontSize 26
+    set x 418
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-42" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 469
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-43" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 566
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-43-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 44"
+    fontSize 26
+    set x 566
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-43" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 617
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-44" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 714
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-44-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 45"
+    fontSize 26
+    set x 714
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-44" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 765
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-45" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 862
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-45-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 46"
+    fontSize 26
+    set x 862
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-45" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 913
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-46" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1010
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-46-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 47"
+    fontSize 26
+    set x 1010
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-46" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 1061
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "component-47" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1158
+    set y 520
+    set width 132
+    set height 52
+}
+
+visual "component-47-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SVC 48"
+    fontSize 26
+    set x 1158
+    set y 520
+    set width 108
+    set height 40
+}
+
+visual "ready-47" for 2.25s at 3.75s {
+    shape circle
+    fill "#34d399"
+    set x 1209
+    set y 503
+    set width 10
+    set height 10
+}
+
+visual "caption-4" for 2s at 4s {
+    shape text
+    fill "#e2e8f0"
+    text "ROLLING BATCHES - ALL 48 READY BY 4 SECONDS"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

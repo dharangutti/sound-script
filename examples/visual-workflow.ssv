@@ -1,0 +1,155 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#fff7ed"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "REVIEW AND REVISION"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "draft" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffedd5"
+    stroke "#9a3412"
+    strokeWidth 2
+    set x 260
+    set y 300
+    set width 260
+    set height 104
+}
+
+visual "draft-label" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "DRAFT"
+    fontSize 26
+    set x 260
+    set y 300
+    set width 236
+    set height 40
+}
+
+visual "review" for 4s at 2s {
+    shape roundedRectangle
+    fill "#ffedd5"
+    stroke "#9a3412"
+    strokeWidth 2
+    set x 640
+    set y 300
+    set width 260
+    set height 104
+}
+
+visual "review-label" for 4s at 2s {
+    shape text
+    fill "#431407"
+    text "REVIEW"
+    fontSize 26
+    set x 640
+    set y 300
+    set width 236
+    set height 40
+}
+
+visual "approved" for 2s at 4s {
+    shape roundedRectangle
+    fill "#ffedd5"
+    stroke "#9a3412"
+    strokeWidth 2
+    set x 1020
+    set y 300
+    set width 260
+    set height 104
+}
+
+visual "approved-label" for 2s at 4s {
+    shape text
+    fill "#431407"
+    text "APPROVED"
+    fontSize 26
+    set x 1020
+    set y 300
+    set width 236
+    set height 40
+}
+
+visual "submit" for 4s at 2s {
+    shape arrow
+    fill "#ea580c"
+    set rotation 0.000
+    strokeWidth 3
+    set x 450
+    set y 300
+    set width 120.000
+    set height 22
+}
+
+visual "approve" for 2s at 4s {
+    shape arrow
+    fill "#ea580c"
+    set rotation 0.000
+    strokeWidth 3
+    set x 830
+    set y 300
+    set width 120.000
+    set height 22
+}
+
+visual "feedback-down" for 4s at 2s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 640
+    set y 427.5
+    set width 125.000
+    set height 8
+}
+
+visual "feedback-back" for 4s at 2s {
+    shape arrow
+    fill "#ea580c"
+    set rotation 180.000
+    strokeWidth 3
+    set x 450
+    set y 490
+    set width 380.000
+    set height 22
+}
+
+visual "feedback-up" for 4s at 2s {
+    shape line
+    stroke "#ea580c"
+    set rotation 270.000
+    strokeWidth 3
+    set x 260
+    set y 427.5
+    set width 125.000
+    set height 8
+}
+
+visual "revision" for 4s at 2s {
+    shape text
+    fill "#431407"
+    text "REVISE WHEN NEEDED"
+    fontSize 24
+    set x 450
+    set y 545
+    set width 500
+    set height 38
+}

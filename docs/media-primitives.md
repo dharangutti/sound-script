@@ -67,7 +67,10 @@ Text is colored by `fill` and rejects a non-`none` stroke.
 ## Position, dimensions, and animation
 
 The existing linear `animate property from -> to over duration` syntax is reused.
-For a constant numeric value use identical endpoints. Curves start at the visual's
+For a constant numeric value use `set x 640`, or the compatible equal-endpoint
+form `animate x 640 -> 640 over 4s`. `set` accepts the eight properties below
+and lowers to a constant animation over the visual's duration. Setting and
+animating the same property is rejected. Curves start at the visual's
 local time zero, hold their target after finishing, and must fit within the interval.
 
 | Property | Explicit primitive behavior |
@@ -78,6 +81,10 @@ local time zero, hold their target after finishing, and must fit within the inte
 | `radius` | Circle/ring only; clamped to 4–360 before bounds are applied. Explicit width/height or size take precedence. |
 | `rotation` | Degrees clockwise around the centre, clamped to −360–360. Applied to every explicit shape, including text. |
 | `opacity` | Clamped to 0–1. Default 1. |
+
+Source numeric literals are non-negative; use equivalent positive rotation
+angles (270 instead of -90). The renderer's signed clamps also cover host API
+values, but the source tokenizer does not accept signed literals.
 
 Circle and ring use the smaller final dimension for both axes; use `ellipse`
 when unequal dimensions are intended. A line uses width for its length,
@@ -134,3 +141,7 @@ These are authored timelines, not live telemetry or UI widgets. Data binding,
 interaction, image/video imports, arbitrary paths, and rich multilingual text
 are outside this extension. See [temporal semantics](visual-temporal.md) and
 [application use cases](use-cases.md).
+
+The [practical composition library](audio-visual-compositions.md) adds 20
+editable examples: diagrams, dashboards, explainers, mixed Wave/Voice audio,
+and a 48-service scale study.

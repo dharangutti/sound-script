@@ -1,0 +1,186 @@
+tempo 120
+track ticks { mp loop 6 { C5 e rest:1.5 } }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#fff7ed"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "DISTANCE = SPEED X TIME"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "ruler" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 0.000
+    strokeWidth 3
+    set x 640
+    set y 420
+    set width 980.000
+    set height 8
+}
+
+visual "tick-0" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 150
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-0" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "0 M"
+    fontSize 22
+    set x 150
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "tick-1" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 346
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-1" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "2 M"
+    fontSize 22
+    set x 346
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "tick-2" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 542
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-2" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "4 M"
+    fontSize 22
+    set x 542
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "tick-3" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 738
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-3" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "6 M"
+    fontSize 22
+    set x 738
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "tick-4" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 934
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-4" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "8 M"
+    fontSize 22
+    set x 934
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "tick-5" for 6s at 0s {
+    shape line
+    stroke "#ea580c"
+    set rotation 90.000
+    strokeWidth 3
+    set x 1130
+    set y 420
+    set width 24.000
+    set height 8
+}
+
+visual "scale-5" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "10 M"
+    fontSize 22
+    set x 1130
+    set y 478
+    set width 130
+    set height 36
+}
+
+visual "traveller" for 6s at 0s {
+    shape circle
+    fill "#ea580c"
+    set y 340
+    set width 56
+    set height 56
+    animate x 150 -> 1130 over 5s
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "SPEED 2 M/S - AFTER 5 SECONDS: 10 M"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

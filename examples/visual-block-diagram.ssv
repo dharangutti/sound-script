@@ -1,0 +1,131 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SIGNAL CONDITIONING"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "block-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 250
+    set y 330
+    set width 250
+    set height 120
+}
+
+visual "block-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SENSOR"
+    fontSize 26
+    set x 250
+    set y 330
+    set width 226
+    set height 40
+}
+
+visual "block-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 330
+    set width 250
+    set height 120
+}
+
+visual "block-1-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "FILTER"
+    fontSize 26
+    set x 640
+    set y 330
+    set width 226
+    set height 40
+}
+
+visual "block-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1030
+    set y 330
+    set width 250
+    set height 120
+}
+
+visual "block-2-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "OUTPUT"
+    fontSize 26
+    set x 1030
+    set y 330
+    set width 226
+    set height 40
+}
+
+visual "wire-0" for 6s at 0s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 445
+    set y 330
+    set width 140.000
+    set height 22
+}
+
+visual "wire-1" for 4s at 2s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 835
+    set y 330
+    set width 140.000
+    set height 22
+}
+
+visual "signal" for 6s at 0s {
+    shape circle
+    fill "#38bdf8"
+    set y 330
+    set width 18
+    set height 18
+    animate x 130 -> 1150 over 6s
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "REMOVE NOISE BEFORE THE SIGNAL REACHES THE OUTPUT"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

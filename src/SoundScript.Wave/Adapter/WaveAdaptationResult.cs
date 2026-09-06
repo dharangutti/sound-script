@@ -12,4 +12,8 @@ public sealed record SampleOverlayRequest(
 public sealed record WaveAdaptationResult(
     Dictionary<string, List<Model.NoteEvent>> Tracks,
     IReadOnlyList<SampleOverlayRequest> SampleOverlays,
-    IReadOnlyList<(SpeakNode Speak, double StartTimeSeconds)> SpeakTimings);
+    IReadOnlyList<(SpeakNode Speak, double StartTimeSeconds)> SpeakTimings)
+{
+    /// <summary>The tempo map used to schedule this adaptation's PCM events.</summary>
+    public SoundScript.Core.TempoAutomationMap TempoMap { get; init; } = new();
+}

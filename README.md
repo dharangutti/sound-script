@@ -1,7 +1,12 @@
 # SoundScript
 
-An open-source, deterministic music language that turns simple text into professional-sounding MIDI.  
+An independent open-source audio and media programming language for deterministic scores, audio synthesis, and temporal Audio/Visual compositions.
 Built in C# — runs on Windows, macOS, and Linux, with a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari).
+
+Explore [20 practical Audio/Visual compositions](docs/audio-visual-compositions.md):
+diagrams, dashboards, explainers, timed presentations, and shared Wave/Voice audio.
+See the [capability audit and verification report](docs/av-stress-test.md) for
+implemented features and limits, including browser WebM support.
 
 ```
 import "lib.ss"

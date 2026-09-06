@@ -18,7 +18,6 @@ timelines; external live data and event integrations must be supplied by a host
 application. The renderer uses built-in visual treatments and named cards.
 See [all supported constructs and properties](visual-temporal.md).
 
-## Audio workflows
 ## More application options with explicit primitives
 
 | Use case | Primitives | Runnable demo |
@@ -32,6 +31,20 @@ Set fills and outlines to suit the application, then animate position, dimension
 opacity, and rotation. These examples play authored timelines; an application
 must supply any external events or live data. Text uses a portable uppercase
 bitmap font. See [the complete primitives reference](media-primitives.md).
+
+## Practical compositions
+
+The [20-composition library](audio-visual-compositions.md) covers organizational
+communication, software architecture, process documentation, educational
+explainers, technical presentations, status reporting, animated diagrams and
+programmable presentation sequences. The sources are editable templates using
+ordinary shapes, text, constant properties and animation.
+
+The mixed-audio example combines score notes, Wave effects, voice/sing and
+synthetic speak cues. Four explainer trials retain captions because voice is
+synthetic phoneme audio, not natural narration. CLI supports deterministic
+offline media generation; browser recording runs in real time and can drop
+frames under load. See the [verification report](av-stress-test.md).
 
 ## Audio workflows
 

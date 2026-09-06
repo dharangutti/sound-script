@@ -150,10 +150,9 @@ public partial class Playground : IDisposable
       var program = new SoundScript.Parser.Parser(tokens).Parse();
 
       CompiledVisualTimeline = VisualInterpreter.Interpret(program);
-      // The MIDI interpreter is the authoritative producer of SoundScript's
-      // tempo map. Visual directives are deliberately a no-op there, allowing
-      // this bridge to stay correct for tempo ramps without duplicating timing.
-      VisualTempoMap = Interpreter.Interpret(program, "playground-visual.ssv").TempoMap;
+      // Use the same adapter as the audible PCM rail. MIDI interpretation
+      // rejects valid Wave speak/effect syntax and is not the media clock.
+      VisualTempoMap = TemporalAudioRenderer.BuildTempoMap(program);
       VisualErrorMessage = null;
       UpdateVisualState();
       UpdateVisualAudioBeatState();

@@ -1,0 +1,188 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CACHE HIT - REQUEST SEQUENCE"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "actor-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 240
+    set y 200
+    set width 220
+    set height 72
+}
+
+visual "actor-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CLIENT"
+    fontSize 26
+    set x 240
+    set y 200
+    set width 196
+    set height 40
+}
+
+visual "life-0" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 90.000
+    strokeWidth 3
+    set x 240
+    set y 415
+    set width 330.000
+    set height 8
+}
+
+visual "actor-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 200
+    set width 220
+    set height 72
+}
+
+visual "actor-1-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "API"
+    fontSize 26
+    set x 640
+    set y 200
+    set width 196
+    set height 40
+}
+
+visual "life-1" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 90.000
+    strokeWidth 3
+    set x 640
+    set y 415
+    set width 330.000
+    set height 8
+}
+
+visual "actor-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1040
+    set y 200
+    set width 220
+    set height 72
+}
+
+visual "actor-2-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CACHE"
+    fontSize 26
+    set x 1040
+    set y 200
+    set width 196
+    set height 40
+}
+
+visual "life-2" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 90.000
+    strokeWidth 3
+    set x 1040
+    set y 415
+    set width 330.000
+    set height 8
+}
+
+visual "request" for 6s at 0s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 440
+    set y 320
+    set width 400.000
+    set height 22
+}
+
+visual "request-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "GET /STATUS"
+    fontSize 22
+    set x 440
+    set y 292
+    set width 280
+    set height 36
+}
+
+visual "lookup" for 4s at 2s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 840
+    set y 420
+    set width 400.000
+    set height 22
+}
+
+visual "lookup-label" for 4s at 2s {
+    shape text
+    fill "#e2e8f0"
+    text "LOOKUP"
+    fontSize 22
+    set x 840
+    set y 392
+    set width 280
+    set height 36
+}
+
+visual "result" for 2s at 4s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 180.000
+    strokeWidth 3
+    set x 640
+    set y 520
+    set width 800.000
+    set height 22
+}
+
+visual "result-label" for 2s at 4s {
+    shape text
+    fill "#e2e8f0"
+    text "CACHED RESULT"
+    fontSize 22
+    set x 640
+    set y 492
+    set width 500
+    set height 36
+}

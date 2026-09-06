@@ -11,6 +11,13 @@ namespace SoundScript.Media;
 /// </summary>
 public static class TemporalAudioRenderer
 {
+    /// <summary>Uses the PCM adapter's clock, including Wave-only programs.</summary>
+    public static SoundScript.Core.TempoAutomationMap BuildTempoMap(ProgramNode program)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        return SoundScript.Wave.Adapter.AstToNoteEventAdapter.Adapt(program).TempoMap;
+    }
+
     public static byte[] RenderToWavBytes(ProgramNode program, TimeSpan duration)
     {
         ArgumentNullException.ThrowIfNull(program);

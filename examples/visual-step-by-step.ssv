@@ -1,0 +1,155 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "INCIDENT RESPONSE"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "stage-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 260
+    set y 340
+    set width 280
+    set height 160
+}
+
+visual "stage-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "DETECT"
+    fontSize 26
+    set x 260
+    set y 340
+    set width 256
+    set height 40
+}
+
+visual "highlight-0" for 2s at 0s {
+    shape roundedRectangle
+    fill "none"
+    stroke "#38bdf8"
+    strokeWidth 5
+    set x 260
+    set y 340
+    set width 296
+    set height 176
+}
+
+visual "caption-0" for 2s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CONFIRM THE SIGNAL"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
+
+visual "stage-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 340
+    set width 280
+    set height 160
+}
+
+visual "stage-1-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "TRIAGE"
+    fontSize 26
+    set x 640
+    set y 340
+    set width 256
+    set height 40
+}
+
+visual "highlight-1" for 2s at 2s {
+    shape roundedRectangle
+    fill "none"
+    stroke "#38bdf8"
+    strokeWidth 5
+    set x 640
+    set y 340
+    set width 296
+    set height 176
+}
+
+visual "caption-2" for 2s at 2s {
+    shape text
+    fill "#e2e8f0"
+    text "ASSIGN AN OWNER"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
+
+visual "stage-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1020
+    set y 340
+    set width 280
+    set height 160
+}
+
+visual "stage-2-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "RESOLVE"
+    fontSize 26
+    set x 1020
+    set y 340
+    set width 256
+    set height 40
+}
+
+visual "highlight-2" for 2s at 4s {
+    shape roundedRectangle
+    fill "none"
+    stroke "#38bdf8"
+    strokeWidth 5
+    set x 1020
+    set y 340
+    set width 296
+    set height 176
+}
+
+visual "caption-4" for 2s at 4s {
+    shape text
+    fill "#e2e8f0"
+    text "VERIFY RECOVERY"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
