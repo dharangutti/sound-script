@@ -1,5 +1,14 @@
 # SoundScript Release Notes
 
+## V11 — Temporal Media Export
+
+- Shared canonical scenes and SoundScript.Wave PCM for live preview and WebM.
+- Browser Export Clip at 24/30/60 FPS; CLI `video` export through FFmpeg.
+- Four Audio/Visual presets in the Playground and Example Library.
+- Expanded media language reference, use cases, and website architecture.
+
+Details: [docs/whats-new-v11.md](docs/whats-new-v11.md).
+
 ## V10 — Temporal Visual Playground
 
 - **Audio + visual Playground demo:** a 12-second piano-backed temporal program

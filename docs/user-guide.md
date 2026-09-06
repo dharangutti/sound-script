@@ -1,5 +1,9 @@
 # SoundScript User Guide
 
+For V10/V11 Audio/Visual programming, start with the
+[four runnable media examples](examples.md), [media language reference](visual-temporal.md),
+and [audio and media use cases](use-cases.md). The existing audio tour follows.
+
 **From your first note to expressive, production-ready cues — a hands-on tour of the whole language.**
 
 SoundScript is a deterministic music language: you write plain text, the engine compiles it to a standard MIDI file, and the same script always produces the same output — on every platform, every time. This guide takes you from a three-note melody to multi-track arrangements and industrial audio cues, with a complete, runnable script at every step.

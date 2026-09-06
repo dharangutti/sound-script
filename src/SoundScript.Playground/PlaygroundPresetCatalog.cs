@@ -10,6 +10,7 @@ public enum PlaygroundOutputRail
     TextCompose,
     TextProsody,
     PlaygroundOnly,
+    AudioVisual,
 }
 
 /// <summary>Metadata linking a Playground preset to on-disk examples and CLI commands.</summary>
@@ -31,6 +32,7 @@ public sealed record PlaygroundPresetInfo(
         PlaygroundOutputRail.TextCompose => "Text → MIDI (compose)",
         PlaygroundOutputRail.TextProsody => "Text → MIDI (prosody)",
         PlaygroundOutputRail.PlaygroundOnly => "Playground only",
+        PlaygroundOutputRail.AudioVisual => "Audio/Visual (.ssv → WebM)",
         _ => OutputRail.ToString(),
     };
 
@@ -147,6 +149,7 @@ public static class PlaygroundPresetCatalog
         PlaygroundOutputRail.TextCompose => "compose",
         PlaygroundOutputRail.TextProsody => "prosody",
         PlaygroundOutputRail.PlaygroundOnly => "Playground",
+        PlaygroundOutputRail.AudioVisual => "Audio/Visual",
         _ => rail.ToString(),
     };
 
@@ -155,6 +158,12 @@ public static class PlaygroundPresetCatalog
 
     private static IEnumerable<PlaygroundPresetInfo> BuildPresets()
     {
+        foreach (var preset in VisualPresetCatalog.All)
+            yield return new PlaygroundPresetInfo(preset.Key, preset.Title, PlaygroundOutputRail.AudioVisual,
+                preset.ExampleFile, "Audio/Visual → Play / Export Clip", preset.Description,
+                [$"{CliPrefix}visual examples/{preset.ExampleFile} --at 1",
+                 $"{CliPrefix}video examples/{preset.ExampleFile} --output clip.webm --fps 30"]);
+
         yield return DefaultPreset();
 
         foreach (var p in MidiPresets())

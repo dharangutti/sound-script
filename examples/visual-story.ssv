@@ -1,0 +1,23 @@
+tempo 120
+track music {
+    instrument piano
+    mp
+    C4 h E4 h G4 h C5 h G4 h E4 h C4 h
+}
+sync audio
+visual "Ready" for 2s {
+    animate x 0.5 -> 0.5 over 2s
+    animate y 0.5 -> 0.5 over 2s
+    animate opacity 0 -> 1 over 1s
+}
+wait 1s
+visual "Go" for 2s {
+    animate x 0.5 -> 0.5 over 2s
+    animate y 0.5 -> 0.5 over 2s
+    animate width 112 -> 280 over 2s
+}
+visual "Done" for 2s {
+    animate x 0.5 -> 0.5 over 2s
+    animate y 0.5 -> 0.5 over 2s
+    animate opacity 1 -> 0 over 2s
+}

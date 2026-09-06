@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="..\..\examples\visual-*.ssv" LogicalName="VisualExamples.%(Filename)%(Extension)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.28" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.28" PrivateAssets="all" />
   </ItemGroup>

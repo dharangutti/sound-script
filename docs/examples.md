@@ -1,4 +1,24 @@
-# SoundScript Examples (V10)
+# SoundScript Examples (V11)
+
+## Audio/Visual Example Library — V10/V11
+
+All four programs include a musical score. Load them in the Playground's
+**Audio/Visual** selector or **Example Library**, then play, scrub, and export.
+
+| Example | Focus | Duration |
+|---|---|---|
+| [visual-temporal.ssv](../examples/visual-temporal.ssv) | Sequential cues, waits, overlaps, fades | 12 seconds |
+| [visual-motion.ssv](../examples/visual-motion.ssv) | Moving orb, radius, rotating sparkle | 6 seconds |
+| [visual-story.ssv](../examples/visual-story.ssv) | Ready/Go/Done cards, a gap, width and opacity | 7 seconds |
+| [visual-overlays.ssv](../examples/visual-overlays.ssv) | Layered product, orb, and star; millisecond placement | 8 seconds |
+
+```bash
+dotnet run --project src/SoundScript.Cli -- visual examples/visual-motion.ssv --at 3
+dotnet run --project src/SoundScript.Cli -- video examples/visual-motion.ssv --output motion.webm --fps 30
+```
+
+Replace the input path to run another example. CLI video requires FFmpeg.
+See [supported media constructs](visual-temporal.md) and [use cases](use-cases.md).
 
 Runnable example scripts for every major feature.
 

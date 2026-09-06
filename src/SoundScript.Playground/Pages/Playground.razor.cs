@@ -34,6 +34,7 @@ public partial class Playground : IDisposable
 
   [Inject] private IJSRuntime Js { get; set; } = null!;
   [Inject] private HttpClient Http { get; set; } = null!;
+  [Inject] private NavigationManager Navigation { get; set; } = null!;
 
   private const string DefaultScript =
       """
@@ -78,42 +79,28 @@ public partial class Playground : IDisposable
   // The visual rail intentionally owns an independent, seconds-based editor.
   // It is not a frame editor: each interaction queries a compiled timeline at
   // an exact time, so changing the display refresh rate cannot change meaning.
-  private const string VisualDemoScript =
-      """
-      tempo 120
-
-      track music {
-          instrument piano
-          mf
-          C4 h E4 h G4 h C5 h
-          G4 h E4 h C4 h G4 h
-          C5 h G4 h E4 h C4 h
-      }
-
-      sync audio
-
-      visual "intro" for 3s
-      wait 1s
-      visual "product" for 4s
-
-      visual "circle" for 8s at 0s {
-          animate radius 28 -> 170 over 3s
-          animate opacity 0.35 -> 1 over 1.5s
-      }
-
-      visual "sparkle" for 2s at 4.5s {
-          animate opacity 0 -> 1 over 0.4s
-      }
-
-      visual "outro" for 4s {
-          animate opacity 1 -> 0 over 2s
-      }
-      """;
+  private static readonly string VisualDemoScript = VisualPresetCatalog.All[0].Source;
 
   private static readonly double[] VisualProbeTimes = [0, 1.5, 4, 4.5, 5, 8.75];
 
   private PlaygroundTab ActiveTab { get; set; } = PlaygroundTab.Music;
   private string VisualScriptText { get; set; } = VisualDemoScript;
+  private string SelectedVisualExampleKey { get; set; } = "visual-temporal";
+
+  private void LoadVisualExample()
+  {
+    VisualScriptText = VisualPresetCatalog.All.Single(p => p.Key == SelectedVisualExampleKey).Source;
+    VisualTimeSeconds = 0;
+    VisualAudioBeat = 0;
+    ActiveTab = PlaygroundTab.VisualTimeline;
+    CompileVisualTimeline();
+  }
+
+  private void LoadVisualExample(string key)
+  {
+    SelectedVisualExampleKey = key;
+    LoadVisualExample();
+  }
   private VisualTimeline? CompiledVisualTimeline { get; set; }
   private TempoAutomationMap? VisualTempoMap { get; set; }
   private VisualState? VisualStateAtCursor { get; set; }
@@ -143,6 +130,8 @@ public partial class Playground : IDisposable
     LoadSelectedExample();
     LoadSelectedWaveExample(syncMainEditor: false);
     CompileVisualTimeline();
+    if (new Uri(Navigation.Uri).Fragment == "#visual-workspace-tab")
+      ActiveTab = PlaygroundTab.VisualTimeline;
   }
 
   private void SelectTab(PlaygroundTab tab)
@@ -183,12 +172,7 @@ public partial class Playground : IDisposable
 
   private void ResetVisualDemo()
   {
-    CancelVisualPlayback();
-    _ = StopVisualAudioAsync();
-    VisualScriptText = VisualDemoScript;
-    VisualTimeSeconds = 1.5;
-    VisualAudioBeat = 10;
-    CompileVisualTimeline();
+    LoadVisualExample("visual-temporal");
   }
 
   private async Task CopyVisualScriptAsync()

@@ -1,4 +1,23 @@
-# SoundScript Architecture (V4)
+# SoundScript Architecture (V11)
+
+## V10/V11 media extension
+
+The existing parser, shared AST, MIDI, Wave, vocal, composition, and timbre
+structure below remains in place. Media adds these parallel paths:
+
+```text
+Shared AST → VisualInterpreter → VisualTimeline.StateAt(t) → Canonical scene
+Shared AST → TemporalAudioRenderer → SoundScript.Wave → Fitted PCM
+Canonical scene + PCM → Live Playground playback
+StateAt(t) → TemporalVideoExportPlan → Canonical scenes + PCM → WebM
+```
+
+V10 introduced temporal intervals and playback. V11 places frame sampling and
+scene projection in SoundScript.Media, outside the language and timeline model.
+The browser uses canvas capture/MediaRecorder; the CLI uses a rasterizer and
+FFmpeg. Both share the scene profile and Wave PCM audio.
+See [the media reference](visual-temporal.md) for the supported primitives,
+properties, audio fitting, and determinism boundaries.
 
 System overview for the SoundScript engine and documentation suite.
 
