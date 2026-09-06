@@ -1,0 +1,160 @@
+tempo 120
+track alert { rest:8 C5 e rest e C5 q }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "OPERATIONS - SERVICE HEALTH"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "service-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 260
+    set y 300
+    set width 290
+    set height 145
+}
+
+visual "service-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "API"
+    fontSize 26
+    set x 260
+    set y 300
+    set width 266
+    set height 40
+}
+
+visual "status-0" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 260
+    set y 425
+    set width 34
+    set height 34
+}
+
+visual "health-0" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "HEALTHY"
+    fontSize 24
+    set x 260
+    set y 490
+    set width 300
+    set height 38
+}
+
+visual "service-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 300
+    set width 290
+    set height 145
+}
+
+visual "service-1-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "WORKERS"
+    fontSize 26
+    set x 640
+    set y 300
+    set width 266
+    set height 40
+}
+
+visual "status-1" for 6s at 0s {
+    shape circle
+    fill "#fbbf24"
+    set x 640
+    set y 425
+    set width 34
+    set height 34
+}
+
+visual "health-1" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "DEGRADED"
+    fontSize 24
+    set x 640
+    set y 490
+    set width 300
+    set height 38
+}
+
+visual "service-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1020
+    set y 300
+    set width 290
+    set height 145
+}
+
+visual "service-2-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "STORAGE"
+    fontSize 26
+    set x 1020
+    set y 300
+    set width 266
+    set height 40
+}
+
+visual "status-2" for 6s at 0s {
+    shape circle
+    fill "#34d399"
+    set x 1020
+    set y 425
+    set width 34
+    set height 34
+}
+
+visual "health-2" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "HEALTHY"
+    fontSize 24
+    set x 1020
+    set y 490
+    set width 300
+    set height 38
+}
+
+visual "caption-4" for 2s at 4s {
+    shape text
+    fill "#e2e8f0"
+    text "WORKER QUEUE ABOVE TARGET"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

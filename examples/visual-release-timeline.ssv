@@ -1,0 +1,138 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#f1f5f9"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "RELEASE MILESTONES"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "axis" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 0.000
+    strokeWidth 3
+    set x 640
+    set y 360
+    set width 1000.000
+    set height 8
+}
+
+visual "milestone-0" for 6s at 0s {
+    shape circle
+    fill "#2563eb"
+    set x 220
+    set y 360
+    set width 26
+    set height 26
+}
+
+visual "milestone-text-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "DESIGN"
+    fontSize 28
+    set x 220
+    set y 300
+    set width 300
+    set height 42
+}
+
+visual "date-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "WEEK 1"
+    fontSize 22
+    set x 220
+    set y 425
+    set width 300
+    set height 36
+}
+
+visual "milestone-1" for 4s at 2s {
+    shape circle
+    fill "#2563eb"
+    set x 640
+    set y 360
+    set width 26
+    set height 26
+}
+
+visual "milestone-text-1" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "BETA"
+    fontSize 28
+    set x 640
+    set y 300
+    set width 300
+    set height 42
+}
+
+visual "date-1" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "WEEK 3"
+    fontSize 22
+    set x 640
+    set y 425
+    set width 300
+    set height 36
+}
+
+visual "milestone-2" for 2s at 4s {
+    shape circle
+    fill "#2563eb"
+    set x 1060
+    set y 360
+    set width 26
+    set height 26
+}
+
+visual "milestone-text-2" for 2s at 4s {
+    shape text
+    fill "#0f172a"
+    text "RELEASE"
+    fontSize 28
+    set x 1060
+    set y 300
+    set width 300
+    set height 42
+}
+
+visual "date-2" for 2s at 4s {
+    shape text
+    fill "#0f172a"
+    text "WEEK 6"
+    fontSize 22
+    set x 1060
+    set y 425
+    set width 300
+    set height 36
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "A TIMED WALK THROUGH THE DELIVERY PLAN"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

@@ -338,14 +338,20 @@
     <h2>Example Library</h2>
     <details class="example-cli">
         <summary>Audio/Visual examples — V10/V11</summary>
-        @foreach (var preset in VisualPresetCatalog.All)
+        @foreach (var category in VisualPresetCatalog.All.GroupBy(p => p.Category))
         {
-            <article class="text-workflow">
-                <h3>@preset.Title</h3>
-                <p>@preset.Description</p>
-                <button type="button" class="btn btn-secondary" @onclick="() => LoadVisualExample(preset.Key)">Open in Audio/Visual</button>
-                <pre>@(PlaygroundPresetCatalog.CliPrefix + "video examples/" + preset.ExampleFile + " --output clip.webm --fps 30")</pre>
-            </article>
+            <details>
+                <summary>@category.Key</summary>
+                @foreach (var preset in category)
+                {
+                    <article class="text-workflow">
+                        <h3>@preset.Title</h3>
+                        <p>@preset.Description</p>
+                        <button type="button" class="btn btn-secondary" @onclick="() => LoadVisualExample(preset.Key)">Open in Audio/Visual</button>
+                        <pre>@(PlaygroundPresetCatalog.CliPrefix + "video examples/" + preset.ExampleFile + " --output clip.webm --fps 30")</pre>
+                    </article>
+                }
+            </details>
         }
         <p class="hint">CLI WebM encoding requires FFmpeg. Browser Export Clip uses MediaRecorder.</p>
     </details>
@@ -567,9 +573,14 @@
         <div class="presets">
             <label for="visual-example-select">Audio/Visual example:</label>
             <select id="visual-example-select" class="example-select" @bind="SelectedVisualExampleKey" @bind:after="LoadVisualExample" disabled="@VisualIsExporting">
-                @foreach (var preset in VisualPresetCatalog.All)
+                @foreach (var category in VisualPresetCatalog.All.GroupBy(p => p.Category))
                 {
-                    <option value="@preset.Key">@preset.Title</option>
+                    <optgroup label="@category.Key">
+                        @foreach (var preset in category)
+                        {
+                            <option value="@preset.Key">@preset.Title</option>
+                        }
+                    </optgroup>
                 }
             </select>
             <p class="hint">@VisualPresetCatalog.All.Single(p => p.Key == SelectedVisualExampleKey).Description</p>

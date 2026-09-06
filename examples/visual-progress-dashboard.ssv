@@ -1,0 +1,121 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#17132b"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "DEPLOYMENT PROGRESS"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "task-0" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "BUILD"
+    fontSize 26
+    set x 220
+    set y 245
+    set width 240
+    set height 40
+}
+
+visual "rail-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#292041"
+    set x 770
+    set y 245
+    set width 650
+    set height 36
+}
+
+visual "fill-0" for 6s at 0s {
+    shape rectangle
+    fill "#c084fc"
+    set y 245
+    set height 30
+    animate x 449 -> 770 over 1.5s
+    animate width 8 -> 650 over 1.5s
+}
+
+visual "task-1" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "VERIFY"
+    fontSize 26
+    set x 220
+    set y 370
+    set width 240
+    set height 40
+}
+
+visual "rail-1" for 6s at 0s {
+    shape roundedRectangle
+    fill "#292041"
+    set x 770
+    set y 370
+    set width 650
+    set height 36
+}
+
+visual "fill-1" for 4s at 2s {
+    shape rectangle
+    fill "#c084fc"
+    set y 370
+    set height 30
+    animate x 449 -> 770 over 1.5s
+    animate width 8 -> 650 over 1.5s
+}
+
+visual "task-2" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "RELEASE"
+    fontSize 26
+    set x 220
+    set y 495
+    set width 240
+    set height 40
+}
+
+visual "rail-2" for 6s at 0s {
+    shape roundedRectangle
+    fill "#292041"
+    set x 770
+    set y 495
+    set width 650
+    set height 36
+}
+
+visual "fill-2" for 2s at 4s {
+    shape rectangle
+    fill "#c084fc"
+    set y 495
+    set height 30
+    animate x 449 -> 770 over 1.5s
+    animate width 8 -> 650 over 1.5s
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "EACH CHECK COMPLETES BEFORE THE NEXT STAGE"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

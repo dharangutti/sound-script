@@ -1,0 +1,204 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#f1f5f9"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "TEAM RESPONSIBILITIES"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "reporting-stem" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 90.000
+    strokeWidth 3
+    set x 640
+    set y 295
+    set width 90.000
+    set height 8
+}
+
+visual "reporting-bar" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 0.000
+    strokeWidth 3
+    set x 640
+    set y 340
+    set width 760.000
+    set height 8
+}
+
+visual "report-260" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 90.000
+    strokeWidth 3
+    set x 260
+    set y 385
+    set width 90.000
+    set height 8
+}
+
+visual "report-640" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 90.000
+    strokeWidth 3
+    set x 640
+    set y 385
+    set width 90.000
+    set height 8
+}
+
+visual "report-1020" for 6s at 0s {
+    shape line
+    stroke "#2563eb"
+    set rotation 90.000
+    strokeWidth 3
+    set x 1020
+    set y 385
+    set width 90.000
+    set height 8
+}
+
+visual "lead" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 210
+    set width 260
+    set height 104
+}
+
+visual "lead-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "DELIVERY LEAD"
+    fontSize 26
+    set x 640
+    set y 210
+    set width 236
+    set height 40
+}
+
+visual "team-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 260
+    set y 480
+    set width 260
+    set height 104
+}
+
+visual "team-0-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "DESIGN"
+    fontSize 26
+    set x 260
+    set y 480
+    set width 236
+    set height 40
+}
+
+visual "active-0" for 6s at 0s {
+    shape circle
+    fill "#2563eb"
+    set x 260
+    set y 553
+    set width 18
+    set height 18
+}
+
+visual "team-1" for 4s at 2s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 480
+    set width 260
+    set height 104
+}
+
+visual "team-1-label" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "ENGINEERING"
+    fontSize 26
+    set x 640
+    set y 480
+    set width 236
+    set height 40
+}
+
+visual "active-1" for 4s at 2s {
+    shape circle
+    fill "#2563eb"
+    set x 640
+    set y 553
+    set width 18
+    set height 18
+}
+
+visual "team-2" for 2s at 4s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1020
+    set y 480
+    set width 260
+    set height 104
+}
+
+visual "team-2-label" for 2s at 4s {
+    shape text
+    fill "#0f172a"
+    text "OPERATIONS"
+    fontSize 26
+    set x 1020
+    set y 480
+    set width 236
+    set height 40
+}
+
+visual "active-2" for 2s at 4s {
+    shape circle
+    fill "#2563eb"
+    set x 1020
+    set y 553
+    set width 18
+    set height 18
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "ONE OWNER - THREE SPECIALIST TEAMS"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

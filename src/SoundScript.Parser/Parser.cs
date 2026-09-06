@@ -188,7 +188,10 @@ public sealed class Parser
                 };
                 continue;
             }
-            var automation = ParseVisualAutomationStatement(out var propertyToken);
+            Token propertyToken;
+            var automation = MatchContextualWord("set")
+                ? ParseVisualConstant(duration, out propertyToken)
+                : ParseVisualAutomationStatement(out propertyToken);
             if (!properties.Add(automation.Property))
                 throw Invalid(propertyToken, $"Visual '{visual.Name}' animates '{automation.Property}' more than once.");
 
@@ -210,6 +213,18 @@ public sealed class Parser
                 throw Invalid(nameToken, "fontSize requires shape text.");
         }
         return visual with { Presentation = presentation };
+    }
+
+    // Constant properties lower into the existing temporal AST. There is no
+    // second property store or renderer-specific interpretation of `set`.
+    private VisualAutomationNode ParseVisualConstant(TimeSpan duration, out Token propertyToken)
+    {
+        propertyToken = Peek();
+        var property = ParseName("visual property");
+        if (property.ToLowerInvariant() is not ("x" or "y" or "width" or "height" or "size" or "radius" or "rotation" or "opacity"))
+            throw Invalid(propertyToken, "set supports x, y, width, height, size, radius, rotation, and opacity. Use appearance declarations for shape, colors, strokeWidth, and fontSize.");
+        var value = ParseDecimal(Expect(TokenType.Number, "constant visual value"), "constant visual value");
+        return new VisualAutomationNode { Property = property, From = value, To = value, Duration = duration };
     }
 
     private VisualAutomationNode ParseVisualAutomationStatement(out Token propertyToken)

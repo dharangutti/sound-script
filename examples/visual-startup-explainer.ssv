@@ -1,0 +1,85 @@
+tempo 120
+track explanation0 {  speak "check" seed=7 }
+track explanation1 { rest:4 speak "connect" seed=7 }
+track explanation2 { rest:8 speak "start" seed=7 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#fff7ed"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#431407"
+    text "SAFE DEVICE STARTUP"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "icon-0" for 2s at 0s {
+    shape ring
+    stroke "#ea580c"
+    set x 640
+    set y 330
+    set width 160
+    set height 160
+}
+
+visual "caption-0" for 2s at 0s {
+    shape text
+    fill "#431407"
+    text "1. CHECK THE POWER IS OFF"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
+
+visual "icon-1" for 2s at 2s {
+    shape arrow
+    fill "#ea580c"
+    set x 640
+    set y 330
+    set width 160
+    set height 160
+}
+
+visual "caption-2" for 2s at 2s {
+    shape text
+    fill "#431407"
+    text "2. CONNECT THE CABLE"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
+
+visual "icon-2" for 2s at 4s {
+    shape triangle
+    fill "#ea580c"
+    set x 640
+    set y 330
+    set width 160
+    set height 160
+}
+
+visual "caption-4" for 2s at 4s {
+    shape text
+    fill "#431407"
+    text "3. START THE DEVICE"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

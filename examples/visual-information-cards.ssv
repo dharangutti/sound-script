@@ -1,0 +1,133 @@
+tempo 120
+
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#f1f5f9"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "SUPPORT HANDOFF"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "info-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 260
+    set y 330
+    set width 340
+    set height 190
+}
+
+visual "info-0-label" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "OWNER: MAYA"
+    fontSize 26
+    set x 260
+    set y 330
+    set width 316
+    set height 40
+}
+
+visual "detail-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "PLATFORM TEAM"
+    fontSize 20
+    set x 260
+    set y 395
+    set width 300
+    set height 34
+}
+
+visual "info-1" for 5s at 1s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 330
+    set width 340
+    set height 190
+}
+
+visual "info-1-label" for 5s at 1s {
+    shape text
+    fill "#0f172a"
+    text "PRIORITY: NORMAL"
+    fontSize 26
+    set x 640
+    set y 330
+    set width 316
+    set height 40
+}
+
+visual "detail-1" for 5s at 1s {
+    shape text
+    fill "#0f172a"
+    text "RESPONSE: 4 HOURS"
+    fontSize 20
+    set x 640
+    set y 395
+    set width 300
+    set height 34
+}
+
+visual "info-2" for 4s at 2s {
+    shape roundedRectangle
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1020
+    set y 330
+    set width 340
+    set height 190
+}
+
+visual "info-2-label" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "NEXT: FOLLOW UP"
+    fontSize 26
+    set x 1020
+    set y 330
+    set width 316
+    set height 40
+}
+
+visual "detail-2" for 4s at 2s {
+    shape text
+    fill "#0f172a"
+    text "THURSDAY 10:00"
+    fontSize 20
+    set x 1020
+    set y 395
+    set width 300
+    set height 34
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#0f172a"
+    text "A SHAREABLE BRIEF WITH CLEAR OWNERSHIP"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

@@ -164,7 +164,10 @@ public static class AstToNoteEventAdapter
         foreach (var name in trackOrder)
             result[name] = tracks[name].Notes;
 
-        return new WaveAdaptationResult(result, context.SampleOverlays, context.SpeakTimings);
+        return new WaveAdaptationResult(result, context.SampleOverlays, context.SpeakTimings)
+        {
+            TempoMap = context.TempoMap
+        };
     }
 
     private static void ExecuteStatements(

@@ -58,6 +58,7 @@ deterministic.
 | `wait 1s` | Advance only that cursor. It creates no visual. |
 | `visual "badge" for 2s at 6s` | Pin an absolute overlay without moving the narrative cursor. |
 | `animate radius 20 -> 200 over 3s` | Add a local, deterministic linear property curve inside a visual block. |
+| `set x 640` | Constant property; lowered to an equal-endpoint curve over the visual duration. |
 | `sync audio` | Declare that the current visual cursor is an audio-clock synchronization marker. |
 
 Seconds accept `s`, `sec`, `secs`, `second`, or `seconds`; milliseconds accept `ms`, `millisecond`, or `milliseconds`, and are stored as exact
@@ -134,8 +135,9 @@ source remain deterministic.
 
 ## Playground playback
 
-The Playground's Visual Timeline tab compiles the source once, then uses the
-shared deterministic SoundScript.Wave PCM rail for the `track music` rail.
+The Playground's Visual Timeline tab uses shared deterministic SoundScript.Wave
+PCM for notes, voice/sing, speak and Wave effects. Its beat probe uses the Wave
+adapter's tempo map, so Wave-only syntax can compile.
 **Play** starts audio and a monotonic visual clock together; **Pause** stops both
 while keeping the exact current `t`; **Resume** schedules audio from that time;
 **Restart** returns to `t = 0`. Dragging or typing in the scrubber pauses
@@ -201,7 +203,7 @@ A visual block accepts `animate property from -> to over duration`
 directives (`→` is also accepted) and optional [static presentation settings](media-primitives.md).
 Animated values interpolate linearly from the visual's
 local start, then hold their target until the interval ends. For a constant
-property, use equal endpoints: `animate x 0.5 -> 0.5 over 2s`.
+property, use `set x 0.5` or equal endpoints: `animate x 0.5 -> 0.5 over 2s`.
 Durations must be positive; absolute placement may be zero. Each property
 may appear once per visual, with a curve no longer than its visual interval.
 Intervals with equal start times retain source order in the scene.
@@ -219,7 +221,7 @@ Output FPS and codecs belong to the exporter.
 ## Audio/Visual Example Library
 
 Use the Playground's **Audio/Visual** selector, or **Example Library →
-Audio/Visual** in Music & Wave. Each example includes a piano score. The four
+Audio/Visual** in Music & Wave. The original eight examples include piano scores. The four
 original demos below are joined by [four shape-and-style application demos](media-primitives.md):
 
 | Example | What to inspect |
@@ -228,6 +230,10 @@ original demos below are joined by [four shape-and-style application demos](medi
 | [Moving orb](../examples/visual-motion.ssv) | Position, radius, and rotating sparkle; 6 seconds |
 | [Ready, Go, Done](../examples/visual-story.ssv) | Named cards, a one-second gap, width animation, and fades; 7 seconds |
 | [Layered product cue](../examples/visual-overlays.ssv) | Overlap, dimensions, rotation, size, millisecond timing; 8 seconds |
+
+See [20 practical compositions](audio-visual-compositions.md) for categorized
+diagrams, dashboards, teaching examples and the limits of synthetic Voice/speak
+audio in preview and export.
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- visual examples/visual-motion.ssv --at 3

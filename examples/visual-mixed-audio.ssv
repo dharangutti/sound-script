@@ -1,0 +1,103 @@
+tempo 120
+track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+voice guide { vocal choir mp rest:4 sing "go" C4 h }
+track speech { rest:8 speak "done" seed=7 }
+effect delay time=0.125 feedback=0.1 mix=0.08
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#17132b"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "SCORE + WAVE + VOICE"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "score" for 6s at 0s {
+    shape roundedRectangle
+    fill "#292041"
+    stroke "#a78bfa"
+    strokeWidth 2
+    set x 260
+    set y 330
+    set width 260
+    set height 104
+}
+
+visual "score-label" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "SCORE CUES"
+    fontSize 26
+    set x 260
+    set y 330
+    set width 236
+    set height 40
+}
+
+visual "voice" for 4s at 2s {
+    shape roundedRectangle
+    fill "#292041"
+    stroke "#a78bfa"
+    strokeWidth 2
+    set x 640
+    set y 330
+    set width 260
+    set height 104
+}
+
+visual "voice-label" for 4s at 2s {
+    shape text
+    fill "#faf5ff"
+    text "SYNTHETIC GO"
+    fontSize 26
+    set x 640
+    set y 330
+    set width 236
+    set height 40
+}
+
+visual "speech" for 2s at 4s {
+    shape roundedRectangle
+    fill "#292041"
+    stroke "#a78bfa"
+    strokeWidth 2
+    set x 1020
+    set y 330
+    set width 260
+    set height 104
+}
+
+visual "speech-label" for 2s at 4s {
+    shape text
+    fill "#faf5ff"
+    text "SPEAK DONE"
+    fontSize 26
+    set x 1020
+    set y 330
+    set width 236
+    set height 40
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#faf5ff"
+    text "ONE PCM MIX - ONE SHARED TIMELINE"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

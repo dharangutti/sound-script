@@ -1,0 +1,199 @@
+tempo 120
+
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "DEPENDENCY MAP"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "link-0" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 199.855
+    strokeWidth 3
+    set x 460
+    set y 285
+    set width 382.753
+    set height 8
+}
+
+visual "link-1" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 340.145
+    strokeWidth 3
+    set x 820
+    set y 285
+    set width 382.753
+    set height 8
+}
+
+visual "link-2" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 156.038
+    strokeWidth 3
+    set x 460
+    set y 430
+    set width 393.954
+    set height 8
+}
+
+visual "link-3" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 23.962
+    strokeWidth 3
+    set x 820
+    set y 430
+    set width 393.954
+    set height 8
+}
+
+visual "node-0" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 640
+    set y 350
+    set width 210
+    set height 80
+}
+
+visual "node-0-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CORE"
+    fontSize 26
+    set x 640
+    set y 350
+    set width 186
+    set height 40
+}
+
+visual "node-1" for 5s at 1s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 280
+    set y 220
+    set width 210
+    set height 80
+}
+
+visual "node-1-label" for 5s at 1s {
+    shape text
+    fill "#e2e8f0"
+    text "API"
+    fontSize 26
+    set x 280
+    set y 220
+    set width 186
+    set height 40
+}
+
+visual "node-2" for 5s at 1s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1000
+    set y 220
+    set width 210
+    set height 80
+}
+
+visual "node-2-label" for 5s at 1s {
+    shape text
+    fill "#e2e8f0"
+    text "WORKER"
+    fontSize 26
+    set x 1000
+    set y 220
+    set width 186
+    set height 40
+}
+
+visual "node-3" for 5s at 1s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 280
+    set y 510
+    set width 210
+    set height 80
+}
+
+visual "node-3-label" for 5s at 1s {
+    shape text
+    fill "#e2e8f0"
+    text "TESTS"
+    fontSize 26
+    set x 280
+    set y 510
+    set width 186
+    set height 40
+}
+
+visual "node-4" for 5s at 1s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1000
+    set y 510
+    set width 210
+    set height 80
+}
+
+visual "node-4-label" for 5s at 1s {
+    shape text
+    fill "#e2e8f0"
+    text "TOOLS"
+    fontSize 26
+    set x 1000
+    set y 510
+    set width 186
+    set height 40
+}
+
+visual "focus" for 4s at 2s {
+    shape ring
+    stroke "#38bdf8"
+    strokeWidth 3
+    set x 640
+    set y 350
+    set width 250
+    set height 250
+    animate opacity 0.2 -> 1 over 1s
+}
+
+visual "caption-2" for 4s at 2s {
+    shape text
+    fill "#e2e8f0"
+    text "CHANGES TO CORE AFFECT FOUR DEPENDENTS"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}

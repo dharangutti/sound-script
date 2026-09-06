@@ -1,0 +1,211 @@
+tempo 120
+track explanation0 {  speak "edge" seed=7 }
+track explanation1 { rest:4 speak "service" seed=7 }
+track explanation2 { rest:8 speak "store" seed=7 }
+sync audio
+
+visual "background" for 6s at 0s {
+    shape rectangle
+    fill "#0b1220"
+    set x 640
+    set y 360
+    set width 1280
+    set height 720
+}
+
+visual "heading" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "SERVICE BOUNDARIES"
+    fontSize 48
+    set x 640
+    set y 78
+    set width 1100
+    set height 62
+}
+
+visual "service-boundary" for 6s at 0s {
+    shape roundedRectangle
+    fill "none"
+    stroke "#64748b"
+    set x 640
+    set y 380
+    set width 610
+    set height 360
+}
+
+visual "boundary-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "PRIVATE NETWORK"
+    fontSize 22
+    set x 640
+    set y 230
+    set width 450
+    set height 36
+}
+
+visual "edge" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 160
+    set y 390
+    set width 190
+    set height 104
+}
+
+visual "edge-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "EDGE"
+    fontSize 26
+    set x 160
+    set y 390
+    set width 166
+    set height 40
+}
+
+visual "api" for 4s at 2s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 500
+    set y 390
+    set width 210
+    set height 104
+}
+
+visual "api-label" for 4s at 2s {
+    shape text
+    fill "#e2e8f0"
+    text "SERVICE"
+    fontSize 26
+    set x 500
+    set y 390
+    set width 186
+    set height 40
+}
+
+visual "store" for 2s at 4s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 790
+    set y 390
+    set width 210
+    set height 104
+}
+
+visual "store-label" for 2s at 4s {
+    shape text
+    fill "#e2e8f0"
+    text "STORE"
+    fontSize 26
+    set x 790
+    set y 390
+    set width 186
+    set height 40
+}
+
+visual "edge-api" for 4s at 2s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 325
+    set y 390
+    set width 140.000
+    set height 22
+}
+
+visual "api-store" for 2s at 4s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 0.000
+    strokeWidth 3
+    set x 645
+    set y 390
+    set width 80.000
+    set height 22
+}
+
+visual "client" for 6s at 0s {
+    shape roundedRectangle
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+    set x 1100
+    set y 215
+    set width 220
+    set height 104
+}
+
+visual "client-label" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "CLIENT"
+    fontSize 26
+    set x 1100
+    set y 215
+    set width 196
+    set height 40
+}
+
+visual "client-out" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 180.000
+    strokeWidth 3
+    set x 980
+    set y 215
+    set width 20.000
+    set height 8
+}
+
+visual "client-up" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 270.000
+    strokeWidth 3
+    set x 970
+    set y 182.5
+    set width 65.000
+    set height 8
+}
+
+visual "client-route" for 6s at 0s {
+    shape line
+    stroke "#38bdf8"
+    set rotation 180.000
+    strokeWidth 3
+    set x 565
+    set y 150
+    set width 810.000
+    set height 8
+}
+
+visual "client-edge" for 6s at 0s {
+    shape arrow
+    fill "#38bdf8"
+    set rotation 90.000
+    strokeWidth 3
+    set x 160
+    set y 244
+    set width 188.000
+    set height 22
+}
+
+visual "caption-0" for 6s at 0s {
+    shape text
+    fill "#e2e8f0"
+    text "EDGE VALIDATES - SERVICE DECIDES - STORE PERSISTS"
+    fontSize 28
+    set x 640
+    set y 640
+    set width 1120
+    set height 42
+}
