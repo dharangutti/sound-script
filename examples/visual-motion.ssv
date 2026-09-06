@@ -1,0 +1,16 @@
+tempo 120
+track music {
+    instrument piano
+    mf
+    C4 h E4 h G4 h C5 h G4 h C4 h
+}
+sync audio
+visual "circle" for 6s {
+    animate x 0.2 -> 0.8 over 6s
+    animate y 0.5 -> 0.5 over 6s
+    animate radius 30 -> 100 over 3s
+}
+visual "sparkle" for 2s at 4s {
+    animate rotation 0 -> 180 over 2s
+    animate opacity 0 -> 1 over 1s
+}

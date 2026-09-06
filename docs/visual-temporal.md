@@ -1,7 +1,7 @@
 # Temporal Visual Programs
 
 SoundScript visual source describes events and state over continuous time. It
-does not describe frames. A future renderer can sample the same program at 24,
+does not describe frames. A downstream renderer can sample the same program at 24,
 30, or 60 FPS; the authored meaning stays unchanged.
 
 ```ss
@@ -47,7 +47,7 @@ outro:   [8s, 12s), opacity fades during its first 2s
 ```
 
 `[start, end)` is a half-open interval, so `intro` is no longer active at
-exactly `t = 4s`. That removes endpoint ambiguity and keeps adjacent cues
+exactly `t = 3s`. That removes endpoint ambiguity and keeps adjacent cues
 deterministic.
 
 ## Language surface
@@ -60,7 +60,7 @@ deterministic.
 | `animate radius 20 -> 200 over 3s` | Add a local, deterministic linear property curve inside a visual block. |
 | `sync audio` | Declare that the current visual cursor is an audio-clock synchronization marker. |
 
-Seconds accept `s`, `sec`, `seconds`, or `ms`, and are stored as exact
+Seconds accept `s`, `sec`, `secs`, `second`, or `seconds`; milliseconds accept `ms`, `millisecond`, or `milliseconds`, and are stored as exact
 `TimeSpan` ticks. Animation duration must fit inside its visual interval;
 duplicate property curves on the same visual are rejected instead of guessed.
 
@@ -158,3 +158,65 @@ generic card fallback. `opacity` is applied uniformly, while `x`, `y`, `width`,
 `height`, `size`, and `rotation` are renderer-profile properties. This keeps the
 demo and exported clips visually aligned without adding frames or FPS to the
 language.
+
+## Supported presentation primitives and properties (V11)
+
+| Visual name (case-insensitive) | Presentation |
+|---|---|
+| `intro` | Pill labelled “A visual idea begins” |
+| `circle` | Orb with radius-controlled bounds |
+| `product` | Card labelled “PRODUCT” |
+| `sparkle` | Star glyph |
+| Any other quoted name | Generic card labelled with that name |
+
+These are conventions for `visual "name"`, not separate shape keywords.
+Arbitrary names do not load files or generate imagery.
+
+| Animated property | Current renderer behavior |
+|---|---|
+| `opacity` | All primitives; clamped to 0–1, default 1 |
+| `x`, `y` | Centre position; values from 0 to 1 are normalized, others are logical pixels |
+| `width`, `height` | Clamped to 8–1280 and 8–720 logical pixels respectively |
+| `size` | Fallback for each dimension when explicit width/height is absent |
+| `radius` | Circle bounds only; clamped to 12–220, default 72; `size` is a fallback radius before dimension overrides |
+| `rotation` | Degrees, clamped to −360–360 |
+
+The logical viewport is 1280×720. Explicit width/height override bounds derived
+from radius or size. Properties are case-insensitive. Other numeric property
+curves can be stored and inspected, but the scene renderer does not display them.
+
+Media constructs are top-level `visual`, `wait`, and `sync audio` statements.
+A visual block contains only `animate property from -> to over duration`
+directives (`→` is also accepted). Values interpolate linearly from the visual's
+local start, then hold their target until the interval ends. For a constant
+property, use equal endpoints: `animate x 0.5 -> 0.5 over 2s`.
+Durations must be positive; absolute placement may be zero. Each property
+may appear once per visual, with a curve no longer than its visual interval.
+Intervals with equal start times retain source order in the scene.
+
+`sync audio` records a marker at the narrative cursor; it does not delay,
+stretch, or retime the score. Tempo changes affect the beat-to-time bridge,
+while visual durations remain seconds-based. The media PCM track is fitted
+to the visual timeline: longer audio is trimmed, shorter audio is padded with
+silence. Missing external sample files are skipped by the shared media profile.
+
+This surface does not include image/video imports, arbitrary drawing commands,
+visual loops or nested scenes, easing selectors, or authored frame tracks.
+Output FPS and codecs belong to the exporter.
+
+## Audio/Visual Example Library
+
+Use the Playground's **Audio/Visual** selector, or **Example Library →
+Audio/Visual** in Music & Wave. Each example includes a piano score:
+
+| Example | What to inspect |
+|---|---|
+| [Showcase](../examples/visual-temporal.ssv) | Sequential cues, waits, overlap, radius and opacity; 12 seconds |
+| [Moving orb](../examples/visual-motion.ssv) | Position, radius, and rotating sparkle; 6 seconds |
+| [Ready, Go, Done](../examples/visual-story.ssv) | Named cards, a one-second gap, width animation, and fades; 7 seconds |
+| [Layered product cue](../examples/visual-overlays.ssv) | Overlap, dimensions, rotation, size, millisecond timing; 8 seconds |
+
+```bash
+dotnet run --project src/SoundScript.Cli -- visual examples/visual-motion.ssv --at 3
+dotnet run --project src/SoundScript.Cli -- video examples/visual-motion.ssv --output motion.webm --fps 30
+```

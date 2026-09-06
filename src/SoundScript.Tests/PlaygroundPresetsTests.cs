@@ -162,7 +162,9 @@ public partial class PlaygroundPresetsTests
   {
     foreach (Match select in ExampleSelectRegex().Matches(razorMarkup))
       foreach (Match option in OptionValueRegex().Matches(select.Value))
-        yield return option.Groups[1].Value;
+        // Dynamic visual options are verified from their shared catalog in VisualPresetTests.
+        if (!option.Groups[1].Value.StartsWith('@'))
+          yield return option.Groups[1].Value;
   }
 
   [GeneratedRegex("<select[^>]*example-select[^>]*>.*?</select>", RegexOptions.Singleline | RegexOptions.CultureInvariant)]

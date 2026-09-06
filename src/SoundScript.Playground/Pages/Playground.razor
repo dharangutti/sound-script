@@ -25,7 +25,7 @@
                 aria-controls="visual-workspace-panel"
                 tabindex="@(ActiveTab == PlaygroundTab.VisualTimeline ? "0" : "-1")"
                 @onclick="() => SelectTab(PlaygroundTab.VisualTimeline)">
-            Visual Timeline <span aria-hidden="true">✦</span>
+            Audio/Visual <span aria-hidden="true">✦</span>
         </button>
     </nav>
 
@@ -335,7 +335,21 @@
         </p>
     </details>
 
-    @* CLI Examples split into two sections: MIDI-rail and Wave-rail. *@
+    <h2>Example Library</h2>
+    <details class="example-cli">
+        <summary>Audio/Visual examples — V10/V11</summary>
+        @foreach (var preset in VisualPresetCatalog.All)
+        {
+            <article class="text-workflow">
+                <h3>@preset.Title</h3>
+                <p>@preset.Description</p>
+                <button type="button" class="btn btn-secondary" @onclick="() => LoadVisualExample(preset.Key)">Open in Audio/Visual</button>
+                <pre>@(PlaygroundPresetCatalog.CliPrefix + "video examples/" + preset.ExampleFile + " --output clip.webm --fps 30")</pre>
+            </article>
+        }
+        <p class="hint">CLI WebM encoding requires FFmpeg. Browser Export Clip uses MediaRecorder.</p>
+    </details>
+    @* Existing MIDI and Wave CLI libraries. *@
     <div class="cli-examples-split">
         <details class="example-cli-panel cli-examples-section">
             <summary>A · MIDI examples — CLI (@MidiCliPresets.Count)</summary>
@@ -538,8 +552,8 @@
         <div class="visual-tab-heading">
             <div>
                 <span class="badge badge-visual">Temporal visual program</span>
-                <h2>Visual Timeline</h2>
-                <p class="hint">Author intervals and curves once; inspect the same program at any exact moment. There are no frame or FPS controls here.</p>
+                <h2>Audio/Visual — Visual Timeline</h2>
+                <p class="hint">Author intervals and curves once; inspect the same program at any exact moment. FPS is an export setting, separate from the time-based source.</p>
             </div>
             @if (CompiledVisualTimeline is not null)
             {
@@ -550,6 +564,17 @@
             }
         </div>
 
+        <div class="presets">
+            <label for="visual-example-select">Audio/Visual example:</label>
+            <select id="visual-example-select" class="example-select" @bind="SelectedVisualExampleKey" @bind:after="LoadVisualExample" disabled="@VisualIsExporting">
+                @foreach (var preset in VisualPresetCatalog.All)
+                {
+                    <option value="@preset.Key">@preset.Title</option>
+                }
+            </select>
+            <p class="hint">@VisualPresetCatalog.All.Single(p => p.Key == SelectedVisualExampleKey).Description</p>
+            <a href="/doc.html?p=visual-temporal.md">Audio/Visual language reference</a>
+        </div>
         <div class="visual-playback-bar" role="toolbar" aria-label="Visual timeline playback controls">
             <button type="button" class="btn btn-primary" disabled="@(CompiledVisualTimeline is null || VisualIsPlaying || VisualIsPreparing)" @onclick="PlayVisualAsync">
                 @(VisualIsPreparing ? "Preparing…" : VisualTimeSeconds > 0 && !VisualIsPlaying ? "▶ Resume" : "▶ Play")
@@ -631,7 +656,7 @@
                         <span class="visual-seconds-label">s</span>
                     </div>
                     <div class="visual-probe-buttons" aria-label="Timeline checkpoints">
-                        @foreach (var probeTime in VisualProbeTimes)
+                        @foreach (var probeTime in VisualProbeTimes.Where(t => t <= (CompiledVisualTimeline?.Duration.TotalSeconds ?? 0)))
                         {
                             <button type="button" class="visual-probe @(Math.Abs(VisualTimeSeconds - probeTime) < 0.005 ? "is-active" : "")"
                                     @onclick="() => ProbeVisualTimeAsync(probeTime)">@probeTime.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)s</button>

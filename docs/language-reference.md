@@ -1,4 +1,15 @@
-# SoundScript Language Reference (V2)
+# SoundScript Language Reference
+
+## Audio/Visual media (V10/V11)
+
+The audio grammar below remains available. Media programs add top-level
+`visual "name" for 2s`, `wait 1s`, `visual "name" for 2s at 0s`, and
+`sync audio`. Visual blocks accept linear numeric curves such as
+`animate opacity 0 -> 1 over 1s`. V11 renders these states and the shared
+Wave PCM audio to WebM; it adds no frame or codec syntax to the language.
+See the [complete temporal media reference](visual-temporal.md) for all
+time-unit aliases, validation rules, primitives, renderer properties,
+audio timing, and executable examples.
 
 Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. Statements appear at the top level or inside blocks.
 
