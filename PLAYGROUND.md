@@ -1,4 +1,13 @@
-# SoundScript Playground — Verification Checklist (V10)
+# SoundScript Playground — Verification Checklist (V11)
+
+## Audio/Visual examples
+
+Select **Audio/Visual** to load the showcase, moving orb, Ready/Go/Done story,
+or layered product cue. The same four appear under **Example Library** in
+Music & Wave. Each selection resets the visual time to zero and compiles the
+source embedded directly from its repository example. Check Play, Pause,
+Resume, Restart, exact scrubbing, and Export Clip for the selected program.
+See [all media constructs and properties](visual-temporal.md).
 
 Use this checklist after building or deploying the playground.
 

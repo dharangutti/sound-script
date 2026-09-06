@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundScript — Deterministic Audio Programming Language</title>
+    <title>SoundScript — Deterministic Audio and Media Programming Language</title>
     <meta name="description" content="SoundScript is an independent open-source temporal media language for deterministic MIDI, WAV, visual timelines, and browser-playable audio-visual clips. Use the .NET 8 CLI or browser playground, entirely offline and without an account.">
     <meta name="keywords" content="SoundScript, music DSL, music programming language, text to MIDI, MIDI generator, deterministic music, C# music library, music as code, industrial audio cues, browser MIDI playground">
     <meta name="author" content="Anup Jayant Dharangutti">
@@ -13,7 +13,7 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SoundScript">
-    <meta property="og:title" content="SoundScript — Deterministic Audio Programming Language">
+    <meta property="og:title" content="SoundScript — Deterministic Audio and Media Programming Language">
     <meta property="og:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 8 CLI and client-side browser playground.">
     <meta property="og:url" content="https://soundscript.net/">
     <meta property="og:locale" content="en_US">
@@ -22,7 +22,7 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="SoundScript — Deterministic Audio Programming Language">
+    <meta name="twitter:title" content="SoundScript — Deterministic Audio and Media Programming Language">
     <meta name="twitter:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 8 CLI and browser playground.">
     <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
     <meta name="twitter:image:alt" content="SoundScript logo">
@@ -389,7 +389,7 @@
 
         .demo-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 1rem;
         }
 
@@ -815,7 +815,7 @@
             <div class="badge"><!--VERSION_BADGE-->Version: V11 — Temporal Media Export<!--/VERSION_BADGE--></div>
             <h1>Write audio like <span>code</span></h1>
             <p class="lead">
-                SoundScript is an independent open-source audio programming language. Write melodies, phrases,
+                SoundScript is an independent open-source audio and media programming language. Write timed visuals, melodies, phrases,
                 orchestration, vocal cues, and industrial sonification as plain text; compile them to deterministic
                 MIDI, WAV, or a browser-playable audio-visual clip with the .NET CLI or a client-side browser playground.
             </p>
@@ -830,7 +830,7 @@
                 <span class="trust-badge">Offline</span>
                 <span class="trust-badge">Cross Platform</span>
                 <span class="trust-badge">Open Source</span>
-                <span class="trust-badge"><!--METRIC_TESTS-->520+<!--/METRIC_TESTS--> Tests</span>
+                <span class="trust-badge"><!--METRIC_TESTS-->521+<!--/METRIC_TESTS--> Tests</span>
                 <span class="trust-badge">.NET 8</span>
                 <span class="trust-badge">Browser Playground</span>
                 <span class="trust-badge">Temporal A/V Export</span>
@@ -859,8 +859,23 @@
         <main id="main-content">
             <section id="live-demo" aria-labelledby="live-demo-title">
                 <h2 id="live-demo-title">Live Demo</h2>
-                <p class="section-intro">These are repository-generated outputs, not stock or placeholder audio. Each card includes its input, source, MIDI, and WAV.</p>
+                <p class="section-intro">Hear and watch repository-generated outputs. Explore the audio sources below, or play and edit the Audio/Visual demo in the Playground.</p>
                 <div class="demo-grid">
+                    <article class="demo-card">
+                        <h3>Playable Audio/Visual Example</h3>
+                        <p>A piano-backed timeline with sequential cues, an expanding orb, overlapping sparkle, and an outro fade.</p>
+                        <video controls preload="metadata" style="width:100%;border-radius:12px;" aria-label="SoundScript audio and visual showcase">
+                            <source src="assets/demos/visual-temporal.webm" type="video/webm">
+                            <a href="assets/demos/visual-temporal.webm">Download the WebM clip</a>.
+                        </video>
+                        <pre class="demo-input">sync audio
+visual "intro" for 3s
+visual "circle" for 8s at 0s {
+    animate radius 28 -> 170 over 3s
+}</pre>
+                        <div class="demo-actions"><a class="btn btn-secondary" href="playground/#visual-workspace-tab">Play and edit Audio/Visual</a><a class="btn btn-secondary" href="assets/demos/visual-temporal.ssv" download>Download full source</a></div>
+                        <p class="source-note">The full source includes the piano track, all cues, and animations.</p>
+                    </article>
                     <article class="demo-card">
                         <h3>Playable Piano Example</h3>
                         <p>One piano track with phrase shaping and legato articulation.</p>
@@ -981,13 +996,17 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <h2 id="benefits-title">Key Benefits</h2>
                 <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
                 <div class="metric-grid" aria-label="Repository engineering metrics">
-                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->285+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->287+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->16<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
-                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->520+<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->521+<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
                     <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
                     <div class="metric"><span class="metric-value">2 rails</span><span class="metric-label">MIDI and Wave</span></div>
                 </div>
                 <div class="grid-2">
+                    <article class="card">
+                        <h3>Audio and visuals on one clock</h3>
+                        <p>Version timed cues and property curves alongside a musical score. Scrub exact states, preview synchronized audio, and export a WebM clip. Timeline states and source PCM are deterministic; encoded video bytes can vary by encoder.</p>
+                    </article>
                     <article class="card">
                         <h3>Deterministic rendering</h3>
                         <p>Identical scripts produce byte-identical MIDI. Seeded humanization and audio regression checks preserve reproducibility across runs and platforms.</p>
@@ -1014,12 +1033,13 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                             <tr><th scope="col">Property</th><th scope="col">Traditional DAW</th><th scope="col">AI Generator</th><th scope="col">SoundScript</th></tr>
                         </thead>
                         <tbody>
-                            <tr><th scope="row">Reproducibility</th><td>Depends on project, plug-ins, and versions</td><td>Depends on model, seed, and service version</td><td>Byte-stable outputs covered by regression tests</td></tr>
+                            <tr><th scope="row">Reproducibility</th><td>Depends on project, plug-ins, and versions</td><td>Depends on model, seed, and service version</td><td>Byte-stable MIDI/PCM and deterministic visual states; encoded WebM varies by encoder</td></tr>
                             <tr><th scope="row">Git friendly</th><td>Project-format dependent</td><td>Prompts can be versioned; outputs are media files</td><td>Plain-text scripts are diffable</td></tr>
                             <tr><th scope="row">Offline</th><td>Common after installation</td><td>Product and model dependent</td><td>CLI and synthesis pipelines run locally</td></tr>
                             <tr><th scope="row">Deterministic</th><td>Depends on plug-ins and workflow</td><td>Model and seed dependent</td><td>Explicit product invariant</td></tr>
                             <tr><th scope="row">Programmable</th><td>Automation and scripting vary</td><td>API availability varies</td><td>Purpose-built language and C# libraries</td></tr>
                             <tr><th scope="row">Automation</th><td>Host-specific</td><td>Service-specific</td><td>Cross-platform CLI and text files</td></tr>
+                            <tr><th scope="row">Media / Audio-Visual</th><td>Video and synchronization workflows vary by host</td><td>Audio/video generation and editing vary by model</td><td>Text-authored intervals, overlays, linear property curves, shared audio clock, and browser or CLI WebM export</td></tr>
                             <tr><th scope="row">Accessibility</th><td>Interface and host dependent</td><td>Service interface dependent</td><td>Text input, CLI, and keyboard-operable browser UI</td></tr>
                         </tbody>
                     </table>
@@ -1036,12 +1056,12 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                         <pre>visual "intro" for 3s
 visual "circle" for 8s at 0s {
     animate radius 28 -> 170 over 3s
-}</pre><p>Author deterministic state over time, then sample it in the Playground at 24, 30, or 60 FPS to export a WebM clip with the existing MIDI audio rail.</p>
+}</pre><p>Author deterministic state over time, then sample it in the Playground at 24, 30, or 60 FPS to export a WebM clip with the shared SoundScript.Wave PCM audio rail.</p>
                     </article>
                     <article class="card">
                         <span class="cat-tag">V11</span>
                         <h3>Temporal Media Export</h3>
-                        <p>Visual programs remain a deterministic <code>StateAt(t)</code> function. The Playground samples that function only in its WebM renderer, combines it with the established MIDI/Web Audio rail, and downloads a playable clip.</p>
+                        <p>Visual programs remain a deterministic <code>StateAt(t)</code> function. The Playground samples that function only in its WebM renderer, combines it with the shared SoundScript.Wave PCM audio rail, and downloads a playable clip.</p>
                         <p><a href="doc.html?p=visual-temporal.md">Visual timeline and export model →</a></p>
                     </article>
                     <article class="card">
@@ -1095,6 +1115,7 @@ track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
             <section id="use-cases" aria-labelledby="use-cases-title">
                 <h2 id="use-cases-title">Who Is It For?</h2>
                 <div class="use-grid">
+                    <article class="use-card"><h3>Audio/Visual Storytelling</h3><p>Timed title cards, motion studies, and layered product cues with a scripted score. <a href="doc.html?p=use-cases.md">Explore use cases</a>.</p></article>
                     <article class="use-card"><h3>Developers</h3><p>Versioned compositions, CLI workflows, and reusable C# libraries.</p></article>
                     <article class="use-card"><h3>Researchers</h3><p>Repeatable rule-based audio experiments and inspectable pipelines.</p></article>
                     <article class="use-card"><h3>Education</h3><p>Plain-text notation, harmony, orchestration, and synthesis examples.</p></article>
@@ -1103,6 +1124,19 @@ track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
                     <article class="use-card"><h3>Music Technology</h3><p>MIDI, Wave, SoundCSS, phonetics, and programmatic arrangement.</p></article>
                     <article class="use-card"><h3>Interactive Installations</h3><p>Deterministic cue generation for repeatable interactive behavior.</p></article>
                 </div>
+
+                <section id="media-programming" class="industrial-promo" aria-labelledby="media-programming-title">
+                    <h3 id="media-programming-title">Media / Audio-Visual Programming</h3>
+                    <p>V10 adds continuous-time visual programs alongside the existing audio language. V11 projects those states into a shared scene for live playback and browser or CLI WebM export.</p>
+                    <ul class="industrial-list">
+                        <li><strong>Tell a timed story</strong> — sequential visual cues and explicit waits.</li>
+                        <li><strong>Layer motion</strong> — absolute overlays and linear position, size, rotation, radius, and opacity curves.</li>
+                        <li><strong>Inspect any instant</strong> — exact scrubbing and tempo-aware audio-beat queries through <code>StateAt(t)</code>.</li>
+                        <li><strong>Share a clip</strong> — sample at 24, 30, or 60 FPS during export, with a shared Wave PCM audio track.</li>
+                    </ul>
+                    <p>The current presentation profile renders an intro pill, circle/orb, product card, sparkle/star, and generic named cards. These are built-in treatments, not imported image or video assets.</p>
+                    <a href="playground/#visual-workspace-tab">Try four Audio/Visual examples →</a> · <a href="doc.html?p=visual-temporal.md">Read the supported constructs</a>
+                </section>
 
                 <div class="industrial-promo">
                     <h3>SoundScript Industrial Audio</h3>
@@ -1127,16 +1161,20 @@ track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
 
             <section id="architecture" aria-labelledby="architecture-title">
                 <h2 id="architecture-title">Architecture</h2>
-                <p class="section-intro">A shared parser builds the AST. Independent output rails then produce MIDI, direct Wave audio, or vocal-enhanced mixes.</p>
-                <div class="architecture" role="img" aria-label="SoundScript architecture: text passes through the parser to an abstract syntax tree, then branches to MIDI, Wave, and WordBank vocal outputs">
+                <p class="section-intro">A shared parser builds the AST. Independent output rails then produce MIDI, direct Wave audio, vocal-enhanced mixes, or temporal visuals with synchronized media export.</p>
+                <div class="architecture" role="img" aria-label="SoundScript architecture: text passes through the parser to an abstract syntax tree, then branches to MIDI, Wave, WordBank vocal, and visual state outputs; media combines visual scenes with Wave PCM for WebM">
                     <div class="flow-row">
-                        <span class="flow-node"><strong>Text</strong><small>.ss / .ssw</small></span><span class="flow-arrow">→</span>
+                        <span class="flow-node"><strong>Text</strong><small>.ss / .ssw / .ssv</small></span><span class="flow-arrow">→</span>
                         <span class="flow-node"><strong>Parser</strong><small>syntax + imports</small></span><span class="flow-arrow">→</span>
                         <span class="flow-node"><strong>AST</strong><small>shared program model</small></span>
                     </div>
                     <div class="flow-row"><span class="flow-label">MIDI rail</span><span class="flow-node">Interpreter</span><span class="flow-arrow">→</span><span class="flow-node">Composer + shaping</span><span class="flow-arrow">→</span><span class="flow-node"><strong>MIDI</strong><small>standard file</small></span></div>
                     <div class="flow-row"><span class="flow-label">Wave rail</span><span class="flow-node">AST adapter</span><span class="flow-arrow">→</span><span class="flow-node">Synth + effects</span><span class="flow-arrow">→</span><span class="flow-node"><strong>WAV</strong><small>direct render</small></span></div>
                     <div class="flow-row"><span class="flow-label">Vocal rail</span><span class="flow-node">WordBank</span><span class="flow-arrow">→</span><span class="flow-node">Vocal stems</span><span class="flow-arrow">→</span><span class="flow-node"><strong>WAV mix</strong><small>offline vocals</small></span></div>
+                </div>
+                <div class="architecture" aria-label="Additional visual and media branches from the shared AST">
+                    <div class="flow-row"><span class="flow-label">Visual rail · AST</span><span class="flow-node">VisualInterpreter</span><span class="flow-arrow">→</span><span class="flow-node">VisualTimeline · StateAt(t)</span><span class="flow-arrow">→</span><span class="flow-node">Canonical scene</span></div>
+                    <div class="flow-row"><span class="flow-label">Audio/Visual output</span><span class="flow-node">Scene + Wave PCM</span><span class="flow-arrow">→</span><span class="flow-node">Live preview / export plan</span><span class="flow-arrow">→</span><span class="flow-node"><strong>WebM</strong><small>Browser / FFmpeg CLI</small></span></div>
                 </div>
                 <div class="pipeline" style="margin-top:1rem;" aria-label="Detailed MIDI processing pipeline">
                     <span>Import</span><span class="arrow">→</span><span>Parser</span><span class="arrow">→</span>
@@ -1150,6 +1188,8 @@ track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
             <section id="technical-highlights" aria-labelledby="technical-title">
                 <h2 id="technical-title">Technical Highlights</h2>
                 <div class="grid-2">
+                    <article class="card"><span class="cat-tag">V10</span><h3>Temporal Visual Programs</h3><p>Exact time intervals, absolute overlays, linear automation, audio synchronization markers, and a tempo-aware beat bridge. Play, pause, resume, restart, and scrub the same compiled timeline.</p></article>
+                    <article class="card"><span class="cat-tag">V11</span><h3>Shared Media Rendering</h3><p>One canonical scene profile and fitted Wave PCM track feed live preview, browser WebM, and CLI WebM. Output FPS belongs to the export adapter. CLI encoding requires FFmpeg; browser export requires canvas capture and MediaRecorder.</p></article>
                     <article class="card">
                         <span class="cat-tag">V9</span>
                         <h3>WordBank Vocal Engine</h3>
@@ -1178,6 +1218,12 @@ track melody { play arp Cmaj q play strumPat Cmaj q }</pre>
 
                 <h3 style="margin:2rem 0 0.75rem;">Language Surface</h3>
                 <div class="grid-2">
+                    <article class="card"><h3>Audio/Visual · V10/V11</h3><pre>sync audio
+visual "intro" for 2s
+wait 500ms
+visual "circle" for 3s at 0s {
+    animate radius 24 -> 120 over 3s
+}</pre><p>Time-based source; V11 adds downstream WebM rendering. <a href="doc.html?p=visual-temporal.md">All media constructs and properties</a></p></article>
                     <article class="card"><h3>Imports &amp; Blocks</h3><pre>import "lib.ss"
 block intro { ... }
 play intro</pre><p><a href="doc.html?p=imports.md">Imports</a> · <a href="doc.html?p=blocks.md">Blocks</a></p></article>
@@ -1217,7 +1263,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <div class="grid-2">
                     <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=user-guide.md"><strong>User Guide</strong></a><br><a href="doc.html?p=SoundScript.md">Documentation hub</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
                     <article class="card"><h3>Language &amp; CLI</h3><p><a href="doc.html?p=language-reference.md">Language reference</a><br><a href="doc.html?p=cli.md">CLI reference</a><br><a href="doc.html?p=notation.md">Notation engine</a><br><a href="doc.html?p=expressive-notation.md">Expressive notation</a></p></article>
-                    <article class="card"><h3>Current Release — V11</h3><p><a href="doc.html?p=visual-temporal.md">Temporal media export</a><br><a href="playground/">Visual Timeline Playground</a><br><a href="doc.html?p=examples.md">Runnable examples</a></p></article>
+                    <article class="card"><h3>Audio/Visual — V10/V11</h3><p><a href="doc.html?p=whats-new-v11.md">V11 media export</a><br><a href="doc.html?p=visual-temporal.md">V10 timing and supported primitives</a><br><a href="doc.html?p=use-cases.md">Audio/Visual use cases</a><br><a href="doc.html?p=visual-temporal.md">Temporal media export</a><br><a href="playground/#visual-workspace-tab">Audio/Visual Playground</a><br><a href="doc.html?p=examples.md">Runnable examples</a></p></article>
                     <article class="card"><h3>Wave &amp; Vocals</h3><p><a href="doc.html?p=wave-grammar.md">Wave grammar</a><br><a href="doc.html?p=vocal.md">Vocal tracks</a><br><a href="doc.html?p=whats-new-v8.md">V8 vocal stems</a><br><a href="doc.html?p=playback-quality.md">Playback quality</a></p></article>
                     <article class="card"><h3>Composition</h3><p><a href="doc.html?p=text-to-melody.md">Text-to-melody</a><br><a href="doc.html?p=phrases.md">Phrases</a><br><a href="doc.html?p=orchestration.md">Orchestration</a><br><a href="doc.html?p=tempo-automation.md">Tempo automation</a></p></article>
                     <article class="card"><h3>Engine Internals</h3><p><a href="doc.html?p=architecture.md">Architecture</a><br><a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br><a href="doc.html?p=timbre-engine.md">Timbre engine</a><br><a href="doc.html?p=whats-new-v1.2.md">v1.2 foundation</a></p></article>
@@ -1227,7 +1273,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V11</span><div><strong>Temporal Media Export</strong><span class="release-label">Current</span><br>Visual programs stay time-based and deterministic while the Playground samples them at a selected output FPS to create a browser-playable WebM clip with synchronized MIDI audio. <a href="doc.html?p=visual-temporal.md">Release details →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V11</span><div><strong>Temporal Media Export</strong><span class="release-label">Current</span><br>Visual programs stay time-based and deterministic while the Playground samples them at a selected output FPS to create a browser-playable WebM clip with synchronized Wave PCM audio. <a href="doc.html?p=visual-temporal.md">Release details →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
                     <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V7</span><div>SoundScript.Wave renders <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV through <code>speak</code>, effects, and seeded humanization.</div></li>
@@ -1253,7 +1299,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
                 <a href="/contact/">Contact</a>
             </p>
-            <p style="margin-top:0.5rem;">Independent Open Source Project · MIT License · Deterministic Audio Programming Language</p>
+            <p style="margin-top:0.5rem;">Independent Open Source Project · MIT License · Deterministic Audio and Media Programming Language</p>
             <p style="margin-top:0.5rem;">© SoundScript · <a href="mailto:info@dharangutti.in">info@dharangutti.in</a> · <a href="https://dharangutti.in">dharangutti.in</a></p>
         </footer>
     </div>
