@@ -1,4 +1,5 @@
 using SoundScript.Visual;
+using SoundScript.Core.Ast;
 
 namespace SoundScript.Media;
 
@@ -28,7 +29,8 @@ public sealed record TemporalVideoSample(double TimeSeconds, IReadOnlyList<Tempo
 /// <summary>A renderer-friendly visual state that has already been evaluated by the temporal timeline.</summary>
 public sealed record TemporalVideoElement(
     string Name,
-    IReadOnlyList<TemporalVideoProperty> Properties);
+    IReadOnlyList<TemporalVideoProperty> Properties,
+    VisualPresentation? Presentation = null);
 
 public sealed record TemporalVideoProperty(string Name, decimal Value);
 
@@ -56,7 +58,7 @@ public static class TemporalVideoExportPlanBuilder
                 Array.AsReadOnly(state.Elements.Select(element => new TemporalVideoElement(
                     element.Name,
                     Array.AsReadOnly(element.Properties.Select(property =>
-                        new TemporalVideoProperty(property.Property, property.Value)).ToArray()))).ToArray()));
+                        new TemporalVideoProperty(property.Property, property.Value)).ToArray()), element.Presentation)).ToArray()));
         }
 
         return new TemporalVideoExportPlan(

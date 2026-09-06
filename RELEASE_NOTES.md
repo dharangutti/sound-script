@@ -2,6 +2,13 @@
 
 ## V11 — Temporal Media Export
 
+- **Media primitives extension:** optional explicit rectangle, rounded rectangle,
+  ellipse, circle, triangle, line, arrow, ring, and text presentations.
+- Static RGB fills/outlines, outline thickness, and portable bitmap text sizing.
+  Shared paths preserve shape transforms across browser and CLI rendering.
+- Four additional application demos: progress, process diagram, instructions,
+  and status. See [docs/media-primitives.md](docs/media-primitives.md).
+
 - Shared canonical scenes and SoundScript.Wave PCM for live preview and WebM.
 - Browser Export Clip at 24/30/60 FPS; CLI `video` export through FFmpeg.
 - Four Audio/Visual presets in the Playground and Example Library.

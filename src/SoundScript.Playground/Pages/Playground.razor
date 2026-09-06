@@ -574,6 +574,7 @@
             </select>
             <p class="hint">@VisualPresetCatalog.All.Single(p => p.Key == SelectedVisualExampleKey).Description</p>
             <a href="/doc.html?p=visual-temporal.md">Audio/Visual language reference</a>
+            <a href="/doc.html?p=media-primitives.md">Shapes, colors, and text</a>
         </div>
         <div class="visual-playback-bar" role="toolbar" aria-label="Visual timeline playback controls">
             <button type="button" class="btn btn-primary" disabled="@(CompiledVisualTimeline is null || VisualIsPlaying || VisualIsPreparing)" @onclick="PlayVisualAsync">
@@ -614,6 +615,15 @@
                     <button type="button" class="btn btn-secondary" @onclick="ResetVisualDemo">Reset demo</button>
                     <button type="button" class="btn btn-secondary" @onclick="CopyVisualScriptAsync">Copy</button>
                 </div>
+                <details class="script-details">
+                    <summary>Use a custom shape</summary>
+                    <p class="hint">Choose rectangle, roundedRectangle, ellipse, circle, triangle, line, arrow, ring, or text. Use quoted #RRGGBB colors. Line and ring use stroke; text uses fill and a portable uppercase bitmap font.</p>
+                    <pre>visual "indicator" for 3s {
+    shape rectangle
+    fill "#6ee7b7"
+    animate width 20 -&gt; 300 over 3s
+}</pre>
+                </details>
 
                 @if (!string.IsNullOrEmpty(VisualStatusMessage))
                 {

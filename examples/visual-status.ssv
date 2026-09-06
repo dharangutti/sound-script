@@ -1,0 +1,35 @@
+tempo 120
+track music { instrument piano mp C4 h E4 h G4 h C5 h A4 h G4 h E4 h C4 h }
+sync audio
+visual "status ring" for 8s {
+    shape ring
+    stroke "#6ee7b7"
+    strokeWidth 8
+    animate radius 70 -> 100 over 4s
+    animate x 350 -> 350 over 8s
+}
+visual "status dot" for 8s at 0s {
+    shape circle
+    fill "#6ee7b7"
+    animate radius 32 -> 50 over 4s
+    animate x 350 -> 350 over 8s
+}
+visual "status badge" for 8s at 0s {
+    shape ellipse
+    fill "#1e3a5f"
+    stroke "#38bdf8"
+    strokeWidth 3
+    animate x 850 -> 850 over 8s
+    animate width 360 -> 360 over 8s
+    animate height 150 -> 150 over 8s
+    animate rotation 0 -> 12 over 8s
+}
+visual "status label" for 8s at 0s {
+    shape text
+    text "SYSTEM OK"
+    fontSize 32
+    fill "#f8fafc"
+    animate x 850 -> 850 over 8s
+    animate width 300 -> 300 over 8s
+    animate rotation 0 -> 12 over 8s
+}

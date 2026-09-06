@@ -19,6 +19,21 @@ application. The renderer uses built-in visual treatments and named cards.
 See [all supported constructs and properties](visual-temporal.md).
 
 ## Audio workflows
+## More application options with explicit primitives
+
+| Use case | Primitives | Runnable demo |
+|---|---|---|
+| Timed progress and loading presentations | Rectangle, rounded panel, text | [Progress indicator](../examples/visual-progress.ssv) |
+| Process explanations and training | Panels, labels, arrows, dividers | [Process diagram](../examples/visual-process.ssv) |
+| Direction and instructional cues | Rotating triangle, sequential captions | [Instruction sequence](../examples/visual-instructions.ssv) |
+| Status and monitoring prototypes | Ring, circle, ellipse, status label | [Status display](../examples/visual-status.ssv) |
+
+Set fills and outlines to suit the application, then animate position, dimensions,
+opacity, and rotation. These examples play authored timelines; an application
+must supply any external events or live data. Text uses a portable uppercase
+bitmap font. See [the complete primitives reference](media-primitives.md).
+
+## Audio workflows
 
 - **Developers and music technology:** diffable compositions, reusable blocks,
   phrases, patterns, orchestration, MIDI, and direct WAV synthesis.

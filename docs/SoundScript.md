@@ -4,12 +4,16 @@ SoundScript is an open-source, deterministic media DSL that compiles text to MID
 
 ### V11 Media Features
 
+The [Media Primitives reference](media-primitives.md) covers explicit shapes,
+fills, outlines, portable text, animation, and the four new application demos.
+
 | Document | Description |
 |----------|-------------|
 | [whats-new-v11.md](whats-new-v11.md) | Shared scene and PCM rendering, browser and CLI WebM export |
 | [use-cases.md](use-cases.md) | Audio and Audio/Visual use cases with runnable examples |
 | [visual-temporal.md](visual-temporal.md) | Complete supported media constructs, presentation primitives, and properties |
-| [examples.md](examples.md) | Example Library including four Audio/Visual programs |
+| [examples.md](examples.md) | Example Library including eight Audio/Visual programs |
+| [media-primitives.md](media-primitives.md) | Explicit shapes, colors, outlines, portable text, and application demos |
 
 ### V10 Features
 

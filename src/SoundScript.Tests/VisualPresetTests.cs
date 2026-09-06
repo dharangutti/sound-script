@@ -14,6 +14,10 @@ public class VisualPresetTests
     [InlineData("visual-motion", 6, 2)]
     [InlineData("visual-story", 7, 3)]
     [InlineData("visual-overlays", 8, 3)]
+    [InlineData("visual-progress", 6, 3)]
+    [InlineData("visual-process", 8, 6)]
+    [InlineData("visual-instructions", 6, 4)]
+    [InlineData("visual-status", 8, 4)]
     public void Presets_CompileAndRenderThePublishedSource(string key, int seconds, int visuals)
     {
         var preset = VisualPresetCatalog.All.Single(p => p.Key == key);

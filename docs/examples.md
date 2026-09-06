@@ -2,6 +2,13 @@
 
 ## Audio/Visual Example Library — V10/V11
 
+The library now also includes [Progress indicator](../examples/visual-progress.ssv),
+[Process diagram](../examples/visual-process.ssv),
+[Instruction sequence](../examples/visual-instructions.ssv), and
+[Status display](../examples/visual-status.ssv). These four application demos use
+explicit shapes, colors, outlines, and portable text. See their
+[feature and duration table](media-primitives.md).
+
 All four programs include a musical score. Load them in the Playground's
 **Audio/Visual** selector or **Example Library**, then play, scrub, and export.
 

@@ -1,0 +1,28 @@
+tempo 120
+track music { instrument piano mf C4 h E4 h G4 h C5 h G4 h C4 h }
+sync audio
+visual "progress rail" for 6s {
+    shape roundedRectangle
+    fill "#172b3a"
+    stroke "#94a3b8"
+    strokeWidth 2
+    animate x 640 -> 640 over 6s
+    animate y 400 -> 400 over 6s
+    animate width 680 -> 680 over 6s
+    animate height 80 -> 80 over 6s
+}
+visual "progress fill" for 6s at 0s {
+    shape rectangle
+    fill "#6ee7b7"
+    animate x 325 -> 640 over 6s
+    animate y 400 -> 400 over 6s
+    animate width 10 -> 640 over 6s
+    animate height 40 -> 40 over 6s
+}
+visual "heading" for 6s at 0s {
+    shape text
+    text "LOADING DEMO"
+    fontSize 48
+    fill "#f8fafc"
+    animate y 260 -> 260 over 6s
+}

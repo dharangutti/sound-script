@@ -1,0 +1,48 @@
+tempo 120
+track music { instrument piano mp C4 h E4 h G4 h C5 h A4 h G4 h E4 h C4 h }
+sync audio
+visual "input panel" for 8s {
+    shape roundedRectangle
+    fill "#1e3a5f"
+    stroke "#38bdf8"
+    strokeWidth 3
+    animate x 320 -> 320 over 8s
+    animate width 260 -> 260 over 8s
+}
+visual "output panel" for 8s at 0s {
+    shape roundedRectangle
+    fill "#164e3c"
+    stroke "#6ee7b7"
+    strokeWidth 3
+    animate x 960 -> 960 over 8s
+    animate width 260 -> 260 over 8s
+}
+visual "flow" for 8s at 0s {
+    shape arrow
+    fill "#fbbf24"
+    animate width 100 -> 240 over 4s
+    animate height 70 -> 70 over 8s
+}
+visual "input label" for 8s at 0s {
+    shape text
+    text "INPUT"
+    fontSize 32
+    fill "#f8fafc"
+    animate x 320 -> 320 over 8s
+    animate width 220 -> 220 over 8s
+}
+visual "output label" for 8s at 0s {
+    shape text
+    text "OUTPUT"
+    fontSize 32
+    fill "#f8fafc"
+    animate x 960 -> 960 over 8s
+    animate width 220 -> 220 over 8s
+}
+visual "divider" for 8s at 0s {
+    shape line
+    stroke "#94a3b8"
+    strokeWidth 3
+    animate width 920 -> 920 over 8s
+    animate y 510 -> 510 over 8s
+}

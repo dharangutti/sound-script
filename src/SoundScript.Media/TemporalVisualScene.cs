@@ -26,7 +26,10 @@ public sealed record TemporalVisualPrimitive(
     decimal Width,
     decimal Height,
     decimal Opacity,
-    decimal RotationDegrees);
+    decimal RotationDegrees)
+{
+    public IReadOnlyList<TemporalShapePath>? Paths { get; init; }
+}
 
 /// <summary>
 /// The visual export adapter's immutable scene observations. FPS exists on
@@ -57,7 +60,7 @@ public static class TemporalVisualSceneBuilder
             Array.AsReadOnly(state.Elements.Select(element => new TemporalVideoElement(
                 element.Name,
                 Array.AsReadOnly(element.Properties.Select(property =>
-                    new TemporalVideoProperty(property.Property, property.Value)).ToArray()))).ToArray()));
+                    new TemporalVideoProperty(property.Property, property.Value)).ToArray()), element.Presentation)).ToArray()));
         return Build(sample);
     }
 
@@ -82,6 +85,8 @@ public static class TemporalVisualSceneBuilder
 
     private static TemporalVisualPrimitive Project(TemporalVideoElement element)
     {
+        if (element.Presentation is not null)
+            return TemporalShapeGeometry.Project(element);
         var kind = KnownKind(element.Name);
         var (label, left, top, width, height, rotation) = kind switch
         {

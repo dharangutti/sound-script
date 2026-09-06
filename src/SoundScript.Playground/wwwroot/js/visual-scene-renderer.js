@@ -257,6 +257,32 @@ window.SoundScriptVisualRenderer = (function () {
     }
 
     function drawPrimitive(context, primitive) {
+        if (primitive && Array.isArray(primitive.paths)) {
+            // Positions and rotation have already been resolved by the shared geometry builder.
+            context.save();
+            context.globalAlpha = clamp(number(primitive.opacity, 1), 0, 1);
+            context.lineJoin = 'round';
+            context.lineCap = 'round';
+            for (const path of primitive.paths) {
+                if (!path.points || path.points.length === 0) continue;
+                context.beginPath();
+                context.moveTo(path.points[0].x, path.points[0].y);
+                for (let i = 1; i < path.points.length; i++)
+                    context.lineTo(path.points[i].x, path.points[i].y);
+                if (path.closed) context.closePath();
+                if (path.closed && path.fill !== 'none') {
+                    context.fillStyle = path.fill;
+                    context.fill();
+                }
+                if (path.stroke !== 'none' && path.strokeWidth > 0) {
+                    context.strokeStyle = path.stroke;
+                    context.lineWidth = path.strokeWidth;
+                    context.stroke();
+                }
+            }
+            context.restore();
+            return;
+        }
         const normalized = normalizedPrimitive(primitive);
         if (normalized.opacity <= 0) {
             return;
