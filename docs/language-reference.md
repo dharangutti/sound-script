@@ -1,5 +1,7 @@
 # SoundScript Language Reference
 
+For editor-focused authoring features, see [Authoring ergonomics](authoring.md).
+
 ## Audio/Visual media (V10/V11)
 
 Visual blocks also support explicit shapes and static appearance declarations:
@@ -22,7 +24,8 @@ Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. 
 
 ## Lexical Rules
 
-- **Comments:** none — `#` is not a comment token.
+- **Comments:** `//` line comments and `/* ... */` block comments. `#` remains a
+  literal outside quoted colors and is not a comment token.
 - **Case:** keywords are case-insensitive (`Melody`, `melody`, `MELODY` are equivalent).
 - **Strings:** `"relative/path.ss"` for imports.
 - **Numbers:** integers or decimals (`120`, `0.5`, `1.5`).

@@ -9,7 +9,7 @@ using SoundScript.Core.Notation;
 
 namespace SoundScript.Parser;
 
-public sealed class Parser
+public sealed partial class Parser
 {
     private readonly IReadOnlyList<Token> _tokens;
     private int _position;
@@ -25,6 +25,9 @@ public sealed class Parser
 
         while (!Check(TokenType.EndOfFile))
         {
+            if (MatchContextualWord("let")) { ParseConstantDeclaration(false); continue; }
+            if (MatchContextualWord("marker")) { ParseConstantDeclaration(true); continue; }
+            if (MatchContextualWord("style")) { ParseStyleDeclaration(); continue; }
             program.Statements.Add(ParseTopLevelStatement());
         }
 
@@ -167,8 +170,17 @@ public sealed class Parser
         var properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var settings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         VisualPresentation? presentation = null;
+        Dictionary<string, Token>? style = null;
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
+            if (MatchContextualWord("use"))
+            {
+                var reference = Expect(TokenType.StringLiteral, "quoted style name");
+                if (style is not null) throw Invalid(reference, "Use one style per visual; override its values locally.");
+                if (!_styles.TryGetValue(reference.Value, out style))
+                    throw Invalid(reference, $"Unknown style '{reference.Value}'. Declare it before use.");
+                continue;
+            }
             var settingToken = Peek();
             var setting = settingToken.Value.ToLowerInvariant();
             if (setting is "shape" or "fill" or "stroke" or "strokewidth" or "text" or "fontsize")
@@ -205,6 +217,16 @@ public sealed class Parser
         }
 
         Expect(TokenType.RightBrace, "}");
+        if (style is not null)
+        {
+            presentation ??= new VisualPresentation();
+            foreach (var entry in style)
+                if (!settings.Contains(entry.Key))
+                {
+                    presentation = ApplyStyleValue(presentation, entry.Key, entry.Value);
+                    settings.Add(entry.Key);
+                }
+        }
         if (presentation is not null)
         {
             try { presentation.Validate(); }
@@ -223,7 +245,7 @@ public sealed class Parser
         var property = ParseName("visual property");
         if (property.ToLowerInvariant() is not ("x" or "y" or "width" or "height" or "size" or "radius" or "rotation" or "opacity"))
             throw Invalid(propertyToken, "set supports x, y, width, height, size, radius, rotation, and opacity. Use appearance declarations for shape, colors, strokeWidth, and fontSize.");
-        var value = ParseDecimal(Expect(TokenType.Number, "constant visual value"), "constant visual value");
+        var value = ParseNumericExpression();
         return new VisualAutomationNode { Property = property, From = value, To = value, Duration = duration };
     }
 
@@ -265,6 +287,14 @@ public sealed class Parser
     /// </summary>
     private TimeSpan ParseSeconds(string description, bool allowZero)
     {
+        if (Check(TokenType.Identifier) && _constants.TryGetValue(Peek().Value, out var constant))
+        {
+            var reference = Advance();
+            if (constant.Time is not { } time) throw Invalid(reference, $"{description} requires a time constant.");
+            if (time < TimeSpan.Zero || (!allowZero && time == TimeSpan.Zero))
+                throw Invalid(reference, $"{description} must be {(allowZero ? "non-negative" : "greater than zero")}.");
+            return time;
+        }
         var valueToken = Expect(TokenType.Number, description);
         var unitToken = Expect(TokenType.Identifier, "seconds unit (s, sec, or seconds)");
         var unit = unitToken.Value.ToLowerInvariant();
@@ -1537,6 +1567,14 @@ public sealed class Parser
 
     private Token Expect(TokenType type, string description)
     {
+        if (type is TokenType.Number or TokenType.StringLiteral && Check(TokenType.Identifier)
+            && _constants.TryGetValue(Peek().Value, out var constant))
+        {
+            var reference = Advance();
+            if (constant.Time is not null || constant.Value.Type != type)
+                throw Invalid(reference, $"Constant '{reference.Value}' has the wrong type for {description}.");
+            return constant.Value with { Line = reference.Line, Column = reference.Column };
+        }
         if (!Check(type))
             throw Invalid(Peek(), $"Expected {description}.");
 
