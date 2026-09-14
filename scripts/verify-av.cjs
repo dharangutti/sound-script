@@ -37,7 +37,7 @@ function validate(file, kind, key) {
   if (process.argv.includes('--cli')) {
     for(const key of keys) {
       const file=path.join(directory,key+'.cli.webm');
-      execFileSync('dotnet',[path.join(root,'src/SoundScript.Cli/bin/Debug/net8.0/soundscript.dll'),'video',path.join(root,`examples/visual-${key}.ssv`),'--output',file,'--fps','24','--width','640','--height','360'],{stdio:'pipe',timeout:180000});
+      execFileSync('dotnet',[path.join(root,'src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll'),'video',path.join(root,`examples/visual-${key}.ssv`),'--output',file,'--fps','24','--width','640','--height','360'],{stdio:'pipe',timeout:180000});
       validate(file,'cli',key);
     }
     saveResults('cli'); return;

@@ -84,7 +84,7 @@ public class ComposeWaveCliTests
     {
         var cliDll = Path.GetFullPath(Path.Combine(
             AppContext.BaseDirectory,
-            "../../../../SoundScript.Cli/bin/Debug/net8.0/soundscript.dll"));
+            "../../../../SoundScript.Cli/bin/Debug/net10.0/soundscript.dll"));
 
         var psi = new ProcessStartInfo
         {

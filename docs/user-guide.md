@@ -35,7 +35,7 @@ SoundScript is a deterministic music language: you write plain text, the engine 
 
 **No install:** open the [Playground](https://soundscript.net/playground/). It runs entirely in your browser (Chrome, Edge, Firefox, Safari — desktop and mobile), compiles your script client-side, and plays the result with Web Audio.
 
-**CLI (Windows, macOS, Linux):** requires the .NET 8 SDK.
+**CLI (Windows, macOS, Linux):** requires the .NET 10 SDK.
 
 ```bash
 git clone https://github.com/dharangutti/sound-script.git

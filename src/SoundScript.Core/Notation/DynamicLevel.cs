@@ -6,7 +6,11 @@ public enum DynamicLevel
     Piano,
     MezzoPiano,
     MezzoForte,
-    Forte
+    Forte,
+    Pianissimo,
+    Fortissimo,
+    Sforzando,
+    Fortepiano
 }
 
 public static class DynamicLevelExtensions
@@ -17,6 +21,10 @@ public static class DynamicLevelExtensions
         DynamicLevel.MezzoPiano => 64,
         DynamicLevel.MezzoForte => 80,
         DynamicLevel.Forte => 96,
+        DynamicLevel.Pianissimo => 32,
+        DynamicLevel.Fortissimo => 112,
+        DynamicLevel.Sforzando => 120,
+        DynamicLevel.Fortepiano => 104,
         _ => throw new ArgumentOutOfRangeException(nameof(level))
     };
 }

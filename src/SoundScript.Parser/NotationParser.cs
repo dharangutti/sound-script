@@ -8,8 +8,10 @@ namespace SoundScript.Parser;
 /// </summary>
 public static class NotationParser
 {
-  private const int MinOctave = 0;
-  private const int MaxOctave = 8;
+  // MIDI names use C-1 (0) through G9 (127). The octave is validated by
+  // resolved MIDI value so the final octave correctly stops at G9.
+  private const int MinOctave = -1;
+  private const int MaxOctave = 9;
 
   /// <summary>Parses pitch letter and optional accidental from a note token.</summary>
   public static (PitchClass PitchClass, AccidentalType Accidental, int Octave) ParsePitchWithAccidental(
@@ -54,6 +56,10 @@ public static class NotationParser
 
     if (octave < MinOctave || octave > MaxOctave)
       throw InvalidOctave(octave, token);
+
+    var midi = new NotatedNote { PitchClass = pitchClass, Accidental = accidental, Octave = octave }.ToMidiNumber();
+    if (midi is < 0 or > 127)
+      throw Invalid(token, $"MIDI note is outside the supported range 0-127: {midi}");
 
     return (pitchClass, accidental, octave);
   }
@@ -153,10 +159,14 @@ public static class NotationParser
   public static DynamicLevel ParseDynamic(string value, Token token) =>
       value.ToLowerInvariant() switch
       {
+        "ppp" => DynamicLevel.Pianissimo,
         "p" => DynamicLevel.Piano,
         "mp" => DynamicLevel.MezzoPiano,
         "mf" => DynamicLevel.MezzoForte,
         "f" => DynamicLevel.Forte,
+        "ff" or "fff" => DynamicLevel.Fortissimo,
+        "sfz" => DynamicLevel.Sforzando,
+        "fp" => DynamicLevel.Fortepiano,
         _ => throw Invalid(token, $"Unknown dynamic marking: '{value}'")
       };
 

@@ -4,7 +4,7 @@ Write deterministic music and media as code.
 
 [![Tests](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml/badge.svg)](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![.NET 8](https://img.shields.io/badge/.NET-8-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 SoundScript turns plain text and `.ss` / `.ssw` / `.ssv` scripts into reproducible
 MIDI, WAV, and WebM files. The cross-platform `soundscript` CLI validates and
@@ -28,7 +28,7 @@ For automation, CI, and version-controlled assets, use the CLI.
 
 ## Quick start
 
-Requirements: the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+Requirements: the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```bash
 git clone https://github.com/dharangutti/sound-script.git
@@ -140,7 +140,7 @@ is [Directory.Build.props](Directory.Build.props), and release history is in
 
 ## Supported platforms
 
-- CLI: Windows, macOS, and Linux with .NET 8.
+- CLI: Windows, macOS, and Linux with .NET 10.
 - Playground: current Chrome, Edge, Firefox, and Safari on desktop and mobile.
 - CLI release workflow: Windows x64, Linux x64, macOS x64, and macOS arm64.
 

@@ -38,8 +38,8 @@ public class NotationParserTests
 
     [Theory]
     [InlineData("H5", "Unknown pitch name: H")]
-    [InlineData("C9", "Invalid octave: 9")]
-    [InlineData("C#-1", "Invalid octave: -1")]
+    [InlineData("C10", "Invalid octave: 10")]
+    [InlineData("C#-2", "Invalid octave: -2")]
     [InlineData("Z4", "Unknown pitch name: Z")]
     [InlineData("C##4", "Invalid accidental syntax: 'C##4'")]
     public void ParsePitchWithAccidental_RejectsInvalidNotes(string text, string expectedMessage)
@@ -120,8 +120,8 @@ public class NotationIntegrationTests
 
     [Theory]
     [InlineData("H5 q", "Unknown pitch name: H")]
-    [InlineData("C9 q", "Invalid octave: 9")]
-    [InlineData("C#-1 q", "Invalid octave: -1")]
+    [InlineData("C10 q", "Invalid octave: 10")]
+    [InlineData("C#-2 q", "Invalid octave: -2")]
     [InlineData("Z#4 h", "Unknown pitch name: Z")]
     [InlineData("C##4 q", "Invalid accidental syntax: 'C##4'")]
     public void Parser_RejectsInvalidNotationScripts(string noteLine, string expectedMessage)

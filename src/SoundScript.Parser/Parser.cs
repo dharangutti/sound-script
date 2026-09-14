@@ -45,6 +45,9 @@ public sealed partial class Parser
 
     private AstNode ParseTopLevelStatement()
     {
+        if (MatchContextualWord("triplet")) return ParseRhythmicNoteModifier(2.0 / 3.0, "triplet");
+        if (MatchContextualWord("tuplet")) return ParseTupletStatement();
+        if (MatchContextualWord("grace")) return ParseRhythmicNoteModifier(0.25, "grace");
         // Visual words intentionally remain contextual identifiers instead of
         // global keywords. That keeps existing programs free to use names such
         // as "visual" or "wait", while giving the top-level temporal rail a
@@ -533,6 +536,9 @@ public sealed partial class Parser
 
     private AstNode ParseBlockBodyStatement()
     {
+        if (MatchContextualWord("triplet")) return ParseRhythmicNoteModifier(2.0 / 3.0, "triplet");
+        if (MatchContextualWord("tuplet")) return ParseTupletStatement();
+        if (MatchContextualWord("grace")) return ParseRhythmicNoteModifier(0.25, "grace");
         if (Match(TokenType.Play))
             return ParsePlayStatement();
 
@@ -619,6 +625,9 @@ public sealed partial class Parser
 
     private AstNode ParsePhraseBodyStatement()
     {
+        if (MatchContextualWord("triplet")) return ParseRhythmicNoteModifier(2.0 / 3.0, "triplet");
+        if (MatchContextualWord("tuplet")) return ParseTupletStatement();
+        if (MatchContextualWord("grace")) return ParseRhythmicNoteModifier(0.25, "grace");
         if (Match(TokenType.Curve))
             return ParsePhraseCurveStatement();
 
@@ -781,6 +790,9 @@ public sealed partial class Parser
 
     private AstNode ParseBodyStatement(bool allowLoop)
     {
+        if (MatchContextualWord("triplet")) return ParseRhythmicNoteModifier(2.0 / 3.0, "triplet");
+        if (MatchContextualWord("tuplet")) return ParseTupletStatement();
+        if (MatchContextualWord("grace")) return ParseRhythmicNoteModifier(0.25, "grace");
         if (allowLoop && Match(TokenType.Loop))
             return ParseLoopBlock();
 
@@ -1209,7 +1221,7 @@ public sealed partial class Parser
 
     private LayerNode ParseLayerStatement()
     {
-        var nameToken = Expect(TokenType.Identifier, "layer instrument name");
+        var nameToken = ExpectInstrumentName("layer instrument name");
         return new LayerNode
         {
             Name = nameToken.Value,
@@ -1219,7 +1231,7 @@ public sealed partial class Parser
 
     private InstrumentNode ParseInstrumentStatement()
     {
-        var nameToken = Expect(TokenType.Identifier, "instrument name");
+        var nameToken = ExpectInstrumentName("instrument name");
         return new InstrumentNode
         {
             Name = nameToken.Value,
@@ -1243,6 +1255,8 @@ public sealed partial class Parser
 
         if (IsDominantSeventhAmbiguity(noteToken))
             return ParseDominantSeventhChord(noteToken);
+        if (IsExtendedChordAmbiguity(noteToken))
+            return ParseExtendedChord(noteToken);
 
         var note = BuildNoteNode(noteToken, prefixArticulation);
 
@@ -1477,6 +1491,22 @@ public sealed partial class Parser
 
     private static (ChordQuality Quality, int Length) ParseChordQuality(string suffix)
     {
+        if (suffix.StartsWith("halfdim", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.HalfDiminished7, 7);
+        if (suffix.StartsWith("half diminished", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.HalfDiminished7, 15);
+        if (suffix.StartsWith("dim7", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Diminished7, 4);
+        if (suffix.StartsWith("maj9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Major9, 4);
+        if (suffix.StartsWith("major6", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Major6, 6);
+        if (suffix.StartsWith("min9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Minor9, 4);
+        if (suffix.StartsWith("m9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Minor9, 2);
+        if (suffix.StartsWith("add9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Add9, 4);
+        if (suffix.StartsWith("sus2", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Sus2, 4);
+        if (suffix.StartsWith("sus4", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Sus4, 4);
+        if (suffix.StartsWith("min7", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Minor7, 4);
+        if (suffix.StartsWith("dom9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Dominant9, 4);
+        if (suffix.StartsWith("13", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Thirteenth, 2);
+        if (suffix.StartsWith("11", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Eleventh, 2);
+        if (suffix.StartsWith("9", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Dominant9, 1);
+        if (suffix.StartsWith("m6", StringComparison.OrdinalIgnoreCase)) return (ChordQuality.Minor6, 2);
         if (suffix.StartsWith("maj7", StringComparison.OrdinalIgnoreCase))
             return (ChordQuality.Major7, 4);
         if (suffix.StartsWith("maj", StringComparison.OrdinalIgnoreCase))
@@ -1511,10 +1541,56 @@ public sealed partial class Parser
         {
             var durationToken = Previous();
             var (standardDuration, beats) = NotationParser.ParseDurationAlias(durationToken.Value, durationToken);
+            if (Match(TokenType.Identifier) && Previous().Value == ".") return (beats * 1.5, null);
             return (beats, standardDuration);
         }
 
         return (1.0, null);
+    }
+
+    private bool IsExtendedChordAmbiguity(Token token) =>
+        (token.Value.EndsWith("9") || token.Value.EndsWith("11") || token.Value.EndsWith("13"))
+        && (Check(TokenType.Duration) || Check(TokenType.Colon) || Check(TokenType.For));
+
+    private ChordNode ParseExtendedChord(Token token)
+    {
+        var text = token.Value;
+        var suffix = text.EndsWith("13") ? "13" : text.EndsWith("11") ? "11" : "9";
+        var root = text[0];
+        var index = 1;
+        var isSharp = false;
+        var isFlat = false;
+        if (index < text.Length && text[index] == '#') { isSharp = true; index++; }
+        else if (index < text.Length && (text[index] == 'b' || text[index] == 'B')) { isFlat = true; index++; }
+        var (durationBeats, _) = ParseOptionalDuration();
+        return new ChordNode { Root = root, IsSharp = isSharp, IsFlat = isFlat,
+            Quality = suffix == "13" ? ChordQuality.Thirteenth : suffix == "11" ? ChordQuality.Eleventh : ChordQuality.Dominant9,
+            Octave = 4, DurationBeats = durationBeats, Velocity = ParseOptionalVelocity() };
+    }
+
+    private NoteNode ParseRhythmicNoteModifier(double multiplier, string modifier)
+    {
+        double? prefixBeats = null;
+        if (Check(TokenType.Duration))
+        {
+            var durationToken = Advance();
+            prefixBeats = NotationParser.ParseDurationAlias(durationToken.Value, durationToken).Beats;
+        }
+        if (!Check(TokenType.Note)) throw Invalid(Peek(), $"Expected note after {modifier}.");
+        var note = ParseNoteStatement() as NoteNode
+            ?? throw Invalid(Peek(), $"{modifier} requires a note, not a chord.");
+        var beats = (prefixBeats ?? note.Notation.DurationBeats) * multiplier;
+        return note with { Notation = note.Notation with { DurationBeats = beats, StandardDuration = null } };
+    }
+
+    private NoteNode ParseTupletStatement()
+    {
+        var count = Expect(TokenType.Number, "tuplet count");
+        ExpectContextualWord("in", "'in' in tuplet declaration");
+        var unit = Expect(TokenType.Number, "tuplet unit");
+        if (!double.TryParse(count.Value, out var countValue) || !double.TryParse(unit.Value, out var unitValue) || countValue <= 0 || unitValue <= 0)
+            throw Invalid(count, "Tuplet values must be positive numbers.");
+        return ParseRhythmicNoteModifier(unitValue / countValue, $"tuplet {count.Value} in {unit.Value}");
     }
 
     private int? ParseOptionalVelocity()
@@ -1597,6 +1673,13 @@ public sealed partial class Parser
 
         Advance();
         return true;
+    }
+
+    private Token ExpectInstrumentName(string description)
+    {
+        if (Check(TokenType.Identifier) || Check(TokenType.Number))
+            return Advance();
+        throw Invalid(Peek(), $"Expected {description}.");
     }
 
     /// <summary>
