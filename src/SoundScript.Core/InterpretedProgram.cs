@@ -9,4 +9,5 @@ public sealed class InterpretedProgram
     public List<InterpretedTrack> Tracks { get; } = [];
     public List<InterpretedVocalTrack> VocalTracks { get; } = [];
     public List<string> Warnings { get; } = [];
+    public List<(string Message, SourceLocation? Location)> SourceWarnings { get; } = [];
 }

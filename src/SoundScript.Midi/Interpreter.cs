@@ -32,6 +32,7 @@ public static class Interpreter
         public double CurrentMeasureBeats { get; set; }
         public List<double> MeasureBeats { get; } = [];
         public List<int> MeasureLines { get; } = [];
+        public List<SourceLocation?> MeasureSources { get; } = [];
         public List<TimedNote> Notes { get; } = [];
         public List<ProgramChange> ProgramChanges { get; } = [];
         public List<TrackLayer> Layers { get; } = [];
@@ -70,6 +71,8 @@ public static class Interpreter
 
         foreach (var statement in program.Statements)
         {
+            try
+            {
             switch (statement)
             {
                 case TempoNode tempoNode:
@@ -138,7 +141,7 @@ public static class Interpreter
                     break;
                 case BarNode bar:
                     defaultTrack ??= GetOrCreateTrack(tracks, "default");
-                    CloseMeasure(defaultTrack, bar.Line);
+                    CloseMeasure(defaultTrack, bar.Line, SourceLocation.For(bar));
                     break;
 
                 // Visual directives are a parallel temporal rail. MIDI keeps
@@ -168,6 +171,8 @@ public static class Interpreter
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot mix audio buffers. " +
                         "Render this file through the wave backend instead.");
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
 
         foreach (var track in tracks.Values)
@@ -255,6 +260,8 @@ public static class Interpreter
     {
         foreach (var statement in body)
         {
+            try
+            {
             switch (statement)
             {
                 case BpmNode bpm:
@@ -340,7 +347,7 @@ public static class Interpreter
                     ExecutePlay(track, play, context, result, clock);
                     break;
                 case BarNode bar:
-                    CloseMeasure(track, bar.Line);
+                    CloseMeasure(track, bar.Line, SourceLocation.For(bar));
                     break;
 
                 // Mirrors the top-level switch's rejection of wave-only
@@ -358,6 +365,8 @@ public static class Interpreter
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot mix audio buffers. " +
                         "Render this file through the wave backend instead.");
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
     }
 
@@ -478,6 +487,8 @@ public static class Interpreter
 
         foreach (var statement in body)
         {
+            try
+            {
             switch (statement)
             {
                 case NoteNode:
@@ -497,6 +508,8 @@ public static class Interpreter
                     count += CountPhraseNotes(nested.Body, context);
                     break;
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
 
         return count;
@@ -899,11 +912,12 @@ public static class Interpreter
         track.CurrentMeasureBeats = BeatMath.AddBeats(track.CurrentMeasureBeats, beats);
     }
 
-    private static void CloseMeasure(TrackBuilder track, int line)
+    private static void CloseMeasure(TrackBuilder track, int line, SourceLocation? source)
     {
         track.HasBarLines = true;
         track.MeasureBeats.Add(BeatMath.RoundBeat(track.CurrentMeasureBeats));
         track.MeasureLines.Add(line);
+        track.MeasureSources.Add(source);
         track.CurrentMeasureBeats = 0;
     }
 
@@ -918,10 +932,17 @@ public static class Interpreter
         {
             track.MeasureBeats.Add(BeatMath.RoundBeat(track.CurrentMeasureBeats));
             track.MeasureLines.Add(0);
+            track.MeasureSources.Add(null);
         }
 
         foreach (var warning in NotationParser.ValidateMeasure(track.MeasureBeats, numerator, denominator))
-            AddWarning(result, FormatSourceWarning(sourceFile, warning, track.MeasureLines));
+        {
+            var formatted = FormatSourceWarning(sourceFile, warning, track.MeasureLines);
+            AddWarning(result, formatted);
+            var words = warning.Split(' ');
+            var source = words.Length > 1 && int.TryParse(words[1], out var number) && number > 0 && number <= track.MeasureSources.Count ? track.MeasureSources[number - 1] : null;
+            result.SourceWarnings.Add((formatted, source));
+        }
     }
 
     private static string FormatSourceWarning(string? sourceFile, string warning, IReadOnlyList<int> measureLines)

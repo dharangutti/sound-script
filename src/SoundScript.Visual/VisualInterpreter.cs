@@ -21,6 +21,8 @@ public static class VisualInterpreter
 
         foreach (var statement in program.Statements)
         {
+            try
+            {
             switch (statement)
             {
                 case VisualNode visual:
@@ -57,6 +59,8 @@ public static class VisualInterpreter
                     duration = Max(duration, cursor);
                     break;
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
 
         var orderedVisuals = visuals

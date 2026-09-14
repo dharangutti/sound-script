@@ -51,7 +51,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "softwareVersion": "11.0.0",
+                "softwareVersion": "11.1.0",
                 "programmingLanguage": "C#",
                 "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
@@ -812,7 +812,7 @@
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V11 — Temporal Media Export<!--/VERSION_BADGE--></div>
+            <div class="badge"><!--VERSION_BADGE-->Version: V11.1 — CLI Productization<!--/VERSION_BADGE--></div>
             <h1>Write audio like <span>code</span></h1>
             <p class="lead">
                 SoundScript is an independent open-source audio and media programming language. Write timed visuals, melodies, phrases,
@@ -1273,7 +1273,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V11</span><div><strong>Temporal Media Export</strong><span class="release-label">Current</span><br>Visual programs stay time-based and deterministic while the Playground samples them at a selected output FPS to create a browser-playable WebM clip with synchronized Wave PCM audio. <a href="doc.html?p=visual-temporal.md">Release details →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V11.1</span><div><strong>CLI Productization</strong><span class="release-label">Current</span><br>SoundScript adds strict validation, metadata inspection, JSON automation, stable exit codes, export preflight, atomic media output, and installable release binaries while preserving the deterministic V11 media runtime. <a href="doc.html?p=cli.md">Release details →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
                     <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V7</span><div>SoundScript.Wave renders <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV through <code>speak</code>, effects, and seeded humanization.</div></li>

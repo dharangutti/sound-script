@@ -21,6 +21,15 @@
     <Nullable>enable</Nullable>
     <AssemblyName>soundscript</AssemblyName>
     <RootNamespace>SoundScript.Cli</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>soundscript</ToolCommandName>
+    <PackageId>SoundScript.Cli</PackageId>
+    <Description>Deterministic audio and temporal media programming, with CLI validation, inspection, and export.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
 
 </Project>

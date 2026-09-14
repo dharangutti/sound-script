@@ -23,6 +23,16 @@ namespace SoundScript.Wave.Effects;
 /// </summary>
 public static class MasterEffectChain
 {
+    /// <summary>Measures existing tail sizing without allocating or synthesizing PCM.</summary>
+    public static long MeasureOutputLength(long inputLength, IReadOnlyList<EffectSettings> effects, int sampleRate)
+    {
+        if (inputLength == 0) return 0;
+        foreach (var effect in effects)
+            if (effect is DelaySettings delay)
+                inputLength = checked(inputLength + Math.Max(1, (int)Math.Round(delay.TimeSeconds * sampleRate)) * (long)DelayEffect.TailRepeats(delay));
+        return inputLength;
+    }
+
     public static float[] Apply(float[] buffer, IReadOnlyList<EffectSettings> effects, int sampleRate)
     {
         if (effects.Count == 0 || buffer.Length == 0)
