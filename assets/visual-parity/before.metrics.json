@@ -1,0 +1,98 @@
+[
+  {
+    "name": "legacy-cards",
+    "width": 1280,
+    "height": 720,
+    "time": 1,
+    "meanAbsoluteError": 16.765519386574073,
+    "pixelsOver16Percent": 30.22775607638889
+  },
+  {
+    "name": "legacy-cards-small",
+    "width": 640,
+    "height": 360,
+    "time": 1,
+    "meanAbsoluteError": 16.71458912037037,
+    "pixelsOver16Percent": 29.641927083333336
+  },
+  {
+    "name": "primitives-0",
+    "width": 1280,
+    "height": 720,
+    "time": 0,
+    "meanAbsoluteError": 9.843638599537037,
+    "pixelsOver16Percent": 22.695963541666668
+  },
+  {
+    "name": "primitives-1",
+    "width": 1280,
+    "height": 720,
+    "time": 1,
+    "meanAbsoluteError": 10.07117259837963,
+    "pixelsOver16Percent": 22.63498263888889
+  },
+  {
+    "name": "primitives-2",
+    "width": 1280,
+    "height": 720,
+    "time": 2,
+    "meanAbsoluteError": 10.075700593171296,
+    "pixelsOver16Percent": 22.501844618055557
+  },
+  {
+    "name": "primitives-small",
+    "width": 640,
+    "height": 360,
+    "time": 1,
+    "meanAbsoluteError": 10.71005931712963,
+    "pixelsOver16Percent": 23.758680555555557
+  },
+  {
+    "name": "org-chart",
+    "width": 1280,
+    "height": 720,
+    "time": 4.5,
+    "meanAbsoluteError": 0.6709291811342593,
+    "pixelsOver16Percent": 1.1521267361111112
+  },
+  {
+    "name": "information-cards",
+    "width": 1280,
+    "height": 720,
+    "time": 4,
+    "meanAbsoluteError": 0.8467317708333333,
+    "pixelsOver16Percent": 1.389865451388889
+  },
+  {
+    "name": "legacy-0",
+    "width": 1280,
+    "height": 720,
+    "time": 0,
+    "meanAbsoluteError": 8.642730396412038,
+    "pixelsOver16Percent": 19.252821180555554
+  },
+  {
+    "name": "legacy-3",
+    "width": 1280,
+    "height": 720,
+    "time": 3,
+    "meanAbsoluteError": 6.44963794849537,
+    "pixelsOver16Percent": 15.841037326388888
+  },
+  {
+    "name": "legacy-8",
+    "width": 1280,
+    "height": 720,
+    "time": 8,
+    "meanAbsoluteError": 7.479929832175926,
+    "pixelsOver16Percent": 17.10004340277778
+  },
+  {
+    "name": "legacy-small",
+    "width": 640,
+    "height": 360,
+    "time": 8,
+    "meanAbsoluteError": 7.501759259259259,
+    "pixelsOver16Percent": 16.88237847222222
+  }
+]

@@ -1,0 +1,92 @@
+{
+  "rendererSha256": "5f1055d7061aeb303dcf5c9a1baa48e5aec44d760977b6bfebda360efca2fc22",
+  "browser": "153.0.4234.32",
+  "platform": "win32",
+  "deviceScaleFactor": 1,
+  "cases": [
+    {
+      "Name": "legacy-cards",
+      "Source": "tools/VisualParity/legacy.ssv",
+      "Time": 1,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "legacy-cards-small",
+      "Source": "tools/VisualParity/legacy.ssv",
+      "Time": 1,
+      "Width": 640,
+      "Height": 360
+    },
+    {
+      "Name": "primitives-0",
+      "Source": "tools/VisualParity/primitives.ssv",
+      "Time": 0,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "primitives-1",
+      "Source": "tools/VisualParity/primitives.ssv",
+      "Time": 1,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "primitives-2",
+      "Source": "tools/VisualParity/primitives.ssv",
+      "Time": 2,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "primitives-small",
+      "Source": "tools/VisualParity/primitives.ssv",
+      "Time": 1,
+      "Width": 640,
+      "Height": 360
+    },
+    {
+      "Name": "org-chart",
+      "Source": "examples/visual-org-chart.ssv",
+      "Time": 4.5,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "information-cards",
+      "Source": "examples/visual-information-cards.ssv",
+      "Time": 4,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "legacy-0",
+      "Source": "examples/visual-temporal.ssv",
+      "Time": 0,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "legacy-3",
+      "Source": "examples/visual-temporal.ssv",
+      "Time": 3,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "legacy-8",
+      "Source": "examples/visual-temporal.ssv",
+      "Time": 8,
+      "Width": 1280,
+      "Height": 720
+    },
+    {
+      "Name": "legacy-small",
+      "Source": "examples/visual-temporal.ssv",
+      "Time": 8,
+      "Width": 640,
+      "Height": 360
+    }
+  ]
+}
