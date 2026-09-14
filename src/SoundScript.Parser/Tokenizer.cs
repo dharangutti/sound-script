@@ -42,9 +42,14 @@ public sealed class Tokenizer
         ["legato"] = TokenType.Articulation,
         ["accent"] = TokenType.Articulation,
         ["p"] = TokenType.Dynamic,
+        ["ppp"] = TokenType.Dynamic,
         ["mp"] = TokenType.Dynamic,
         ["mf"] = TokenType.Dynamic,
         ["f"] = TokenType.Dynamic,
+        ["ff"] = TokenType.Dynamic,
+        ["fff"] = TokenType.Dynamic,
+        ["sfz"] = TokenType.Dynamic,
+        ["fp"] = TokenType.Dynamic,
         ["import"] = TokenType.Import,
         ["drop2"] = TokenType.ChordVoicing,
         ["drop3"] = TokenType.ChordVoicing,
@@ -92,7 +97,7 @@ public sealed class Tokenizer
 
     private static readonly string[] ChordSuffixes =
     [
-        "maj7", "maj", "min", "dim", "aug", "m"
+        "half diminished", "halfdim", "dim7", "maj9", "major6", "min9", "m9", "add9", "sus2", "sus4", "maj7", "min7", "dom9", "m6", "maj", "min", "dim", "aug", "m"
     ];
 
     private readonly string _source;
@@ -207,7 +212,7 @@ public sealed class Tokenizer
 
             // Expression punctuation is contextual; musical accidentals and arrows
             // have already been consumed by the unchanged notation scanner.
-            if (current is '+' or '-' or '*' or '(' or ')')
+            if (current is '+' or '-' or '*' or '(' or ')' or '.')
             {
                 Advance();
                 tokens.Add(new Token(TokenType.Identifier, current.ToString(), startLine, startColumn));

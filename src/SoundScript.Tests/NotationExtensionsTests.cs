@@ -126,7 +126,6 @@ public class NotationExtensionsTests
 
     [Theory]
     [InlineData("sharpstaccato C4 q", "Unknown articulation: 'sharpstaccato'")]
-    [InlineData("fff", "Unknown dynamic marking: 'fff'")]
     [InlineData("rest qq", "Invalid rest duration: 'rest qq'")]
     public void Parser_RejectsInvalidNotationExtensions(string script, string expectedMessage)
     {

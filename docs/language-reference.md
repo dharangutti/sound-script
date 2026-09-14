@@ -58,7 +58,8 @@ Top-level statements: `import`, `block`, `pattern`, `track`, `melody`, `sequence
 | `F#4` | F sharp, octave 4 |
 | `Bb3` | B flat, octave 3 |
 
-- Octave range: **0–8** (4 = middle-C octave).
+- MIDI octave range: **-1–9** (4 = middle-C octave). The valid MIDI boundary is
+  C-1 (0) through G9 (127); pitches above G9 are rejected.
 - At most one accidental per note.
 
 ## Durations
@@ -73,7 +74,12 @@ Top-level statements: `import`, `block`, `pattern`, `track`, `melody`, `sequence
 | `for N` | N | Numeric beats (`C4 for 2`) |
 | `:N` | N | Colon form (`G4:4`, `G4:0.5`) |
 
-**Dotted suffix notation** (e.g. `q.`) is not supported. Use numeric forms for fractional beats (`C4 for 1.5`, `D4:1.5`).
+ Dotted suffix notation multiplies a written duration by 3/2 (`C4 q.`). Numeric
+ forms remain available for arbitrary beats (`C4 for 1.5`). `triplet e C4`
+ applies a 2/3 multiplier, while `tuplet 5 in 4 C4 e` supports arbitrary
+ n-in-the-time-of-m tuplets. `grace C5 e` emits a short 1/4-duration grace
+ event. These modifiers resolve to the same deterministic beat representation
+ used by ordinary notes.
 
 Repeated single-letter aliases (`qq`, `hh`) are rejected.
 
@@ -124,6 +130,10 @@ One articulation per note, as prefix or suffix (not both).
 | `mp` | 64 |
 | `mf` | 80 |
 | `f` | 96 |
+| `ppp` | 32 |
+| `ff` / `fff` | 112 |
+| `sfz` | 120 |
+| `fp` | 104 |
 
 Dynamics persist on the track until changed. Per-note `vN` overrides apply before shaping.
 
@@ -154,6 +164,17 @@ Cmaj spread q
 | `aug` | Augmented | 0, 4, 8 |
 | `maj7` | Major 7 | 0, 4, 7, 11 |
 | `7` | Dominant 7 | 0, 4, 7, 10 |
+| `sus2` / `sus4` | Suspended | 0, 2, 7 / 0, 5, 7 |
+| `major6` / `m6` | Sixth | 0, 4, 7, 9 / 0, 3, 7, 9 |
+| `dim7` / `halfdim7` | Diminished / half-diminished 7 | 0, 3, 6, 9 / 0, 3, 6, 10 |
+| `m7` / `min7` | Minor 7 | 0, 3, 7, 10 |
+| `maj9` / `min9` / `9` | Ninth chords | 0, 4, 7, 11, 14 / 0, 3, 7, 10, 14 / 0, 4, 7, 10, 14 |
+| `dom9` | Explicit dominant 9 | 0, 4, 7, 10, 14 |
+| `11` / `13` | Extended dominant harmony | 0, 4, 7, 10, 14, 17 / plus 21 |
+| `add9` | Added ninth | 0, 4, 7, 14 |
+
+`C6` and `Cmaj6` remain unambiguous MIDI pitches/chords from earlier syntax;
+write `Cmajor6` when a major-sixth chord is intended.
 
 ### Dominant-7 Disambiguation
 
@@ -214,7 +235,13 @@ layer piano
 layer cello
 ```
 
-Supported: `piano`, `bass`, `violin`, `flute`, `guitar`, `trumpet`, `cello`, `organ`, `synth`
+All 128 General MIDI Level 1 programs are available by compact names (for
+example `acousticgrand`, `electricguitarclean`, `altosax`,
+`trombone`, `leadsquare`, and `fxscifi`) or by program number `0`–`127`.
+The original names `piano`, `bass`, `violin`, `flute`, `guitar`, `trumpet`,
+`cello`, `organ`, and `synth` retain their existing mappings. General MIDI
+percussion uses channel 10 and meaningful drum names are a recommended future
+extension; custom Wave/SoundCSS timbres remain supported.
 
 → [layers.md](layers.md)
 
@@ -282,7 +309,7 @@ phrase {
 | `crescendo` / `decrescendo` | Phrase velocity ramp |
 | `articulation` | `staccato`, `legato`, `accent`, `detached` |
 | `swing` / `push` / `pull` | Deterministic timing offsets |
-| Dynamics | `p`, `mp`, `mf`, `f` (scoped to phrase) |
+| Dynamics | `ppp`, `p`, `mp`, `mf`, `f`, `ff`, `fff`, `sfz`, `fp` (scoped to phrase) |
 
 Phrase blocks set **phrase boundaries** on exit (same as `play` block/sequence). Nested `phrase` inside `phrase` is not supported.
 
