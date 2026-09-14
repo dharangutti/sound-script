@@ -1,3 +1,4 @@
+// Audio-Visual: demonstrate sequential timing, pinned overlays, and fades in the website export demo.
 tempo 120
 
 track music {
