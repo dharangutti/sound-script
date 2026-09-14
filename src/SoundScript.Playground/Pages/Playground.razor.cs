@@ -304,15 +304,53 @@ public partial class Playground : IDisposable
       var program = new SoundScript.Parser.Parser(new Tokenizer(VisualScriptText).Tokenize()).Parse();
       var audioBytes = TemporalAudioRenderer.RenderToWavBytes(program, timeline.Duration);
 
+      // Visual Timeline playback uses the Wave rail for its deterministic PCM
+      // audio. Keep the browser speech overlay on the same clock so `speak`
+      // cues are spoken aloud instead of leaving only the synthetic phoneme
+      // tones in the WAV. Speech is a playback convenience; it never changes
+      // the exported audio bytes.
+      var speechWords = WaveSpeechTimeline.Build(program);
+
+      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
       var playback = await Js.InvokeAsync<VisualPlaybackStart>(
           "SoundScriptAudio.playWavBytesFromOffset", audioBytes, startSeconds);
       cancellation.Token.ThrowIfCancellationRequested();
 
+      var startMs = startSeconds * 1000.0;
+      var speechFromOffset = speechWords
+          .Where(word => word.StartMs >= startMs)
+          .Select(word => word with
+          {
+            // Audio playback starts a few milliseconds in the future so the
+            // AudioContext can attach the decoded buffer. Include the same lead
+            // for speech timers to keep both rails aligned.
+            StartMs = word.StartMs - startMs + playback.StartDelayMs
+          })
+          .ToList();
+
+      var speechStatus = string.Empty;
+      if (speechFromOffset.Count > 0)
+      {
+        try
+        {
+          var speechSupported = await Js.InvokeAsync<bool>("SoundScriptVoice.speak", speechFromOffset);
+          speechStatus = speechSupported
+              ? $" Speaking {speechFromOffset.Count} phrase(s) with browser speech synthesis."
+              : " Browser speech synthesis is unavailable; synthetic prosody tones are playing.";
+        }
+        catch
+        {
+          // Speech synthesis is an optional browser overlay. Keep the shared
+          // PCM rail and visual timeline running if a browser blocks or lacks it.
+          speechStatus = " Browser speech synthesis could not start; synthetic prosody tones are playing.";
+        }
+      }
+
       VisualIsPreparing = false;
       VisualIsPlaying = true;
       VisualStatusMessage = startSeconds > 0
-          ? $"Playing audio + visuals from {FormatVisualTime(SecondsToTimeSpan(startSeconds))}. The stage is evaluating StateAt(t)."
-          : "Playing audio + visuals from the shared t = 0 clock. The stage is evaluating StateAt(t).";
+          ? $"Playing audio + visuals from {FormatVisualTime(SecondsToTimeSpan(startSeconds))}. The stage is evaluating StateAt(t).{speechStatus}"
+          : $"Playing audio + visuals from the shared t = 0 clock. The stage is evaluating StateAt(t).{speechStatus}";
       await InvokeAsync(StateHasChanged);
 
       // The shared PCM player schedules its source a small amount ahead and
@@ -389,6 +427,7 @@ public partial class Playground : IDisposable
     try
     {
       await Js.InvokeVoidAsync("SoundScriptMidi.stop");
+      await Js.InvokeVoidAsync("SoundScriptVoice.stop");
       await Js.InvokeVoidAsync("SoundScriptAudio.stop");
     }
     catch (JSDisconnectedException)

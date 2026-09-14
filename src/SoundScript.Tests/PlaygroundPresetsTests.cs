@@ -122,6 +122,22 @@ public partial class PlaygroundPresetsTests
     }
   }
 
+  [Fact]
+  public void VisualPlayback_TriggersTimedBrowserSpeechOverlay()
+  {
+    var source = File.ReadAllText(PlaygroundCodePath);
+    var start = source.IndexOf("private async Task RunVisualPlaybackAsync", StringComparison.Ordinal);
+    var end = source.IndexOf("private async Task RunWaveAsync", start, StringComparison.Ordinal);
+
+    Assert.True(start >= 0, "Visual playback method was not found.");
+    Assert.True(end > start, "Visual playback method boundary was not found.");
+
+    var method = source[start..end];
+    Assert.Contains("WaveSpeechTimeline.Build(program)", method, StringComparison.Ordinal);
+    Assert.Contains("SoundScriptVoice.speak", method, StringComparison.Ordinal);
+    Assert.Contains("playback.StartDelayMs", method, StringComparison.Ordinal);
+  }
+
   // "ScriptText =" is a substring of "WaveScriptText =", so this returns the
   // MIDI-rail presets AND the wave presets — the callers that need only one
   // rail pass the more specific marker.

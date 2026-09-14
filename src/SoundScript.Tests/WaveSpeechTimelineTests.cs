@@ -16,6 +16,27 @@ namespace SoundScript.Tests;
 
 public class WaveSpeechTimelineTests
 {
+    [Fact]
+    public void VisualPresentationExample_SchedulesSpeakCuesAtSlideStarts()
+    {
+        var path = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "../../../../../examples/visual-presentation.ssv"));
+
+        var source = File.ReadAllText(path);
+        var program = ParseSsw(source);
+        var words = WaveSpeechTimeline.Build(program);
+
+        Assert.Equal(3, words.Count);
+        Assert.Equal("results", words[0].Text);
+        Assert.Equal("focus", words[1].Text);
+        Assert.Equal("next", words[2].Text);
+        Assert.Equal(0.0, words[0].StartMs, 6);
+        Assert.Equal(2000.0, words[1].StartMs, 6);
+        Assert.Equal(4000.0, words[2].StartMs, 6);
+        Assert.All(words, word => Assert.True(word.DurationMs > 0));
+    }
+
     private static ProgramNode ParseSsw(string source) =>
         new SoundScriptParser(new Tokenizer(source).Tokenize()).Parse();
 
