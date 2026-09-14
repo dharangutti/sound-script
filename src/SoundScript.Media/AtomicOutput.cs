@@ -38,6 +38,7 @@ public static class AtomicOutput
             File.Move(temporary, full, overwrite: true);
         }
         catch (DependencyException) { throw; }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex) { throw new ExportException($"Export failed; destination was not replaced: {ex.Message}", ex); }
         finally { TryDeleteFile(temporary); }
     }

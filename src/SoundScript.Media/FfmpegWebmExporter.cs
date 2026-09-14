@@ -36,7 +36,9 @@ public static class FfmpegWebmExporter
         string framesDirectory,
         string audioWavPath,
         string outputWebmPath,
-        TemporalVideoExportPlan plan)
+        TemporalVideoExportPlan plan,
+        CancellationToken cancellationToken = default,
+        Action? verificationStarted = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
         EncodeAndVerify(
@@ -46,7 +48,9 @@ public static class FfmpegWebmExporter
             outputWebmPath,
             plan.FramesPerSecond,
             plan.DurationSeconds,
-            plan.Samples.Count);
+            plan.Samples.Count,
+            cancellationToken,
+            verificationStarted);
     }
 
     /// <summary>Encodes a canonical visual-scene plan through the same codec boundary.</summary>
@@ -55,7 +59,9 @@ public static class FfmpegWebmExporter
         string framesDirectory,
         string audioWavPath,
         string outputWebmPath,
-        TemporalVisualExportPlan plan)
+        TemporalVisualExportPlan plan,
+        CancellationToken cancellationToken = default,
+        Action? verificationStarted = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
         EncodeAndVerify(
@@ -65,7 +71,9 @@ public static class FfmpegWebmExporter
             outputWebmPath,
             plan.FramesPerSecond,
             plan.DurationSeconds,
-            plan.Samples.Count);
+            plan.Samples.Count,
+            cancellationToken,
+            verificationStarted);
     }
 
     private static void EncodeAndVerify(
@@ -75,7 +83,9 @@ public static class FfmpegWebmExporter
         string outputWebmPath,
         int framesPerSecond,
         double durationSeconds,
-        int sampleCount)
+        int sampleCount,
+        CancellationToken cancellationToken,
+        Action? verificationStarted)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ffmpegPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(framesDirectory);
@@ -88,12 +98,12 @@ public static class FfmpegWebmExporter
             throw new FileNotFoundException("The rendered audio WAV is missing.", audioWavPath);
 
         AtomicOutput.Write(outputWebmPath,
-            temporary => Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, temporary, framesPerSecond, durationSeconds).ToArray()),
-            temporary => Run(ffmpegPath,
-                "-hide_banner", "-v", "error", "-xerror", "-nostdin",
-                "-i", temporary,
-                "-map", "0:v:0", "-map", "0:a:0",
-                "-f", "null", "-"));
+            temporary => Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, temporary, framesPerSecond, durationSeconds).ToArray(), cancellationToken),
+            temporary => { verificationStarted?.Invoke(); _ = Run(ffmpegPath,
+                new[] { "-hide_banner", "-v", "error", "-xerror", "-nostdin",
+                    "-i", temporary,
+                    "-map", "0:v:0", "-map", "0:a:0",
+                    "-f", "null", "-" }, cancellationToken); });
     }
 
     public static IReadOnlyList<string> BuildEncodeArguments(
@@ -142,6 +152,9 @@ public static class FfmpegWebmExporter
     }
 
     private static string Run(string executable, params string[] arguments)
+        => Run(executable, arguments, CancellationToken.None);
+
+    private static string Run(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -161,10 +174,21 @@ public static class FfmpegWebmExporter
             var stderr = process.StandardError.ReadToEndAsync();
             var stdout = process.StandardOutput.ReadToEndAsync();
             // Both redirected pipes must drain concurrently, including capability listings.
-            if (!process.WaitForExit(600_000))
+            try
             {
-                process.Kill(entireProcessTree: true);
-                throw new ExportException("FFmpeg timed out after ten minutes.");
+                var waitTask = process.WaitForExitAsync(cancellationToken);
+                var completedTask = Task.WhenAny(waitTask, Task.Delay(TimeSpan.FromMinutes(10))).GetAwaiter().GetResult();
+                if (completedTask != waitTask)
+                {
+                    try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
+                    throw new ExportException("FFmpeg timed out after ten minutes.");
+                }
+                waitTask.GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
+                throw;
             }
             Task.WaitAll(stderr, stdout);
             if (process.ExitCode != 0)

@@ -40,6 +40,18 @@ public static class WaveRenderer
         WavWriter.Write(outputWavPath, mixed);
     }
 
+    /// <summary>
+    /// Renders a previously adapted program when the caller already performed
+    /// the AST lowering step. The adaptation is reused when the options do not
+    /// require a different speak/sample policy.
+    /// </summary>
+    public static void Render(WaveAdaptationResult adapted, ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(adapted);
+        var mixed = MixProgram(program, options, adapted);
+        WavWriter.Write(outputWavPath, mixed);
+    }
+
     public static void RenderTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
         var mixed = MixProgram(program, options);
@@ -59,6 +71,14 @@ public static class WaveRenderer
         WavWriter.WriteStereo(outputWavPath, left, right);
     }
 
+    /// <summary>Stereo counterpart to <see cref="Render(WaveAdaptationResult, ProgramNode, string, WaveRenderOptions?)"/>.</summary>
+    public static void RenderStereo(WaveAdaptationResult adapted, ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(adapted);
+        var (left, right) = MixProgramStereo(program, options, adapted);
+        WavWriter.WriteStereo(outputWavPath, left, right);
+    }
+
     public static void RenderStereoTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
         var (left, right) = MixProgramStereo(program, options);
@@ -71,10 +91,12 @@ public static class WaveRenderer
     public static string RenderStereoSha256(ProgramNode program, WaveRenderOptions? options = null) =>
         Convert.ToHexString(SHA256.HashData(RenderStereoToBytes(program, options)));
 
-    private static float[] MixProgram(ProgramNode program, WaveRenderOptions? options)
+    private static float[] MixProgram(ProgramNode program, WaveRenderOptions? options, WaveAdaptationResult? preadapted = null)
     {
         var adaptOptions = BuildAdaptOptions(options);
-        var adapted = AstToNoteEventAdapter.Adapt(program, adaptOptions);
+        var adapted = adaptOptions is null && preadapted is not null
+            ? preadapted
+            : AstToNoteEventAdapter.Adapt(program, adaptOptions);
         var trackBuffers = RenderTrackBuffers(adapted.Tracks);
         var mixed = Mixer.SumTracksRaw(trackBuffers);
         mixed = ApplyOverlays(mixed, adapted.SampleOverlays, options);
@@ -85,10 +107,12 @@ public static class WaveRenderer
         return MasterEffectChain.Apply(finalized, EffectSettingsFactory.FromProgram(program), WavWriter.SampleRate);
     }
 
-    private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program, WaveRenderOptions? options)
+    private static (float[] Left, float[] Right) MixProgramStereo(ProgramNode program, WaveRenderOptions? options, WaveAdaptationResult? preadapted = null)
     {
         var adaptOptions = BuildAdaptOptions(options);
-        var adapted = AstToNoteEventAdapter.Adapt(program, adaptOptions);
+        var adapted = adaptOptions is null && preadapted is not null
+            ? preadapted
+            : AstToNoteEventAdapter.Adapt(program, adaptOptions);
         var trackBuffers = RenderTrackBuffersStereo(adapted.Tracks);
         var (leftMixed, rightMixed) = Mixer.SumTracksStereoRaw(trackBuffers);
         leftMixed = ApplyOverlays(leftMixed, adapted.SampleOverlays, options);

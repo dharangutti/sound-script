@@ -11,19 +11,19 @@ public sealed class CliArguments
 {
     public static readonly CommandDefinition[] Commands =
     [
-        new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", PositionalOutput: true),
-        new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo", PositionalOutput: true),
-        new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo", PositionalOutput: true),
-        new("render", "<file.mid> --css <style.ssc> [--out <file.wav|ogg>] [--text <text>]", "render song.mid --css style.ssc --out song.wav", "out css text", PositionalOutput: true),
-        new("wave", "<file.ss|ssw> [output.wav] [--out <file>] [options]", "wave song.ss --out song.wav --stereo", "out vocal vocal-at vocal-gain tts-dir offline-tts-dir offline-tts-voice css wordbank-dir locale voice seed", "stereo continuous offline-tts", PositionalOutput: true),
-        new("visual", "<file.ss|ssv> [--at <seconds>]...", "visual scene.ssv --at 1.5", "at"),
-        new("video", "<file.ss|ssv> [output.webm] --out <file.webm> [--check] [options]", "video scene.ssv --out scene.webm --check", "out fps width height ffmpeg", "check json", PositionalOutput: true),
-        new("validate", "<file.ss|ssw|ssv|ssc> [--json] [--target midi|wave|video] [options]", "validate scene.ssv --json", "target out fps width height ffmpeg", "json"),
-        new("inspect", "<file.ss|ssw|ssv|ssc> [--json] [--at <seconds>]", "inspect scene.ssv --json --at 1.5", "at", "json"),
-        new("vocal generate", "<text> [--out <file.wav>] [options]", "vocal generate \"hello\" --out hello.wav --engine wordbank", "out wordbank-dir engine locale voice seed css", "continuous"),
-        new("vocal batch", "<file.ss|ssw> --out-dir <folder> [options]", "vocal batch song.ssw --out-dir stems", "out-dir wordbank-dir engine locale voice seed css", "continuous skip-existing"),
-        new("wordbank ensure", "<lemma> [--auto-generate-missing] [options]", "wordbank ensure hello --locale en", "locale wordbank-dir voice", "auto-generate-missing"),
-        new("wordbank normalize", "[lemma | --all] [options]", "wordbank normalize --all --locale en", "locale wordbank-dir", "all", Min: 0)
+        new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", "verbose", PositionalOutput: true),
+        new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
+        new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
+        new("render", "<file.mid> --css <style.ssc> [--out <file.wav|ogg>] [--text <text>]", "render song.mid --css style.ssc --out song.wav", "out css text", "verbose", PositionalOutput: true),
+        new("wave", "<file.ss|ssw> [output.wav] [--out <file>] [options]", "wave song.ss --out song.wav --stereo", "out vocal vocal-at vocal-gain tts-dir offline-tts-dir offline-tts-voice css wordbank-dir locale voice seed", "stereo continuous offline-tts verbose", PositionalOutput: true),
+        new("visual", "<file.ss|ssv> [--at <seconds>]...", "visual scene.ssv --at 1.5", "at", "verbose"),
+        new("video", "<file.ss|ssv> [output.webm] --out <file.webm> [--check] [options]", "video scene.ssv --out scene.webm --check", "out fps width height ffmpeg jobs", "check json verbose", PositionalOutput: true),
+        new("validate", "<file.ss|ssw|ssv|ssc> [--json] [--target midi|wave|video] [options]", "validate scene.ssv --json", "target out fps width height ffmpeg", "json verbose"),
+        new("inspect", "<file.ss|ssw|ssv|ssc> [--json] [--at <seconds>]", "inspect scene.ssv --json --at 1.5", "at", "json verbose"),
+        new("vocal generate", "<text> [--out <file.wav>] [options]", "vocal generate \"hello\" --out hello.wav --engine wordbank", "out wordbank-dir engine locale voice seed css", "continuous verbose"),
+        new("vocal batch", "<file.ss|ssw> --out-dir <folder> [options]", "vocal batch song.ssw --out-dir stems", "out-dir wordbank-dir engine locale voice seed css", "continuous skip-existing verbose"),
+        new("wordbank ensure", "<lemma> [--auto-generate-missing] [options]", "wordbank ensure hello --locale en", "locale wordbank-dir voice", "auto-generate-missing verbose"),
+        new("wordbank normalize", "[lemma | --all] [options]", "wordbank normalize --all --locale en", "locale wordbank-dir", "all verbose", Min: 0)
     ];
 
     public string Command { get; private set; } = "";
@@ -94,7 +94,7 @@ public sealed class CliArguments
 
     private void Validate()
     {
-        foreach (var name in new[] { "fps", "width", "height", "seed" })
+        foreach (var name in new[] { "fps", "width", "height", "seed", "jobs" })
             if (Value(name) is { } value && !int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _)) throw new CliUsageException($"--{name} requires an integer.");
         foreach (var name in new[] { "vocal-at", "vocal-gain" })
             if (Value(name) is { } value && (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) || !double.IsFinite(number) || number < 0 || name == "vocal-gain" && number > 1)) throw new CliUsageException($"Invalid --{name}: {value}.");
@@ -102,6 +102,7 @@ public sealed class CliArguments
         if (Has("fps") && Integer("fps", 30) is not (24 or 30 or 60)) throw new CliUsageException("--fps supports 24, 30, or 60.");
         foreach (var name in new[] { "width", "height" })
             if (Has(name) && (Integer(name, 0) < 2 || Integer(name, 0) % 2 != 0)) throw new CliUsageException($"--{name} requires a positive even pixel count.");
+        if (Has("jobs") && Integer("jobs", 0) is < 1 or > 64) throw new CliUsageException("--jobs requires an integer from 1 to 64.");
         if (Has("append") && Has("wave")) throw new CliUsageException("--wave and --append cannot be combined.");
         if (Has("append") && Has("emit-ss")) throw new CliUsageException("--emit-ss and --append cannot be combined.");
         if (Command == "render" && !Has("css")) throw new CliUsageException("render requires --css <style.ssc>.");
