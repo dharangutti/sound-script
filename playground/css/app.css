@@ -784,6 +784,27 @@ a:hover { text-decoration: underline; }
 
 .pge-scroll { position: relative; flex: 1 1 auto; min-width: 0; }
 
+.authoring-panel { margin: .65rem 0; padding: .7rem; border: 1px solid var(--border); border-radius: .5rem; font-size: .8rem; }
+.authoring-tools { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.authoring-tools .btn { font-size: .72rem; padding: .35rem .5rem; }
+.authoring-tools input, .authoring-tools select { max-width: 10rem; padding: .3rem; color: var(--text); background: var(--code-bg); border: 1px solid var(--border); }
+.authoring-tools input[type=number] { width: 5rem; }
+.authoring-help { min-height: 1.4em; margin: .4rem 0; color: var(--muted); }
+.authoring-panel details { margin-top: .4rem; }
+.authoring-outline, .authoring-completions { display: flex; flex-wrap: wrap; gap: .35rem; }
+.authoring-panel button:not(.btn) { color: var(--text); background: var(--code-bg); border: 1px solid var(--border); border-radius: .3rem; padding: .4rem; text-align: left; cursor: pointer; }
+.authoring-diagnostics { max-height: 15rem; overflow: auto; }
+.authoring-diagnostics button { display: block; width: 100%; margin: .25rem 0; }
+.authoring-diagnostics .authoring-error { color: #fca5a5; }
+.authoring-diagnostics .authoring-warning { color: #fde68a; }
+.authoring-diagnostics label { margin-left: .65rem; white-space: nowrap; }
+.authoring-beat-marks { position: relative; height: 3rem; margin: .5rem 2rem .5rem 0; border-top: 1px solid var(--border); overflow: hidden; }
+.authoring-beat-marks span { position: absolute; font-size: .65rem; width: 4rem; border-left: 1px solid var(--accent); padding-left: .2rem; }
+.visual-editor-shell { position: relative; height: 28rem; background: var(--code-bg); border-radius: .5rem; }
+.visual-editor-shell #visual-source-highlight, .visual-editor-shell #visual-timeline-source { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 1rem; border: 0; font: .82rem/1.6 ui-monospace, monospace; white-space: pre; overflow: auto; tab-size: 4; }
+.visual-editor-shell #visual-source-highlight { pointer-events: none; }
+.visual-editor-shell #visual-timeline-source { background: transparent; color: transparent; caret-color: var(--accent); resize: none; }
+
 .pge-highlight, .pge-input {
     margin: 0;
     padding: 0.6rem 0.75rem;

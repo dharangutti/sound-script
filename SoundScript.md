@@ -20,6 +20,7 @@ fills, outlines, portable text, animation, and the four new application demos.
 | Document | Description |
 |----------|-------------|
 | [visual-temporal.md](visual-temporal.md) | Frame-free temporal visual programs, `StateAt(t)`, and audio synchronization |
+| [authoring.md](authoring.md) | Common editor ergonomics and additive authoring syntax |
 | [PLAYGROUND.md](PLAYGROUND.md) | Playground playback and sanity checklist |
 
 ## Documentation Index
