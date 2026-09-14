@@ -619,8 +619,11 @@
                     </div>
                     <span class="visual-frame-free">Frame-free</span>
                 </div>
+                <div class="visual-editor-shell">
+                <pre id="visual-source-highlight" aria-hidden="true"></pre>
                 <textarea id="visual-timeline-source" class="visual-code-input" @bind="VisualScriptText" @bind:event="oninput"
                           spellcheck="false" aria-label="Visual timeline source code"></textarea>
+                </div>
                 <div class="visual-source-actions" role="toolbar" aria-label="Visual timeline source actions">
                     <button type="button" class="btn btn-primary" @onclick="CompileVisualTimeline">Evaluate timeline</button>
                     <button type="button" class="btn btn-secondary" @onclick="ResetVisualDemo">Reset demo</button>

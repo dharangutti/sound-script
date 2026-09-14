@@ -53,6 +53,7 @@ Runnable example scripts for every major feature.
 | [orchestration.ss](../examples/orchestration.ss) | Orchestration helpers | `... run examples/orchestration.ss` |
 | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) | Combined V2 demo | `... run examples/full-v2-showcase.ss` |
 | [vocal-song.ss](../examples/vocal-song.ss) | Vocal track — lyrics + phonetic syllable alignment | `... run examples/vocal-song.ss` |
+| [authoring.ss](../examples/authoring.ss) | Comments, compile-time constants, and reusable note timing | `... run examples/authoring.ss` |
 
 ## Temporal Visual Example
 

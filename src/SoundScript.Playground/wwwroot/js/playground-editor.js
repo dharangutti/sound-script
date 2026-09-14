@@ -87,7 +87,8 @@
         ed.gutter.textContent = lines.map((_, i) => i + 1).join("\n");
 
         // Highlight overlay (trailing newline keeps the last line height stable).
-        ed.code.innerHTML = lines.map((l) => highlightLine(l, ed.language)).join("\n") + "\n";
+        ed.code.innerHTML = window.SoundScriptAuthoring.highlight(value, ed.language) + "\n";
+        if (ed.authoringChanged) ed.authoringChanged();
     }
 
     function syncScroll(ed) {
@@ -137,7 +138,9 @@
         const start = ta.selectionStart;
         const lineStart = ta.value.lastIndexOf("\n", start - 1) + 1;
         const indentMatch = /^[ \t]*/.exec(ta.value.slice(lineStart, start));
-        const indent = indentMatch ? indentMatch[0] : "";
+        const before = ta.value.slice(0, start);
+        const last = window.SoundScriptAuthoring.lex(before).filter(t => t.kind !== 'comment').at(-1);
+        const indent = (indentMatch ? indentMatch[0] : "") + (last?.text === '{' ? '    ' : '');
         if (!indent) return;
         e.preventDefault();
         const insert = "\n" + indent;
@@ -216,6 +219,7 @@
 
         undo(id) {
             const ed = editors[id];
+            if (ed) pushHistory(ed);
             if (!ed || ed.undoStack.length <= 1) return;
             ed.redoStack.push(ed.undoStack.pop());
             ed.textarea.value = ed.undoStack[ed.undoStack.length - 1];
@@ -287,4 +291,16 @@
     };
 
     window.playgroundEditor = api;
+    api.enableAuthoring = (id, reference) => {
+        const ed = editors[id];
+        if (!ed || ed.authoringChanged) return;
+        ed.authoringChanged = window.SoundScriptAuthoring.attach(ed.textarea, id, reference, () => {
+            pushHistory(ed); render(ed); syncScroll(ed);
+        }, ed.mount);
+        ed.authoringChanged();
+    };
+    api.attachVisual = (id, reference) => {
+        const textarea = document.getElementById(id);
+        if (textarea) window.SoundScriptAuthoring.attach(textarea, id, reference, () => {}, textarea);
+    };
 })();

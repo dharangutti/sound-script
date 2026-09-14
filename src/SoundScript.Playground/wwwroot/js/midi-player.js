@@ -186,20 +186,20 @@ window.SoundScriptMidi = (function () {
         }
     }
 
-    function scheduleNotes(parsedMidi, offsetSeconds, destination = masterGain) {
+    function scheduleNotes(parsedMidi, offsetSeconds, destination = masterGain, endSeconds = Infinity) {
         const { notes, totalDuration } = parsedMidi;
         const now = audioContext.currentTime + 0.05;
         let remainingDuration = 0;
 
         for (const note of notes) {
             const noteEnd = note.start + note.duration;
-            if (noteEnd <= offsetSeconds) {
+            if (noteEnd <= offsetSeconds || note.start >= endSeconds) {
                 continue;
             }
 
             const elapsedStart = Math.max(0, note.start - offsetSeconds);
             const elapsedOffset = Math.max(0, offsetSeconds - note.start);
-            const remainingNoteDuration = Math.max(0.05, note.duration - elapsedOffset);
+            const remainingNoteDuration = Math.min(Math.max(0.05, note.duration - elapsedOffset), endSeconds - Math.max(offsetSeconds, note.start));
             const nodes = SoundScriptSoundfont.playNote(
                 note.note,
                 note.velocity,
@@ -224,7 +224,7 @@ window.SoundScriptMidi = (function () {
         };
     }
 
-    async function startPlayback(midiBytes, offsetSeconds = 0) {
+    async function startPlayback(midiBytes, offsetSeconds = 0, endSeconds = Infinity) {
         clearScheduled();
         const parsedMidi = parseMidi(midiBytes);
         const offset = Number.isFinite(offsetSeconds) ? Math.max(0, offsetSeconds) : 0;
@@ -245,7 +245,8 @@ window.SoundScriptMidi = (function () {
 
         await SoundScriptSoundfont.load(audioContext, parsedMidi.programs);
 
-        return scheduleNotes(parsedMidi, offset);
+        const timing = scheduleNotes(parsedMidi, offset, masterGain, endSeconds);
+        return { ...timing, clockStart: audioContext.currentTime + timing.startDelayMs / 1000 };
     }
 
     // The video adapter shares this established MIDI/Web Audio timing rail. It
@@ -299,7 +300,8 @@ window.SoundScriptMidi = (function () {
         startExportPlayback,
         primePrograms,
         stop,
-        download
+        download,
+        currentTime: () => audioContext?.currentTime || 0
     };
 })();
 

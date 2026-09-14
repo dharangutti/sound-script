@@ -258,6 +258,7 @@ public partial class Playground : IDisposable
 
   private async Task ExportVisualClipAsync()
   {
+    CompileVisualTimeline();
     if (CompiledVisualTimeline is null || VisualIsExporting)
       return;
 
@@ -1932,6 +1933,7 @@ public partial class Playground : IDisposable
 
   public void Dispose()
   {
+    _authoringReference?.Dispose();
     CancelVisualPlayback();
     _ = StopVisualAudioAsync();
   }
@@ -2236,6 +2238,7 @@ public partial class Playground : IDisposable
       await Js.InvokeVoidAsync("playgroundEditor.setValue", CssEditorId, StudioCssDefault);
 
       _editorsReady = true;
+      await InitializeAuthoringAsync();
       UpdatePatternPreview();
 
       try
@@ -2256,6 +2259,7 @@ public partial class Playground : IDisposable
           _visualStageCanvas,
           VisualSceneAtCursor ?? new TemporalVisualScene(VisualTimeSeconds, Array.Empty<TemporalVisualPrimitive>()));
     }
+    await Js.InvokeVoidAsync("SoundScriptAuthoring.syncVisual");
   }
 
   private void UpdatePatternPreview()

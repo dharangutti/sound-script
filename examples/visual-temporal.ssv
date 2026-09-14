@@ -1,3 +1,12 @@
+// Authoring conveniences are lowered before the existing temporal runtime.
+let centerX = 640
+let centerY = 360
+marker orbitStart = 0s
+style "orb" {
+    stroke "#6ee7b7"
+    strokeWidth 2
+}
+
 tempo 120
 
 track music {
@@ -12,9 +21,13 @@ sync audio
 visual "intro" for 3s
 wait 1s
 visual "product" for 4s
-visual "circle" for 8s at 0s {
+visual "circle" for 8s at orbitStart {
+    shape circle
+    use "orb"
     animate radius 28 -> 170 over 3s
     animate opacity 0.35 -> 1 over 1.5s
+    set x centerX
+    set y centerY
 }
 visual "sparkle" for 2s at 4.5s {
     animate opacity 0 -> 1 over 0.4s

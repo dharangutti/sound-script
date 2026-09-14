@@ -119,6 +119,28 @@ public sealed class Tokenizer
             var startColumn = _column;
             var current = Peek();
 
+            if (current == '/' && _index + 1 < _source.Length && _source[_index + 1] is '/' or '*')
+            {
+                var block = _source[_index + 1] == '*';
+                Advance();
+                Advance();
+                while (!IsAtEnd() && (block || Peek() != '\n'))
+                {
+                    if (block && Peek() == '*' && _index + 1 < _source.Length && _source[_index + 1] == '/')
+                    {
+                        Advance();
+                        Advance();
+                        block = false;
+                        break;
+                    }
+                    if (Peek() == '\n') { _index++; _line++; _column = 1; }
+                    else Advance();
+                }
+                if (block)
+                    throw new InvalidOperationException($"Unterminated block comment at line {startLine}, column {startColumn}.");
+                continue;
+            }
+
             if (current == '"')
             {
                 tokens.Add(ReadStringLiteral(startLine, startColumn));
@@ -180,6 +202,15 @@ public sealed class Tokenizer
             if (char.IsLetter(current))
             {
                 tokens.Add(ReadWordOrNoteOrChord(startLine, startColumn));
+                continue;
+            }
+
+            // Expression punctuation is contextual; musical accidentals and arrows
+            // have already been consumed by the unchanged notation scanner.
+            if (current is '+' or '-' or '*' or '(' or ')')
+            {
+                Advance();
+                tokens.Add(new Token(TokenType.Identifier, current.ToString(), startLine, startColumn));
                 continue;
             }
 

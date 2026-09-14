@@ -122,6 +122,7 @@ MidiGenerator → output.mid
 | [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw) | V8: `speak sample=` vocal stem mixing |
 | [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) | V8: Jingle Bells + offline vocal stems |
 | [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) | V9: Jingle Bells rhythm with WordBank-only vocal stems (Playground preset) |
+| [examples/authoring.ss](examples/authoring.ss) | Comments, compile-time constants, and reusable note timing |
 
 → [docs/examples.md](docs/examples.md)
 
@@ -437,6 +438,7 @@ versions, but the temporal state supplied to it is deterministic. →
 | [docs/vocal.md](docs/vocal.md) | Vocal track + phonetics engine |
 | [docs/soundcss.md](docs/soundcss.md) | SoundCSS timbre + word-level pronunciation, DSP mapping table, persona presets |
 | [docs/PLAYGROUND.md](docs/PLAYGROUND.md) | Playground checklist + wordbank normalize / `--auto-generate-missing` HOWTO |
+| [docs/authoring.md](docs/authoring.md) | Comments, constants, markers, styles, validation, and editor workflows |
 | [docs/pipeline.md](docs/pipeline.md) | Interpreter pipeline |
 | [docs/architecture.md](docs/architecture.md) | System architecture |
 | [docs/examples.md](docs/examples.md) | Example catalog |
