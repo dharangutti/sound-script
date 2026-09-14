@@ -29,8 +29,8 @@ public sealed class PerformanceCliTests : IDisposable
         return path;
     }
 
-    private static string CliDll => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../SoundScript.Cli/bin/Debug/net8.0/soundscript.dll"));
-    private static string FakeFfmpeg => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../..", "SoundScript.Cli.TestFfmpeg", "bin", "Debug", "net8.0", "SoundScript.Cli.TestFfmpeg" + (OperatingSystem.IsWindows() ? ".exe" : "")));
+    private static string CliDll => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../SoundScript.Cli/bin/Debug/net10.0/soundscript.dll"));
+    private static string FakeFfmpeg => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../..", "SoundScript.Cli.TestFfmpeg", "bin", "Debug", "net10.0", "SoundScript.Cli.TestFfmpeg" + (OperatingSystem.IsWindows() ? ".exe" : "")));
 
     private (int ExitCode, string StdOut, string StdErr) Run(params string[] arguments)
     {

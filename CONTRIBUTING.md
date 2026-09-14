@@ -5,7 +5,7 @@ problem they solve, and include the command or test that verifies the result.
 
 ## Prerequisites
 
-- .NET 8 SDK
+- .NET 10 SDK
 - Git
 - FFmpeg with `libvpx-vp9` and `libopus` for WebM export tests
 - Bash for the wordbank synchronization script
