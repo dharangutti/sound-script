@@ -1,3 +1,4 @@
+// Music: apply arpeggio, strum, and rhythm patterns to chords.
 tempo 120
 
 pattern arp {

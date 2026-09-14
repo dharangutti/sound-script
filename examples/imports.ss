@@ -1,3 +1,4 @@
+// Integration / Export: resolve a local library and reuse its melody and bass definitions.
 import "import-lib.ss"
 
 tempo 120

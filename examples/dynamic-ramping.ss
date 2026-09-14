@@ -1,3 +1,4 @@
+// Music: demonstrate playback shaping across changes in dynamic level.
 tempo 100
 instrument piano
 

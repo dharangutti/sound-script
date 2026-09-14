@@ -1,5 +1,19 @@
+// Advanced: 48 service cards with six timed batches for timeline and export inspection.
+// Share card appearance while keeping each card and label independently timed.
+style "serviceCard" {
+    fill "#17263c"
+    stroke "#64748b"
+    strokeWidth 2
+}
+let cardWidth = 132
+let cardHeight = 52
+marker summaryEntry = 4s
+// Ready indicators arrive every 0.75s by row; the summary follows the last batch at 3.75s.
+
 tempo 120
-track completion { rest:10 C5 q E5 q }
+track completion {
+    rest:10 C5 q E5 q
+}
 sync audio
 
 visual "background" for 6s at 0s {
@@ -24,13 +38,11 @@ visual "heading" for 6s at 0s {
 
 visual "component-0" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-0-label" for 6s at 0s {
@@ -55,13 +67,11 @@ visual "ready-0" for 6s at 0s {
 
 visual "component-1" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-1-label" for 6s at 0s {
@@ -86,13 +96,11 @@ visual "ready-1" for 6s at 0s {
 
 visual "component-2" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-2-label" for 6s at 0s {
@@ -117,13 +125,11 @@ visual "ready-2" for 6s at 0s {
 
 visual "component-3" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-3-label" for 6s at 0s {
@@ -148,13 +154,11 @@ visual "ready-3" for 6s at 0s {
 
 visual "component-4" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-4-label" for 6s at 0s {
@@ -179,13 +183,11 @@ visual "ready-4" for 6s at 0s {
 
 visual "component-5" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-5-label" for 6s at 0s {
@@ -210,13 +212,11 @@ visual "ready-5" for 6s at 0s {
 
 visual "component-6" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-6-label" for 6s at 0s {
@@ -241,13 +241,11 @@ visual "ready-6" for 6s at 0s {
 
 visual "component-7" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 190
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-7-label" for 6s at 0s {
@@ -272,13 +270,11 @@ visual "ready-7" for 6s at 0s {
 
 visual "component-8" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-8-label" for 6s at 0s {
@@ -303,13 +299,11 @@ visual "ready-8" for 5.25s at 0.75s {
 
 visual "component-9" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-9-label" for 6s at 0s {
@@ -334,13 +328,11 @@ visual "ready-9" for 5.25s at 0.75s {
 
 visual "component-10" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-10-label" for 6s at 0s {
@@ -365,13 +357,11 @@ visual "ready-10" for 5.25s at 0.75s {
 
 visual "component-11" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-11-label" for 6s at 0s {
@@ -396,13 +386,11 @@ visual "ready-11" for 5.25s at 0.75s {
 
 visual "component-12" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-12-label" for 6s at 0s {
@@ -427,13 +415,11 @@ visual "ready-12" for 5.25s at 0.75s {
 
 visual "component-13" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-13-label" for 6s at 0s {
@@ -458,13 +444,11 @@ visual "ready-13" for 5.25s at 0.75s {
 
 visual "component-14" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-14-label" for 6s at 0s {
@@ -489,13 +473,11 @@ visual "ready-14" for 5.25s at 0.75s {
 
 visual "component-15" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 256
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-15-label" for 6s at 0s {
@@ -520,13 +502,11 @@ visual "ready-15" for 5.25s at 0.75s {
 
 visual "component-16" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-16-label" for 6s at 0s {
@@ -551,13 +531,11 @@ visual "ready-16" for 4.5s at 1.5s {
 
 visual "component-17" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-17-label" for 6s at 0s {
@@ -582,13 +560,11 @@ visual "ready-17" for 4.5s at 1.5s {
 
 visual "component-18" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-18-label" for 6s at 0s {
@@ -613,13 +589,11 @@ visual "ready-18" for 4.5s at 1.5s {
 
 visual "component-19" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-19-label" for 6s at 0s {
@@ -644,13 +618,11 @@ visual "ready-19" for 4.5s at 1.5s {
 
 visual "component-20" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-20-label" for 6s at 0s {
@@ -675,13 +647,11 @@ visual "ready-20" for 4.5s at 1.5s {
 
 visual "component-21" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-21-label" for 6s at 0s {
@@ -706,13 +676,11 @@ visual "ready-21" for 4.5s at 1.5s {
 
 visual "component-22" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-22-label" for 6s at 0s {
@@ -737,13 +705,11 @@ visual "ready-22" for 4.5s at 1.5s {
 
 visual "component-23" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 322
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-23-label" for 6s at 0s {
@@ -768,13 +734,11 @@ visual "ready-23" for 4.5s at 1.5s {
 
 visual "component-24" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-24-label" for 6s at 0s {
@@ -799,13 +763,11 @@ visual "ready-24" for 3.75s at 2.25s {
 
 visual "component-25" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-25-label" for 6s at 0s {
@@ -830,13 +792,11 @@ visual "ready-25" for 3.75s at 2.25s {
 
 visual "component-26" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-26-label" for 6s at 0s {
@@ -861,13 +821,11 @@ visual "ready-26" for 3.75s at 2.25s {
 
 visual "component-27" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-27-label" for 6s at 0s {
@@ -892,13 +850,11 @@ visual "ready-27" for 3.75s at 2.25s {
 
 visual "component-28" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-28-label" for 6s at 0s {
@@ -923,13 +879,11 @@ visual "ready-28" for 3.75s at 2.25s {
 
 visual "component-29" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-29-label" for 6s at 0s {
@@ -954,13 +908,11 @@ visual "ready-29" for 3.75s at 2.25s {
 
 visual "component-30" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-30-label" for 6s at 0s {
@@ -985,13 +937,11 @@ visual "ready-30" for 3.75s at 2.25s {
 
 visual "component-31" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 388
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-31-label" for 6s at 0s {
@@ -1016,13 +966,11 @@ visual "ready-31" for 3.75s at 2.25s {
 
 visual "component-32" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-32-label" for 6s at 0s {
@@ -1047,13 +995,11 @@ visual "ready-32" for 3s at 3s {
 
 visual "component-33" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-33-label" for 6s at 0s {
@@ -1078,13 +1024,11 @@ visual "ready-33" for 3s at 3s {
 
 visual "component-34" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-34-label" for 6s at 0s {
@@ -1109,13 +1053,11 @@ visual "ready-34" for 3s at 3s {
 
 visual "component-35" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-35-label" for 6s at 0s {
@@ -1140,13 +1082,11 @@ visual "ready-35" for 3s at 3s {
 
 visual "component-36" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-36-label" for 6s at 0s {
@@ -1171,13 +1111,11 @@ visual "ready-36" for 3s at 3s {
 
 visual "component-37" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-37-label" for 6s at 0s {
@@ -1202,13 +1140,11 @@ visual "ready-37" for 3s at 3s {
 
 visual "component-38" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-38-label" for 6s at 0s {
@@ -1233,13 +1169,11 @@ visual "ready-38" for 3s at 3s {
 
 visual "component-39" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 454
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-39-label" for 6s at 0s {
@@ -1264,13 +1198,11 @@ visual "ready-39" for 3s at 3s {
 
 visual "component-40" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 122
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-40-label" for 6s at 0s {
@@ -1295,13 +1227,11 @@ visual "ready-40" for 2.25s at 3.75s {
 
 visual "component-41" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 270
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-41-label" for 6s at 0s {
@@ -1326,13 +1256,11 @@ visual "ready-41" for 2.25s at 3.75s {
 
 visual "component-42" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 418
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-42-label" for 6s at 0s {
@@ -1357,13 +1285,11 @@ visual "ready-42" for 2.25s at 3.75s {
 
 visual "component-43" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 566
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-43-label" for 6s at 0s {
@@ -1388,13 +1314,11 @@ visual "ready-43" for 2.25s at 3.75s {
 
 visual "component-44" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 714
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-44-label" for 6s at 0s {
@@ -1419,13 +1343,11 @@ visual "ready-44" for 2.25s at 3.75s {
 
 visual "component-45" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 862
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-45-label" for 6s at 0s {
@@ -1450,13 +1372,11 @@ visual "ready-45" for 2.25s at 3.75s {
 
 visual "component-46" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1010
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-46-label" for 6s at 0s {
@@ -1481,13 +1401,11 @@ visual "ready-46" for 2.25s at 3.75s {
 
 visual "component-47" for 6s at 0s {
     shape roundedRectangle
-    fill "#17263c"
-    stroke "#64748b"
-    strokeWidth 2
+    use "serviceCard"
     set x 1158
     set y 520
-    set width 132
-    set height 52
+    set width cardWidth
+    set height cardHeight
 }
 
 visual "component-47-label" for 6s at 0s {
@@ -1510,7 +1428,7 @@ visual "ready-47" for 2.25s at 3.75s {
     set height 10
 }
 
-visual "caption-4" for 2s at 4s {
+visual "caption-4" for 2s at summaryEntry {
     shape text
     fill "#e2e8f0"
     text "ROLLING BATCHES - ALL 48 READY BY 4 SECONDS"

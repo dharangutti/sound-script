@@ -1,3 +1,4 @@
+// Advanced: compare drop voicing, inversion, and spreading on the same chord.
 tempo 96
 instrument piano
 

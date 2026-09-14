@@ -1,3 +1,4 @@
+// Visual: animate position and radius with a rotating overlay over a piano score.
 tempo 120
 track music {
     instrument piano

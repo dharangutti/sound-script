@@ -1,3 +1,4 @@
+// Integration / Export: provide shared definitions for the import examples; no notes play on their own.
 block intro {
     mf
     C4 q

@@ -1,5 +1,9 @@
+// Audio-Visual: a three-part title sequence over a short musical opening.
+
 tempo 120
-track sting { instrument piano p C4 h E4 h G4 h C5 h }
+track sting {
+    instrument piano p C4 h E4 h G4 h C5 h
+}
 sync audio
 
 visual "background" for 6s at 0s {

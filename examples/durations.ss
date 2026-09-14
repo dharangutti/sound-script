@@ -1,3 +1,4 @@
+// Beginner: compare explicit beat lengths, colon notation, and a default duration.
 melody {
     bpm 100
     C4 for 2

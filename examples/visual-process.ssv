@@ -1,3 +1,4 @@
+// Audio-Visual: connect two labelled panels with an animated arrow over music.
 tempo 120
 track music { instrument piano mp C4 h E4 h G4 h C5 h A4 h G4 h E4 h C4 h }
 sync audio

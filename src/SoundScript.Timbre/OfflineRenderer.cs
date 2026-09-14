@@ -15,7 +15,7 @@ public static class OfflineRenderer
 {
   /// <summary>Default SoundCSS bundled with the timbre engine (v1.1 tuning attributes).</summary>
   public const string DefaultStylesheet = """
-    // SoundScript default timbre stylesheet (V4.1.1)
+    // Integration / Export: shape plosive and vowel timbres for offline SoundCSS rendering.
     p {
         burst: 12ms;
         noise-plosive: 0.5;

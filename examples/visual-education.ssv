@@ -1,5 +1,10 @@
+// Audio-Visual: distance, speed, and time illustrated with one-second musical ticks.
+// An eighth note plus 1.5 beats of rest makes each tick one second at 120 BPM.
+
 tempo 120
-track ticks { mp loop 6 { C5 e rest:1.5 } }
+track ticks {
+    mp loop 6 { C5 e rest:1.5 }
+}
 sync audio
 
 visual "background" for 6s at 0s {

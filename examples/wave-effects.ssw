@@ -1,3 +1,4 @@
+// Integration / Export: combine seeded humanization, synthetic speech, delay, and filtering.
 tempo 110
 
 track lead {
@@ -10,5 +11,6 @@ track lead {
 
 speak "hello from soundscript wave" voice=default seed=7
 
+// Effects run in source order on the master mix, including speech.
 effect delay time=0.2 feedback=0.4 mix=0.35
 effect filter type=lowpass cutoff=3000

@@ -1,3 +1,4 @@
+// Integration / Export: combine a song arrangement with speech phrases for offline vocal-stem rendering.
 tempo 132
 time 4/4
 
@@ -40,6 +41,7 @@ track bass {
     F2 w C2 w
 }
 
+// Keep both vocal phrases at the same mix level; named speak parameters take literals.
 speak "Jingle bells jingle bells" seed=7 gain=1.1
 speak "Jingle all the way" seed=8 gain=1.1
 

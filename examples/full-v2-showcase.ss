@@ -1,3 +1,4 @@
+// Advanced: combine imports, patterns, layers, tempo automation, and orchestration.
 import "import-lib.ss"
 
 time 4/4

@@ -1,3 +1,4 @@
+// Music: compare chord registers and the resulting voicings.
 tempo 100
 instrument piano
 

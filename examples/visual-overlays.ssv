@@ -1,3 +1,4 @@
+// Visual: overlap three cues and place a short sparkle using milliseconds.
 tempo 120
 track music {
     instrument piano
@@ -14,6 +15,7 @@ visual "circle" for 6s at 1s {
     animate radius 24 -> 120 over 6s
     animate opacity 0.2 -> 0.8 over 3s
 }
+// Explicit placement overlaps the earlier cues without extending their sequential cursor.
 visual "sparkle" for 1500ms at 4500ms {
     animate size 30 -> 100 over 1500ms
     animate opacity 1 -> 0 over 1500ms

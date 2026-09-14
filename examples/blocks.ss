@@ -1,3 +1,4 @@
+// Beginner: define named musical sections and play them in order.
 block verse {
     mf
     C4 q

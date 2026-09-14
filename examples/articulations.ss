@@ -1,3 +1,4 @@
+// Music: compare staccato, legato, and accent in prefix and suffix notation.
 tempo 120
 instrument piano
 

@@ -1,3 +1,4 @@
+// Beginner: declare tempo and meter independently of note durations.
 tempo 100
 time 3/4
 

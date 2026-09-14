@@ -1,5 +1,10 @@
+// Audio-Visual: three progress bars that complete in sequence.
+// Move each bar center by half its width increase to keep the left edge fixed.
+
 tempo 120
-track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
+track cues {
+    instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3
+}
 sync audio
 
 visual "background" for 6s at 0s {

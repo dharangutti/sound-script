@@ -1,6 +1,8 @@
+// Integration / Export: render repeatable timing and velocity variation with synthetic speech.
 tempo 120
 
 track melody {
+    // Keep the seed fixed when comparing renders or adjusting the amount of variation.
     humanize timing=0.02 velocity=0.1 seed=42
     mf
     C4 q D4 q E4 q F4 q

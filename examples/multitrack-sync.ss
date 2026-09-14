@@ -1,5 +1,7 @@
+// Music: align melody, harmony, and bass on the same four-beat timeline.
 tempo 120
 
+// Every track starts at beat zero; note counts may differ while the four-beat span stays aligned.
 track melody {
     instrument flute
     C5 q

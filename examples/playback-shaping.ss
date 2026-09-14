@@ -1,3 +1,4 @@
+// Music: combine articulation, dynamics, and a chord to demonstrate playback shaping.
 tempo 120
 instrument piano
 

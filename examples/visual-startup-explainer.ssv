@@ -1,7 +1,16 @@
+// Audio-Visual: timed startup symbols and captions with synthetic speech.
+// Speech uses seeded phoneme tones; captions carry the readable message.
+
 tempo 120
-track explanation0 {  speak "check" seed=7 }
-track explanation1 { rest:4 speak "connect" seed=7 }
-track explanation2 { rest:8 speak "start" seed=7 }
+track explanation0 {
+     speak "check" seed=7
+}
+track explanation1 {
+    rest:4 speak "connect" seed=7
+}
+track explanation2 {
+    rest:8 speak "start" seed=7
+}
 sync audio
 
 visual "background" for 6s at 0s {

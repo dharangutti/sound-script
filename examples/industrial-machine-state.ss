@@ -1,3 +1,4 @@
+// Integration / Export: distinguish idle, running, and critical states with reusable musical cues.
 tempo 100
 instrument organ
 

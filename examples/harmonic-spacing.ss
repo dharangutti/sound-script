@@ -1,3 +1,4 @@
+// Music: demonstrate harmonic spacing across seventh chords.
 tempo 90
 instrument piano
 

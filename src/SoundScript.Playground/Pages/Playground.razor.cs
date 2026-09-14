@@ -38,6 +38,7 @@ public partial class Playground : IDisposable
 
   private const string DefaultScript =
       """
+      // Music: reuse a short phrase across piano and cello layers.
       tempo 120
 
       block intro {
@@ -577,6 +578,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Advanced: combine blocks, patterns, layers, tempo automation, and chord voicing.
         tempo 120
 
         pattern arp { up }
@@ -611,6 +613,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Beginner: define named musical sections and play them in order.
         block verse { mf C4 q E4 q G4 q }
         block chorus { f C5 q G4 q E4 q }
 
@@ -627,6 +630,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: contrast track gain and humanization settings with a dry piano track.
         tempo 120
         track piano {
             instrument piano
@@ -643,6 +647,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: declare a four-bar tempo ramp over a sustained note.
         time 4/4
         tempo 120 → 160 over 4 bars
         track melody {
@@ -657,6 +662,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: play one chord progression through piano and cello layers.
         tempo 120
         track piano {
             layer piano
@@ -672,6 +678,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: apply deterministic timing and velocity variation to a short piano line.
         tempo 120
         track piano {
             humanize 0.03
@@ -686,6 +693,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Advanced: compare drop voicing, inversion, and spreading on the same chord.
         tempo 96
         track melody {
             instrument piano
@@ -701,6 +709,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: shape a soft opening phrase followed by a louder response.
         tempo 108
         track melody {
             instrument violin
@@ -723,6 +732,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Advanced: combine phrase curves, transitions, envelopes, articulation, and swing.
         tempo 108
         pattern arp { up }
 
@@ -756,6 +766,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: apply arpeggio, strum, and rhythm patterns to chords.
         tempo 120
         pattern arp { up }
         pattern strumPat { strum }
@@ -775,6 +786,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Advanced: enrich a chord with octave doubling, bass reinforcement, and top-note emphasis.
         tempo 88
         track harmony {
             instrument piano
@@ -791,6 +803,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Integration / Export: align sung lyric syllables with pitches over a piano accompaniment.
         tempo 100
 
         track accompaniment {
@@ -812,6 +825,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Beginner: write pitches, short duration symbols, and a bar separator in a melody.
         melody {
             tempo 120
             C4 q E4 q G4 q | C5 h
@@ -824,6 +838,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: compare staccato, legato, and accent in prefix and suffix notation.
         tempo 120
         instrument piano
         melody {
@@ -840,6 +855,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Beginner: change dynamic markings as a melody rises.
         tempo 96
         instrument piano
         melody {
@@ -858,6 +874,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Beginner: combine major, minor, and seventh chords into a progression.
         tempo 120
         instrument piano
         melody {
@@ -874,6 +891,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: smooth a phrase transition around a reusable block and a register change.
         tempo 110
         instrument violin
         block phrasea { C5 q D5 q E5 h }
@@ -893,6 +911,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Beginner: play a melody and bass together on independent tracks.
         tempo 120
         track melody {
             instrument flute
@@ -910,6 +929,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Music: combine articulation, dynamics, and a chord to demonstrate playback shaping.
         tempo 120
         instrument piano
         melody {
@@ -936,6 +956,7 @@ public partial class Playground : IDisposable
   {
     ScriptText =
         """
+        // Advanced: arrange a full song with tempo changes, layers, patterns, and pitched lyrics.
         tempo 132 -> 132 over 8 bars
         tempo 132 -> 112 over 4 bars
         time 4/4
@@ -1039,6 +1060,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: render a full song with pitched lyrics, seeded humanization, and master effects.
         tempo 132
         time 4/4
 
@@ -1115,6 +1137,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: apply delay followed by low-pass filtering to a melody.
         tempo 100
         track melody {
             mf
@@ -1129,6 +1152,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Beginner: render a short phrase as seeded synthetic speech tones through Wave.
         tempo 100
         speak "hello world" seed=7
         """;
@@ -1138,6 +1162,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: render repeatable timing and velocity variation with synthetic speech.
         tempo 120
         track melody {
             humanize timing=0.02 velocity=0.1 seed=42
@@ -1152,6 +1177,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: combine seeded humanization, synthetic speech, delay, and filtering.
         tempo 110
 
         track lead {
@@ -1173,6 +1199,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: render a reusable hook, harmony, bass, and sung voice through Wave.
         tempo 132
         time 4/4
 
@@ -1235,6 +1262,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: render sung lyrics and synthetic speech over a chord pad without a MIDI step.
         tempo 100
         time 4/4
 
@@ -1257,6 +1285,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: sketch a chord pad and synthetic speech for a vocal-stem workflow.
         tempo 120
         time 4/4
 
@@ -1273,6 +1302,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: combine a song arrangement with speech phrases for offline vocal-stem rendering.
         tempo 132
         time 4/4
 
@@ -1327,6 +1357,7 @@ public partial class Playground : IDisposable
   {
     WaveScriptText =
         """
+        // Integration / Export: arrange Jingle Bells for the WordBank vocal-stem workflow.
         tempo 132
         time 4/4
 
@@ -2141,6 +2172,7 @@ public partial class Playground : IDisposable
 
   private const string SyntaxExample =
       """
+      // Integration / Export: style one word with pitch and persona overrides.
       "hello" {
           style: sing;
           pitch: +4;
@@ -2154,6 +2186,7 @@ public partial class Playground : IDisposable
   [
     (
       """
+      // Integration / Export: pair corpus vocabulary and a chord pad with word-level SoundCSS.
       tempo 120
       time 4/4
 
@@ -2165,6 +2198,7 @@ public partial class Playground : IDisposable
       speak "bright star little song" seed=7
       """,
       """
+      // Integration / Export: vary pronunciation and timbre for words in the paired speech example.
       "bright" { style: sing; persona: bright; pitch: +3; }
       "star"   { style: sing; vibrato: medium; }
       "little" { style: normal; persona: soft; }
@@ -2173,6 +2207,7 @@ public partial class Playground : IDisposable
     ),
     (
       """
+      // Integration / Export: pair corpus vocabulary and a chord pad with word-level SoundCSS.
       tempo 112
       time 4/4
 
@@ -2184,6 +2219,7 @@ public partial class Playground : IDisposable
       speak "happy world welcome music" seed=11
       """,
       """
+      // Integration / Export: vary pronunciation and timbre for words in the paired speech example.
       "happy"   { style: sing; pitch: +5; }
       "world"   { style: sing; timbre: bright; }
       "welcome" { style: normal; persona: narrator; }
@@ -2192,6 +2228,7 @@ public partial class Playground : IDisposable
     ),
     (
       """
+      // Integration / Export: pair corpus vocabulary and a chord pad with word-level SoundCSS.
       tempo 96
       time 4/4
 
@@ -2203,6 +2240,7 @@ public partial class Playground : IDisposable
       speak "snow sound love way" seed=5
       """,
       """
+      // Integration / Export: vary pronunciation and timbre for words in the paired speech example.
       "snow"  { style: sing; timbre: dark; }
       "sound" { style: sing; persona: bright; }
       "love"  { style: sing; vibrato: medium; }

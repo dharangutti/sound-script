@@ -1,3 +1,4 @@
+// Integration / Export: mix a bundled vocal-stem sample with a chord pad.
 tempo 120
 time 4/4
 
@@ -6,4 +7,5 @@ track pad {
     Cmaj w Gmaj w
 }
 
+// Resolve the sample relative to this script; the bundled file is a demo tone.
 speak "Hello from my vocal stem" sample="vocal-stems/hello-world.wav" gain=0.95 seed=7

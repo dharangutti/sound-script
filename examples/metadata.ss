@@ -1,3 +1,4 @@
+// Music: contrast track gain and humanization settings with a dry piano track.
 tempo 120
 
 track piano {

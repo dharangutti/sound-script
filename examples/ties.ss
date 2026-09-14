@@ -1,3 +1,4 @@
+// Music: join repeated pitches into sustained notes with ties.
 tempo 100
 instrument violin
 
