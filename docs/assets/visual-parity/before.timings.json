@@ -1,0 +1,98 @@
+[
+  {
+    "Name": "legacy-cards",
+    "Source": "tools/VisualParity/legacy.ssv",
+    "Time": 1,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 134.2185
+  },
+  {
+    "Name": "legacy-cards-small",
+    "Source": "tools/VisualParity/legacy.ssv",
+    "Time": 1,
+    "Width": 640,
+    "Height": 360,
+    "Milliseconds": 28.8878
+  },
+  {
+    "Name": "primitives-0",
+    "Source": "tools/VisualParity/primitives.ssv",
+    "Time": 0,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 836.5671
+  },
+  {
+    "Name": "primitives-1",
+    "Source": "tools/VisualParity/primitives.ssv",
+    "Time": 1,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 842.4068
+  },
+  {
+    "Name": "primitives-2",
+    "Source": "tools/VisualParity/primitives.ssv",
+    "Time": 2,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 841.253
+  },
+  {
+    "Name": "primitives-small",
+    "Source": "tools/VisualParity/primitives.ssv",
+    "Time": 1,
+    "Width": 640,
+    "Height": 360,
+    "Milliseconds": 214.8218
+  },
+  {
+    "Name": "org-chart",
+    "Source": "examples/visual-org-chart.ssv",
+    "Time": 4.5,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 528.231
+  },
+  {
+    "Name": "information-cards",
+    "Source": "examples/visual-information-cards.ssv",
+    "Time": 4,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 761.6562
+  },
+  {
+    "Name": "legacy-0",
+    "Source": "examples/visual-temporal.ssv",
+    "Time": 0,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 106.7973
+  },
+  {
+    "Name": "legacy-3",
+    "Source": "examples/visual-temporal.ssv",
+    "Time": 3,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 832.9677
+  },
+  {
+    "Name": "legacy-8",
+    "Source": "examples/visual-temporal.ssv",
+    "Time": 8,
+    "Width": 1280,
+    "Height": 720,
+    "Milliseconds": 79.8207
+  },
+  {
+    "Name": "legacy-small",
+    "Source": "examples/visual-temporal.ssv",
+    "Time": 8,
+    "Width": 640,
+    "Height": 360,
+    "Milliseconds": 20.1393
+  }
+]

@@ -1,0 +1,63 @@
+// Renderer comparison fixture: fractional placement, strokes, transparency,
+// text sizes, clipping and motion all use existing authoring syntax.
+visual "small text" for 3s at 0s {
+ shape text text "AV To 123 / tiny" fontSize 12 fill "#ffffff"
+ set x 235 set y 35 set width 420 set height 25
+}
+visual "large text" for 3s at 0s {
+ shape text text "Quality 48" fontSize 48 fill "#6ee7b7"
+ set x 320 set y 100 set width 600 set height 64
+}
+visual "largest text" for 3s at 0s {
+ shape text text "AV 96" fontSize 96 fill "#ffffff"
+ set x 930 set y 86 set width 580 set height 110
+}
+visual "rect" for 3s at 0s {
+ shape rectangle fill "#f97316" stroke "#ffffff" strokeWidth 1
+ set x 155.25 set y 230.75 set width 180.5 set height 105.5
+}
+visual "rounded" for 3s at 0s {
+ shape roundedRectangle fill "#2563eb" stroke "#ffffff" strokeWidth 3
+ set x 400.25 set y 230.75 set width 195 set height 110
+}
+visual "circle" for 3s at 0s {
+ shape circle fill "#f43f5e" stroke "#fef3c7" strokeWidth 8
+ set x 655.5 set y 230.5 set radius 68
+}
+visual "ellipse" for 3s at 0s {
+ shape ellipse fill "#a78bfa" stroke "#ffffff" strokeWidth 0.5
+ set x 920.25 set y 230.25 set width 210 set height 110 set rotation 25
+}
+visual "clipped" for 3s at 0s {
+ shape roundedRectangle fill "#ffffff" stroke "#f43f5e" strokeWidth 20
+ set x 1270 set y 250 set width 100 set height 150 set rotation 30
+}
+visual "horizontal" for 3s at 0s {
+ shape line stroke "#ffffff" strokeWidth 1 set x 190 set y 380.25 set width 270 set height 8
+}
+visual "vertical" for 3s at 0s {
+ shape line stroke "#6ee7b7" strokeWidth 3 set x 380.5 set y 395 set width 130 set height 8 set rotation 90
+}
+visual "diagonal" for 3s at 0s {
+ shape line stroke "#fb7185" strokeWidth 12 set x 560 set y 395 set width 220 set height 8 set rotation 27
+}
+visual "translucent first" for 3s at 0s {
+ shape roundedRectangle fill "#ff0000" stroke "#ffffff" strokeWidth 8
+ set x 880 set y 420 set width 220 set height 150 set opacity 0.5
+}
+visual "translucent second" for 3s at 0s {
+ shape circle fill "#0000ff" stroke "#6ee7b7" strokeWidth 12
+ set x 995 set y 440 set radius 78 set opacity 0.5
+}
+visual "rotating" for 3s at 0s {
+ shape triangle fill "#fbbf24" stroke "#ffffff" strokeWidth 5
+ set x 180 set y 595 set width 135 set height 110
+ animate rotation 0 -> 90 over 3s animate opacity 0.25 -> 1 over 3s
+}
+visual "Case, AV To 123" for 3s at 0s {
+ set x 565.25 set y 590.5 set width 440 set height 96
+ animate rotation 0 -> 16 over 3s
+}
+visual "intro" for 3s at 0s {
+ set x 1020 set y 620 set width 390 set height 80
+}
