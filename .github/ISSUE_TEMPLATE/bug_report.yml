@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible problem in the CLI, language, or Playground
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Include a minimal source file when possible.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and the behavior you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the command, source snippet or file, and complete output.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, .NET SDK version, SoundScript version, and FFmpeg version if relevant.
+    validations:
+      required: true
