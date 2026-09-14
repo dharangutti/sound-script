@@ -360,8 +360,11 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 
 | Code | Meaning |
 |------|---------|
-| `0` | Output written successfully (MIDI, WAV, or OGG) |
-| `1` | Usage error, missing file, empty compose text, or compile/render error (message on stderr) |
+| `0` | Output written successfully (MIDI, WAV, OGG, or WebM) |
+| `1` | Source compilation or validation error |
+| `2` | Invalid CLI usage |
+| `3` | Missing input or dependency/environment failure |
+| `4` | Render/export failure, including cancellation |
 
 ## Related
 
@@ -429,3 +432,27 @@ dotnet publish src/SoundScript.Cli -c Release -r linux-x64 --self-contained true
 dotnet publish src/SoundScript.Cli -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
 dotnet publish src/SoundScript.Cli -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true
 ```
+
+## Performance and progress
+
+Long-running commands keep their concise output by default. Add `--verbose` to
+see stage transitions, elapsed time, configuration, and bounded progress lines
+on stderr. This keeps stdout valid for pipelines, including `--json --verbose`.
+
+```sh
+soundscript video scene.ssv --out scene.webm --verbose
+soundscript wave song.ssw --out song.wav --verbose
+```
+
+Video frame generation accepts `--jobs N` (1–64). The default is a conservative
+value capped at eight workers. Frames are still written with their canonical
+numbered names, so single-worker and parallel renders remain byte-identical.
+Press Ctrl+C during video rendering to cancel frame generation or FFmpeg; the
+temporary directory is removed and the atomic final output is left untouched.
+
+On a Windows/.NET 8 machine using `examples/visual-temporal.ssv` at 320×180,
+30 FPS with real FFmpeg, the measured export changed from 14.92 s (serial
+baseline) to 7.40 s with `--jobs 4`. The frame stage changed from roughly
+11.88 s to 4.46 s, while the resulting WebM remained 326,999 bytes. These are
+representative measurements rather than a runtime guarantee; codec and CPU
+hardware affect the result.
