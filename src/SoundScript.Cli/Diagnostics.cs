@@ -18,6 +18,7 @@ public static class Diagnostics
     public static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
     public static int ExitCode(Exception ex) => ex switch
     {
+        OperationCanceledException => 4,
         CliUsageException => 2,
         DependencyException or FileNotFoundException or DirectoryNotFoundException or UnauthorizedAccessException => 3,
         ExportException => 4,

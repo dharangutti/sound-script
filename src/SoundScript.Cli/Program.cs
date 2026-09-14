@@ -1,6 +1,15 @@
 using SoundScript.Cli;
 using SoundScript.Core;
 
+using var cancellation = new CancellationTokenSource();
+CliRuntime.CancellationToken = cancellation.Token;
+Console.CancelKeyPress += (_, eventArgs) =>
+{
+    eventArgs.Cancel = true;
+    cancellation.Cancel();
+    CliRuntime.Progress?.Cancelled();
+};
+
 CliArguments? invocation = null;
 try
 {

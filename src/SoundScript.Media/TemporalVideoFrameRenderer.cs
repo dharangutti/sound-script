@@ -9,28 +9,53 @@ namespace SoundScript.Media;
 /// </summary>
 public static class TemporalVideoFrameRenderer
 {
+    /// <summary>
+    /// Writes canonical numbered PPM frames. Each frame is independent, so a
+    /// bounded worker count can be used without changing frame bytes or order.
+    /// </summary>
     public static void WritePpmFrames(
         TemporalVideoExportPlan plan,
         string outputDirectory,
         int width = 640,
-        int height = 360) =>
-        WritePpmFrames(TemporalVisualSceneBuilder.Build(plan), outputDirectory, width, height);
+        int height = 360,
+        IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default,
+        int jobs = 1)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        cancellationToken.ThrowIfCancellationRequested();
+        WritePpmFrames(TemporalVisualSceneBuilder.Build(plan), outputDirectory, width, height, progress, cancellationToken, jobs);
+    }
 
     public static void WritePpmFrames(
         TemporalVisualExportPlan plan,
         string outputDirectory,
         int width = 640,
-        int height = 360)
+        int height = 360,
+        IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default,
+        int jobs = 1)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ValidateOutput(outputDirectory, width, height);
 
+        if (jobs is < 1 or > 64)
+            throw new ArgumentOutOfRangeException(nameof(jobs), "Frame jobs must be between 1 and 64.");
+
         Directory.CreateDirectory(outputDirectory);
-        for (var index = 0; index < plan.Samples.Count; index++)
+        var options = new ParallelOptions
         {
+            CancellationToken = cancellationToken,
+            MaxDegreeOfParallelism = jobs,
+        };
+        var completed = 0;
+        Parallel.For(0, plan.Samples.Count, options, index =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             var bytes = RenderPpm(plan.Samples[index], width, height);
             File.WriteAllBytes(Path.Combine(outputDirectory, $"frame-{index:D6}.ppm"), bytes);
-        }
+            progress?.Report(Interlocked.Increment(ref completed));
+        });
     }
 
     /// <summary>Projects a supplied state observation through the shared scene profile.</summary>

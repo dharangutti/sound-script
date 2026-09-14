@@ -34,6 +34,7 @@ public sealed class SourceAnalysis
     public ProgramNode? Program { get; private set; }
     public VisualTimeline? Timeline { get; private set; }
     public InterpretedProgram? Midi { get; private set; }
+    public WaveAdaptationResult? Wave { get; private set; }
     public ProgramMetadata Metadata { get; } = new();
     public List<Diagnostic> Diagnostics { get; } = [];
 
@@ -71,7 +72,8 @@ public sealed class SourceAnalysis
         if (wave)
         {
             var adapted = AstToNoteEventAdapter.Adapt(loaded.Program);
-            _ = EffectSettingsFactory.FromProgram(loaded.Program);
+            analysis.Wave = adapted;
+            var effects = EffectSettingsFactory.FromProgram(loaded.Program);
             metadata.AudioBackend = "wave";
             metadata.Tempo = adapted.TempoMap.GetBpmAt(0);
             metadata.TrackCount = adapted.Tracks.Count;
@@ -101,7 +103,7 @@ public sealed class SourceAnalysis
                     throw;
                 }
             }
-            endSamples = SoundScript.Wave.Effects.MasterEffectChain.MeasureOutputLength(checked((long)endSamples), EffectSettingsFactory.FromProgram(loaded.Program), WavWriter.SampleRate);
+            endSamples = SoundScript.Wave.Effects.MasterEffectChain.MeasureOutputLength(checked((long)endSamples), effects, WavWriter.SampleRate);
             metadata.AudioDurationSeconds = endSamples / WavWriter.SampleRate;
             metadata.DurationBasis = "Wave PCM length including release, sample overlays, and effect tails; no synthesis";
             metadata.SupportedOutputTypes.Add("wav");

@@ -11,6 +11,7 @@ public static partial class CommandHandlers
 {
 public static int Wave(CliArguments args)
 {
+    using var progress = BeginProgress(args);
     if (!TryConfigureWordbankCatalog(args, out var wordbankError))
     {
         Console.Error.WriteLine(wordbankError);
@@ -35,13 +36,16 @@ public static int Wave(CliArguments args)
 
     try
     {
+        progress.Stage("Compiling");
         var analysis = SourceAnalysis.Load(scriptPath, "wave");
+        progress.CompleteStage();
         var loaded = new LoadResult { Program = analysis.Program! };
         foreach (var diagnostic in analysis.Diagnostics) Console.Error.WriteLine(diagnostic);
         foreach (var warning in loaded.Warnings)
             Console.Error.WriteLine($"warning: {warning}");
 
-        var adapted = AstToNoteEventAdapter.Adapt(loaded.Program);
+        progress.Stage("Preparing Wave timeline");
+        var adapted = analysis.Wave ?? AstToNoteEventAdapter.Adapt(loaded.Program);
         IReadOnlyList<WaveExternalOverlay>? externalOverlays = null;
         IReadOnlyList<SampleOverlayRequest>? additionalOverlays = null;
 
@@ -101,6 +105,7 @@ public static int Wave(CliArguments args)
             externalOverlays = [new WaveExternalOverlay(vocalSamples, startSeconds, vocalGain)];
         }
 
+        progress.CompleteStage();
         var renderOptions = new WaveRenderOptions
         {
             ScriptDirectory = scriptDirectory,
@@ -108,15 +113,21 @@ public static int Wave(CliArguments args)
             ExternalOverlays = externalOverlays,
         };
 
+        progress.Stage("Rendering audio");
         if (stereo)
-            WriteMedia(outputPath, temporary => WaveRenderer.RenderStereo(loaded.Program, temporary, renderOptions));
+            WriteMedia(outputPath, temporary => WaveRenderer.RenderStereo(adapted, loaded.Program, temporary, renderOptions));
         else
-            WriteMedia(outputPath, temporary => WaveRenderer.Render(loaded.Program, temporary, renderOptions));
+            WriteMedia(outputPath, temporary => WaveRenderer.Render(adapted, loaded.Program, temporary, renderOptions));
+        progress.Completed(outputPath);
 
         Console.WriteLine($"Rendered {scriptPath} directly to {outputPath} (no MIDI step).");
         return 0;
     }
-    catch (Exception) { throw; }
+    catch (OperationCanceledException)
+    {
+        progress.Cancelled();
+        throw;
+    }
 }
 
 }
