@@ -41,7 +41,69 @@ function line(name, x1, y1, x2, y2, at = 0, arrow = false, seconds = duration - 
   shape(name, arrow ? 'arrow' : 'line', (x1+x2)/2, (y1+y2)/2, w, arrow ? 22 : 8, at, seconds, colors[3], [property('rotation', rotation, seconds), 'strokeWidth 3']);
 }
 function caption(label, at, seconds = 2) { text(`caption-${at}`, label, 640, 640, 1120, 28, at, seconds); }
-function save(key) { fs.writeFileSync(path.join(root, 'examples', `visual-${key}.ssv`), parts.join('\n')); }
+const purposes = {
+  'org-chart': 'Audio-Visual: staged team cards and reporting lines with musical entry cues.',
+  'delivery-flow': 'Audio-Visual: process stages and captions aligned with synthetic speech cues.',
+  'sequence-diagram': 'Audio-Visual: request and response arrows along three actor lifelines.',
+  'architecture': 'Audio-Visual: service boundaries, routed connectors, and synthetic speech cues.',
+  'block-diagram': 'Audio-Visual: a moving signal through three processing blocks.',
+  'release-timeline': 'Audio-Visual: release milestones introduced with musical cues.',
+  'status-dashboard': 'Audio-Visual: a service-health snapshot with a delayed alert cue.',
+  'progress-dashboard': 'Audio-Visual: three progress bars that complete in sequence.',
+  'information-cards': 'Visual: reusable cards for a staged support-handoff brief.',
+  'comparison': 'Visual: before and after latency bars using the same scale.',
+  'startup-explainer': 'Audio-Visual: timed startup symbols and captions with synthetic speech.',
+  'title-captions': 'Audio-Visual: a three-part title sequence over a short musical opening.',
+  'presentation': 'Audio-Visual: three timed slides with captions and synthetic speech cues.',
+  'workflow': 'Audio-Visual: an approval workflow with an explicit revision path.',
+  'network': 'Visual: shared dependencies and an animated outline highlight.',
+  'step-by-step': 'Audio-Visual: coordinated captions and highlights for incident-response stages.',
+  'kpi': 'Visual: staged metrics and targets in an authored scorecard snapshot.',
+  'education': 'Audio-Visual: distance, speed, and time illustrated with one-second musical ticks.',
+  'mixed-audio': 'Integration / Export: score notes, voice, speech, and an effect in one timed composition.',
+  'scale-study': 'Advanced: 48 service cards with six timed batches for timeline and export inspection.',
+};
+
+function save(key) {
+  let source = parts.join('\n');
+  let introduction = `// ${purposes[key]}\n`;
+  if (['org-chart', 'information-cards', 'scale-study'].includes(key)) {
+    const styleName = key === 'scale-study' ? 'serviceCard' : 'teamCard';
+    introduction += '// Share card appearance while keeping each card and label independently timed.\n';
+    introduction += `style "${styleName}" {\n    fill "${colors[1]}"\n    stroke "${colors[4]}"\n    strokeWidth 2\n}\n`;
+    source = source.replaceAll(`    fill "${colors[1]}"\n    stroke "${colors[4]}"\n    strokeWidth 2`, `    use "${styleName}"`);
+  }
+  if (key === 'org-chart') {
+    introduction += 'let centerX = 640\nlet sceneDuration = 6s\nmarker engineeringEntry = 2s\nmarker operationsEntry = 4s\n';
+    source = source.replaceAll('set x 640', 'set x centerX').replaceAll('for 6s', 'for sceneDuration')
+      .replaceAll('at 2s', 'at engineeringEntry').replaceAll('at 4s', 'at operationsEntry');
+  }
+  if (key === 'scale-study') {
+    introduction += 'let cardWidth = 132\nlet cardHeight = 52\nmarker summaryEntry = 4s\n';
+    introduction += '// Ready indicators arrive every 0.75s by row; the summary follows the last batch at 3.75s.\n';
+    source = source.replaceAll('set width 132', 'set width cardWidth').replaceAll('set height 52', 'set height cardHeight')
+      .replaceAll('at 4s', 'at summaryEntry');
+  }
+  if (key === 'mixed-audio') {
+    introduction += '// At 120 BPM, four beats place the voice at 2s and eight beats place speech at 4s.\n';
+    introduction += 'let voiceDelayBeats = 4\nlet speechDelayBeats = 8\nmarker voiceEntry = 2s\nmarker speechEntry = 4s\n';
+    source = source.replace('rest:4 sing', 'rest for voiceDelayBeats sing').replace('rest:8 speak', 'rest for speechDelayBeats speak')
+      .replaceAll('at 2s', 'at voiceEntry').replaceAll('at 4s', 'at speechEntry');
+  }
+  if (key === 'progress-dashboard')
+    introduction += '// Move each bar center by half its width increase to keep the left edge fixed.\n';
+  if (key === 'comparison')
+    introduction += '// The 600px and 200px widths preserve the 480:160 ratio; the growing bar keeps its left edge fixed.\n';
+  if (key === 'education')
+    introduction += '// An eighth note plus 1.5 beats of rest makes each tick one second at 120 BPM.\n';
+  if (key === 'status-dashboard')
+    introduction += '// Eight beats of rest place the alert at the 4s caption; the displayed values are authored data.\n';
+  if (source.includes('speak '))
+    introduction += '// Speech uses seeded phoneme tones; captions carry the readable message.\n';
+  // Keep the exported sources readable without requiring this authoring helper.
+  source = source.replace(/^(track|voice) (\w+) \{ (.*?) \}$/gm, '$1 $2 {\n    $3\n}');
+  fs.writeFileSync(path.join(root, 'examples', `visual-${key}.ssv`), introduction + '\n' + source);
+}
 const cues = 'track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }';
 function speech(words) {
   return words.map((word,i) => `track explanation${i} { ${i ? `rest:${i*4}` : ''} speak "${word}" seed=7 }`).join('\n');

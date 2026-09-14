@@ -1,3 +1,4 @@
+// Advanced: arrange imported material with phrases, patterns, layers, and chord helpers.
 import "import-lib.ss"
 
 time 4/4

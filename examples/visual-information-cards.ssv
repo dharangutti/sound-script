@@ -1,3 +1,11 @@
+// Visual: reusable cards for a staged support-handoff brief.
+// Share card appearance while keeping each card and label independently timed.
+style "teamCard" {
+    fill "#ffffff"
+    stroke "#64748b"
+    strokeWidth 2
+}
+
 tempo 120
 
 sync audio
@@ -24,9 +32,7 @@ visual "heading" for 6s at 0s {
 
 visual "info-0" for 6s at 0s {
     shape roundedRectangle
-    fill "#ffffff"
-    stroke "#64748b"
-    strokeWidth 2
+    use "teamCard"
     set x 260
     set y 330
     set width 340
@@ -57,9 +63,7 @@ visual "detail-0" for 6s at 0s {
 
 visual "info-1" for 5s at 1s {
     shape roundedRectangle
-    fill "#ffffff"
-    stroke "#64748b"
-    strokeWidth 2
+    use "teamCard"
     set x 640
     set y 330
     set width 340
@@ -90,9 +94,7 @@ visual "detail-1" for 5s at 1s {
 
 visual "info-2" for 4s at 2s {
     shape roundedRectangle
-    fill "#ffffff"
-    stroke "#64748b"
-    strokeWidth 2
+    use "teamCard"
     set x 1020
     set y 330
     set width 340

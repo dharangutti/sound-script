@@ -1,3 +1,6 @@
+// Visual: before and after latency bars using the same scale.
+// The 600px and 200px widths preserve the 480:160 ratio; the growing bar keeps its left edge fixed.
+
 tempo 120
 
 sync audio

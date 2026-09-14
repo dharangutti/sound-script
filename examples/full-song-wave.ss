@@ -1,6 +1,10 @@
-tempo 132
+// Integration / Export: render a reusable hook, harmony, bass, and sung voice through Wave.
+let songTempo = 132
+
+tempo songTempo
 time 4/4
 
+// Wave renders phrase notes and pitched lyrics; MIDI instrument and phrase shaping do not change Wave timbre.
 block hook {
     E4 q E4 q E4 h
     E4 q E4 q E4 h
@@ -20,7 +24,7 @@ track melody {
         transition smooth
         play hook
     }
-    tempo 132 → 112 over 4 bars
+    tempo songTempo → 112 over 4 bars
     phrase {
         transition abrupt
         f

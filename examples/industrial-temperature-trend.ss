@@ -1,3 +1,4 @@
+// Integration / Export: represent rising, stable, and falling temperature with melodic phrases.
 tempo 90
 instrument flute
 

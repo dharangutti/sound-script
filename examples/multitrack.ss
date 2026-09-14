@@ -1,3 +1,4 @@
+// Beginner: play a melody and bass together on independent tracks.
 tempo 120
 time 4/4
 

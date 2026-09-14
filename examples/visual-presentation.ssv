@@ -1,7 +1,16 @@
+// Audio-Visual: three timed slides with captions and synthetic speech cues.
+// Speech uses seeded phoneme tones; captions carry the readable message.
+
 tempo 120
-track explanation0 {  speak "results" seed=7 }
-track explanation1 { rest:4 speak "focus" seed=7 }
-track explanation2 { rest:8 speak "next" seed=7 }
+track explanation0 {
+     speak "results" seed=7
+}
+track explanation1 {
+    rest:4 speak "focus" seed=7
+}
+track explanation2 {
+    rest:8 speak "next" seed=7
+}
 sync audio
 
 visual "background" for 6s at 0s {

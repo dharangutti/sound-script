@@ -1,3 +1,4 @@
+// Advanced: combine phrase curves, transitions, envelopes, articulation, and swing.
 tempo 108
 instrument violin
 

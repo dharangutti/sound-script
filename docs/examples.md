@@ -1,5 +1,19 @@
 # SoundScript Examples (V11)
 
+Start with the [complete learning guide](example-learning-guide.md), which groups
+every standalone example by Beginner, Music, Visual, Audio-Visual, Advanced,
+and Integration / Export. These are learning paths, not different language modes;
+the original filenames and entry points remain available below.
+
+| Learning path | Suggested starting point |
+|---|---|
+| Beginner | [melody.ss](../examples/melody.ss), then [rests.ss](../examples/rests.ss) and [multitrack.ss](../examples/multitrack.ss) |
+| Music | [phrases.ss](../examples/phrases.ss), then [patterns.ss](../examples/patterns.ss) |
+| Visual | [visual-motion.ssv](../examples/visual-motion.ssv), then [visual-story.ssv](../examples/visual-story.ssv) |
+| Audio-Visual | [visual-temporal.ssv](../examples/visual-temporal.ssv), then [visual-org-chart.ssv](../examples/visual-org-chart.ssv) |
+| Advanced | [full-v2-showcase.ss](../examples/full-v2-showcase.ss) and [visual-scale-study.ssv](../examples/visual-scale-study.ssv) |
+| Integration / Export | [imports.ss](../examples/imports.ss), [wave-vocal-stem.ssw](../examples/wave-vocal-stem.ssw), and [visual-mixed-audio.ssv](../examples/visual-mixed-audio.ssv) |
+
 ## Audio/Visual Example Library — V10/V11
 
 The [practical composition library](audio-visual-compositions.md) adds 20

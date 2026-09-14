@@ -1,5 +1,10 @@
+// Audio-Visual: a service-health snapshot with a delayed alert cue.
+// Eight beats of rest place the alert at the 4s caption; the displayed values are authored data.
+
 tempo 120
-track alert { rest:8 C5 e rest e C5 q }
+track alert {
+    rest:8 C5 e rest e C5 q
+}
 sync audio
 
 visual "background" for 6s at 0s {

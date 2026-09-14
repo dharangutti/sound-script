@@ -1,6 +1,8 @@
+// Integration / Export: contrast swing, push, and pull as conveyor-drift audio cues.
 tempo 120
 instrument synth
 
+// Repeating the same pitches isolates the timing contrast between the three phrases.
 track conveyor {
     phrase {
         swing 0.67

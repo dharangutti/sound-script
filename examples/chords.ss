@@ -1,3 +1,4 @@
+// Beginner: combine major, minor, and seventh chords into a progression.
 tempo 120
 instrument piano
 

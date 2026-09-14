@@ -1,3 +1,4 @@
+// Beginner: place explicit silence between notes.
 tempo 120
 instrument piano
 

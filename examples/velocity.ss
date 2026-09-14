@@ -1,3 +1,4 @@
+// Beginner: combine a default velocity with individual note overrides.
 tempo 120
 velocity 80
 

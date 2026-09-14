@@ -1,4 +1,4 @@
-// Authoring conveniences are lowered before the existing temporal runtime.
+// Audio-Visual: combine sequential cues, a wait, pinned overlays, and reusable authoring values.
 let centerX = 640
 let centerY = 360
 marker orbitStart = 0s
@@ -19,6 +19,7 @@ track music {
 
 sync audio
 visual "intro" for 3s
+// Delay the next sequential cue; the circle remains independently pinned at the start.
 wait 1s
 visual "product" for 4s
 visual "circle" for 8s at orbitStart {

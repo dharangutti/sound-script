@@ -1,3 +1,4 @@
+// Beginner: choose a piano instrument for a short melody.
 tempo 120
 instrument piano
 

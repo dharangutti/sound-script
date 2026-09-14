@@ -1,3 +1,4 @@
+// Integration / Export: export pitched lyrics with a piano accompaniment as MIDI.
 tempo 132
 time 4/4
 

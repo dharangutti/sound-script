@@ -1,3 +1,4 @@
+// Music: shape the website piano demo with a gentle, legato phrase.
 tempo 112
 time 4/4
 instrument piano

@@ -1,3 +1,4 @@
+// Audio-Visual: combine animated status indicators with a rotating badge and label.
 tempo 120
 track music { instrument piano mp C4 h E4 h G4 h C5 h A4 h G4 h E4 h C4 h }
 sync audio
@@ -24,6 +25,7 @@ visual "status badge" for 8s at 0s {
     animate height 150 -> 150 over 8s
     animate rotation 0 -> 12 over 8s
 }
+// Match the badge rotation so the text stays aligned throughout the cue.
 visual "status label" for 8s at 0s {
     shape text
     text "SYSTEM OK"

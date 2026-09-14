@@ -1,3 +1,4 @@
+// Visual: sequence Ready, Go, and Done cards with an intentional gap and fades.
 tempo 120
 track music {
     instrument piano
@@ -10,6 +11,7 @@ visual "Ready" for 2s {
     animate y 0.5 -> 0.5 over 2s
     animate opacity 0 -> 1 over 1s
 }
+// Leave the visual stage empty from 2s to 3s while the music continues.
 wait 1s
 visual "Go" for 2s {
     animate x 0.5 -> 0.5 over 2s

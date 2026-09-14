@@ -1,3 +1,4 @@
+// Integration / Export: render sung lyrics and synthetic speech over a chord pad without a MIDI step.
 tempo 100
 time 4/4
 

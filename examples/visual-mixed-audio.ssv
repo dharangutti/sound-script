@@ -1,7 +1,21 @@
+// Integration / Export: score notes, voice, speech, and an effect in one timed composition.
+// At 120 BPM, four beats place the voice at 2s and eight beats place speech at 4s.
+let voiceDelayBeats = 4
+let speechDelayBeats = 8
+marker voiceEntry = 2s
+marker speechEntry = 4s
+// Speech uses seeded phoneme tones; captions carry the readable message.
+
 tempo 120
-track cues { instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3 }
-voice guide { vocal choir mp rest:4 sing "go" C4 h }
-track speech { rest:8 speak "done" seed=7 }
+track cues {
+    instrument piano mp C5 q rest:3 E5 q rest:3 G5 q rest:3
+}
+voice guide {
+    vocal choir mp rest for voiceDelayBeats sing "go" C4 h
+}
+track speech {
+    rest for speechDelayBeats speak "done" seed=7
+}
 effect delay time=0.125 feedback=0.1 mix=0.08
 sync audio
 
@@ -47,7 +61,7 @@ visual "score-label" for 6s at 0s {
     set height 40
 }
 
-visual "voice" for 4s at 2s {
+visual "voice" for 4s at voiceEntry {
     shape roundedRectangle
     fill "#292041"
     stroke "#a78bfa"
@@ -58,7 +72,7 @@ visual "voice" for 4s at 2s {
     set height 104
 }
 
-visual "voice-label" for 4s at 2s {
+visual "voice-label" for 4s at voiceEntry {
     shape text
     fill "#faf5ff"
     text "SYNTHETIC GO"
@@ -69,7 +83,7 @@ visual "voice-label" for 4s at 2s {
     set height 40
 }
 
-visual "speech" for 2s at 4s {
+visual "speech" for 2s at speechEntry {
     shape roundedRectangle
     fill "#292041"
     stroke "#a78bfa"
@@ -80,7 +94,7 @@ visual "speech" for 2s at 4s {
     set height 104
 }
 
-visual "speech-label" for 2s at 4s {
+visual "speech-label" for 2s at speechEntry {
     shape text
     fill "#faf5ff"
     text "SPEAK DONE"

@@ -1,3 +1,4 @@
+// Music: smooth a phrase transition around a reusable block and a register change.
 tempo 110
 instrument violin
 

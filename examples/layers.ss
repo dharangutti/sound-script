@@ -1,3 +1,4 @@
+// Music: play one chord progression through piano and cello layers.
 tempo 120
 
 track piano {

@@ -1,3 +1,4 @@
+// Integration / Export: sketch contrasting spatial-awareness cues through register, articulation, and dynamics.
 tempo 96
 instrument synth
 

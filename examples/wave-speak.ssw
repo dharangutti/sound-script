@@ -1,3 +1,4 @@
+// Beginner: render a short phrase as seeded synthetic speech tones through Wave.
 tempo 100
 
 speak "hello world" seed=7

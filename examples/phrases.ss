@@ -1,3 +1,4 @@
+// Music: compare smooth and abrupt phrase transitions.
 tempo 108
 instrument violin
 

@@ -1,7 +1,16 @@
+// Audio-Visual: process stages and captions aligned with synthetic speech cues.
+// Speech uses seeded phoneme tones; captions carry the readable message.
+
 tempo 120
-track explanation0 {  speak "plan" seed=7 }
-track explanation1 { rest:4 speak "build" seed=7 }
-track explanation2 { rest:8 speak "ship" seed=7 }
+track explanation0 {
+     speak "plan" seed=7
+}
+track explanation1 {
+    rest:4 speak "build" seed=7
+}
+track explanation2 {
+    rest:8 speak "ship" seed=7
+}
 sync audio
 
 visual "background" for 6s at 0s {

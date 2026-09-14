@@ -1,3 +1,4 @@
+// Integration / Export: align sung lyric syllables with pitches over a piano accompaniment.
 tempo 100
 
 track accompaniment {

@@ -1,3 +1,4 @@
+// Beginner: change dynamic markings as a melody rises.
 tempo 96
 instrument piano
 

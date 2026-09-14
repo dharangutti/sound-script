@@ -1,3 +1,4 @@
+// Beginner: reuse named note sequences in a chosen order.
 tempo 120
 
 sequence intro {

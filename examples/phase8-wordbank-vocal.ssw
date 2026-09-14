@@ -1,8 +1,10 @@
+// Integration / Export: exercise corpus-backed words and an uncommon-word fallback in vocal generation.
 tempo 96
 
 track pad {
   mp C3 q G3 q A3 q E3 q
 }
 
+// Select the WordBank engine in the vocal workflow; speak alone uses synthetic prosody tones.
 speak "Hello welcome" voice=default seed=7
 speak "Hello xenoglottophobia" voice=default seed=8
