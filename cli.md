@@ -2,7 +2,7 @@
 
 The SoundScript CLI (`SoundScript.Cli`, assembly name `soundscript`) compiles
 scripts and text to MIDI, renders offline timbre audio, and renders `.ss`/`.ssw`
-scripts directly to WAV. It requires the .NET 8 SDK and runs on Windows, macOS,
+scripts directly to WAV. It requires the .NET 10 SDK and runs on Windows, macOS,
 and Linux.
 
 ```bash
