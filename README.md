@@ -51,6 +51,16 @@ Music should be as writable, versionable, and reproducible as software. SoundScr
 | **CLI** (`SoundScript.Cli`) | .NET 8 SDK — Windows, macOS, Linux |
 | **Playground** (`SoundScript.Playground`) | Any modern browser with WebAssembly and Web Audio — Chrome, Edge, Firefox, Safari (desktop and mobile). Runs fully client-side; no account, no server, no installation. |
 
+## CLI installation and workflows
+
+V11.1 includes the `soundscript` .NET global tool. Install it with
+`dotnet tool install --global SoundScript.Cli`, then use
+`soundscript validate demo.ssv`, `soundscript inspect demo.ssv`, or
+`soundscript wave song.ss --out song.wav`. The CLI also supports strict JSON
+automation, stable exit codes, and `video --check` export preflight. See
+[CLI documentation](docs/cli.md) for the command reference, JSON schema,
+FFmpeg requirement, and release binary commands.
+
 ## V2 Overview
 
 V2 extends the v1.2 five-phase engine with compositional and production features:

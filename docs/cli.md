@@ -376,3 +376,56 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`
 - [examples.md](examples.md) — example catalog
+## V11.1 CLI productization
+
+Install the packaged tool with `dotnet tool install --global SoundScript.Cli`,
+then run `soundscript --version`. V11.1 adds strict `validate` and `inspect`
+commands while preserving the intent-oriented commands documented above.
+
+```sh
+soundscript validate scene.ssv
+soundscript validate scene.ssv --json
+soundscript inspect scene.ssv --at 1.5
+soundscript wave song.ss --out song.wav
+soundscript video scene.ssv --out scene.webm --check
+```
+
+`--out` and `-o` are accepted wherever an output is supported. Existing
+positional output forms continue to work. Unknown flags, missing values,
+duplicate options, and conflicting positional/explicit output forms return
+exit code 2. Commands never prompt interactively.
+
+Stable exit codes are: 0 success (warnings are allowed), 1 source
+compilation/validation failure, 2 invalid CLI usage, 3 missing input or
+dependency/environment failure, and 4 render/export failure.
+
+`validate` parses the complete import graph and runs the existing MIDI, Wave,
+visual, and SoundCSS semantic paths without writing media. Diagnostics have
+`severity`, `code`, `file`, `line`, `column`, and `message`, for example
+`scene.ssv:18:12 warning SS2104: visual extends beyond audio duration`.
+`inspect` reports tempo, duration, track/note/event counts, visual/audio
+durations, synchronization points, supported outputs, and the duration basis.
+Visual programs accept `--at <seconds>`.
+
+JSON mode uses schema version 1 and writes only JSON to stdout:
+
+```json
+{"schemaVersion":1,"soundScriptVersion":"11.1.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
+```
+
+`video --check` preflights timing, dimensions, FPS, frame count, output path,
+FFmpeg, and the `libvpx-vp9`, `libopus`, and WebM capabilities without making
+frames or replacing the output. WebM export requires FFmpeg; select it with
+`--ffmpeg` or `SOUNDSCRIPT_FFMPEG`. Export media is staged beside the target,
+verified, and atomically replaced, so failed exports leave an existing target
+untouched.
+
+The .NET single-file release workflow publishes Windows x64, Linux x64, macOS
+x64, and macOS arm64 artifacts. The equivalent local commands are:
+
+```sh
+dotnet publish src/SoundScript.Cli -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+dotnet publish src/SoundScript.Cli -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
+dotnet publish src/SoundScript.Cli -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
+dotnet publish src/SoundScript.Cli -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true
+```

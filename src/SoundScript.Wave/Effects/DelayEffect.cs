@@ -56,7 +56,7 @@ internal static class DelayEffect
     /// below <see cref="TailFloor"/> (echo n has amplitude mix·feedback^(n-1)),
     /// capped so pathological feedback values can't produce unbounded output.
     /// </summary>
-    private static int TailRepeats(DelaySettings settings)
+    internal static int TailRepeats(DelaySettings settings)
     {
         if (settings.Mix <= 0.0)
             return 0; // fully dry — no audible tail to preserve

@@ -82,6 +82,8 @@ public static class AstToNoteEventAdapter
 
         foreach (var statement in program.Statements)
         {
+            try
+            {
             switch (statement)
             {
                 case BpmNode bpm:
@@ -158,6 +160,8 @@ public static class AstToNoteEventAdapter
                 // nodes, BarNode, ImportNode: out of scope (see class summary).
                 // Skipped, not failed.
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
 
         var result = new Dictionary<string, List<NoteEvent>>(StringComparer.OrdinalIgnoreCase);
@@ -178,6 +182,8 @@ public static class AstToNoteEventAdapter
     {
         foreach (var statement in body)
         {
+            try
+            {
             switch (statement)
             {
                 case BpmNode bpm:
@@ -236,6 +242,8 @@ public static class AstToNoteEventAdapter
 
                 // See class summary for the full list of intentionally-skipped node types.
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
     }
 
@@ -485,6 +493,8 @@ public static class AstToNoteEventAdapter
     {
         foreach (var statement in body)
         {
+            try
+            {
             switch (statement)
             {
                 case DynamicNode dynamic:
@@ -504,6 +514,8 @@ public static class AstToNoteEventAdapter
                 // coloring is deferred (see class summary) — captured by the
                 // grammar, no-op for audibility here.
             }
+            }
+            catch (Exception ex) { SoundScript.Core.SourceLocation.Attach(ex, statement); throw; }
         }
     }
 

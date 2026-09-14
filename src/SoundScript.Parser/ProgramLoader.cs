@@ -1,4 +1,5 @@
 using SoundScript.Core.Ast;
+using SoundScript.Core;
 
 namespace SoundScript.Parser;
 
@@ -6,6 +7,7 @@ public sealed class LoadResult
 {
     public ProgramNode Program { get; set; } = new();
     public List<string> Warnings { get; } = [];
+    public List<(string Message, SourceLocation? Location)> SourceWarnings { get; } = [];
 }
 
 public static class ProgramLoader
@@ -14,10 +16,10 @@ public static class ProgramLoader
     {
         var fullEntryPath = Path.GetFullPath(entryPath);
         var result = new LoadResult();
-        var loading = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var loading = new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         var merged = new MergedProgram();
 
-        LoadFile(fullEntryPath, merged, result.Warnings, loading);
+        LoadFile(fullEntryPath, merged, result, loading);
 
         result.Program = merged.ToProgramNode();
         return result;
@@ -26,7 +28,7 @@ public static class ProgramLoader
     private static void LoadFile(
         string filePath,
         MergedProgram merged,
-        List<string> warnings,
+        LoadResult result,
         HashSet<string> loading)
     {
         if (!loading.Add(filePath))
@@ -35,10 +37,10 @@ public static class ProgramLoader
         try
         {
             if (!File.Exists(filePath))
-                throw new FileNotFoundException($"Import file not found: '{filePath}'.");
+                throw new FileNotFoundException($"Import file not found: '{filePath}'.", filePath);
 
             var source = File.ReadAllText(filePath);
-            var program = new Parser(new Tokenizer(source).Tokenize()).Parse();
+            var program = new Parser(new Tokenizer(source).Tokenize()) { SourceFile = filePath }.Parse();
             var baseDirectory = Path.GetDirectoryName(filePath) ?? ".";
 
             foreach (var statement in program.Statements)
@@ -46,12 +48,18 @@ public static class ProgramLoader
                 if (statement is ImportNode import)
                 {
                     var resolvedPath = ResolveImportPath(import.Path, baseDirectory);
-                    LoadFile(resolvedPath, merged, warnings, loading);
+                    try { LoadFile(resolvedPath, merged, result, loading); }
+                    catch (Exception ex) { SourceLocation.Attach(ex, import); throw; }
                     continue;
                 }
 
-                merged.Add(statement, warnings);
+                merged.Add(statement, result);
             }
+        }
+        catch (Exception ex)
+        {
+            if (!ex.Data.Contains("SoundScript.File")) ex.Data["SoundScript.File"] = filePath;
+            throw;
         }
         finally
         {
@@ -83,14 +91,16 @@ public static class ProgramLoader
         private readonly List<AstNode> _statements = [];
         private readonly Dictionary<string, int> _blockIndices = new(StringComparer.OrdinalIgnoreCase);
 
-        public void Add(AstNode statement, List<string> warnings)
+        public void Add(AstNode statement, LoadResult result)
         {
             var blockName = GetBlockName(statement);
             if (blockName is not null)
             {
                 if (_blockIndices.TryGetValue(blockName, out var index))
                 {
-                    warnings.Add($"Duplicate block name '{blockName}' — later definition overrides earlier.");
+                    var warning = $"Duplicate block name '{blockName}' — later definition overrides earlier.";
+                    result.Warnings.Add(warning);
+                    result.SourceWarnings.Add((warning, SourceLocation.For(statement)));
                     _statements[index] = statement;
                     return;
                 }

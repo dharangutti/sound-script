@@ -8,9 +8,10 @@
     from the same values on the next push to main.
   -->
   <PropertyGroup>
-    <Version>11.0.0</Version>
-    <SoundScriptVersionLabel>V11</SoundScriptVersionLabel>
-    <SoundScriptCodename>Temporal Media Export</SoundScriptCodename>
+    <Version>11.1.0</Version>
+    <SoundScriptVersionLabel>V11.1</SoundScriptVersionLabel>
+    <SoundScriptCodename>CLI Productization</SoundScriptCodename>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

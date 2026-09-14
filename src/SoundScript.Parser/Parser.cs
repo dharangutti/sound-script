@@ -13,6 +13,15 @@ public sealed partial class Parser
 {
     private readonly IReadOnlyList<Token> _tokens;
     private int _position;
+    public string? SourceFile { get; init; }
+
+    private AstNode Located(Func<AstNode> parse)
+    {
+        var token = Peek();
+        var node = parse();
+        SourceLocation.Set(node, new SourceLocation(SourceFile, token.Line, token.Column));
+        return node;
+    }
 
     public Parser(IReadOnlyList<Token> tokens)
     {
@@ -28,7 +37,7 @@ public sealed partial class Parser
             if (MatchContextualWord("let")) { ParseConstantDeclaration(false); continue; }
             if (MatchContextualWord("marker")) { ParseConstantDeclaration(true); continue; }
             if (MatchContextualWord("style")) { ParseStyleDeclaration(); continue; }
-            program.Statements.Add(ParseTopLevelStatement());
+            program.Statements.Add(Located(ParseTopLevelStatement));
         }
 
         return program;
@@ -346,7 +355,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            melody.Body.Add(ParseBodyStatement(allowLoop: false));
+            melody.Body.Add(Located(() => ParseBodyStatement(allowLoop: false)));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -362,7 +371,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            track.Body.Add(ParseBodyStatement(allowLoop: true));
+            track.Body.Add(Located(() => ParseBodyStatement(allowLoop: true)));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -378,7 +387,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            voice.Body.Add(ParseVoiceBodyStatement());
+            voice.Body.Add(Located(ParseVoiceBodyStatement));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -443,7 +452,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            sequence.Body.Add(ParseBodyStatement(allowLoop: true));
+            sequence.Body.Add(Located(() => ParseBodyStatement(allowLoop: true)));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -459,7 +468,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
         {
-            block.Body.Add(ParseBlockBodyStatement());
+            block.Body.Add(Located(ParseBlockBodyStatement));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -588,7 +597,7 @@ public sealed partial class Parser
             if (Check(TokenType.Loop))
                 throw Invalid(Peek(), "Nested loops are not supported.");
 
-            loop.Body.Add(ParseBodyStatement(allowLoop: false));
+            loop.Body.Add(Located(() => ParseBodyStatement(allowLoop: false)));
         }
 
         Expect(TokenType.RightBrace, "}");
@@ -602,7 +611,7 @@ public sealed partial class Parser
         var phrase = new PhraseNode();
 
         while (!Check(TokenType.RightBrace) && !Check(TokenType.EndOfFile))
-            phrase.Body.Add(ParsePhraseBodyStatement());
+            phrase.Body.Add(Located(ParsePhraseBodyStatement));
 
         Expect(TokenType.RightBrace, "}");
         return phrase;

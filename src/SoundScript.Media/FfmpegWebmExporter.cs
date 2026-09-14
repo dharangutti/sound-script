@@ -9,7 +9,27 @@ namespace SoundScript.Media;
 /// </summary>
 public static class FfmpegWebmExporter
 {
-    public static void EnsureAvailable(string ffmpegPath) => Run(ffmpegPath, "-hide_banner", "-version");
+    public static void EnsureAvailable(string ffmpegPath)
+    {
+        try { Run(ffmpegPath, "-hide_banner", "-version"); }
+        catch (ExportException ex) { throw new DependencyException($"FFmpeg cannot run: {ex.Message}", ex); }
+    }
+
+    public static void EnsureCapabilities(string ffmpegPath)
+    {
+        EnsureAvailable(ffmpegPath);
+        try
+        {
+            var encoders = Run(ffmpegPath, "-hide_banner", "-encoders");
+            foreach (var encoder in new[] { "libvpx-vp9", "libopus" })
+                if (!System.Text.RegularExpressions.Regex.IsMatch(encoders, @"(?m)^\s*[VA][A-Z.]{5}\s+" + encoder + @"\s"))
+                    throw new DependencyException($"FFmpeg is missing the required {encoder} encoder. Install a build with libvpx-vp9 and libopus.");
+            var formats = Run(ffmpegPath, "-hide_banner", "-muxers");
+            if (!System.Text.RegularExpressions.Regex.IsMatch(formats, @"(?m)^\s*E\s+webm\s"))
+                throw new DependencyException("FFmpeg is missing the required WebM muxer.");
+        }
+        catch (ExportException ex) { throw new DependencyException($"Could not query FFmpeg capabilities: {ex.Message}", ex); }
+    }
 
     public static void EncodeAndVerify(
         string ffmpegPath,
@@ -67,22 +87,13 @@ public static class FfmpegWebmExporter
         if (!File.Exists(audioWavPath))
             throw new FileNotFoundException("The rendered audio WAV is missing.", audioWavPath);
 
-        var outputDirectory = Path.GetDirectoryName(Path.GetFullPath(outputWebmPath));
-        if (!string.IsNullOrEmpty(outputDirectory))
-            Directory.CreateDirectory(outputDirectory);
-
-        Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, outputWebmPath, framesPerSecond, durationSeconds).ToArray());
-
-        if (!File.Exists(outputWebmPath) || new FileInfo(outputWebmPath).Length == 0)
-            throw new InvalidOperationException("FFmpeg completed without creating a WebM file.");
-
-        // Decode both explicitly mapped streams. This validates the final file
-        // contains a readable video stream and a readable audio stream.
-        Run(ffmpegPath,
-            "-hide_banner", "-v", "error",
-            "-i", outputWebmPath,
-            "-map", "0:v:0", "-map", "0:a:0",
-            "-f", "null", "-");
+        AtomicOutput.Write(outputWebmPath,
+            temporary => Run(ffmpegPath, BuildEncodeArguments(framesDirectory, audioWavPath, temporary, framesPerSecond, durationSeconds).ToArray()),
+            temporary => Run(ffmpegPath,
+                "-hide_banner", "-v", "error", "-xerror", "-nostdin",
+                "-i", temporary,
+                "-map", "0:v:0", "-map", "0:a:0",
+                "-f", "null", "-"));
     }
 
     public static IReadOnlyList<string> BuildEncodeArguments(
@@ -114,7 +125,7 @@ public static class FfmpegWebmExporter
         double durationSeconds)
     {
         return [
-            "-hide_banner", "-loglevel", "error", "-y",
+            "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
             "-framerate", framesPerSecond.ToString(CultureInfo.InvariantCulture),
             "-start_number", "0",
             "-i", Path.Combine(framesDirectory, "frame-%06d.ppm"),
@@ -130,7 +141,7 @@ public static class FfmpegWebmExporter
         ];
     }
 
-    private static void Run(string executable, params string[] arguments)
+    private static string Run(string executable, params string[] arguments)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -147,15 +158,22 @@ public static class FfmpegWebmExporter
         {
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"Could not start FFmpeg at '{executable}'.");
-            var stderr = process.StandardError.ReadToEnd();
-            var stdout = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+            var stderr = process.StandardError.ReadToEndAsync();
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            // Both redirected pipes must drain concurrently, including capability listings.
+            if (!process.WaitForExit(600_000))
+            {
+                process.Kill(entireProcessTree: true);
+                throw new ExportException("FFmpeg timed out after ten minutes.");
+            }
+            Task.WaitAll(stderr, stdout);
             if (process.ExitCode != 0)
-                throw new InvalidOperationException($"FFmpeg exited with code {process.ExitCode}:\n{stderr}{stdout}");
+                throw new ExportException($"FFmpeg exited with code {process.ExitCode}:\n{stderr.Result}{stdout.Result}");
+            return stdout.Result + stderr.Result;
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            throw new InvalidOperationException(
+            throw new DependencyException(
                 "FFmpeg is required for CLI WebM encoding. Install an FFmpeg build with libvpx-vp9 and libopus, " +
                 "put it on PATH, or pass --ffmpeg <path-to-ffmpeg>.", ex);
         }
