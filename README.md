@@ -1,458 +1,175 @@
 # SoundScript
 
-An independent open-source audio and media programming language for deterministic scores, audio synthesis, and temporal Audio/Visual compositions.
-Built in C# — runs on Windows, macOS, and Linux, with a browser playground that works in any modern browser (Chrome, Edge, Firefox, Safari).
+Write deterministic music and media as code.
 
-Explore [20 practical Audio/Visual compositions](docs/audio-visual-compositions.md):
-diagrams, dashboards, explainers, timed presentations, and shared Wave/Voice audio.
-See the [capability audit and verification report](docs/av-stress-test.md) for
-implemented features and limits, including browser WebM support.
+[![Tests](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml/badge.svg)](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET 8](https://img.shields.io/badge/.NET-8-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-```
-import "lib.ss"
+SoundScript turns plain text and `.ss` / `.ssw` / `.ssv` scripts into reproducible
+MIDI, WAV, and WebM files. The cross-platform `soundscript` CLI validates and
+inspects source, renders audio, and exports temporal media. The same source is
+designed to produce the same result across runs and platforms.
 
-block intro {
-    phrase {
-        mf
-        play arp Cmaj q
-    }
-}
+[Try the Playground](https://soundscript.net/playground/) · [CLI reference](docs/cli.md) · [Contributing](CONTRIBUTING.md)
 
-pattern arp { up }
+## See it work
 
-track melody {
-    layer piano
-    layer cello
-    gain 0.9
-    humanize 0.02
-    play intro
-}
-```
+The repository includes a temporal audio/visual composition with source, a
+browser demo, and a decode-verified WebM export:
 
-**Text → import loader → tokenizer → parser → AST → interpreter → shaping → MIDI.**
+| Source | Result |
+| --- | --- |
+| [visual-temporal.ssv](examples/visual-temporal.ssv) | [visual-temporal.webm](docs/assets/demos/visual-temporal.webm) |
+| [piano.ss](docs/assets/demos/piano.ss) | [piano.wav](docs/assets/demos/piano.wav) · [piano.mid](docs/assets/demos/piano.mid) |
 
-## What is SoundScript?
+For a browser-first experiment, open the [Playground](https://soundscript.net/playground/).
+For automation, CI, and version-controlled assets, use the CLI.
 
-SoundScript is a micro-language for writing music like code. Describe notes, chords, dynamics, patterns, and orchestration in plain text; the engine parses your script, applies musical intelligence and playback refinement, and emits a standard MIDI file. The same script always produces the same MIDI — on every platform.
+## Quick start
 
-## Vision
-
-Music should be as writable, versionable, and reproducible as software. SoundScript makes sound a first-class engineering artifact:
-
-- **Deterministic by design** — the same script yields bit-identical MIDI, every run, everywhere. Compositions belong in version control.
-- **General-purpose, not a toy** — from melody sketches and full arrangements to [expressive industrial audio cues](https://soundscript.net/industrial/) for machine states, robotics, and accessibility workflows.
-- **Runs everywhere** — a cross-platform .NET CLI (Windows, macOS, Linux) and a WebAssembly playground that works in any modern browser. SoundScript is not tied to any single browser or vendor.
-- **Minimal surface** — no DAW, no plugins, no server. Plain text in, standard MIDI out.
-
-## Platform Support
-
-| Surface | Requirements |
-|---------|--------------|
-| **CLI** (`SoundScript.Cli`) | .NET 8 SDK — Windows, macOS, Linux |
-| **Playground** (`SoundScript.Playground`) | Any modern browser with WebAssembly and Web Audio — Chrome, Edge, Firefox, Safari (desktop and mobile). Runs fully client-side; no account, no server, no installation. |
-
-## CLI installation and workflows
-
-V11.1 includes the `soundscript` .NET global tool. Install it with
-`dotnet tool install --global SoundScript.Cli`, then use
-`soundscript validate demo.ssv`, `soundscript inspect demo.ssv`, or
-`soundscript wave song.ss --out song.wav`. The CLI also supports strict JSON
-automation, stable exit codes, and `video --check` export preflight. See
-[CLI documentation](docs/cli.md) for the command reference, JSON schema,
-FFmpeg requirement, and release binary commands.
-
-## V2 Overview
-
-V2 extends the v1.2 five-phase engine with compositional and production features:
-
-| Feature | Syntax |
-|---------|--------|
-| **Imports** | `import "lib.ss"` |
-| **Blocks** | `block intro { }` + `play intro` |
-| **Metadata** | `gain 0.9`, `humanize 0.03` |
-| **Tempo automation** | `tempo 120 → 140 over 4 bars` |
-| **Layers** | `layer piano` / `layer cello` |
-| **Humanization** | Deterministic timing + velocity jitter |
-| **Advanced chords** | `Cmaj drop2`, `inv1`, `spread` |
-| **Phrases** | `phrase { curve soft ... }` · [V3 aliases & envelopes](docs/phrases-v3.md) |
-| **Patterns** | `pattern arp { up }` + `play arp Cmaj q` |
-| **Orchestration** | `double octave`, `reinforce bass`, `brighten top` |
-
-All v1.2 syntax remains valid.
-
-## Interpreter Pipeline (V2)
-
-```
-DSL script
-    ↓
-ProgramLoader (imports)
-    ↓
-Tokenizer → Parser → AST   ←── PhonemeComposer (V3.1: plain text → syllables → phonemes → gestures → AST)
-    ↓
-Interpreter
-    ├── PatternExpander (pattern play)
-    ├── Chord: Voicing → AdvancedVoicing → Orchestration → Spacing
-    ├── Note: Intelligence → PhraseTimingShaper (V3) → PhraseShaper → PlaybackShaper
-    ├── Layers (per-channel shaping)
-    └── HumanizeApplicator (post-pass)
-    ↓
-MidiGenerator → output.mid
-```
-
-→ [docs/pipeline.md](docs/pipeline.md) · [docs/architecture.md](docs/architecture.md)
-
-## V2 Examples
-
-| Example | Demonstrates |
-|---------|--------------|
-| [examples/imports.ss](examples/imports.ss) | Multi-file imports |
-| [examples/blocks.ss](examples/blocks.ss) | Named blocks |
-| [examples/metadata.ss](examples/metadata.ss) | Gain + humanize |
-| [examples/tempo-automation.ss](examples/tempo-automation.ss) | Tempo ramps |
-| [examples/layers.ss](examples/layers.ss) | Instrument layers |
-| [examples/humanization.ss](examples/humanization.ss) | Deterministic jitter |
-| [examples/advanced-chords.ss](examples/advanced-chords.ss) | drop2, inv1, spread |
-| [examples/phrases.ss](examples/phrases.ss) | Phrase engine v2 |
-| [examples/phrases-v3.ss](examples/phrases-v3.ss) | Phrase engine v3 |
-| [examples/patterns.ss](examples/patterns.ss) | Arp, strum, rhythm |
-| [examples/orchestration.ss](examples/orchestration.ss) | Orchestration helpers |
-| [examples/full-v2-showcase.ss](examples/full-v2-showcase.ss) | Combined V2 demo |
-| [examples/industrial-blind-assist.ss](examples/industrial-blind-assist.ss) | Industrial cue — blind operator spatial awareness |
-| [examples/industrial-machine-state.ss](examples/industrial-machine-state.ss) | Industrial cue — machine states (idle / running / critical) |
-| [examples/industrial-conveyor-drift.ss](examples/industrial-conveyor-drift.ss) | Industrial cue — conveyor timing drift |
-| [examples/industrial-temperature-trend.ss](examples/industrial-temperature-trend.ss) | Industrial cue — temperature trend |
-| [examples/industrial-robotic-arm.ss](examples/industrial-robotic-arm.ss) | Industrial cue — robotic arm motion phases |
-| [examples/vocal-song.ss](examples/vocal-song.ss) | Vocal track — lyrics bound to pitches via phonetics |
-| [examples/default.ssc](examples/default.ssc) | SoundCSS timbre stylesheet (V4) |
-| [examples/wave-effects.ssw](examples/wave-effects.ssw) | Wave grammar — combined humanize + speak + effects |
-| [examples/wave-speak.ssw](examples/wave-speak.ssw) | Wave grammar — `speak` prosody tones |
-| [examples/wave-humanize.ssw](examples/wave-humanize.ssw) | Wave grammar — seeded humanize + speak |
-| [examples/full-song-wave.ss](examples/full-song-wave.ss) | Four-part song rendered via the wave backend |
-| [examples/speech-only-wave.ss](examples/speech-only-wave.ss) | Speech + vocal song without a MIDI step |
-| [examples/wave-vocal-stem.ssw](examples/wave-vocal-stem.ssw) | V8: `speak sample=` vocal stem mixing |
-| [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw) | V8: Jingle Bells + offline vocal stems |
-| [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) | V9: Jingle Bells rhythm with WordBank-only vocal stems (Playground preset) |
-| [examples/authoring.ss](examples/authoring.ss) | Comments, compile-time constants, and reusable note timing |
-
-→ [docs/examples.md](docs/examples.md)
-
-```bash
-dotnet run --project src/SoundScript.Cli -- run examples/full-v2-showcase.ss
-```
-
-## v1.2 Foundation
-
-| Phase | Focus |
-|-------|--------|
-| **Phase 2** | Notation engine |
-| **Phase 3** | Expressive notation |
-| **Phase 1** | Stabilization |
-| **Phase 4** | Musical intelligence |
-| **Phase 5** | Playback quality |
-
-→ [docs/whats-new-v1.2.md](docs/whats-new-v1.2.md)
-
-## Text-to-Melody (PhonemeComposer)
-
-V3.1 adds a deterministic **text-to-melody engine**: give the CLI a plain
-English string and it composes a melody from the sounds of the words — no
-script required, no randomness, no audio synthesis.
-
-```bash
-dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
-```
-
-```
-Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
-```
-
-```
-Text → Syllables → Phonemes → Gestures → AST → MIDI
-       Syllabifier  PhonemeSplitter  PhonemeMapper  PhraseAssembler  MidiGenerator
-```
-
-Each syllable becomes a musical micro-phrase: plosives map to staccato notes,
-nasals to swells, fricatives to fades, liquids to accents, vowels to legato
-pitches. The composer builds a standard AST and reuses the existing interpreter
-and MIDI generator, so identical text always produces byte-identical MIDI —
-verified by SHA-256. Use `--append file.ss` to add the composed track to an
-existing script's output.
-
-→ [docs/text-to-melody.md](docs/text-to-melody.md) · [docs/phoneme-composer.md](docs/phoneme-composer.md) · [docs/cli.md](docs/cli.md)
-
-## Wordbank integration
-
-Linguistic tables (function words, grapheme rules, phoneme mappings, prosody
-offsets, legal syllable onsets, locale syllabification rules, timbre profiles,
-and optional per-word overrides) load at runtime from embedded JSON sourced from
-the companion
-[soundscript-wordbank](https://github.com/dharangutti/soundscript-wordbank)
-repository (English, Spanish, and French locale packs in v0.5.0; corpus pilot
-`2026.07.0`). The wordbank
-is vendored as a git submodule at `wordbank/` and copied into
-`src/SoundScript.Wordbank/Data/` before build. Sync updated data with:
-
-```bash
-git submodule update --init --recursive   # first clone
-./scripts/sync-wordbank.sh
-./scripts/bump-wordbank-submodule.sh      # update submodule + sync
-```
-
-Load an external wordbank checkout at runtime (overrides embedded packs):
-
-```bash
-export WORDBANK_DIR=./wordbank
-dotnet run --project src/SoundScript.Cli -- prosody "Hola mundo" out.mid --locale es
-# or pass --wordbank-dir ./wordbank on compose / prosody
-```
-
-See [wordbank VERSIONING.md](https://github.com/dharangutti/soundscript-wordbank/blob/main/docs/VERSIONING.md) for the engine ↔ package ↔ corpus contract (`9.0.x` / `>= 0.6.2` / `2026.07.1`).
-
-Select a locale for `compose` or `prosody`:
-
-```bash
-dotnet run --project src/SoundScript.Cli -- prosody "Hola mundo" out.mid --locale es
-```
-
-## V4: Offline timbre synthesis
-
-V4 adds **SoundScript.Timbre** — deterministic MIDI → WAV/OGG using
-[SoundCSS](docs/soundcss.md) stylesheets. MIDI remains the backbone; timbre is
-a read-only leaf branch.
-
-```bash
-dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.mid
-dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
-  --css examples/default.ssc --out twinkle.wav --text "Twinkle twinkle little star"
-```
-
-## V4.1: Cycle-accurate timbre synthesis
-
-V4.1 adds cycle-by-cycle waveform reconstruction inside each frame. MIDI and
-SoundCSS remain the backbone; synthesis quality improves via harmonic series
-per pitch period.
-
-→ [docs/v4.1-cycle-synthesis.md](docs/v4.1-cycle-synthesis.md) · [docs/whats-new-v4.1.md](docs/whats-new-v4.1.md)
-
-## V4.1.1: Timbre quality tuning
-
-V4.1.1 tunes harmonic balance, formant Q, noise shaping, transients, and
-cycle/frame continuity on top of the V4.1 engine — additive and
-deterministic, no new modules.
-
-→ [docs/v4.1.1-timbre-tuning.md](docs/v4.1.1-timbre-tuning.md) · [docs/whats-new-v4.1.1.md](docs/whats-new-v4.1.1.md)
-
-## Vocal Track (New)
-
-SoundScript now has a parallel **voice engine**: write lyrics beside pitches and a
-deterministic phonetics engine (syllabification + maximal-onset alignment) binds
-each syllable to a note, exporting karaoke-standard MIDI lyric events.
-
-```
-voice lead {
-    vocal choir
-    mf
-    sing "Twinkle twinkle little star" C4 q C4 q G4 q G4 q A4 q A4 q G4 h
-}
-```
-
-The instrumental pipeline is untouched — voices interpret in a separate branch and
-render onto a reserved MIDI channel. In the [Playground](https://soundscript.net/playground/),
-lyrics are **spoken aloud** over the melody via the browser's speech synthesis (click the
-*Voice* preset and press Run); the exported MIDI carries them as standard karaoke lyric
-events for DAWs and singing synthesizers.
-
-```bash
-# try it from the CLI
-dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-song.mid
-```
-
-→ [docs/vocal.md](docs/vocal.md)
-
-## Architecture
-
-```
-/src
-    SoundScript.Core/       # AST, TempoAutomationMap, InstrumentMap
-    SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
-    SoundScript.Midi/       # Interpreter, PatternExpander, PhraseShaper, ChordOrchestration
-    SoundScript.Visual/     # Frame-free temporal visual programs + state queries
-    SoundScript.Voice/      # Vocal engine: Syllabifier, LyricAligner, VocalInterpreter
-    SoundScript.Compose/    # Text-to-melody: PhonemeComposer, PhonemeSplitter, PhonemeMapper
-    SoundScript.Wordbank/   # Embedded linguistic data from soundscript-wordbank
-    SoundScript.Timbre/      # Offline timbre synthesis (SoundCSS)
-    SoundScript.Wave/        # Direct AST → WAV synthesis (V7)
-    SoundScript.Cli/        # CLI (run, compose, prosody, render, wave)
-    SoundScript.Playground/ # Browser playground
-
-/docs                       # Documentation + website
-/examples                   # Example scripts
-```
-
-## Temporal Visual Programs
-
-SoundScript can also describe a visual story as deterministic intervals and
-property curves—never as source frames. The `visual` CLI verb prints a
-temporal storyboard and evaluates any instant without choosing an FPS:
-
-```bash
-dotnet run --project src/SoundScript.Cli -- visual examples/visual-temporal.ssv \
-  --at 0 --at 1.5 --at 4 --at 5
-```
-
-The example includes a temporal audio rail, sequential cues, an intentional
-delay, an independently pinned overlay, property automation, and an audio
-synchronization marker. In the browser Playground, Play/Pause/Resume/Restart,
-scrubbing, browser export, and CLI export all consume one elapsed-time model:
-the visual stage evaluates `StateAt(t)` and the deterministic SoundScript.Wave
-rail is shared by playback and WebM rendering. → [docs/visual-temporal.md](docs/visual-temporal.md)
-
-## Getting Started
+Requirements: the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ```bash
 git clone https://github.com/dharangutti/sound-script.git
 cd sound-script
-dotnet build
-dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss
+dotnet run --project src/SoundScript.Cli -- wave examples/full-song-wave.ss --out song.wav
 ```
 
-## Playground
-
-Try SoundScript in your browser — works in Chrome, Edge, Firefox, and Safari, fully client-side:
-
-**[soundscript.net/playground](https://soundscript.net/playground/)**
-
-## What's New in V11
-
-- **Playable temporal media** — the Visual Timeline Playground now exports a
-  synchronized WebM clip using browser-native Canvas capture, MediaRecorder,
-  and the shared deterministic SoundScript.Wave PCM rail.
-- **Renderer-only sampling** — `SoundScript.Media` creates export plans from
-  `VisualTimeline.StateAt(t)` at 24, 30, or 60 FPS; no FPS or frames enter the
-  DSL, parser, AST, or temporal timeline.
-- **CLI WebM export** — `soundscript video` rasterizes the same canonical scene
-  plan and PCM rail, then uses FFmpeg only as a downstream VP9/Opus WebM
-  encoder with post-encode stream verification.
+That command writes a deterministic WAV file without a DAW, plugin, account, or
+server. To inspect a source file before exporting it:
 
 ```bash
-dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv \
-  --output demo.webm --fps 30
+dotnet run --project src/SoundScript.Cli -- validate examples/visual-temporal.ssv
+dotnet run --project src/SoundScript.Cli -- inspect examples/visual-temporal.ssv --at 1.5
 ```
 
-The browser media encoder can produce different container bytes across browser
-versions, but the temporal state supplied to it is deterministic. →
-[docs/visual-temporal.md](docs/visual-temporal.md)
+The first command prints structured diagnostics; the second prints the visual
+state at exactly 1.5 seconds.
 
-## What's New in V10
+## Why SoundScript?
 
-- **Temporal Visual Playground** — the Visual Timeline tab now pairs a
-  deterministic 12-second visual program with a real local MIDI rail.
-- **Playback and inspection** — Play, Pause, Resume, Restart, exact scrubbing,
-  half-open interval lanes, and the `StateAt(t)` inspector use one shared
-  temporal clock.
-- **No frame authoring** — browser repaint cadence is a rendering detail; the
-  SoundScript source remains time-based and renderer-neutral.
+- **Versionable:** compositions and media timelines are plain text, so they work with Git and code review.
+- **Deterministic:** identical source produces identical MIDI and WAV bytes; use hashes in CI when reproducibility matters.
+- **One CLI:** validate, inspect, compose text to melody, render audio, and export WebM without changing tools.
+- **Standard outputs:** generated MIDI, WAV, OGG, and WebM files can move into existing audio and media workflows.
+- **Two useful surfaces:** the CLI is the automation and production path; the Playground is the no-install learning and experimentation path.
 
-→ [docs/visual-temporal.md](docs/visual-temporal.md) · [docs/PLAYGROUND.md](docs/PLAYGROUND.md)
+SoundScript is an independent open-source project. The engine is active and
+cross-platform, while the public release and package distribution process is
+still maturing.
 
-## What's New in V9
+## CLI at a glance
 
-- **WordBank vocal engine in the Playground** — new *Jingle Bells + WordBank vocal* preset
-  (offline, deterministic corpus audio + G2P timbre, no eSpeak)
-- **Corpus expansion** — embedded WordBank corpus grows from 32 to **66** English
-  pronunciations, covering the full "Jingle Bells" word set
-- **CLI fix** — `wave --tts-dir` / `--offline-tts-dir` resolve relative to the script directory
-- Example: [examples/jingle-bells-wordbank.ssw](examples/jingle-bells-wordbank.ssw) ·
-  [examples/jingle-bells-wordbank.wav](examples/jingle-bells-wordbank.wav)
+| Command | Use it for |
+| --- | --- |
+| `validate` | Parse the complete import graph and report stable diagnostics |
+| `inspect` | Read tempo, duration, tracks, notes, visuals, and sync points |
+| `run` | Compile `.ss` scripts to MIDI |
+| `compose` / `prosody` | Turn text into deterministic MIDI or WAV |
+| `render` | Render MIDI through a SoundCSS stylesheet to WAV/OGG |
+| `wave` | Render `.ss` / `.ssw` directly to WAV |
+| `video` | Export a synchronized WebM through FFmpeg |
+| `vocal` | Generate or batch offline vocal stems |
 
-→ [docs/whats-new-v9.md](docs/whats-new-v9.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
+Use `--json` with validation and inspection commands for CI. Exit codes are
+stable: `0` success, `1` source error, `2` usage error, `3` missing dependency,
+and `4` render/export failure.
 
-## What's New in V8
+### A first script
 
-- **Vocal stems in Wave export** — `sample`, `speak sample=`, CLI `--vocal` / `--tts-dir` / `--offline-tts`
-- **`soundscript vocal`** — `generate` and `batch` for offline stem WAVs (`composite` default: corpus + G2P; `espeak`/`prosody` optional)
-- **Phase 8 wordbank vocal** — curated CC0/CC-BY pronunciation audio with G2P fallback → [docs/phase8-wordbank-vocal.md](docs/phase8-wordbank-vocal.md)
-- Example: [examples/jingle-bells-vocal.ssw](examples/jingle-bells-vocal.ssw)
+`examples/blocks.ss` is intentionally self-contained and runs from a fresh
+checkout:
 
-→ [docs/whats-new-v8.md](docs/whats-new-v8.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
+```text
+block verse {
+    mf
+    C4 q
+    E4 q
+    G4 q
+}
 
-## What's New in V7
+track melody {
+    instrument piano
+    play verse
+}
+```
 
-- **SoundScript.Wave** — render `.ss` / `.ssw` directly to deterministic WAV (no MIDI step)
-- **`wave` CLI verb** — `soundscript wave script.ssw output.wav`
-- Playground auto-routes wave-only grammar (`speak`, `effect`, named `humanize`)
+```bash
+dotnet run --project src/SoundScript.Cli -- run examples/blocks.ss --out melody.mid
+```
 
-→ [docs/whats-new-v7.md](docs/whats-new-v7.md) · [docs/wave-grammar.md](docs/wave-grammar.md)
+### Text to melody
 
-## What's New in V3.1
+```bash
+dotnet run --project src/SoundScript.Cli -- compose \
+  "Twinkle twinkle little star" twinkle.wav --wave
+```
 
-- **PhonemeComposer** — deterministic text-to-melody engine (`SoundScript.Compose`)
-- **`compose` CLI verb** — `soundscript compose "Twinkle twinkle little star"`, with `--append file.ss`
-- **Playground Text-to-Melody** — type text, press *Compose from text*
-- No breaking changes; identical text → identical MIDI bytes (SHA-256 verified)
+The same text and options produce the same output bytes. See
+[text-to-melody.md](docs/text-to-melody.md) for the composition model.
 
-→ [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) · [docs/text-to-melody.md](docs/text-to-melody.md) · [RELEASE_NOTES.md](RELEASE_NOTES.md)
+### Temporal media
 
-## What's New in V3
+```bash
+dotnet run --project src/SoundScript.Cli -- video \
+  examples/visual-temporal.ssv --out scene.webm --fps 30
+```
 
-- Curve and transition aliases (`curve gentle`, `transition sharp`)
-- New curves: `swell`, `fade`, `expressive`
-- Dynamic envelopes: `crescendo`, `decrescendo`
-- Phrase articulation: `articulation legato`
-- Timing modifiers: `swing`, `push`, `pull` (via `PhraseTimingShaper`)
-- Industrial audio cue showcase: [soundscript.net/industrial](https://soundscript.net/industrial/)
+WebM export requires FFmpeg with `libvpx-vp9` and `libopus`. Install it with
+your platform package manager, set `SOUNDSCRIPT_FFMPEG`, or pass `--ffmpeg`.
+Use `video --check` to preflight an export without writing media.
 
-→ [docs/whats-new-v3.md](docs/whats-new-v3.md) · [docs/phrases-v3.md](docs/phrases-v3.md)
+## Installation and releases
 
-## What's New in V2
+The source checkout is the currently supported installation path:
 
-- Multi-file imports with `ProgramLoader`
-- Named reusable blocks
-- Track metadata: gain, humanize
-- Tempo automation with linear ramps
-- Instrument layers with per-channel MIDI
-- Deterministic humanization
-- Advanced chord voicing (drop2, inv1, spread)
-- Phrase engine v2 with curves and transitions
-- Pattern engine (arp, strum, rhythm)
-- Orchestration helpers
+```bash
+dotnet build SoundScript.sln
+dotnet run --project src/SoundScript.Cli -- --version
+```
 
-→ [docs/whats-new-v2.md](docs/whats-new-v2.md)
+`SoundScript.Cli` is configured as a .NET tool package, but it is not currently
+published to NuGet. Until a public package is available, do not rely on
+`dotnet tool install --global SoundScript.Cli`; build from source or use a
+published release archive when one is provided on the [Releases page](https://github.com/dharangutti/sound-script/releases).
+
+The current version is `11.1.0` (V11.1, CLI Productization). The version source
+is [Directory.Build.props](Directory.Build.props), and release history is in
+[RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+## Supported platforms
+
+- CLI: Windows, macOS, and Linux with .NET 8.
+- Playground: current Chrome, Edge, Firefox, and Safari on desktop and mobile.
+- CLI release workflow: Windows x64, Linux x64, macOS x64, and macOS arm64.
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/user-guide.md](docs/user-guide.md) | Hands-on user guide with runnable examples |
-| [docs/language-reference.md](docs/language-reference.md) | Complete syntax (V2) |
-| [docs/cli.md](docs/cli.md) | CLI reference (`run`, `compose`, `prosody`, `render`, `wave`, `video`, `vocal`) |
-| [docs/whats-new-v8.md](docs/whats-new-v8.md) | V8 changelog — vocal stems in Wave export |
-| [docs/whats-new-v7.md](docs/whats-new-v7.md) | V7 changelog — SoundScript.Wave |
-| [docs/wave-grammar.md](docs/wave-grammar.md) | Wave grammar (`.ssw`) |
-| [docs/text-to-melody.md](docs/text-to-melody.md) | Text-to-melody pipeline (V3.1) |
-| [docs/phoneme-composer.md](docs/phoneme-composer.md) | PhonemeComposer module reference |
-| [docs/whats-new-v3.1.md](docs/whats-new-v3.1.md) | V3.1 changelog |
-| [docs/whats-new-v3.md](docs/whats-new-v3.md) | V3 changelog |
-| [docs/whats-new-v2.md](docs/whats-new-v2.md) | V2 changelog |
-| [docs/imports.md](docs/imports.md) | Import system |
-| [docs/blocks.md](docs/blocks.md) | Named blocks |
-| [docs/track-metadata.md](docs/track-metadata.md) | Gain + humanize |
-| [docs/tempo-automation.md](docs/tempo-automation.md) | Tempo ramps |
-| [docs/layers.md](docs/layers.md) | Instrument layers |
-| [docs/humanization.md](docs/humanization.md) | Deterministic jitter |
-| [docs/advanced-chords.md](docs/advanced-chords.md) | Chord voicing |
-| [docs/phrases.md](docs/phrases.md) | Phrase engine v2 |
-| [docs/phrases-v3.md](docs/phrases-v3.md) | Phrase engine v3 |
-| [docs/patterns.md](docs/patterns.md) | Pattern engine |
-| [docs/orchestration.md](docs/orchestration.md) | Orchestration helpers |
-| [docs/vocal.md](docs/vocal.md) | Vocal track + phonetics engine |
-| [docs/soundcss.md](docs/soundcss.md) | SoundCSS timbre + word-level pronunciation, DSP mapping table, persona presets |
-| [docs/PLAYGROUND.md](docs/PLAYGROUND.md) | Playground checklist + wordbank normalize / `--auto-generate-missing` HOWTO |
-| [docs/authoring.md](docs/authoring.md) | Comments, constants, markers, styles, validation, and editor workflows |
-| [docs/pipeline.md](docs/pipeline.md) | Interpreter pipeline |
-| [docs/architecture.md](docs/architecture.md) | System architecture |
-| [docs/examples.md](docs/examples.md) | Example catalog |
+- [User guide](docs/user-guide.md) — hands-on introduction
+- [Language reference](docs/language-reference.md) — complete syntax
+- [CLI reference](docs/cli.md) — commands, JSON schema, exit codes, and FFmpeg
+- [Examples](docs/examples.md) — catalog of runnable scripts
+- [Wave grammar](docs/wave-grammar.md) — direct audio authoring
+- [Visual timeline](docs/visual-temporal.md) — temporal media semantics
+- [Vocal and phonetics](docs/vocal.md) — lyrics and vocal tracks
+- [SoundCSS](docs/soundcss.md) — timbre stylesheets and offline synthesis
+- [Architecture](docs/architecture.md) — source layout and interpreter pipeline
+- [Playground guide](docs/PLAYGROUND.md) — browser workflow and presets
+- [Audio/visual compositions](docs/audio-visual-compositions.md) — practical showcases
+
+## Contributing
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md). It covers the wordbank
+submodule, build and test commands, CLI smoke tests, and the shape of a useful
+pull request. Use the issue templates for bugs and ideas, and include the
+source file, command, operating system, and observed output in reports.
+
+If SoundScript helps you create reproducible music or media, consider starring
+the repository. If you build something with it, share the use case in a
+[Discussion](https://github.com/dharangutti/sound-script/discussions) or open a
+focused issue.
 
 ## License
 
-See [LICENSE](LICENSE).
+SoundScript is released under the [MIT License](LICENSE).
