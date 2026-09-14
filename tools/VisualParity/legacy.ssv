@@ -1,0 +1,15 @@
+visual "intro" for 3s at 0s {
+ set x 355 set y 100 set width 510 set height 86
+}
+visual "product" for 3s at 0s {
+ set x 340 set y 370 set width 380 set height 180 set rotation 12
+}
+visual "circle" for 3s at 0s {
+ set x 835 set y 370 set width 240 set height 180
+}
+visual "sparkle" for 3s at 0s {
+ set x 1120 set y 130 set width 100 set height 100
+}
+visual "AV To: Mixed Case 123" for 3s at 0s {
+ set x 640 set y 625 set width 610 set height 95 set rotation 4 set opacity 0.75
+}

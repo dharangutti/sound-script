@@ -5,6 +5,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.4" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.5" />
+    <EmbeddedResource Include="Fonts/*.ttf" />
+    <None Update="Fonts/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <ProjectReference Include="..\SoundScript.Visual\SoundScript.Visual.csproj" />
     <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
   </ItemGroup>
