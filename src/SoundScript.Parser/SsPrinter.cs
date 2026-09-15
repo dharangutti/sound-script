@@ -62,6 +62,16 @@ public static class SsPrinter
             case NoteNode note:
                 AppendLine(sb, indentLevel, FormatNote(note));
                 break;
+            case RestNode rest:
+                if (!double.IsFinite(rest.Rest.DurationBeats) || rest.Rest.DurationBeats <= 0)
+                    throw new NotSupportedException("Rest duration must be positive and finite.");
+                AppendLine(sb, indentLevel, "rest :" + rest.Rest.DurationBeats.ToString(CultureInfo.InvariantCulture));
+                break;
+            case InstrumentNode instrument:
+                if (instrument.ProgramNumber is < 0 or > 127)
+                    throw new NotSupportedException("Instrument program must be 0-127.");
+                AppendLine(sb, indentLevel, "instrument " + instrument.ProgramNumber.ToString(CultureInfo.InvariantCulture));
+                break;
             default:
                 throw new NotSupportedException(
                     $"SsPrinter cannot serialize AST node '{node.GetType().Name}' to .ss source. " +

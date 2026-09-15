@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../SoundScript.Parser/SoundScript.Parser.csproj" />
+    <ProjectReference Include="../SoundScript.Wave/SoundScript.Wave.csproj" />
+    <ProjectReference Include="../SoundScript.Media/SoundScript.Media.csproj" />
+  </ItemGroup>
+</Project>

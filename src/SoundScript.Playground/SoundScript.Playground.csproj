@@ -28,6 +28,7 @@
     <ProjectReference Include="..\SoundScript.Prosody\SoundScript.Prosody.csproj" />
     <ProjectReference Include="..\SoundScript.Wave\SoundScript.Wave.csproj" />
     <ProjectReference Include="..\SoundScript.Vocal\SoundScript.Vocal.csproj" />
+    <ProjectReference Include="..\SoundScript.Transcription\SoundScript.Transcription.csproj" />
   </ItemGroup>
 
   <!--
@@ -42,21 +43,15 @@
     <ItemGroup>
       <_VocalCorpusAudio Include="..\SoundScript.Wordbank\Data\corpus\v2026.07\audio\en\*.wav" />
     </ItemGroup>
-    <Copy SourceFiles="..\SoundScript.Wordbank\Data\corpus\v2026.07\en\lemmas.json"
-          DestinationFiles="$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\en\lemmas.json"
-          SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_VocalCorpusAudio)"
-          DestinationFiles="@(_VocalCorpusAudio->'$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\audio\en\%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\SoundScript.Wordbank\Data\corpus\v2026.07\en\lemmas.json" DestinationFiles="$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\en\lemmas.json" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_VocalCorpusAudio)" DestinationFiles="@(_VocalCorpusAudio->'$(MSBuildProjectDirectory)\wwwroot\vocal-corpus\audio\en\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="FlattenPlaygroundPublish" AfterTargets="Publish">
     <ItemGroup>
       <_WwwrootFiles Include="$(PublishDir)wwwroot\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(_WwwrootFiles)"
-          DestinationFiles="@(_WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_WwwrootFiles)" DestinationFiles="@(_WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <RemoveDir Directories="$(PublishDir)wwwroot" />
     <Delete Files="$(PublishDir)web.config" ContinueOnError="true" />
     <Delete Files="$(PublishDir)Melanchall_DryWetMidi_Native32.dll" ContinueOnError="true" />

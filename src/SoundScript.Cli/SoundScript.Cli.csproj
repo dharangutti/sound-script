@@ -12,6 +12,7 @@
     <ProjectReference Include="..\SoundScript.Vocal\SoundScript.Vocal.csproj" />
     <ProjectReference Include="..\SoundScript.Visual\SoundScript.Visual.csproj" />
     <ProjectReference Include="..\SoundScript.Media\SoundScript.Media.csproj" />
+    <ProjectReference Include="..\SoundScript.Transcription\SoundScript.Transcription.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -45,8 +46,7 @@
        unchanged. -->
   <Target Name="ExcludeToolPdbFiles" AfterTargets="PackTool">
     <ItemGroup>
-      <TfmSpecificPackageFile Remove="@(TfmSpecificPackageFile)"
-                              Condition="'%(TfmSpecificPackageFile.Extension)' == '.pdb'" />
+      <TfmSpecificPackageFile Remove="@(TfmSpecificPackageFile)" Condition="'%(TfmSpecificPackageFile.Extension)' == '.pdb'" />
     </ItemGroup>
   </Target>
 
