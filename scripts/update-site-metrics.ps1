@@ -15,8 +15,8 @@ $projectCount = (Get-ChildItem -Path $repositoryRoot -Recurse -Filter "*.csproj"
 
 # Count discovered cases, not attributes. A theory can expand into many cases,
 # so counting [Fact]/[Theory] markers understated the public test metric.
-$testProject = Join-Path $repositoryRoot "src/SoundScript.Tests/SoundScript.Tests.csproj"
-$listedTests = & dotnet test $testProject -c Debug --list-tests --no-restore --nologo 2>&1
+$testProject = Join-Path $repositoryRoot "src/SoundScript.Tests/SoundScript.Tests.csproj" 
+$listedTests = & dotnet test $testProject -c Release --list-tests --nologo 2>&1
 $discoveryExitCode = $LASTEXITCODE
 
 Write-Host "========== BEGIN TEST DISCOVERY OUTPUT =========="
