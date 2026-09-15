@@ -44,6 +44,9 @@ public static class SsPrinter
     {
         switch (node)
         {
+            case PerformNode:
+                AppendLine(sb, indentLevel, "perform expressive");
+                break;
             case TempoNode tempo:
                 AppendLine(sb, indentLevel, $"tempo {tempo.Bpm}");
                 break;

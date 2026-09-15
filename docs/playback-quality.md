@@ -1,6 +1,13 @@
 # Playback Quality (Phase 5)
 
-Phase 5 refines the final audio character through a six-stage shaping pipeline applied before MIDI note emission. No syntax changes — all refinement is engine-internal.
+Phase 5 refines MIDI velocity and duration through the pipeline below. These
+legacy rules still apply to scripts without a performance declaration.
+
+[`perform expressive`](performance-interpretation.md) adds an opt-in interpretation
+after MIDI event expansion/humanization and before export. The shared planner
+also serves Wave, which otherwise follows an independent AST-to-audio path.
+The stages below are not a description of legacy Wave or of a synthesizer's
+attack/release envelopes.
 
 ## PlaybackShaper Pipeline
 
@@ -45,6 +52,17 @@ Warning: `Dynamic shaping applied`
 | Staccato | 47% of written | ×0.92 |
 | Legato | 97% of written | unchanged |
 | Accent | 102% of written | ×1.10 (cap 127) |
+
+The beat cursor still advances by the **written** duration. Thus legacy legato
+has an event gap of `0.03 × written duration × 60 / BPM` seconds. A half note at
+60 BPM ends at 1.94 s, with the next note at 2 s. MIDI export at 480 ticks per
+quarter truncates that duration to 931 ticks, leaving 29 ticks (60.417 ms).
+Whether the gap is audible also depends on the receiving synthesizer's tail.
+
+Expressive performance can extend that half note to 2.04 s when the next pitch
+is suitably connected. Its audio release then lasts at most 20 ms beyond
+note-off. Repetitions, accents, and rests use different rules; see the
+[performance specification and measurements](performance-interpretation.md).
 
 Warning: `Articulation shaping applied`
 

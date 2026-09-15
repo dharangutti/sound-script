@@ -12,4 +12,9 @@ public record NoteEvent(
     double DurationSeconds,
     double Velocity,     // 0.0-1.0
     TimbreParams Timbre
-);
+)
+{
+    public SoundScript.Core.Performance.PerformanceIntent? PerformanceIntent { get; init; }
+    public SoundScript.Core.Performance.PerformanceShape? Performance { get; init; }
+    public int PerformanceVoice { get; init; }
+}

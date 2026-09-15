@@ -16,6 +16,14 @@ durations, chords, tracks, and everything else, see the main reference.
 
 ## Why a second backend instead of new MIDI grammar
 
+The shared top-level [`perform expressive`](performance-interpretation.md)
+directive also works with Wave. It enables articulation, phrase velocity
+shaping, controlled note connections, continuous sustained dynamics, instrument
+family timbres, and layers. Its planner is shared with MIDI through Core.
+Without the directive, Wave retains its legacy default timbre and skipped
+phrase/articulation shaping. General MIDI sample quality and advanced MIDI
+chord voicing are not implied by the Wave instrument-family colors.
+
 Two of the three additions below (`effect`, `speak`) have no MIDI
 equivalent — MIDI has no post-mix audio buffer to filter/delay, and no
 concept of phoneme-level frequency. Adding them as new grammar is only

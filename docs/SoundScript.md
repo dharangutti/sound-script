@@ -101,6 +101,7 @@ fills, outlines, portable text, animation, and the four new application demos.
 | [stabilization.md](stabilization.md) | Timing and voicing (Phase 1) |
 | [musical-intelligence.md](musical-intelligence.md) | Contour and spacing (Phase 4) |
 | [playback-quality.md](playback-quality.md) | Playback shaping (Phase 5) |
+| [performance-interpretation.md](performance-interpretation.md) | Opt-in expressive performance, renderer limits, and engineering report |
 | [whats-new-v1.2.md](whats-new-v1.2.md) | v1.2 changelog |
 
 ## Quick Start

@@ -2,6 +2,7 @@ namespace SoundScript.Core;
 
 public sealed class InterpretedProgram
 {
+    public bool ExpressivePerformance { get; set; }
     public int Tempo { get; set; } = 120;
     public TempoAutomationMap TempoMap { get; } = new();
     public int? TimeSignatureNumerator { get; set; }

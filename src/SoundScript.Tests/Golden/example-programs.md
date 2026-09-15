@@ -26,5 +26,12 @@ values merely to make a failing test pass. Existing MIDI, note, timeline, and PC
 regressions remain independent checks on runtime behavior.
 
 The suite renders local media without FFmpeg, network access, or external TTS.
+
+The five `examples/performance-*.ss` fingerprints were added with expressive
+performance after checking their parsed scores, deterministic MIDI/Wave renders,
+and actual Playground playback. They do not replace any earlier fingerprints.
+The Playground embeds those same five source files; dedicated performance tests
+also compare their legacy and expressive output. Listening acceptance is recorded
+separately in `docs/performance-interpretation.md`.
 It does not compare encoded WebM container bytes or rebuild published website
 binaries. Bundled sample paths resolve relative to their source scripts.

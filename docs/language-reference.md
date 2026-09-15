@@ -39,7 +39,42 @@ Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. 
 program ::= statement*
 ```
 
-Top-level statements: `import`, `block`, `pattern`, `track`, `melody`, `sequence`, `loop`, `play`, tempo/time, instrument/layer metadata, orchestration, notes, chords, rests, dynamics.
+Top-level statements: `perform expressive`, `import`, `block`, `pattern`, `track`, `melody`, `sequence`, `loop`, `play`, tempo/time, instrument/layer metadata, orchestration, notes, chords, rests, dynamics.
+
+## Performance interpretation
+
+```ss
+perform expressive
+tempo 72
+track lead {
+    instrument flute
+    phrase {
+        articulation legato
+        crescendo
+        G4 h A4 h B4 w
+    }
+    rest q
+}
+```
+
+`perform expressive` is a **top-level, program-wide opt-in** for MIDI, Wave,
+and Playground playback. It applies to all instrumental tracks regardless of
+where the declaration appears. It is not valid inside a track or phrase;
+`expressive` is the only mode. Omit the declaration to retain legacy output.
+
+The performance layer connects suitable adjacent melodic notes, shapes phrase
+velocity, and keeps repeated pitches, accents, large leaps, and rests articulated.
+It preserves written melodic pitches instead of applying legacy octave/contour
+correction. Explicit staccato retains its MIDI duration and velocity.
+
+Wave and the Playground's MIDI sample player also use gentler connected attacks,
+bounded releases, sustained-note evolution, and continuous phrase dynamics.
+External MIDI players receive the shaped note timing and velocity; the additional
+audio envelopes are SoundScript metadata, not portable MIDI controller automation.
+Each MIDI track/layer gets an independent melodic channel (maximum 15).
+
+See [Performance interpretation](performance-interpretation.md) for the precise
+rules, renderer differences, reproducible comparisons, and current limitations.
 
 ## Notes
 
@@ -112,13 +147,19 @@ C5 q ~ C5 q ~ C5 h
 
 ## Articulations
 
-| Articulation | Syntax | Effect |
+| Articulation | Syntax | Legacy MIDI shaping |
 |--------------|--------|--------|
 | Staccato | `staccato C4 q` | ~47% duration, slightly softer |
 | Legato | `C4 q legato` | ~97% duration |
 | Accent | `accent C4 q` | ~110% velocity, ~102% duration |
 
 One articulation per note, as prefix or suffix (not both).
+
+The 97% legato duration leaves a 3% note-off gap; it does not mean overlapping
+notes. With `perform expressive`, eligible connections replace that gap with
+up to 40 ms of note overlap. Legacy Wave ignores these articulation modifiers;
+expressive Wave honors them. Articulation velocity factors above are intermediate
+values, before later instrument and velocity curves.
 
 → [expressive-notation.md](expressive-notation.md) · [playback-quality.md](playback-quality.md)
 
@@ -312,6 +353,12 @@ phrase {
 | Dynamics | `ppp`, `p`, `mp`, `mf`, `f`, `ff`, `fff`, `sfz`, `fp` (scoped to phrase) |
 
 Phrase blocks set **phrase boundaries** on exit (same as `play` block/sequence). Nested `phrase` inside `phrase` is not supported.
+
+In legacy MIDI, `transition` and `crescendo`/`decrescendo` shape **note-on
+velocity**, not audio crossfades or a held note's volume. Legacy Wave enters
+phrase bodies but skips their shaping directives. `perform expressive` adds
+relationship-based connections and continuous amplitude evolution on supported
+audio paths; rests still separate musical phrases.
 
 → [phrases.md](phrases.md) · [phrases-v3.md](phrases-v3.md)
 

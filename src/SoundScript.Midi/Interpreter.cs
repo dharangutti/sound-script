@@ -6,6 +6,7 @@
 using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
+using SoundScript.Core.Performance;
 using SoundScript.Parser;
 
 namespace SoundScript.Midi;
@@ -40,6 +41,7 @@ public static class Interpreter
         public int? LastPhraseMidi { get; set; }
         public bool PendingPhraseBoundary { get; set; }
         public int PhraseIndex { get; set; }
+        public int PerformancePhrase { get; set; }
         public DynamicRampState? DynamicRamp { get; set; }
         public double Gain { get; set; } = 1.0;
         public double HumanizeTimingSeconds { get; set; }
@@ -61,7 +63,7 @@ public static class Interpreter
 
     public static InterpretedProgram Interpret(ProgramNode program, string? sourceFile)
     {
-        var result = new InterpretedProgram();
+        var result = new InterpretedProgram { ExpressivePerformance = program.Statements.OfType<PerformNode>().Any() };
         var context = new ExecutionContext();
         var tracks = new Dictionary<string, TrackBuilder>(StringComparer.OrdinalIgnoreCase);
         var declaredTrackNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -214,9 +216,13 @@ public static class Interpreter
                 interpretedTrack.ProgramChanges.AddRange(track.ProgramChanges);
             }
 
+            if (result.ExpressivePerformance)
+                ExpressivePerformance.Apply(interpretedTrack, result.TempoMap);
             result.Tracks.Add(interpretedTrack);
         }
 
+        if (result.ExpressivePerformance)
+            ExpressivePerformance.AssignChannels(result);
         return result;
     }
 
@@ -450,6 +456,7 @@ public static class Interpreter
             ExecuteStatements(track, blockBody, context, result, clock);
             track.LastPhraseMidi = track.LastEmittedMidi;
             track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
+            track.PerformancePhrase++;
             RestoreContext(track, parentContext);
         }
         finally
@@ -472,11 +479,13 @@ public static class Interpreter
             NoteCount = CountPhraseNotes(phrase.Body, context)
         };
         track.ActivePhrase = phraseScope;
+        track.PerformancePhrase++;
 
         ExecuteStatements(track, phrase.Body, context, result, clock);
 
         track.LastPhraseMidi = track.LastEmittedMidi;
         track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
+        track.PerformancePhrase++;
         track.ActivePhrase = null;
         RestoreContext(track, parentContext);
     }
@@ -566,6 +575,7 @@ public static class Interpreter
         ExecuteStatements(track, sequenceBody, context, result, clock);
         track.LastPhraseMidi = track.LastEmittedMidi;
         track.PendingPhraseBoundary = track.LastPhraseMidi is not null;
+        track.PerformancePhrase++;
         RestoreContext(track, parentContext);
     }
 
@@ -709,8 +719,9 @@ public static class Interpreter
 
     private static void EmitNote(TrackBuilder track, NoteNode note, GlobalBeatClock clock, InterpretedProgram result)
     {
-        var notation = ApplyMusicalIntelligence(track, note.Notation, result);
+        var notation = result.ExpressivePerformance ? note.Notation : ApplyMusicalIntelligence(track, note.Notation, result);
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
+        var scoreBeat = globalBeat;
         notation.StartTime = globalBeat;
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
@@ -753,7 +764,22 @@ public static class Interpreter
                 shaped.DurationBeats,
                 durationMs,
                 velocity,
-                layer.Channel));
+                layer.Channel)
+            {
+                PerformanceIntent = result.ExpressivePerformance ? new PerformanceIntent(scoreBeat,
+                    notation.DurationBeats, track.PerformancePhrase, articulation, layer.ProgramNumber,
+                    track.ActivePhrase?.Envelope switch
+                    {
+                        PhraseEnvelopeType.Crescendo => 1,
+                        PhraseEnvelopeType.Decrescendo => -1,
+                        _ => track.ActivePhrase?.Curve switch
+                        {
+                            PhraseCurveType.Swell => 1,
+                            PhraseCurveType.Fade => -1,
+                            _ => 0
+                        }
+                    }) : null
+            });
         }
 
         if (lastShaped is not null)
@@ -802,6 +828,7 @@ public static class Interpreter
 
     private static void EmitChord(TrackBuilder track, ChordNode chord, GlobalBeatClock clock, InterpretedProgram result)
     {
+        track.PerformancePhrase++;
         var globalBeat = clock.ToGlobalBeat(track.CurrentBeat, track.GlobalOffset);
         MaybeApplySyncCorrection(track, globalBeat, clock, result);
 
@@ -859,11 +886,16 @@ public static class Interpreter
                     durationBeats,
                     durationMs,
                     ApplyTrackGain(balancedVelocities[i], track.Gain),
-                    layer.Channel));
+                    layer.Channel)
+                {
+                    PerformanceIntent = result.ExpressivePerformance ? new PerformanceIntent(globalBeat,
+                        durationBeats, track.PerformancePhrase, null, layer.ProgramNumber, IsChord: true) : null
+                });
             }
         }
 
         AdvanceTiming(track, chord.DurationBeats);
+        track.PerformancePhrase++;
     }
 
     private static (int? NoteVelocity, int? RampVelocity, DynamicLevel? EffectiveDynamic) ResolvePhraseVelocities(

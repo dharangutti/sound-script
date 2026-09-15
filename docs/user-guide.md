@@ -356,7 +356,10 @@ track melody {
 | `swell` | — | Rises across the phrase |
 | `fade` | — | Falls across the phrase |
 
-**Transitions** control the seam between notes: `smooth`, `abrupt` (alias `sharp`), `soft`, `expressive`.
+**Transitions** shape successive note-on velocities: `smooth`, `abrupt` (alias
+`sharp`), `soft`, `expressive`. They do not crossfade notes by themselves. Add
+top-level [`perform expressive`](performance-interpretation.md) for controlled
+melodic connections and continuous dynamics in Wave/browser audio.
 
 **Envelopes** — `crescendo` ramps velocity up across the phrase's notes; `decrescendo` ramps down.
 

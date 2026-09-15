@@ -2,6 +2,7 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using SoundScript.Core;
+using System.Text.Json;
 
 namespace SoundScript.Midi;
 
@@ -24,6 +25,20 @@ public static partial class MidiGenerator
         {
             var trackChunk = new TrackChunk();
             trackChunk.Events.Add(new SequenceTrackNameEvent(track.Name));
+            if (program.ExpressivePerformance)
+            {
+                // Standard text metadata: external GM players ignore it and retain note timing/velocity.
+                // The Playground consumes it for per-note envelopes without channel-wide CC conflicts.
+                var profiles = track.Notes.Where(n => n.Performance is not null).Select(n => new
+                {
+                    tick = (long)(n.StartBeat * TicksPerQuarterNote), pitch = n.MidiNumber, channel = n.Channel,
+                    attack = n.Performance!.Attack, release = n.Performance.Release,
+                    gainEnd = n.Performance.GainEnd, evolution = n.Performance.Evolution,
+                    connected = n.Performance.Connected,
+                    sustained = SoundScript.Core.Performance.PerformancePlanner.IsSustained(n.PerformanceIntent!.Program)
+                }).ToArray();
+                trackChunk.Events.Add(new TextEvent("SoundScript.performance.v1:" + JsonSerializer.Serialize(profiles)));
+            }
 
             if (program.TimeSignatureNumerator is not null && program.TimeSignatureDenominator is not null)
             {
