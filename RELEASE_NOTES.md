@@ -1,5 +1,22 @@
 # SoundScript Release Notes
 
+## V13 — Media-to-SoundScript Transcription
+
+- New `SoundScript.Transcription` subsystem with an evidence-bearing canonical
+  musical model and extensible input, analysis and output boundaries.
+- Deterministic monophonic WAV transcription; MP3/video audio through existing
+  FFmpeg support; native SoundScript AST/source and analysis/round-trip outputs.
+- CLI `transcribe` and a dedicated Playground Transcription tab with browser
+  upload, editable source, playback, cancellation and export.
+- Five original synthetic fixtures: 100% pitch recall, no missed/extra notes,
+  7.5–10 ms onset error and 5–10 ms duration error. Synthetic results do not
+  establish accuracy on real singers or acoustic instruments.
+- Limitations remain explicit: tempo ambiguity, renderer release tails, and
+  unsupported simultaneous sources/polyphony. No existing performance semantics change.
+
+See [usage](docs/transcription.md) and the
+[engineering report](docs/transcription-engineering-report.md).
+
 ## V12 — Musical Completeness & .NET 10
 
 - **.NET 10:** all projects, CLI workflows, and supported developer paths now

@@ -83,8 +83,11 @@ still maturing.
 
 ## Musical and media capabilities
 
-V12 extends the existing language without changing its deterministic,
-backward-compatible workflow. Highlights include:
+V13 adds monophonic media transcription while retaining the existing deterministic,
+backward-compatible authoring workflow. Highlights include:
+
+- Media-to-SoundScript transcription, a canonical musical model, round-trip
+  validation, and a dedicated Playground Transcription tab
 
 - MIDI pitches `0–127` (`C-1`–`G9`) and all 128 General MIDI programs
 - Extended harmony, dotted notes, triplets and tuplets, grace notes, and
@@ -180,7 +183,7 @@ Until then, build from source, install a locally generated package as described
 in [the release checklist](docs/releasing.md), or use a reviewed release archive
 when one is available on the [Releases page](https://github.com/dharangutti/sound-script/releases).
 
-The current release identity is `12.0.0` (V12, Musical Completeness & .NET 10).
+The current release identity is `13.0.0` (V13, Media-to-SoundScript Transcription).
 [Directory.Build.props](Directory.Build.props) is the version source of truth;
 release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
