@@ -41,11 +41,14 @@ phrase {
 
 ## Transition Values
 
+These are multipliers of successive MIDI note-on velocities. They do not
+crossfade audio or modify note boundaries on their own.
+
 | Value | Alias | Effect |
 |-------|-------|--------|
-| `smooth` | — | Sine envelope, peak at midpoint (±12%) |
+| `smooth` | — | Sine velocity envelope, 0.88 at ends → 1.0 at midpoint |
 | `abrupt` | `sharp` | Flat — no cross-note envelope |
-| `soft` | — | Wider sine envelope (±20%) |
+| `soft` | — | Sine velocity envelope, 0.80 at ends → 1.0 at midpoint |
 | `expressive` | — | Asymmetric contour, emphasis on opening |
 
 ## Envelopes
@@ -56,6 +59,11 @@ phrase {
 - **decrescendo**: `1.15 − 0.30 × position`
 
 When both an envelope keyword and a swell/fade curve are set, the envelope keyword takes precedence.
+
+Legacy envelopes are sampled at note-on; a single sustained note does not swell.
+With [`perform expressive`](performance-interpretation.md), Wave and browser
+sample playback also evolve amplitude during held notes. External MIDI players
+retain note-on velocity shaping. Legacy Wave skips phrase shaping entirely.
 
 ## Phrase Articulation
 

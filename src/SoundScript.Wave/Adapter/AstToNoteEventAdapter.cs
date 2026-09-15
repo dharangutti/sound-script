@@ -3,6 +3,7 @@ using SoundScript.Core;
 using SoundScript.Core.Ast;
 using SoundScript.Core.Notation;
 using SoundScript.Core.Phonetics;
+using SoundScript.Core.Performance;
 using SoundScript.Wave.Model;
 using SoundScript.Wave.Prosody;
 using SoundScript.Wave.Synthesis;
@@ -56,7 +57,7 @@ namespace SoundScript.Wave.Adapter;
 /// (arpeggiating a sequence) stays an explicit, isolated NotSupported.</item>
 /// </list>
 /// </summary>
-public static class AstToNoteEventAdapter
+public static partial class AstToNoteEventAdapter
 {
     public static Dictionary<string, List<NoteEvent>> Convert(ProgramNode program) =>
         Adapt(program).Tracks;
@@ -66,7 +67,7 @@ public static class AstToNoteEventAdapter
 
     private static WaveAdaptationResult AdaptCore(ProgramNode program, WaveAdaptOptions? options)
     {
-        var context = new ExecutionContext();
+        var context = new ExecutionContext { Expressive = program.Statements.OfType<PerformNode>().Any() };
         var tracks = new Dictionary<string, TrackState>(StringComparer.OrdinalIgnoreCase);
         var trackOrder = new List<string>();
         TrackState? defaultTrack = null;
@@ -129,6 +130,9 @@ public static class AstToNoteEventAdapter
                 case VelocityNode velocity:
                     GetDefaultTrack().CurrentVelocity = velocity.Velocity;
                     break;
+                case InstrumentNode instrument when context.Expressive:
+                    GetDefaultTrack().Program = instrument.ProgramNumber;
+                    break;
                 case DynamicNode dynamic:
                     GetDefaultTrack().CurrentDynamic = dynamic.Level;
                     break;
@@ -166,7 +170,11 @@ public static class AstToNoteEventAdapter
 
         var result = new Dictionary<string, List<NoteEvent>>(StringComparer.OrdinalIgnoreCase);
         foreach (var name in trackOrder)
-            result[name] = tracks[name].Notes;
+        {
+            var notes = tracks[name].Notes;
+            if (context.Expressive) ApplyPerformance(notes, context);
+            result[name] = notes;
+        }
 
         return new WaveAdaptationResult(result, context.SampleOverlays, context.SpeakTimings)
         {
@@ -186,6 +194,36 @@ public static class AstToNoteEventAdapter
             {
             switch (statement)
             {
+                case InstrumentNode instrument when context.Expressive:
+                    track.Program = instrument.ProgramNumber;
+                    break;
+                case LayerNode layer when context.Expressive:
+                    track.Layers.Add(layer.ProgramNumber);
+                    break;
+                case GainNode gain when context.Expressive:
+                    track.Gain = gain.Value;
+                    break;
+                case PhraseArticulationNode articulation when context.Expressive:
+                    track.Articulation = articulation.Articulation;
+                    break;
+                case PhraseEnvelopeNode envelope when context.Expressive:
+                    track.Envelope = envelope.Envelope == PhraseEnvelopeType.Crescendo ? 1 : -1;
+                    break;
+                case PhraseCurveNode curve when context.Expressive:
+                    track.Curve = curve.Curve;
+                    break;
+                case PhraseTransitionNode transition when context.Expressive:
+                    track.Transition = transition.Mode;
+                    break;
+                case PhraseSwingNode swing when context.Expressive:
+                    track.Swing = swing.Ratio;
+                    break;
+                case PhrasePushNode push when context.Expressive:
+                    track.Push = push.Beats;
+                    break;
+                case PhrasePullNode pull when context.Expressive:
+                    track.Pull = pull.Beats;
+                    break;
                 case BpmNode bpm:
                     context.TempoMap.SetTempo(track.CurrentBeat, bpm.Bpm);
                     break;
@@ -237,7 +275,22 @@ public static class AstToNoteEventAdapter
                     // like a block so its notes render. The shaping directives
                     // inside (curve/transition/envelope/swing/…) hit no case
                     // and stay no-ops — expressiveness, not audibility.
-                    ExecuteStatements(track, phrase.Body, context, options);
+                    if (context.Expressive)
+                    {
+                        var saved = (track.CurrentDynamic, track.Articulation, track.Envelope, track.Curve, track.Transition,
+                            track.Swing, track.Push, track.Pull, track.NoteIndex);
+                        track.Phrase++;
+                        track.NoteIndex = 0;
+                        track.Swing = null;
+                        track.Push = track.Pull = 0;
+                        track.Curve = PhraseCurveType.Balanced;
+                        track.Transition = PhraseTransitionMode.Smooth;
+                        ExecuteStatements(track, phrase.Body, context, options);
+                        track.Phrase++;
+                        (track.CurrentDynamic, track.Articulation, track.Envelope, track.Curve, track.Transition,
+                            track.Swing, track.Push, track.Pull, track.NoteIndex) = saved;
+                    }
+                    else ExecuteStatements(track, phrase.Body, context, options);
                     break;
 
                 // See class summary for the full list of intentionally-skipped node types.
@@ -252,12 +305,14 @@ public static class AstToNoteEventAdapter
         if (context.Blocks.TryGetValue(play.SequenceName, out var blockBody))
         {
             ExecuteStatements(track, blockBody, context, options);
+            track.Phrase++;
             return;
         }
 
         if (context.Sequences.TryGetValue(play.SequenceName, out var sequenceBody))
         {
             ExecuteStatements(track, sequenceBody, context, options);
+            track.Phrase++;
             return;
         }
 
@@ -289,12 +344,41 @@ public static class AstToNoteEventAdapter
         var startBeat = track.CurrentBeat;
         var durationBeats = note.DurationBeats;
 
+        var playbackBeat = startBeat;
+        if (context.Expressive)
+        {
+            var swing = track.Swing is { } ratio && track.NoteIndex % 2 == 1 ? durationBeats * (1 - ratio) * 0.5 : 0;
+            playbackBeat = Math.Max(0, startBeat + swing - track.Push + track.Pull);
+            track.NoteIndex++;
+        }
+
         var (startSeconds, velocity) = ApplyHumanize(
             track,
-            BeatsToSeconds(context, 0, startBeat),
+            BeatsToSeconds(context, 0, playbackBeat),
             ResolveVelocity(track, note.Velocity));
 
-        track.Notes.Add(new NoteEvent(
+        if (context.Expressive)
+        {
+            var programs = track.Layers.Count > 0 ? track.Layers : [track.Program];
+            var articulation = note.Notation.Articulation ?? track.Articulation;
+            var factor = articulation switch { ArticulationType.Staccato => 0.47, ArticulationType.Legato => 0.97,
+                ArticulationType.Accent => 1.02, _ => 1.0 };
+            for (var voice = 0; voice < programs.Count; voice++)
+            {
+                var direction = track.Envelope != 0 ? track.Envelope : track.Curve switch
+                    { PhraseCurveType.Swell => 1, PhraseCurveType.Fade => -1, _ => 0 };
+                track.Notes.Add(new NoteEvent(MidiToHz(note.ToMidiNumber()), startSeconds,
+                    BeatsToSeconds(context, startBeat, durationBeats * factor),
+                    Math.Clamp(velocity * track.Gain * (articulation == ArticulationType.Accent ? 1.1 :
+                        articulation == ArticulationType.Staccato ? 0.92 : 1), 0, 1), TimbreParams.Default)
+                {
+                    PerformanceIntent = new PerformanceIntent(startBeat, durationBeats, track.Phrase,
+                        articulation, programs[voice], direction, track.Curve, track.Transition),
+                    PerformanceVoice = voice
+                });
+            }
+        }
+        else track.Notes.Add(new NoteEvent(
             FrequencyHz: MidiToHz(note.ToMidiNumber()),
             StartTimeSeconds: startSeconds,
             DurationSeconds: BeatsToSeconds(context, startBeat, durationBeats),
@@ -306,6 +390,7 @@ public static class AstToNoteEventAdapter
 
     private static void EmitChord(TrackState track, ChordNode chord, ExecutionContext context)
     {
+        track.Phrase++;
         var startBeat = track.CurrentBeat;
         var durationBeats = chord.DurationBeats;
 
@@ -321,7 +406,19 @@ public static class AstToNoteEventAdapter
             // and what a human strum actually does.
             var (toneStart, toneVelocity) = ApplyHumanize(track, startSeconds, velocity);
 
-            track.Notes.Add(new NoteEvent(
+            if (context.Expressive)
+            {
+                var programs = track.Layers.Count > 0 ? track.Layers : [track.Program];
+                for (var voice = 0; voice < programs.Count; voice++)
+                    track.Notes.Add(new NoteEvent(MidiToHz(midiNumber), toneStart, durationSeconds,
+                        Math.Clamp(toneVelocity * track.Gain, 0, 1), TimbreParams.Default)
+                    {
+                        PerformanceIntent = new PerformanceIntent(startBeat, durationBeats, track.Phrase,
+                            null, programs[voice], IsChord: true),
+                        PerformanceVoice = voice
+                    });
+            }
+            else track.Notes.Add(new NoteEvent(
                 FrequencyHz: MidiToHz(midiNumber),
                 StartTimeSeconds: toneStart,
                 DurationSeconds: durationSeconds,
@@ -330,6 +427,7 @@ public static class AstToNoteEventAdapter
         }
 
         AdvanceBeat(track, durationBeats);
+        track.Phrase++;
     }
 
     /// <summary>
@@ -710,6 +808,18 @@ public static class AstToNoteEventAdapter
         public double CurrentBeat { get; set; }
         public int CurrentVelocity { get; set; } = 64;
         public DynamicLevel? CurrentDynamic { get; set; }
+        public int Program { get; set; }
+        public List<int> Layers { get; } = [];
+        public int Phrase { get; set; }
+        public double Gain { get; set; } = 1;
+        public ArticulationType? Articulation { get; set; }
+        public int Envelope { get; set; }
+        public PhraseCurveType? Curve { get; set; }
+        public PhraseTransitionMode? Transition { get; set; }
+        public double? Swing { get; set; }
+        public double Push { get; set; }
+        public double Pull { get; set; }
+        public int NoteIndex { get; set; }
 
         /// <summary>Active humanize directive (v3); null = no jitter.</summary>
         public HumanizeNode? Humanize { get; set; }
@@ -719,6 +829,7 @@ public static class AstToNoteEventAdapter
 
     private sealed class ExecutionContext
     {
+        public bool Expressive { get; init; }
         public TempoAutomationMap TempoMap { get; } = new();
         public Dictionary<string, List<AstNode>> Sequences { get; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, List<AstNode>> Blocks { get; } = new(StringComparer.OrdinalIgnoreCase);

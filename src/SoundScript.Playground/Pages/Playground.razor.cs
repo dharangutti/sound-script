@@ -540,6 +540,9 @@ public partial class Playground : IDisposable
   {
     switch (SelectedExampleKey)
     {
+      case var key when key.StartsWith("performance-", StringComparison.Ordinal):
+        ScriptText = PerformanceExamples.Source(key);
+        break;
       case "v2-showcase": LoadV2ShowcaseExample(); break;
       case "v2-blocks": LoadBlocksExample(); break;
       case "v2-metadata": LoadMetadataExample(); break;

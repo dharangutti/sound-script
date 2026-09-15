@@ -16,7 +16,7 @@
         "tempo", "time", "track", "block", "phrase", "pattern", "voice", "melody",
         "sing", "speak", "effect", "instrument", "layer", "gain", "humanize", "play",
         "vocal", "curve", "transition", "crescendo", "decrescendo", "articulation",
-        "swing", "staccato", "legato", "accent", "double", "reinforce", "brighten",
+        "perform", "expressive", "swing", "staccato", "legato", "accent", "double", "reinforce", "brighten",
         "rest", "over", "bars", "for", "up", "down", "strum", "rhythm", "wordbank",
         "visual", "wait", "sync", "audio", "animate", "at",
     ];

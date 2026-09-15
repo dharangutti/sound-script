@@ -45,6 +45,13 @@ public sealed partial class Parser
 
     private AstNode ParseTopLevelStatement()
     {
+        if (MatchContextualWord("perform"))
+        {
+            var mode = Expect(TokenType.Identifier, "performance mode 'expressive'");
+            if (!mode.Value.Equals("expressive", StringComparison.OrdinalIgnoreCase))
+                throw Invalid(mode, "Unknown performance mode. Expected 'perform expressive'.");
+            return new PerformNode();
+        }
         if (MatchContextualWord("triplet")) return ParseRhythmicNoteModifier(2.0 / 3.0, "triplet");
         if (MatchContextualWord("tuplet")) return ParseTupletStatement();
         if (MatchContextualWord("grace")) return ParseRhythmicNoteModifier(0.25, "grace");

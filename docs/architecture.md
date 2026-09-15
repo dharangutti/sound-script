@@ -1,4 +1,40 @@
-# SoundScript Architecture (V11)
+# SoundScript Architecture (V12)
+
+## Opt-in performance interpretation
+
+`PerformNode` enables program-wide expressive interpretation. The parser keeps
+`perform` contextual, so existing named blocks/sequences remain valid. Without
+the node, the legacy rendering branches remain active.
+
+```text
+Shared AST + PerformNode
+    ├─ Midi.Interpreter → expanded, humanized TimedNote + PerformanceIntent
+    │    → Core.Performance.PerformancePlanner → independent track/layer channels
+    │    → MidiGenerator → .mid (notes + optional per-note audio metadata)
+    │         ├─ external synthesizer: standard notes/programs/velocities
+    │         └─ Playground: MIDI schedule + soundfont envelope/sample loops
+    └─ Wave.AstToNoteEventAdapter → NoteEvent + PerformanceIntent
+         → same PerformancePlanner → NoteRenderer → Mixer → effects → PCM
+```
+
+`PerformanceIntent` retains score duration, phrase identity, articulation, and
+instrument separately from humanized playback timing. The pure shared planner
+operates in seconds on each melodic voice, with chord tones separated from
+melody processing. Its output describes duration, velocity, attack, release,
+continuous gain, and sustained evolution. Rest gaps and phrase IDs prevent
+connections across breaths. MIDI converts seconds back through the integrated
+tempo map before tick quantization; Wave evaluates envelopes per sample.
+
+Wave still has no dependency on Midi or Parser. It shares the performance
+policy through Core, not by parsing an intermediate MIDI file. Backend-specific
+velocity curves, chord voicing, and timbre capabilities remain distinct.
+
+The browser reads versioned `SoundScript.performance.v1:` text metadata.
+External players can ignore it and play the same shaped MIDI notes. Only
+expressive playback enables continuous gain envelopes, crossfaded sample-loop
+seams, and tempo-map scheduling; legacy browser playback remains available.
+See [performance interpretation](performance-interpretation.md) for the rules,
+capability boundaries, validation procedure, and engineering report.
 
 ## V10/V11 media extension
 

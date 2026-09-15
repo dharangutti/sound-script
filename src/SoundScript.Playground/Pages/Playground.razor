@@ -48,6 +48,12 @@
                 <option value="v2-orchestration">Orchestration</option>
                 <option value="v2-voice">Voice</option>
             </optgroup>
+            <optgroup label="Expressive performance">
+                @foreach (var example in PerformanceExamples.All)
+                {
+                  <option value="@example.Key">@example.Title</option>
+                }
+            </optgroup>
             <optgroup label="Core">
                 <option value="core-melody">Melody</option>
                 <option value="core-articulations">Articulations</option>

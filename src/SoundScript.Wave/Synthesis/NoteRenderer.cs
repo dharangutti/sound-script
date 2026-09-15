@@ -46,6 +46,17 @@ public static class NoteRenderer
         else
             RenderWavetable(note, sampleRate, frequency, velocity, buffer);
 
+        if (note.Performance is { } performance)
+        {
+            for (var i = 0; i < buffer.Length; i++)
+            {
+                var position = Math.Clamp(i / (double)sampleRate / Math.Max(0.001, note.DurationSeconds), 0, 1);
+                var gain = 1 + (performance.GainEnd - 1) * position;
+                gain *= 1 + performance.Evolution * Math.Sin(Math.PI * position);
+                buffer[i] *= (float)gain;
+            }
+        }
+
         return buffer;
     }
 

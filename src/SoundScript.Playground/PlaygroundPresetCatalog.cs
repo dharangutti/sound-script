@@ -188,6 +188,9 @@ public static class PlaygroundPresetCatalog
 
     private static IEnumerable<PlaygroundPresetInfo> MidiPresets()
     {
+        foreach (var example in PerformanceExamples.All)
+            yield return Midi(example.Key, example.Title, example.Key + ".ss",
+                "Opt-in expressive performance; also render with the Wave backend for continuous envelopes.");
         yield return Midi("v2-showcase", "Showcase", "full-v2-showcase.ss",
             "Inline variant of the V2 showcase (imports omitted — browser cannot load import).");
         yield return Midi("v2-blocks", "Blocks", "blocks.ss");
