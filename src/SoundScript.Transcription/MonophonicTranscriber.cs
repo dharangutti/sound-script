@@ -10,6 +10,10 @@ public sealed class MonophonicTranscriber(IMusicalAnalyzer? analyzer = null)
     {
         if (options.Tempo is < 20 or > 300 || options.Instrument is < 0 or > 127) throw new ArgumentOutOfRangeException(nameof(options));
         var frames=observations.Frames;
+        if (!double.IsFinite(observations.DurationSeconds) || observations.DurationSeconds < 0
+            || frames.Any(f => !double.IsFinite(f.Seconds) || f.Seconds < 0 || f.Seconds > observations.DurationSeconds)
+            || frames.Zip(frames.Skip(1), (a,b) => b.Seconds <= a.Seconds).Any(x => x))
+            throw new InvalidDataException("Observation times must be finite, increasing and within the recording.");
         var pitches=frames.Select(f => f.Frequency.HasValue ? MonophonicAnalyzer.FrequencyToMidi(f.Frequency.Value) : -1).ToArray();
         // Three-frame median rejects isolated pitch glitches, but keeps genuine silence.
         var smoothed=(int[])pitches.Clone();
@@ -20,12 +24,13 @@ public sealed class MonophonicTranscriber(IMusicalAnalyzer? analyzer = null)
         int begin=0;
         for (int i=1;i<=smoothed.Length;i++)
         {
-            bool attack=i<smoothed.Length && i-begin>=8 && frames[i].Rms > frames[i-1].Rms*1.8 && frames[i].Rms>.02;
+            bool attack=i<smoothed.Length && frames[i].Seconds-frames[begin].Seconds>=.08-1e-8 && frames[i].Rms > frames[i-1].Rms*1.8 && frames[i].Rms>.02;
             if (i<smoothed.Length && smoothed[i]==smoothed[begin] && !attack) continue;
-            if (smoothed[begin]>=0 && i-begin>=6)
+            double segmentEnd=i<frames.Count?frames[i].Seconds:observations.DurationSeconds;
+            if (smoothed[begin]>=0 && segmentEnd-frames[begin].Seconds>=.06-1e-8)
             {
                 var range=frames.Skip(begin).Take(i-begin).ToArray();
-                segments.Add((smoothed[begin],frames[begin].Seconds,Math.Min(observations.DurationSeconds,i*.01),range.Average(f=>f.Periodicity),range.Average(f=>f.Rms)));
+                segments.Add((smoothed[begin],frames[begin].Seconds,segmentEnd,range.Average(f=>f.Periodicity),range.Average(f=>f.Rms)));
             }
             begin=i;
         }
@@ -37,7 +42,11 @@ public sealed class MonophonicTranscriber(IMusicalAnalyzer? analyzer = null)
         foreach (var n in segments)
         {
             double start=n.Start*tempo/60, end=n.End*tempo/60;
-            if (options.Quantize) { start=Quantize(start); end=Quantize(end); }
+            if (options.Quantize)
+            {
+                double quantizedStart=Quantize(start), quantizedEnd=Quantize(end);
+                if (quantizedEnd>quantizedStart) { start=quantizedStart; end=quantizedEnd; }
+            }
             start=Math.Max(previousEnd,start); end=Math.Max(start+.01,end);
             notes.Add(new(n.Pitch,n.Start,n.End-n.Start,start,end-start,Math.Clamp((int)Math.Round(100*Math.Sqrt(n.Rms)),35,110),new(n.Confidence,"Mean YIN periodicity (1-CMND), not a calibrated probability")));
             previousEnd=end;

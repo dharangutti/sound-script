@@ -1,5 +1,13 @@
 # CLI Reference
 
+## Transcription
+
+`soundscript transcribe input.wav --out melody.ss --report analysis.json --preview preview.wav`
+
+Imports a solo melody from WAV or FFmpeg-supported MP3/video and validates its
+reconstruction. Options: `--tempo auto|20..300`, `--instrument <GM name|program>`,
+`--ffmpeg <path>`. See [transcription usage, limits and confidence](transcription.md).
+
 The SoundScript CLI (`SoundScript.Cli`, assembly name `soundscript`) compiles
 scripts and text to MIDI, renders offline timbre audio, and renders `.ss`/`.ssw`
 scripts directly to WAV. It requires the .NET 10 SDK and runs on Windows, macOS,

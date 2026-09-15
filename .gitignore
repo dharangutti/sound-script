@@ -5,6 +5,7 @@ obj/
 .vs/
 output.mid
 artifacts/
+**/TestResults/
 # docs/playground/*
 !docs/playground/.gitkeep
 *.dll

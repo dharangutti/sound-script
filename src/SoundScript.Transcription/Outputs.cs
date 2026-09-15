@@ -18,6 +18,9 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
         ast.Statements.Add(new TempoNode { Bpm = (int)Math.Round(score.TempoMap[0].Bpm) });
         foreach (var track in score.Tracks)
         {
+            if (track.Instrument is < 0 or > 127 || track.Rests.Any(r => !double.IsFinite(r.StartBeat) || !double.IsFinite(r.DurationBeats)
+                || r.StartBeat < 0 || r.DurationBeats <= 0 || track.Notes.Any(n => r.StartBeat < n.StartBeat+n.DurationBeats-1e-7 && r.StartBeat+r.DurationBeats > n.StartBeat+1e-7)))
+                throw new NotSupportedException("Invalid instrument or rest overlapping a note.");
             if (track.Chords?.Count > 0 || track.LegitimateText != null || track.Notes.Any(n => n.Expression?.Count > 0))
                 throw new NotSupportedException("Chord, lyric and expression emission requires an extended output writer.");
             var node = new TrackNode { Name = track.Name };

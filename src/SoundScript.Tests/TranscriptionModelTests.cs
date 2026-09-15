@@ -7,7 +7,7 @@ namespace SoundScript.Tests;
 public class TranscriptionModelTests
 {
     internal static MusicalScore Score(params MusicalNote[] notes) => new([new(0,120,new(1,"test"))],null,null,
-        [new("imported", "melody", 73, notes, [new(2,1)])],[],2);
+        [new("imported", "melody", 73, notes, [new(Math.Max(2,notes.Select(n=>n.StartBeat+n.DurationBeats).DefaultIfEmpty(0).Max()),1)])],[],2);
     internal static MusicalNote Note(int pitch, double start = 0, double duration = 1) => new(pitch,start/2,duration/2,start,duration,80,new(1,"test"));
     [Fact] public void ScoreProducesRealAstSourceAndAudio()
     {

@@ -15,6 +15,19 @@ validates and inspects source, renders audio, and exports temporal media.
 
 ## See it work
 
+### Transcribe a melody
+
+Import WAV, MP3 or video audio into editable SoundScript with the additive
+[Transcription subsystem](docs/transcription.md). The Playground source includes
+a dedicated **Transcription** tab for local upload, analysis, editing and playback.
+
+```powershell
+dotnet run --project src/SoundScript.Cli -- transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav
+```
+
+Compressed desktop formats require FFmpeg. The first release supports solo melodies;
+see the [measured accuracy and limitations](docs/transcription-engineering-report.md).
+
 The repository includes a temporal audio/visual composition with source, a
 browser demo, and a decode-verified WebM export:
 

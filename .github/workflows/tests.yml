@@ -55,6 +55,9 @@ jobs:
       - name: Build complete solution
         run: dotnet build SoundScript.sln -c Debug
 
+      - name: Check transcription browser input boundary
+        run: node --test scripts/transcription-browser-input.test.cjs
+
       - name: Build visual verification tool
         run: dotnet build tools/VisualParity -c Debug
 

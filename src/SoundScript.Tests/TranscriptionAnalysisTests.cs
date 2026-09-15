@@ -20,6 +20,14 @@ public class TranscriptionAnalysisTests(ITestOutputHelper output)
     public void TempoUsesOnsets(int tempo) => Assert.Equal(tempo,MonophonicTranscriber.EstimateTempo(Enumerable.Range(0,8).Select(i=>i*60.0/tempo).ToArray()));
     [Fact] public void QuantizationPreservesIrregularTiming()
     { Assert.Equal(1,MonophonicTranscriber.Quantize(1.03)); Assert.Equal(1.11,MonophonicTranscriber.Quantize(1.11)); }
+    [Fact] public void ObservationAdapterUsesTimestampsAndPreservesShortOffGridNote()
+    {
+        var observations = new MusicalObservations([new(0,440,1,.3),new(.07,null,0,0)],.2,[]);
+        var result = new MonophonicTranscriber().Interpret(observations,new(20));
+        var note = Assert.Single(result.Score.Tracks[0].Notes);
+        Assert.Equal(.07,note.DurationSeconds,6);
+        Assert.Equal(.07*20/60,note.DurationBeats,6);
+    }
     [Fact] public void SilenceAndShortInputHaveDiagnostics()
     {
         var result=new MonophonicTranscriber().Transcribe(new(new float[400]));
