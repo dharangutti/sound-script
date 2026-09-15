@@ -69,4 +69,45 @@ public class TranscriptionAnalysisTests(ITestOutputHelper output)
     }
     [Fact] public void CancellationIsObserved()
     { using var c=new CancellationTokenSource();c.Cancel();Assert.Throws<OperationCanceledException>(()=>new MonophonicTranscriber().Transcribe(new(new float[16000]),cancellationToken:c.Token)); }
+    [Fact] public async Task CooperativeBrowserAnalysisMatchesSynchronousAnalysis()
+    {
+        var audio = TranscriptionFixture.All[0].Audio();
+        var analyzer = new MonophonicAnalyzer();
+        Assert.Equal(JsonSerializer.Serialize(analyzer.Analyze(audio)), JsonSerializer.Serialize(await analyzer.AnalyzeAsync(audio)));
+        using var cancel = new CancellationTokenSource(); cancel.Cancel();
+        await Assert.ThrowsAsync<OperationCanceledException>(() => analyzer.AnalyzeAsync(audio, cancel.Token));
+    }
+    [Fact] public void LegatoPitchChangesAndAmplitudeRepeatedAttacksAreDetected()
+    {
+        var samples = new float[32000];
+        for (int i = 0; i < samples.Length; i++)
+        {
+            double frequency = i < 16000 ? 261.625565 : 329.627557;
+            // Repeated C4 at .5 s, with a fresh attack after a low-energy valley.
+            double amplitude = i is >= 7400 and < 8000 ? .02 : .4;
+            samples[i] = (float)(amplitude * Math.Sin(2 * Math.PI * frequency * i / 16000));
+        }
+        var notes = new MonophonicTranscriber().Transcribe(new(samples),new(120,Quantize:false)).Score.Tracks[0].Notes;
+        Assert.Equal(new[]{60,60,64}, notes.Select(n => n.MidiPitch));
+        Assert.InRange(notes[1].StartSeconds,.48,.52);
+        Assert.InRange(notes[2].StartSeconds,.97,1.03);
+    }
+    [Fact] public void ModerateNoisePreservesCleanMelodyNotes()
+    {
+        var fixture = TranscriptionFixture.All[0]; var samples = fixture.Audio().Samples; var random = new Random(2026);
+        for (int i=0;i<samples.Length;i++) samples[i] += (float)((random.NextDouble()-.5)*.035);
+        var result = new MonophonicTranscriber().Transcribe(new(samples));
+        var metrics = MusicalComparison.Compare(fixture.Truth,result.Score.Tracks[0].Notes);
+        Assert.Equal(1,metrics.PitchAccuracy); Assert.Equal(0,metrics.ExtraNotes);
+    }
+    [Fact] public void SimultaneousSourcesRemainAnExplicitUnsupportedAssumption()
+    {
+        var fixture = TranscriptionFixture.All[0]; var samples = fixture.Audio().Samples;
+        for (int i=0;i<samples.Length;i++) samples[i]=(float)(.65*samples[i]+.25*Math.Sin(2*Math.PI*196*i/16000));
+        var result = new MonophonicTranscriber().Transcribe(new(samples));
+        var metric = MusicalComparison.Compare(fixture.Truth,result.Score.Tracks[0].Notes);
+        output.WriteLine("Two-source experiment: "+JsonSerializer.Serialize(metric));
+        Assert.Contains(result.Diagnostics,d=>d.Code=="monophonic-assumption");
+        Assert.Null(result.Score.Key); Assert.Null(result.Score.Meter); Assert.Null(result.Score.Tracks[0].Chords);
+    }
 }

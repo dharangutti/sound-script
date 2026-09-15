@@ -11,6 +11,7 @@ public sealed class CliArguments
 {
     public static readonly CommandDefinition[] Commands =
     [
+        new("transcribe", "<media> --out <score.ss> [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg", "verbose"),
         new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", "verbose", PositionalOutput: true),
         new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
         new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
@@ -94,6 +95,13 @@ public sealed class CliArguments
 
     private void Validate()
     {
+        if (Command == "transcribe")
+        {
+            if (!Has("out") || !Value("out")!.EndsWith(".ss", StringComparison.OrdinalIgnoreCase)) throw new CliUsageException("transcribe requires --out <score.ss>.");
+            if (Value("tempo") is { } tempo && tempo != "auto" && (!int.TryParse(tempo, out var bpm) || bpm is < 20 or > 300)) throw new CliUsageException("--tempo requires auto or an integer from 20 to 300.");
+            if (Value("instrument") is { } instrument && !SoundScript.Core.InstrumentMap.TryResolve(instrument, out _)) throw new CliUsageException("Unknown --instrument; use a General MIDI name or program 0-127.");
+            if (Value("preview") is { } preview && !preview.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)) throw new CliUsageException("--preview requires a .wav path.");
+        }
         foreach (var name in new[] { "fps", "width", "height", "seed", "jobs" })
             if (Value(name) is { } value && !int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _)) throw new CliUsageException($"--{name} requires an integer.");
         foreach (var name in new[] { "vocal-at", "vocal-gain" })

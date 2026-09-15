@@ -27,7 +27,19 @@
                 @onclick="() => SelectTab(PlaygroundTab.VisualTimeline)">
             Audio/Visual <span aria-hidden="true">✦</span>
         </button>
+        <button type="button" role="tab" id="transcription-workspace-tab"
+                class="playground-tab @(ActiveTab == PlaygroundTab.Transcription ? "is-active" : "")"
+                aria-selected="@(ActiveTab == PlaygroundTab.Transcription ? "true" : "false")"
+                aria-controls="transcription-workspace-panel"
+                @onclick="() => SelectTab(PlaygroundTab.Transcription)">
+            Transcription
+        </button>
     </nav>
+
+    <section class="playground-tab-panel" id="transcription-workspace-panel" role="tabpanel"
+             aria-labelledby="transcription-workspace-tab" hidden="@(ActiveTab != PlaygroundTab.Transcription)">
+        <TranscriptionPanel />
+    </section>
 
     <section class="playground-tab-panel" id="music-workspace-panel" role="tabpanel"
              aria-labelledby="music-workspace-tab" hidden="@(ActiveTab != PlaygroundTab.Music)">

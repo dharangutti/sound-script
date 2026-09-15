@@ -10,7 +10,7 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
     public ProgramNode Write(MusicalScore score)
     {
         if (score.TempoMap.Count != 1 || score.TempoMap[0].Beat != 0 || !double.IsFinite(score.TempoMap[0].Bpm)
-            || score.TempoMap[0].Bpm is < 20 or > 300)
+            || score.TempoMap[0].Bpm is < 20 or > 300 || score.TempoMap[0].Bpm != Math.Round(score.TempoMap[0].Bpm))
             throw new NotSupportedException("Source writer currently requires one tempo at beat zero (20-300 BPM).");
         if (score.Meter != null || score.Key != null || score.Sections.Count != 0)
             throw new NotSupportedException("Meter, key and section emission are not yet supported.");
@@ -33,7 +33,7 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
                 PitchClass[] pitches = [PitchClass.C,PitchClass.C,PitchClass.D,PitchClass.D,PitchClass.E,PitchClass.F,PitchClass.F,PitchClass.G,PitchClass.G,PitchClass.A,PitchClass.A,PitchClass.B];
                 node.Body.Add(new NoteNode { Velocity = note.Velocity, Notation = new NotatedNote {
                     PitchClass = pitches[pc], Accidental = pc is 1 or 3 or 6 or 8 or 10 ? AccidentalType.Sharp : AccidentalType.None,
-                    Octave = note.MidiPitch / 12 - 1, DurationBeats = note.DurationBeats,
+                    Octave = note.MidiPitch / 12 - 1, DurationBeats = Math.Round(note.DurationBeats,6),
                     StandardDuration = note.DurationBeats switch { 1 => NoteDuration.Quarter, 2 => NoteDuration.Half, .5 => NoteDuration.Eighth, 4 => NoteDuration.Whole, _ => null }
                 }});
                 cursor = note.StartBeat + note.DurationBeats;
@@ -46,7 +46,7 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
     }
     private static void AddRest(TrackNode node, double beats)
     {
-        if (beats > 1e-7) node.Body.Add(new RestNode { Rest = new NotatedRest { DurationBeats = beats } });
+        if (beats > 1e-7) node.Body.Add(new RestNode { Rest = new NotatedRest { DurationBeats = Math.Round(beats,6) } });
     }
     public string Source(MusicalScore score)
     {

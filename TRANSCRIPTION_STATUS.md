@@ -24,3 +24,16 @@ Measurements and distributable media: `src/SoundScript.Tests/Golden/transcriptio
 
 CLI + dedicated Playground tab, compressed-media/browser verification, final regression and report.
 Architecture rationale: `docs/transcription-architecture.md`. No new packages.
+
+## Milestone 3: product integration complete
+
+Desktop media decoding reuses the existing FFmpeg runner. CLI emits source/report/preview
+and validates every successful import. Playground has its own Transcription tab/editor,
+browser decoding, cooperative analysis/cancel, play/edit/replay and exports.
+Real MP3 and MP4-with-video integration and no-audio failure tests pass. Browser upload,
+WAV transcription, playback, editing and source download were exercised using the UI.
+An actual MP3 UI test found and fixed double stream-reference marshalling in the JS bridge.
+Full expanded .NET suite: **1,068 passed, 0 failed, 0 skipped** (37 new tests).
+Two-source experiment fails melody pitch recall (0%, four extra notes); no polyphony claim.
+
+Final browser follow-up, bridge regression checks and engineering report remain.

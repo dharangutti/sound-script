@@ -54,6 +54,7 @@ public static class MusicalComparison
     }
     public static RoundTripResult Validate(MusicalScore score, CancellationToken cancellationToken = default)
     {
+        if (score.Tracks.Count != 1) throw new NotSupportedException("Monophonic round-trip reanalysis requires exactly one track.");
         var writer=new SoundScriptOutput(); string source=writer.Source(score);
         cancellationToken.ThrowIfCancellationRequested();
         var preview=WaveRenderer.RenderToBytes(SoundScriptOutput.Parse(source));
@@ -61,5 +62,17 @@ public static class MusicalComparison
         double secondsPerBeat=60/score.TempoMap[0].Bpm;
         var expected=score.Tracks.SelectMany(t=>t.Notes).Select(n=>n with { StartSeconds=n.StartBeat*secondsPerBeat,DurationSeconds=n.DurationBeats*secondsPerBeat }).OrderBy(n=>n.StartSeconds).ToArray();
         return new(source,preview,Compare(expected,rendered.Score.Tracks.SelectMany(t=>t.Notes).ToArray()));
+    }
+    public static async Task<RoundTripResult> ValidateAsync(MusicalScore score, CancellationToken cancellationToken = default)
+    {
+        if (score.Tracks.Count != 1) throw new NotSupportedException("Monophonic round-trip reanalysis requires exactly one track.");
+        string source = new SoundScriptOutput().Source(score);
+        cancellationToken.ThrowIfCancellationRequested();
+        var preview = WaveRenderer.RenderToBytes(SoundScriptOutput.Parse(source));
+        var observations = await new MonophonicAnalyzer().AnalyzeAsync(PcmWaveInput.Decode(preview), cancellationToken);
+        var rendered = new MonophonicTranscriber().Interpret(observations, new(Tempo: (int)score.TempoMap[0].Bpm, Quantize: false));
+        double secondsPerBeat = 60 / score.TempoMap[0].Bpm;
+        var expected = score.Tracks[0].Notes.Select(n => n with { StartSeconds = n.StartBeat * secondsPerBeat, DurationSeconds = n.DurationBeats * secondsPerBeat }).ToArray();
+        return new(source, preview, Compare(expected, rendered.Score.Tracks[0].Notes));
     }
 }

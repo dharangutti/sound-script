@@ -38,12 +38,23 @@ public sealed class MonophonicAnalyzer : IMusicalAnalyzer
         return (int)Math.Round(69 + 12*Math.Log2(frequency/440));
     }
     public MusicalObservations Analyze(AnalysisAudio audio, CancellationToken cancellationToken = default)
+        => Complete(audio, AnalyzeFrames(audio, cancellationToken).ToList());
+
+    /// <summary>Same calculations, yielding every 20 frames so WASM can repaint and cancel.</summary>
+    public async Task<MusicalObservations> AnalyzeAsync(AnalysisAudio audio, CancellationToken cancellationToken = default)
+    {
+        var frames = new List<PitchFrame>();
+        foreach (var frame in AnalyzeFrames(audio, cancellationToken))
+        {
+            frames.Add(frame);
+            if (frames.Count % 20 == 0) await Task.Delay(1, cancellationToken);
+        }
+        return Complete(audio, frames);
+    }
+
+    private static IEnumerable<PitchFrame> AnalyzeFrames(AnalysisAudio audio, CancellationToken cancellationToken)
     {
         var samples = audio.Samples;
-        var frames = new List<PitchFrame>();
-        var diagnostics = new List<AnalysisDiagnostic>();
-        if (samples.Length < AnalysisAudio.SampleRate / 10) diagnostics.Add(new("short-input","Less than 100 ms; note and tempo evidence is insufficient."));
-        if (samples.Count(x => Math.Abs(x) >= .999f) > samples.Length * .001) diagnostics.Add(new("clipping","More than 0.1% of samples reach full scale."));
         var rms = new double[(samples.Length + Hop-1)/Hop];
         for (int i = 0; i < rms.Length; i++)
         {
@@ -64,8 +75,17 @@ public sealed class MonophonicAnalyzer : IMusicalAnalyzer
                 for (int j=0;j<Window;j++) if (start+j>=0 && start+j<samples.Length) window[j]=samples[start+j];
                 (frequency,periodicity)=DetectPitch(window);
             }
-            frames.Add(new(i*.01,frequency,periodicity,rms[i]));
+            yield return new(i*.01,frequency,periodicity,rms[i]);
         }
+    }
+
+    private static MusicalObservations Complete(AnalysisAudio audio, List<PitchFrame> frames)
+    {
+        var samples = audio.Samples;
+        var diagnostics = new List<AnalysisDiagnostic>();
+        if (samples.Length < AnalysisAudio.SampleRate / 10) diagnostics.Add(new("short-input","Less than 100 ms; note and tempo evidence is insufficient."));
+        if (samples.Count(x => Math.Abs(x) >= .999f) > samples.Length * .001) diagnostics.Add(new("clipping","More than 0.1% of samples reach full scale."));
+        double threshold = Math.Max(.003, frames.Select(f => f.Rms).DefaultIfEmpty(0).Max() * .035);
         int active=frames.Count(f => f.Rms>=threshold), voiced=frames.Count(f => f.Frequency.HasValue);
         if (active==0) diagnostics.Add(new("silence","No audio above the analysis silence threshold."));
         else if (voiced < active*.8) diagnostics.Add(new("weak-periodicity","Substantial nonperiodic audio: noise, weak fundamental or simultaneous sources may prevent monophonic analysis."));
