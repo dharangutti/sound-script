@@ -1,4 +1,7 @@
-# SoundScript Examples (V12)
+# SoundScript Examples (V13)
+
+For media import, see the [transcription workflow](transcription.md) and its
+[five original synthetic fixtures](../src/SoundScript.Tests/Golden/transcription/README.md).
 
 ## Expressive performance
 

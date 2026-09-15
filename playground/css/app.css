@@ -1499,3 +1499,6 @@ a:hover { text-decoration: underline; }
     .visual-properties { text-align: left; }
     .visual-properties div { justify-content: flex-start; }
 }
+.transcription-workspace { padding: 1.25rem; }
+.transcription-workspace > label { display: block; margin-top: 1rem; margin-bottom: .4rem; }
+.transcription-source { width: 100%; box-sizing: border-box; font: 14px/1.6 monospace; padding: 1rem; color: inherit; background: var(--surface, #111827); border: 1px solid #64748b; border-radius: 8px; }

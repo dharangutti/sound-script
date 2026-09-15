@@ -51,7 +51,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "softwareVersion": "12.0.0",
+                "softwareVersion": "13.0.0",
                 "programmingLanguage": "C#",
                 "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
@@ -812,7 +812,7 @@
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V12 — Musical Completeness &amp; .NET 10<!--/VERSION_BADGE--></div>
+            <div class="badge"><!--VERSION_BADGE-->Version: V13 — Media-to-SoundScript Transcription<!--/VERSION_BADGE--></div>
             <h1>Write audio like <span>code</span></h1>
             <p class="lead">
                 SoundScript is an independent open-source audio and media programming language. Write timed visuals, melodies, phrases,
@@ -830,7 +830,7 @@
                 <span class="trust-badge">Offline</span>
                 <span class="trust-badge">Cross Platform</span>
                 <span class="trust-badge">Open Source</span>
-                <span class="trust-badge"><!--METRIC_TESTS-->1,031<!--/METRIC_TESTS--> Tests</span>
+                <span class="trust-badge"><!--METRIC_TESTS-->1,069<!--/METRIC_TESTS--> Tests</span>
                 <span class="trust-badge">.NET 10</span>
                 <span class="trust-badge">Browser Playground</span>
                 <span class="trust-badge">Temporal A/V Export</span>
@@ -996,9 +996,9 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <h2 id="benefits-title">Key Benefits</h2>
                 <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
                 <div class="metric-grid" aria-label="Repository engineering metrics">
-                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->316+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
-                    <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->18<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
-                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,031<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->322+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->19<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,069<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
                     <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
                     <div class="metric"><span class="metric-value">2 rails</span><span class="metric-label">MIDI and Wave</span></div>
                 </div>
@@ -1273,7 +1273,8 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><span class="release-label">Current</span><br>SoundScript now targets .NET 10 and broadens conventional notation with the full MIDI pitch and General MIDI program ranges, extended harmony, dotted rhythm, tuplets, grace notes, and expanded dynamics—while keeping the deterministic MIDI, Wave, SoundCSS, voice, and temporal-media workflows compatible. <a href="doc.html?p=musical-completeness.md">Capability details →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V13</span><div><strong>Media-to-SoundScript Transcription</strong><span class="release-label">Current</span><br>Import a solo melody into editable SoundScript with a canonical musical model, deterministic monophonic analysis, CLI support, a dedicated Transcription Playground tab, and measured round-trip validation. <a href="doc.html?p=transcription.md">Usage and limitations →</a></div></li>
+                    <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><br>SoundScript now targets .NET 10 and broadens conventional notation with the full MIDI pitch and General MIDI program ranges, extended harmony, dotted rhythm, tuplets, grace notes, and expanded dynamics—while keeping the deterministic MIDI, Wave, SoundCSS, voice, and temporal-media workflows compatible. <a href="doc.html?p=musical-completeness.md">Capability details →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
                     <li><span class="step-num" style="width:auto;padding:0 0.6rem;">V7</span><div>SoundScript.Wave renders <code>.ss</code> / <code>.ssw</code> directly to deterministic WAV through <code>speak</code>, effects, and seeded humanization.</div></li>
@@ -1294,7 +1295,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <a href="playground/">Playground</a> ·
                 <a href="doc.html?p=user-guide.md">User Guide</a> ·
                 <a href="/industrial/">Industrial Audio</a> ·
-                <a href="doc.html?p=musical-completeness.md">What's New in V12</a> ·
+                <a href="doc.html?p=transcription.md">What's New in V13</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="doc.html?p=SoundScript.md">Documentation</a> ·
                 <a href="/contact/">Contact</a>
