@@ -12,18 +12,29 @@ $resolvedIndexPath = if ([System.IO.Path]::IsPathRooted($IndexPath)) {
 
 $commitCount = (git -C $repositoryRoot rev-list --count HEAD).Trim()
 $projectCount = (Get-ChildItem -Path $repositoryRoot -Recurse -Filter "*.csproj" -File).Count
+
 # Count discovered cases, not attributes. A theory can expand into many cases,
 # so counting [Fact]/[Theory] markers understated the public test metric.
 $testProject = Join-Path $repositoryRoot "src/SoundScript.Tests/SoundScript.Tests.csproj"
 $listedTests = & dotnet test $testProject -c Debug --list-tests --no-restore --nologo 2>&1
+
 if ($LASTEXITCODE -ne 0) {
     throw "Unable to discover SoundScript test cases for the site metric."
 }
-$testCount = @($listedTests | Where-Object { $_ -match '^    SoundScript\.Tests\.' }).Count
+
+$testCount = @(
+    $listedTests |
+        Where-Object { $_ -match '^\s+SoundScript\.Tests\.' }
+).Count
+
 if ($testCount -eq 0) {
     throw "No SoundScript test cases were discovered for the site metric."
 }
-$displayTestCount = $testCount.ToString("N0", [System.Globalization.CultureInfo]::InvariantCulture)
+
+$displayTestCount = $testCount.ToString(
+    "N0",
+    [System.Globalization.CultureInfo]::InvariantCulture
+)
 
 $content = Get-Content -LiteralPath $resolvedIndexPath -Raw
 
@@ -34,16 +45,26 @@ function Update-MetricMarker {
     )
 
     $pattern = "(?s)(<!--METRIC_$Name-->).*?(<!--/METRIC_$Name-->)"
+
     if (-not [regex]::IsMatch($content, $pattern)) {
         throw "Metric marker not found: $Name"
     }
 
-    $script:content = [regex]::Replace($content, $pattern, "`${1}$Value`${2}")
+    $script:content = [regex]::Replace(
+        $content,
+        $pattern,
+        "`${1}$Value`${2}"
+    )
 }
 
 Update-MetricMarker -Name "COMMITS" -Value "$commitCount+"
 Update-MetricMarker -Name "PROJECTS" -Value "$projectCount"
 Update-MetricMarker -Name "TESTS" -Value $displayTestCount
 
-Set-Content -LiteralPath $resolvedIndexPath -Value $content -Encoding utf8 -NoNewline
+Set-Content `
+    -LiteralPath $resolvedIndexPath `
+    -Value $content `
+    -Encoding utf8 `
+    -NoNewline
+
 Write-Host "Updated site metrics: $commitCount+ commits, $projectCount projects, $displayTestCount tests."
