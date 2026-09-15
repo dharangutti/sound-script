@@ -9,6 +9,9 @@ namespace SoundScript.Media;
 /// </summary>
 public static class FfmpegWebmExporter
 {
+    /// <summary>Shared external-media process boundary: argument list, drained pipes, cancellation and timeout.</summary>
+    public static string RunMediaProcess(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken = default)
+        => Run(executable, arguments, cancellationToken);
     public static void EnsureAvailable(string ffmpegPath)
     {
         try { Run(ffmpegPath, "-hide_banner", "-version"); }
@@ -198,7 +201,7 @@ public static class FfmpegWebmExporter
         catch (System.ComponentModel.Win32Exception ex)
         {
             throw new DependencyException(
-                "FFmpeg is required for CLI WebM encoding. Install an FFmpeg build with libvpx-vp9 and libopus, " +
+                "FFmpeg is required for this media operation. Install an FFmpeg build with the required codecs, " +
                 "put it on PATH, or pass --ffmpeg <path-to-ffmpeg>.", ex);
         }
     }

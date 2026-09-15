@@ -29,7 +29,8 @@ public partial class Playground : IDisposable
   private enum PlaygroundTab
   {
     Music,
-    VisualTimeline
+    VisualTimeline,
+    Transcription
   }
 
   [Inject] private IJSRuntime Js { get; set; } = null!;
@@ -133,6 +134,8 @@ public partial class Playground : IDisposable
     CompileVisualTimeline();
     if (new Uri(Navigation.Uri).Fragment == "#visual-workspace-tab")
       ActiveTab = PlaygroundTab.VisualTimeline;
+    if (new Uri(Navigation.Uri).Fragment == "#transcription-workspace-tab")
+      ActiveTab = PlaygroundTab.Transcription;
   }
 
   private void SelectTab(PlaygroundTab tab)

@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -36,6 +36,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Visual", "src\SoundScript.Visual\SoundScript.Visual.csproj", "{A35C5E5E-85D8-4D40-91B9-81F019BDF810}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Media", "src\SoundScript.Media\SoundScript.Media.csproj", "{06CED575-4BFC-4AFF-AB09-5E60979429AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Transcription", "src\SoundScript.Transcription\SoundScript.Transcription.csproj", "{0A480E12-6261-4CA1-AFDF-D8CC932CE541}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -239,6 +241,18 @@ Global
 		{06CED575-4BFC-4AFF-AB09-5E60979429AC}.Release|x64.Build.0 = Release|Any CPU
 		{06CED575-4BFC-4AFF-AB09-5E60979429AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{06CED575-4BFC-4AFF-AB09-5E60979429AC}.Release|x86.Build.0 = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|x64.Build.0 = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -260,5 +274,6 @@ Global
 		{F0DFF31F-04FD-43C2-B574-729CCBEEA38F} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 		{A35C5E5E-85D8-4D40-91B9-81F019BDF810} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 		{06CED575-4BFC-4AFF-AB09-5E60979429AC} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
+		{0A480E12-6261-4CA1-AFDF-D8CC932CE541} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,8 @@
-# SoundScript Architecture (V12)
+# SoundScript Architecture (V13)
+
+The additive [transcription subsystem](transcription-architecture.md) normalizes
+media into observations and a canonical musical model, then generates native
+SoundScript AST/source for the existing rendering paths.
 
 ## Opt-in performance interpretation
 

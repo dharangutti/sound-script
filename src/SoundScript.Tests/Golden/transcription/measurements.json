@@ -1,0 +1,540 @@
+[
+  {
+    "Name": "clean-sine",
+    "Tempo": 120,
+    "Timbre": "sine",
+    "Truth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0,
+        "DurationSeconds": 0.4,
+        "StartBeat": 0,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.5,
+        "DurationSeconds": 0.4,
+        "StartBeat": 1,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 1,
+        "DurationSeconds": 0.4,
+        "StartBeat": 2,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 62,
+        "StartSeconds": 1.5,
+        "DurationSeconds": 0.4,
+        "StartBeat": 3,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 65,
+        "StartSeconds": 2,
+        "DurationSeconds": 0.4,
+        "StartBeat": 4,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 69,
+        "StartSeconds": 2.5,
+        "DurationSeconds": 0.4,
+        "StartBeat": 5,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "metrics": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 6,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000082,
+      "DurationMaeSeconds": 0.010000000000000083,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": 0,
+      "RestIntersectionOverUnion": 0.8928571428571414,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "ScoreToRenderedAudio": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 6,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000082,
+      "DurationMaeSeconds": 0.08499999999999996,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": null,
+      "RestIntersectionOverUnion": 0.19230769230769196,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "PitchConfidence": 0.9971048464166063,
+    "TimingGridFit": 0.7199999999999992,
+    "EstimatedTempo": 120
+  },
+  {
+    "Name": "vocal-style",
+    "Tempo": 100,
+    "Timbre": "vocal",
+    "Truth": [
+      {
+        "MidiPitch": 57,
+        "StartSeconds": 0,
+        "DurationSeconds": 0.5,
+        "StartBeat": 0,
+        "DurationBeats": 0.8333333333333334,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.6,
+        "DurationSeconds": 0.5,
+        "StartBeat": 1,
+        "DurationBeats": 0.8333333333333334,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 62,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 2,
+        "DurationBeats": 0.8333333333333334,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 1.8,
+        "DurationSeconds": 0.5,
+        "StartBeat": 3,
+        "DurationBeats": 0.8333333333333334,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 62,
+        "StartSeconds": 2.4,
+        "DurationSeconds": 0.5,
+        "StartBeat": 4,
+        "DurationBeats": 0.8333333333333334,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "metrics": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000052,
+      "DurationMaeSeconds": 0.009999999999999986,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": 0,
+      "RestIntersectionOverUnion": 0.8888888888888874,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "ScoreToRenderedAudio": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000096,
+      "DurationMaeSeconds": 0.09000019999999996,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": null,
+      "RestIntersectionOverUnion": 0,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "PitchConfidence": 0.9968528885908361,
+    "TimingGridFit": 0.5999999999999996,
+    "EstimatedTempo": 100
+  },
+  {
+    "Name": "sustained-bowed",
+    "Tempo": 96,
+    "Timbre": "bowed",
+    "Truth": [
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0,
+        "DurationSeconds": 0.58,
+        "StartBeat": 0,
+        "DurationBeats": 0.9279999999999998,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 69,
+        "StartSeconds": 0.625,
+        "DurationSeconds": 1.2,
+        "StartBeat": 1,
+        "DurationBeats": 1.9199999999999997,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 72,
+        "StartSeconds": 1.875,
+        "DurationSeconds": 0.58,
+        "StartBeat": 3,
+        "DurationBeats": 0.9279999999999998,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 71,
+        "StartSeconds": 2.5,
+        "DurationSeconds": 1.2,
+        "StartBeat": 4,
+        "DurationBeats": 1.9199999999999997,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "metrics": {
+      "ReferenceNotes": 4,
+      "DetectedNotes": 4,
+      "MatchedNotes": 4,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.007500000000000088,
+      "DurationMaeSeconds": 0.005000000000000088,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": 0,
+      "RestIntersectionOverUnion": 0.7647058823529396,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "ScoreToRenderedAudio": {
+      "ReferenceNotes": 4,
+      "DetectedNotes": 4,
+      "MatchedNotes": 4,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.01000000000000009,
+      "DurationMaeSeconds": 0.0424999999999999,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": null,
+      "RestIntersectionOverUnion": 0,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "PitchConfidence": 0.9958100522080159,
+    "TimingGridFit": 0.6639999999999991,
+    "EstimatedTempo": 96
+  },
+  {
+    "Name": "keyboard-repeated",
+    "Tempo": 120,
+    "Timbre": "piano",
+    "Truth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0,
+        "DurationSeconds": 0.32,
+        "StartBeat": 0,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.5,
+        "DurationSeconds": 0.32,
+        "StartBeat": 1,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 1,
+        "DurationSeconds": 0.32,
+        "StartBeat": 2,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 1.5,
+        "DurationSeconds": 0.32,
+        "StartBeat": 3,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 2,
+        "DurationSeconds": 0.32,
+        "StartBeat": 4,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 2.5,
+        "DurationSeconds": 0.32,
+        "StartBeat": 5,
+        "DurationBeats": 0.64,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "metrics": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 6,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000082,
+      "DurationMaeSeconds": 0.010000000000000111,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": 0,
+      "RestIntersectionOverUnion": 0.9374999999999996,
+      "RepeatedReferenceNotes": 2,
+      "MatchedRepeatedNotes": 2
+    },
+    "ScoreToRenderedAudio": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 6,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.010000000000000082,
+      "DurationMaeSeconds": 0.08999999999999991,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": null,
+      "RestIntersectionOverUnion": 0.37735849056603765,
+      "RepeatedReferenceNotes": 2,
+      "MatchedRepeatedNotes": 2
+    },
+    "PitchConfidence": 0.99587601698431,
+    "TimingGridFit": 0.47999999999999915,
+    "EstimatedTempo": 120
+  },
+  {
+    "Name": "rests-rubato",
+    "Tempo": 120,
+    "Timbre": "sine",
+    "Truth": [
+      {
+        "MidiPitch": 62,
+        "StartSeconds": 0.25,
+        "DurationSeconds": 0.3,
+        "StartBeat": 0.5,
+        "DurationBeats": 0.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 65,
+        "StartSeconds": 0.75,
+        "DurationSeconds": 0.65,
+        "StartBeat": 1.5,
+        "DurationBeats": 1.3,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 69,
+        "StartSeconds": 1.7,
+        "DurationSeconds": 0.45,
+        "StartBeat": 3.4,
+        "DurationBeats": 0.9,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 2.45,
+        "DurationSeconds": 0.35,
+        "StartBeat": 4.9,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 3.1,
+        "DurationSeconds": 0.6,
+        "StartBeat": 6.2,
+        "DurationBeats": 1.2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Original fixture ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "metrics": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.00999999999999992,
+      "DurationMaeSeconds": 0.009999999999999853,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": 25,
+      "RestIntersectionOverUnion": 0.9642857142857144,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "ScoreToRenderedAudio": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "PitchAccuracy": 1,
+      "OnsetMaeSeconds": 0.008736757894737036,
+      "DurationMaeSeconds": 0.09105279999999984,
+      "MelodicContourAccuracy": 1,
+      "TempoErrorBpm": null,
+      "RestIntersectionOverUnion": 0.6563334249777528,
+      "RepeatedReferenceNotes": 0,
+      "MatchedRepeatedNotes": 0
+    },
+    "PitchConfidence": 0.9972218277371262,
+    "TimingGridFit": 0.3733333333333334,
+    "EstimatedTempo": 95
+  }
+]

@@ -1,5 +1,13 @@
 # CLI Reference
 
+## Transcription
+
+`soundscript transcribe input.wav --out melody.ss --report analysis.json --preview preview.wav`
+
+Imports a solo melody from WAV or FFmpeg-supported MP3/video and validates its
+reconstruction. Options: `--tempo auto|20..300`, `--instrument <GM name|program>`,
+`--ffmpeg <path>`. See [transcription usage, limits and confidence](transcription.md).
+
 The SoundScript CLI (`SoundScript.Cli`, assembly name `soundscript`) compiles
 scripts and text to MIDI, renders offline timbre audio, and renders `.ss`/`.ssw`
 scripts directly to WAV. It requires the .NET 10 SDK and runs on Windows, macOS,
@@ -379,7 +387,7 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`
 - [examples.md](examples.md) — example catalog
-## V12 CLI installation and automation
+## V13 CLI installation and automation
 
 The `SoundScript.Cli` package is prepared as a .NET tool. Once a reviewed
 package is published to NuGet, install it globally with:
@@ -391,7 +399,7 @@ soundscript --version
 
 Until then, use a source checkout or install a locally packed `.nupkg` from a
 trusted directory; [the release checklist](releasing.md) has the exact local
-verification command. V12 retains the strict `validate` and `inspect` commands
+verification command. V13 retains the strict `validate` and `inspect` commands
 and their stable automation behavior.
 
 ```sh
@@ -422,7 +430,7 @@ Visual programs accept `--at <seconds>`.
 JSON mode uses schema version 1 and writes only JSON to stdout:
 
 ```json
-{"schemaVersion":1,"soundScriptVersion":"12.0.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
+{"schemaVersion":1,"soundScriptVersion":"13.0.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
 ```
 
 `video --check` preflights timing, dimensions, FPS, frame count, output path,

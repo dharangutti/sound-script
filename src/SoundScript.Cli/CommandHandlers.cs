@@ -37,6 +37,7 @@ public static partial class CommandHandlers
             throw new CliUsageException("--out and --emit-ss must name different files.");
         return args.Command switch
         {
+            "transcribe" => Transcribe(args),
             "validate" or "inspect" => Analyze(args), "run" => Run(args),
             "compose" or "prosody" => Compose(args), "wave" => Wave(args),
             "render" => Render(args), "visual" => Visual(args), "video" => Video(args),

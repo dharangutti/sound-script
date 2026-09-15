@@ -1,4 +1,10 @@
-# SoundScript Playground — Verification Checklist (V11)
+# SoundScript Playground — Verification Checklist (V13)
+
+## V13 Transcription
+
+The dedicated Transcription tab supports upload, analysis, editable source,
+playback and export. See [the engineering report](transcription-engineering-report.md)
+for verified workflows, measured accuracy and limitations.
 
 ## Audio/Visual examples
 
