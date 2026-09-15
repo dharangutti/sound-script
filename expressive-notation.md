@@ -34,7 +34,7 @@ melody {
 
 ## Articulations
 
-| Articulation | Syntax | Playback effect |
+| Articulation | Syntax | Legacy MIDI playback effect |
 |--------------|--------|-----------------|
 | Staccato | `staccato C4 q` | ~47% duration, slightly softer |
 | Legato | `C4 q legato` | ~97% duration |
@@ -52,7 +52,12 @@ SoundScript does **not** have a separate slur token or AST node. Expressive cont
 | **Legato** | `C4 q legato` | ~97% duration per note |
 | **Phrase block** | `phrase { ... }` | Scoped dynamics, curve, transition |
 
-For legato phrasing across distinct pitches, use `phrase { curve soft ... }` or per-note `legato`.
+`curve soft` shapes velocity; it does not join distinct pitches. Legacy `legato`
+shortens each note to 97% of its written duration. At 60 BPM that leaves 30 ms
+after a quarter note or 60 ms after a half note, before MIDI tick quantization.
+Use the top-level [`perform expressive`](performance-interpretation.md) opt-in
+for controlled connections across suitable pitches. It does not connect across
+rests, repeated pitches, explicit phrase boundaries, or staccato/accent attacks.
 
 ## Dynamics
 
@@ -87,6 +92,11 @@ There is no `phrase-boundary` keyword. Boundaries are **implicit**, set when:
 3. A `play <sequence>` finishes
 
 The next emitted note may trigger `PhraseSmoother` → warning `Phrase smoothing applied`.
+
+That legacy smoother adjusts pitch/octave; it is not a release envelope or
+crossfade. Expressive performance preserves written melodic pitch and applies
+its own phrase velocity and release rules. Legacy Wave does not use this MIDI
+smoother.
 
 **Not** set after: plain notes, `play <pattern>`, loop end, or track/melody end.
 

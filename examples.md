@@ -1,4 +1,21 @@
-# SoundScript Examples (V11)
+# SoundScript Examples (V12)
+
+## Expressive performance
+
+These files are embedded directly in the Playground's **Expressive performance**
+menu and work with both MIDI Run and CLI Wave rendering. Each opts in with
+`perform expressive`; remove that line for its legacy comparison.
+
+| Example | Musical focus |
+|---------|---------------|
+| [Harbor Lights](../examples/performance-harbor.ss) | Original slow ballad; flute, piano, cello, phrase breaths |
+| [Jingle Bells](../examples/performance-bells.ss) | Public-domain refrain; piano repetitions and rhythmic bass |
+| [Ode to Joy](../examples/performance-ode.ss) | Public-domain theme; lyrical violin, repeated notes, cello |
+| [Clockwork Garden](../examples/performance-clockwork.ss) | Original fast staccato scherzo; deliberate articulation |
+| [Floating Lanterns](../examples/performance-lanterns.ss) | Original layered flute/violin and cello; held-note dynamics |
+
+See [the performance report](performance-interpretation.md) for renderer
+differences, measurements, and listening-validation status.
 
 Start with the [complete learning guide](example-learning-guide.md), which groups
 every standalone example by Beginner, Music, Visual, Audio-Visual, Advanced,
@@ -162,7 +179,7 @@ dotnet run --project src/SoundScript.Cli -- vocal generate "Jingle bells" \
 | `prosody` | None — built into SoundScript.Wave | Synthetic phoneme tones (buzzy, speech-like blips). Always works offline. |
 | `espeak` | System install: `espeak-ng` or `espeak` on PATH | Real spoken words (robotic TTS). Not a NuGet package — install via your OS package manager. |
 
-`vocal batch` on `jingle-bells-vocal.ssw` creates **two** stems (`jingle-bells-jingle-bells.wav`, `jingle-all-the-way.wav`). The repo may also contain `hello-world.wav` from the separate [wave-vocal-stem.ssw](wave-vocal-stem.ssw) example — that file is a bundled demo tone, not from the Jingle batch.
+`vocal batch` on `jingle-bells-vocal.ssw` creates **two** stems (`jingle-bells-jingle-bells.wav`, `jingle-all-the-way.wav`). The repo may also contain `hello-world.wav` from the separate [wave-vocal-stem.ssw](../examples/wave-vocal-stem.ssw) example — that file is a bundled demo tone, not from the Jingle batch.
 
 Stems are peak-normalized for audibility. When `--tts-dir` or `--offline-tts` is
 used, synthetic `speak` phoneme tones are suppressed so only the stem overlays play.

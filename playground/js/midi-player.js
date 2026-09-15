@@ -45,6 +45,9 @@ window.SoundScriptMidi = (function () {
         let offset = 8 + headerLength;
         const events = [];
         let tempo = 500000; // default 120 BPM
+        const tempos = [{ tick: 0, value: 500000 }];
+        const profiles = new Map();
+        let expressive = false;
 
         for (let track = 0; track < trackCount; track++) {
             if (offset + 8 > data.length || String.fromCharCode(...data.slice(offset, offset + 4)) !== 'MTrk') {
@@ -82,17 +85,17 @@ window.SoundScriptMidi = (function () {
                     const note = data[offset++];
                     const velocity = data[offset++];
                     if (velocity > 0) {
-                        events.push({ tick, type: 'on', note, velocity, channel });
+                        events.push({ tick, type: 'on', note, velocity, channel, track });
                     } else {
-                        events.push({ tick, type: 'off', note, channel });
+                        events.push({ tick, type: 'off', note, channel, track });
                     }
                 } else if (type === 0x80) {
                     const note = data[offset++];
                     offset++; // release velocity
-                    events.push({ tick, type: 'off', note, channel });
+                    events.push({ tick, type: 'off', note, channel, track });
                 } else if (type === 0xc0) {
                     const program = data[offset++];
-                    events.push({ tick, type: 'program', program, channel });
+                    events.push({ tick, type: 'program', program, channel, track });
                 } else if (type === 0xb0) {
                     offset += 2;
                 } else if (type === 0xe0) {
@@ -103,6 +106,17 @@ window.SoundScriptMidi = (function () {
                     offset = metaLen.pos;
                     if (metaType === 0x51 && metaLen.value === 3) {
                         tempo = (data[offset] << 16) | (data[offset + 1] << 8) | data[offset + 2];
+                        tempos.push({ tick, value: tempo });
+                    }
+                    if (metaType === 0x01) {
+                        const text = new TextDecoder().decode(data.slice(offset, offset + metaLen.value));
+                        const prefix = 'SoundScript.performance.v1:';
+                        if (text.startsWith(prefix)) {
+                            expressive = true;
+                            for (const p of JSON.parse(text.slice(prefix.length))) {
+                                profiles.set(`${track}:${p.channel}:${p.pitch}:${p.tick}`, p);
+                            }
+                        }
                     }
                     offset += metaLen.value;
                     runningStatus = 0;
@@ -118,27 +132,41 @@ window.SoundScriptMidi = (function () {
             offset = trackEnd;
         }
 
-        events.sort((a, b) => a.tick - b.tick || (a.type === 'off' ? 1 : -1));
+        const rank = { program: 0, off: 1, on: 2 };
+        events.sort((a, b) => a.tick - b.tick || (expressive ? rank[a.type] - rank[b.type] : (a.type === 'off' ? 1 : -1)));
+        tempos.sort((a, b) => a.tick - b.tick);
+        function secondsAt(tick) {
+            if (!expressive) return (tick / ticksPerBeat) * (tempo / 1_000_000);
+            let seconds = 0, previousTick = 0, value = 500000;
+            for (const point of tempos) {
+                if (point.tick > tick) break;
+                seconds += (point.tick - previousTick) / ticksPerBeat * value / 1_000_000;
+                previousTick = point.tick;
+                value = point.value;
+            }
+            return seconds + (tick - previousTick) / ticksPerBeat * value / 1_000_000;
+        }
 
         const channelPrograms = new Array(16).fill(0);
         const noteOn = new Map();
         const scheduled = [];
 
         for (const event of events) {
-            const seconds = (event.tick / ticksPerBeat) * (tempo / 1_000_000);
+            const seconds = secondsAt(event.tick);
 
             if (event.type === 'program') {
                 channelPrograms[event.channel] = event.program;
                 continue;
             }
 
-            const key = event.channel + ':' + event.note;
+            const key = (expressive ? event.track + ':' : '') + event.channel + ':' + event.note;
 
             if (event.type === 'on') {
                 noteOn.set(key, {
                     start: seconds,
                     velocity: event.velocity,
-                    program: channelPrograms[event.channel]
+                    program: channelPrograms[event.channel],
+                    performance: profiles.get(`${event.track}:${event.channel}:${event.note}:${event.tick}`)
                 });
             } else if (event.type === 'off') {
                 const startInfo = noteOn.get(key);
@@ -148,7 +176,8 @@ window.SoundScriptMidi = (function () {
                         velocity: startInfo.velocity,
                         program: startInfo.program,
                         start: startInfo.start,
-                        duration: Math.max(0.05, seconds - startInfo.start)
+                        duration: Math.max(expressive ? 0.001 : 0.05, seconds - startInfo.start),
+                        performance: startInfo.performance
                     });
                     noteOn.delete(key);
                 }
@@ -156,7 +185,7 @@ window.SoundScriptMidi = (function () {
         }
 
         for (const [key, startInfo] of noteOn.entries()) {
-            const note = Number(key.split(':')[1]);
+            const note = Number(key.split(':').at(-1));
             scheduled.push({
                 note,
                 velocity: startInfo.velocity,
@@ -199,14 +228,15 @@ window.SoundScriptMidi = (function () {
 
             const elapsedStart = Math.max(0, note.start - offsetSeconds);
             const elapsedOffset = Math.max(0, offsetSeconds - note.start);
-            const remainingNoteDuration = Math.min(Math.max(0.05, note.duration - elapsedOffset), endSeconds - Math.max(offsetSeconds, note.start));
+            const remainingNoteDuration = Math.min(Math.max(note.performance ? 0.001 : 0.05, note.duration - elapsedOffset), endSeconds - Math.max(offsetSeconds, note.start));
             const nodes = SoundScriptSoundfont.playNote(
                 note.note,
                 note.velocity,
                 now + elapsedStart,
                 remainingNoteDuration,
                 destination,
-                note.program
+                note.program,
+                note.performance ? { ...note.performance, elapsed: elapsedOffset, originalDuration: note.duration } : null
             );
             if (nodes) {
                 activeNodes.push(nodes);

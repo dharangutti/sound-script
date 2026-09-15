@@ -14,6 +14,27 @@ window.SoundScriptSoundfont = (function () {
     const rawBuffers = {};
     const fetchPromises = {};
     const loadPromises = {};
+    const loopBuffers = new WeakMap();
+
+    function sustainBuffer(buffer) {
+        if (loopBuffers.has(buffer)) return loopBuffers.get(buffer);
+        const copy = audioContext.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+        const start = Math.floor(buffer.length * 0.30);
+        const end = Math.floor(buffer.length * 0.80);
+        const fade = Math.max(1, Math.min(Math.floor(buffer.sampleRate * 0.03), Math.floor((end - start) / 4)));
+        for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+            const original = buffer.getChannelData(channel);
+            const data = copy.getChannelData(channel);
+            data.set(original);
+            for (let i = 0; i < fade; i++) {
+                const weight = i / fade;
+                data[end - fade + i] = original[end - fade + i] * (1 - weight) + original[start + i] * weight;
+            }
+        }
+        const result = { buffer: copy, start: (start + fade) / buffer.sampleRate, end: end / buffer.sampleRate };
+        loopBuffers.set(buffer, result);
+        return result;
+    }
 
     function resolveProgram(program) {
         return PROGRAM_SET.has(program) ? program : DEFAULT_PROGRAM;
@@ -94,7 +115,7 @@ window.SoundScriptSoundfont = (function () {
         await Promise.all(normalizePrograms(programs).map(loadProgram));
     }
 
-    function playNote(midiNote, velocity, startTime, duration, destination, program) {
+    function playNote(midiNote, velocity, startTime, duration, destination, program, performance = null) {
         const resolvedProgram = resolveProgram(program);
         const samples = programBuffers(resolvedProgram);
         const pitchClass = ((midiNote % 12) + 12) % 12;
@@ -108,14 +129,51 @@ window.SoundScriptSoundfont = (function () {
         const source = audioContext.createBufferSource();
         const gain = audioContext.createGain();
 
-        source.buffer = buffer;
         source.playbackRate.value = playbackRate;
         gain.gain.value = Math.max(0.01, Math.min(1, velocity / 127));
 
         source.connect(gain);
         gain.connect(destination);
 
+        if (performance) {
+            let offset = (performance.elapsed || 0) * playbackRate;
+            let playbackBuffer = buffer;
+            if (performance.sustained && buffer.duration > 0.1) {
+                const loop = sustainBuffer(buffer);
+                playbackBuffer = loop.buffer;
+                source.loop = true;
+                source.loopStart = loop.start;
+                source.loopEnd = loop.end;
+                if (performance.connected) offset += loop.start;
+                if (offset >= loop.end) offset = loop.start + (offset - loop.start) % (loop.end - loop.start);
+            } else {
+                offset = Math.min(offset, Math.max(0, buffer.duration - 0.001));
+            }
+            const peak = gain.gain.value;
+            const attack = Math.min(performance.attack, duration * 0.25);
+            const fullDuration = performance.originalDuration || duration;
+            const elapsed = performance.elapsed || 0;
+            const levelAt = t => {
+                const p = Math.min(1, (elapsed + t) / fullDuration);
+                return peak * (1 + (performance.gainEnd - 1) * p) *
+                    (1 + performance.evolution * Math.sin(Math.PI * p));
+            };
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(levelAt(attack), startTime + attack);
+            const steps = Math.max(2, Math.min(512, Math.ceil(duration / 0.025)));
+            for (let i = 1; i <= steps; i++) {
+                const t = attack + (duration - attack) * i / steps;
+                gain.gain.linearRampToValueAtTime(levelAt(t), startTime + t);
+            }
+            gain.gain.linearRampToValueAtTime(0, startTime + duration + performance.release);
+            source.buffer = playbackBuffer;
+            source.start(startTime, offset);
+            source.stop(startTime + duration + performance.release);
+            return { source, gain };
+        }
+
         const playDuration = Math.min(duration, buffer.duration / playbackRate);
+        source.buffer = buffer;
         source.start(startTime, 0, playDuration);
 
         const stopAt = startTime + duration;
