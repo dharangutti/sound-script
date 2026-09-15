@@ -8,9 +8,11 @@
     from the same values on the next push to main.
   -->
   <PropertyGroup>
-    <Version>11.1.0</Version>
-    <SoundScriptVersionLabel>V11.1</SoundScriptVersionLabel>
-    <SoundScriptCodename>CLI Productization</SoundScriptCodename>
+    <Version>12.0.0</Version>
+    <SoundScriptVersionLabel>V12</SoundScriptVersionLabel>
+    <SoundScriptCodename>Musical Completeness &amp; .NET 10</SoundScriptCodename>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 

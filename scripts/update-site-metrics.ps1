@@ -12,9 +12,18 @@ $resolvedIndexPath = if ([System.IO.Path]::IsPathRooted($IndexPath)) {
 
 $commitCount = (git -C $repositoryRoot rev-list --count HEAD).Trim()
 $projectCount = (Get-ChildItem -Path $repositoryRoot -Recurse -Filter "*.csproj" -File).Count
-$testMatches = Get-ChildItem -Path (Join-Path $repositoryRoot "src") -Recurse -Filter "*.cs" -File |
-    Select-String -Pattern "\[(Fact|Theory|Test|TestCase|TestMethod)\b" -AllMatches
-$testCount = ($testMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum
+# Count discovered cases, not attributes. A theory can expand into many cases,
+# so counting [Fact]/[Theory] markers understated the public test metric.
+$testProject = Join-Path $repositoryRoot "src/SoundScript.Tests/SoundScript.Tests.csproj"
+$listedTests = & dotnet test $testProject -c Debug --list-tests --no-restore --nologo 2>&1
+if ($LASTEXITCODE -ne 0) {
+    throw "Unable to discover SoundScript test cases for the site metric."
+}
+$testCount = @($listedTests | Where-Object { $_ -match '^    SoundScript\.Tests\.' }).Count
+if ($testCount -eq 0) {
+    throw "No SoundScript test cases were discovered for the site metric."
+}
+$displayTestCount = $testCount.ToString("N0", [System.Globalization.CultureInfo]::InvariantCulture)
 
 $content = Get-Content -LiteralPath $resolvedIndexPath -Raw
 
@@ -34,7 +43,7 @@ function Update-MetricMarker {
 
 Update-MetricMarker -Name "COMMITS" -Value "$commitCount+"
 Update-MetricMarker -Name "PROJECTS" -Value "$projectCount"
-Update-MetricMarker -Name "TESTS" -Value "$testCount+"
+Update-MetricMarker -Name "TESTS" -Value $displayTestCount
 
 Set-Content -LiteralPath $resolvedIndexPath -Value $content -Encoding utf8 -NoNewline
-Write-Host "Updated site metrics: $commitCount+ commits, $projectCount projects, $testCount+ tests."
+Write-Host "Updated site metrics: $commitCount+ commits, $projectCount projects, $displayTestCount tests."

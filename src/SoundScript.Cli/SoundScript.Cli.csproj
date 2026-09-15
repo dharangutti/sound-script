@@ -26,6 +26,13 @@
     <PackageId>SoundScript.Cli</PackageId>
     <Description>Deterministic audio and temporal media programming, with CLI validation, inspection, and export.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/dharangutti/sound-script</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dharangutti/sound-script.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>music;audio;midi;wav;webm;dsl;deterministic;cli</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
