@@ -39,4 +39,15 @@
     <None Include="../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <!-- Debug symbols are useful in build output but are not required by a
+       globally installed tool. Remove only PDBs from the PackTool payload;
+       publish output, native runtime assets, RIDs, and Wordbank content stay
+       unchanged. -->
+  <Target Name="ExcludeToolPdbFiles" AfterTargets="PackTool">
+    <ItemGroup>
+      <TfmSpecificPackageFile Remove="@(TfmSpecificPackageFile)"
+                              Condition="'%(TfmSpecificPackageFile.Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+
 </Project>
