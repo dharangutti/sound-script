@@ -379,11 +379,20 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`
 - [examples.md](examples.md) — example catalog
-## V11.1 CLI productization
+## V12 CLI installation and automation
 
-Install the packaged tool with `dotnet tool install --global SoundScript.Cli`,
-then run `soundscript --version`. V11.1 adds strict `validate` and `inspect`
-commands while preserving the intent-oriented commands documented above.
+The `SoundScript.Cli` package is prepared as a .NET tool. Once a reviewed
+package is published to NuGet, install it globally with:
+
+```sh
+dotnet tool install --global SoundScript.Cli
+soundscript --version
+```
+
+Until then, use a source checkout or install a locally packed `.nupkg` from a
+trusted directory; [the release checklist](releasing.md) has the exact local
+verification command. V12 retains the strict `validate` and `inspect` commands
+and their stable automation behavior.
 
 ```sh
 soundscript validate scene.ssv
@@ -413,7 +422,7 @@ Visual programs accept `--at <seconds>`.
 JSON mode uses schema version 1 and writes only JSON to stdout:
 
 ```json
-{"schemaVersion":1,"soundScriptVersion":"11.1.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
+{"schemaVersion":1,"soundScriptVersion":"12.0.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
 ```
 
 `video --check` preflights timing, dimensions, FPS, frame count, output path,
@@ -450,7 +459,7 @@ numbered names, so single-worker and parallel renders remain byte-identical.
 Press Ctrl+C during video rendering to cancel frame generation or FFmpeg; the
 temporary directory is removed and the atomic final output is left untouched.
 
-On a Windows/.NET 8 machine using `examples/visual-temporal.ssv` at 320×180,
+For historical context, a Windows/.NET 8 benchmark using `examples/visual-temporal.ssv` at 320×180,
 30 FPS with real FFmpeg, the measured export changed from 14.92 s (serial
 baseline) to 7.40 s with `--jobs 4`. The frame stage changed from roughly
 11.88 s to 4.46 s, while the resulting WebM remained 326,999 bytes. These are

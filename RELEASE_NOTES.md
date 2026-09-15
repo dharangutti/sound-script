@@ -1,5 +1,23 @@
 # SoundScript Release Notes
 
+## V12 — Musical Completeness & .NET 10
+
+- **.NET 10:** all projects, CLI workflows, and supported developer paths now
+  target the .NET 10 SDK.
+- **Conventional music surface:** MIDI pitch values 0–127 (`C-1`–`G9`), all
+  128 General MIDI Level 1 programs, extended chord vocabulary, dotted values,
+  triplets and tuplets, grace notes, and dynamics from `ppp` through `fff`.
+- **Compatible by design:** existing SoundScript scripts keep their established
+  parser, MIDI, Wave, SoundCSS, voice/speak, and temporal visual/media
+  behavior. Deterministic MIDI, WAV, and WebM workflows remain central.
+- **Cross-platform validation:** the .NET 10 suite runs on Windows, Ubuntu, and
+  macOS. See [musical-completeness.md](docs/musical-completeness.md) for the
+  exact supported surface and intentionally deferred MIDI controls, percussion,
+  and transposing-instrument work.
+
+V12 expands practical conventional notation; it does not claim to model every
+musical convention or performance control.
+
 ## V11 — Temporal Media Export
 
 - **Media primitives extension:** optional explicit rectangle, rounded rectangle,

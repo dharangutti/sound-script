@@ -6,10 +6,10 @@ Write deterministic music and media as code.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-SoundScript turns plain text and `.ss` / `.ssw` / `.ssv` scripts into reproducible
-MIDI, WAV, and WebM files. The cross-platform `soundscript` CLI validates and
-inspects source, renders audio, and exports temporal media. The same source is
-designed to produce the same result across runs and platforms.
+SoundScript is a programming language for writing deterministic music and
+temporal media as plain text. Its `.ss`, `.ssw`, and `.ssv` scripts compile to
+reproducible MIDI, WAV, and WebM outputs. The cross-platform `soundscript` CLI
+validates and inspects source, renders audio, and exports temporal media.
 
 [Try the Playground](https://soundscript.net/playground/) · [CLI reference](docs/cli.md) · [Contributing](CONTRIBUTING.md)
 
@@ -26,9 +26,13 @@ browser demo, and a decode-verified WebM export:
 For a browser-first experiment, open the [Playground](https://soundscript.net/playground/).
 For automation, CI, and version-controlled assets, use the CLI.
 
-## Quick start
+## Try it in 60 seconds
 
-Requirements: the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+No installation: open the [Playground](https://soundscript.net/playground/) to
+edit and run a script in the browser.
+
+For the CLI, install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0),
+then run a deterministic WAV example from a checkout:
 
 ```bash
 git clone https://github.com/dharangutti/sound-script.git
@@ -36,8 +40,8 @@ cd sound-script
 dotnet run --project src/SoundScript.Cli -- wave examples/full-song-wave.ss --out song.wav
 ```
 
-That command writes a deterministic WAV file without a DAW, plugin, account, or
-server. To inspect a source file before exporting it:
+That command writes a deterministic WAV file without a DAW, plugin, account,
+or server. To inspect a source file before exporting it:
 
 ```bash
 dotnet run --project src/SoundScript.Cli -- validate examples/visual-temporal.ssv
@@ -55,9 +59,30 @@ state at exactly 1.5 seconds.
 - **Standard outputs:** generated MIDI, WAV, OGG, and WebM files can move into existing audio and media workflows.
 - **Two useful surfaces:** the CLI is the automation and production path; the Playground is the no-install learning and experimentation path.
 
+SoundScript is not a DAW, an AI music generator, or merely a MIDI library. It
+does not replace live recording, arranging by ear, or generative composition;
+it gives developers an inspectable, version-controlled language for defining
+the musical and media behavior they want to render.
+
 SoundScript is an independent open-source project. The engine is active and
 cross-platform, while the public release and package distribution process is
 still maturing.
+
+## Musical and media capabilities
+
+V12 extends the existing language without changing its deterministic,
+backward-compatible workflow. Highlights include:
+
+- MIDI pitches `0–127` (`C-1`–`G9`) and all 128 General MIDI programs
+- Extended harmony, dotted notes, triplets and tuplets, grace notes, and
+  dynamics from `ppp` through `fff`
+- Multiple tracks and layers, plus deterministic MIDI and WAV rendering
+- Wave and SoundCSS synthesis, `voice`/`speak`, and temporal visual timelines
+  with deterministic WebM export
+
+See [musical-completeness.md](docs/musical-completeness.md) for the precise
+supported surface and the intentionally deferred MIDI controls, percussion, and
+transposition work.
 
 ## CLI at a glance
 
@@ -120,23 +145,31 @@ WebM export requires FFmpeg with `libvpx-vp9` and `libopus`. Install it with
 your platform package manager, set `SOUNDSCRIPT_FFMPEG`, or pass `--ffmpeg`.
 Use `video --check` to preflight an export without writing media.
 
-## Installation and releases
+## Installation
 
-The source checkout is the currently supported installation path:
+The source checkout is the supported installation path today:
 
 ```bash
 dotnet build SoundScript.sln
 dotnet run --project src/SoundScript.Cli -- --version
 ```
 
-`SoundScript.Cli` is configured as a .NET tool package, but it is not currently
-published to NuGet. Until a public package is available, do not rely on
-`dotnet tool install --global SoundScript.Cli`; build from source or use a
-published release archive when one is provided on the [Releases page](https://github.com/dharangutti/sound-script/releases).
+`SoundScript.Cli` is configured and locally verifiable as a .NET tool package,
+but it is not yet published to NuGet. After publication, the intended global
+installation is:
 
-The current version is `11.1.0` (V11.1, CLI Productization). The version source
-is [Directory.Build.props](Directory.Build.props), and release history is in
-[RELEASE_NOTES.md](RELEASE_NOTES.md).
+```bash
+dotnet tool install --global SoundScript.Cli
+soundscript --version
+```
+
+Until then, build from source, install a locally generated package as described
+in [the release checklist](docs/releasing.md), or use a reviewed release archive
+when one is available on the [Releases page](https://github.com/dharangutti/sound-script/releases).
+
+The current release identity is `12.0.0` (V12, Musical Completeness & .NET 10).
+[Directory.Build.props](Directory.Build.props) is the version source of truth;
+release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## Supported platforms
 
