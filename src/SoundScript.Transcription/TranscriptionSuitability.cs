@@ -27,7 +27,12 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     {
         if (result.Polyphony is { } poly)
         {
-            bool accepted = poly.DetectedNotes > 0 && poly.StableActiveCoverage >= .5 && poly.AmbiguousFrameFraction < .5;
+            int count = result.Score.Tracks.Sum(t => t.Notes.Count);
+            bool accepted = count > 0 && poly.StableActiveCoverage >= .5 && poly.AmbiguousFrameFraction < .5;
+            if (result.Mixed != null)
+                return new(accepted ? "Experimental" : "Rejected", count, poly.StableActiveCoverage,
+                    poly.StableActiveCoverage, 0, accepted ? "Experimental symbolic roles; source isolation and lead/bass identity are not verified. Unsupported mixture content is omitted."
+                        : "No supported notes in the selected roles, or insufficient stable mixture evidence.", poly.MeanFundamentalShare, count);
             return new(accepted ? "Experimental" : "Rejected", poly.DetectedNotes, poly.StableActiveCoverage,
                 poly.StableActiveCoverage, 0, accepted
                     ? "Experimental simultaneous-pitch reconstruction. Harmonics, quiet notes and sustain remain uncertain; compare the original excerpt and generated voices."

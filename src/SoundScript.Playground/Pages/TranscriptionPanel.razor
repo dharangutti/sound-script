@@ -16,8 +16,17 @@
         <option value="Monophonic">Monophonic</option>
         <option value="ExtractMelody">Extract Melody from Complex Audio (Experimental)</option>
         <option value="Polyphonic">Polyphonic / Piano (Experimental)</option>
+        <option value="Mixed">Mixed Audio / Roles (Experimental)</option>
     </select>
-    <p>@(mode == TranscriptionMode.Polyphonic ? "Attempts simultaneous piano pitches and overlapping notes in parallel voices. Dense mixtures and uncertain harmonics may be rejected; this is experimental, not an exact score." : mode == TranscriptionMode.Monophonic ? "One clean solo line; simultaneous sources are unsupported." : "Attempts only one dominant line and discards accompaniment. Ambiguous sections may be rejected. Output is experimental, not exact transcription.")</p>
+    <p>@(mode == TranscriptionMode.Mixed ? "Estimates symbolic melody, harmony and bass roles from supported pitches. These are not isolated stems; percussion and diffuse sections are omitted." : mode == TranscriptionMode.Polyphonic ? "Attempts simultaneous piano pitches and overlapping notes in parallel voices. Dense mixtures and uncertain harmonics may be rejected; this is experimental, not an exact score." : mode == TranscriptionMode.Monophonic ? "One clean solo line; simultaneous sources are unsupported." : "Attempts only one dominant line and discards accompaniment. Ambiguous sections may be rejected. Output is experimental, not exact transcription.")</p>
+    @if (mode == TranscriptionMode.Mixed)
+    {
+        <fieldset><legend>Roles to reconstruct</legend>
+            <label><input id="role-melody" type="checkbox" @bind="includeMelody" @bind:after="InvalidateResult" disabled="@busy" /> Melody</label>
+            <label><input id="role-harmony" type="checkbox" @bind="includeHarmony" @bind:after="InvalidateResult" disabled="@busy" /> Harmony</label>
+            <label><input id="role-bass" type="checkbox" @bind="includeBass" @bind:after="InvalidateResult" disabled="@busy" /> Bass</label>
+        </fieldset>
+    }
     @if (originalUrl != null)
     {
         <label for="transcription-original">Original recording (full file; excerpt times below)</label>
@@ -55,6 +64,15 @@
     @if (result != null)
     {
         <p><strong>@result.Suitability.Status</strong>: @result.Suitability.Reason</p>
+        @if (result.Mixed is { } mixed)
+        {
+            <p>@mixed.SeparationKind. Unsupported/rejected frames: @mixed.UnsupportedFrameFraction.ToString("P1").</p>
+            @foreach (var role in mixed.Roles)
+            {
+                <p>@role.Role: @role.DetectedNotes observed notes; @(role.Selected ? "selected" : "disabled"). @role.Method</p>
+                <button class="btn btn-secondary" disabled="@(!CanUseSource || !role.Selected || role.DetectedNotes == 0)" @onclick="() => PlayRole(role.Role)">Play analyzed @role.Role</button>
+            }
+        }
         @if (result.Polyphony is { } poly)
         {
             <p>@poly.DetectedNotes detected notes; maximum simultaneous notes @poly.MaximumSimultaneousNotes; @poly.ChordCount simultaneous pitch groups (observed chords, not named chord recognition); mean active polyphony @poly.MeanActivePolyphony.ToString("F2").</p>
@@ -83,6 +101,8 @@
 @code {
     private IBrowserFile? file;
     private TranscriptionMode mode;
+    private bool includeMelody = true, includeHarmony = true, includeBass = true;
+    private string[] SelectedRoles => new[] { includeMelody ? "melody" : null, includeHarmony ? "harmony" : null, includeBass ? "bass" : null }.OfType<string>().ToArray();
     private string? originalUrl;
     private int? tempo;
     private int instrument = 73;
@@ -100,7 +120,7 @@
     private double? excerptDuration;
     private bool CanUseSource => !busy && generated && !string.IsNullOrWhiteSpace(source);
     private void InvalidateResult() { generated = false; result = null; comparison = null; polyphonicComparison = null; error = null; status = "Selection changed. Analyze again; previous editor text is inactive."; }
-    private void ModeChanged() { if (mode == TranscriptionMode.Polyphonic) instrument = 0; InvalidateResult(); }
+    private void ModeChanged() { if (mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed) instrument = 0; InvalidateResult(); }
     private void Cancel() => cancellation?.Cancel();
 
     private async Task SelectFile(InputFileChangeEventArgs args)
@@ -138,7 +158,7 @@
             var excerpt = new MediaExcerpt(excerptStart,excerptDuration);
             double duration = excerpt.Validate(media.DurationSeconds);
             AnalysisAudio audio = nativeWave ? PcmWaveInput.Decode(inputBytes,excerpt) : await DecodeBrowser(excerptStart,duration);
-            result = await new TranscriptionEngine().TranscribeAsync(audio, new(tempo, instrument), mode, cancellation.Token);
+            result = await new TranscriptionEngine().TranscribeAsync(audio, new(tempo, instrument) { Roles = mode == TranscriptionMode.Mixed ? SelectedRoles : null }, mode, cancellation.Token);
             if (!result.Suitability.CanGenerate) { status = "Transcription rejected. No source generated; playback and source/WAV export are inactive. You can export the analysis diagnostics."; return; }
             status = "Rendering and checking the reconstruction…"; StateHasChanged();
             if (result.Polyphony != null)
@@ -152,7 +172,7 @@
                 source = validation.Source; comparison = validation.ScoreToRenderedAudio;
             }
             cancellation.Token.ThrowIfCancellationRequested(); generated = true;
-            status = result.Polyphony != null ? "Experimental polyphonic result. Review simultaneous notes, sustain and harmonics against the original excerpt before exporting." : result.Suitability.Status == "Experimental" ? "Experimental partial result. Review every note before using or exporting; accompaniment is not reproduced." : "Ready. Play, edit the source, and play again. Analysis describes the original import.";
+            status = result.Mixed != null ? "Experimental role reconstruction. Review the role assignments; they do not establish isolated sources or instrumental identity." : result.Polyphony != null ? "Experimental polyphonic result. Review simultaneous notes, sustain and harmonics against the original excerpt before exporting." : result.Suitability.Status == "Experimental" ? "Experimental partial result. Review every note before using or exporting; accompaniment is not reproduced." : "Ready. Play, edit the source, and play again. Analysis describes the original import.";
         }
         catch (OperationCanceledException) { status = "Analysis cancelled; your editor text is preserved."; }
         catch (Exception ex) { error = ex.Message.Split('\n')[0]; status = "Transcription failed; previous editor text is preserved but playback and export are inactive."; }
@@ -167,6 +187,20 @@
         if (data.Length % 4 != 0) throw new InvalidDataException("Partial PCM data returned by browser.");
         var samples = new float[data.Length / 4]; Buffer.BlockCopy(data, 0, samples, 0, data.Length);
         return new(samples);
+    }
+    private async Task PlayRole(string role)
+    {
+        if (!CanUseSource || result?.Mixed == null) return;
+        busy = true; error = null;
+        try
+        {
+            await Stop(); await Task.Yield();
+            var score = result.Score with { Tracks = result.Score.Tracks.Where(t => t.Role == role).ToArray() };
+            var bytes = TranscriptionPlayback.Render(new SoundScriptOutput().Source(score));
+            await Js.InvokeVoidAsync("SoundScriptAudio.playWavBytes", bytes);
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { busy = false; }
     }
     private async Task PlayOriginalExcerpt()
     {

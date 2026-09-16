@@ -227,3 +227,5 @@ focused issue.
 ## License
 
 SoundScript is released under the [MIT License](LICENSE).
+
+Mixed recordings can use `--mode mixed --roles melody,bass`; these are [symbolic musical-role estimates](docs/mixed-audio-transcription.md), not isolated stems.

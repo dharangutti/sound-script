@@ -140,3 +140,5 @@ Run browser bridge checks with `node --test scripts/transcription-browser-input.
 Real MP3/MP4 tests require FFmpeg; they explicitly skip if it cannot be found.
 See [engineering report](transcription-engineering-report.md) and
 [fixture ground truth and measurements](../src/SoundScript.Tests/Golden/transcription/measurements.json).
+
+[Mixed audio / musical roles](mixed-audio-transcription.md) supports selected melody, harmony and bass estimates without claiming audio stem separation.

@@ -32,9 +32,14 @@ public sealed record TranscriptionResult(MusicalScore Score, MusicalObservations
     public MelodyExtractionEvidence? Extraction { get; init; }
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public PolyphonicEvidence? Polyphony { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public MixedEvidence? Mixed { get; init; }
     public TranscriptionSuitability Suitability => TranscriptionSuitability.Evaluate(this);
 }
-public sealed record TranscriptionOptions(int? Tempo = null, int Instrument = 73, bool Quantize = true);
+public sealed record TranscriptionOptions(int? Tempo = null, int Instrument = 73, bool Quantize = true)
+{
+    public IReadOnlyList<string>? Roles { get; init; }
+}
 
 public interface ITranscriptionInputAdapter<in T>
 {

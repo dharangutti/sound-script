@@ -3,8 +3,11 @@ const fs = require('node:fs'), path = require('node:path'), http = require('node
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const analysisMode = process.argv[3] || 'polyphonic';
+assert.ok(['polyphonic','mixed'].includes(analysisMode));
+const browserMode = analysisMode === 'mixed' ? 'Mixed' : 'Polyphonic';
 const root = path.resolve(process.argv[2] || 'artifacts/polyphonic-playground');
-const output = path.resolve('artifacts/polyphonic-browser'); fs.mkdirSync(output, { recursive: true });
+const output = path.resolve(`artifacts/${analysisMode}-browser`); fs.mkdirSync(output, { recursive: true });
 const types = { '.html':'text/html', '.js':'text/javascript', '.wasm':'application/wasm', '.css':'text/css', '.json':'application/json' };
 const server = http.createServer((req,res) => {
     const url = new URL(req.url,'http://localhost'), file = path.resolve(root,'.'+(url.pathname==='/'?'/index.html':decodeURIComponent(url.pathname)));
@@ -21,7 +24,7 @@ function fixture(name, seconds, noise=false) {
         const t=i/16000, local=t%1;let sample=0;
         seed=(1664525*seed+1013904223)>>>0;
         if(noise) sample=(seed/4294967296*2-1)*.5;
-        else if(local>=.2&&local<.8) for(const pitch of [60,64,67]) {
+        else if(local>=.2&&local<.8) for(const pitch of (analysisMode === 'mixed' ? [43,60,65,76] : [60,64,67])) {
             const phase=2*Math.PI*440*2**((pitch-69)/12)*(local-.2);
             sample+=.18*(Math.sin(phase)+.33*Math.sin(2*phase)+.16*Math.sin(3*phase))*Math.min(1,(local-.2)/.008)*Math.min(1,(.8-local)/.015)*Math.exp(-(local-.2)*1.2);
         }
@@ -32,7 +35,7 @@ function fixture(name, seconds, noise=false) {
 (async()=>{
     const triad=fixture('triad',2),noise=fixture('noise',2,true),long=fixture('long',30);
     const cliSource=path.join(output,'cli.ss'),cliReport=path.join(output,'cli.json');
-    execFileSync('dotnet',['src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll','transcribe',triad,'--mode','polyphonic','--tempo','120','--out',cliSource,'--report',cliReport],{stdio:'pipe'});
+    execFileSync('dotnet',['src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll','transcribe',triad,'--mode',analysisMode,'--tempo','120','--out',cliSource,'--report',cliReport],{stdio:'pipe'});
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
     const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined});
     try {
@@ -44,13 +47,13 @@ function fixture(name, seconds, noise=false) {
         const ready=()=>page.waitForFunction(()=>document.querySelector('.transcription-workspace [role="status"]').textContent.includes('Media ready'));
         const finish=()=>page.waitForFunction(()=>!document.querySelector('#transcription-file').disabled,null,{timeout:60000});
         await page.locator('#transcription-file').setInputFiles(triad);await ready();
-        await page.locator('#transcription-mode').selectOption('Polyphonic');
+        await page.locator('#transcription-mode').selectOption(browserMode);
         assert.equal(await page.locator('#transcription-instrument').inputValue(),'0');
         await page.locator('#transcription-tempo').fill('120');await page.locator('#transcription-tempo').blur();
         await analyze.click();await finish();
         assert.equal(await exportSource.isEnabled(),true);
         assert.equal(await page.locator('#transcription-source').inputValue(),fs.readFileSync(cliSource,'utf8'));
-        assert.match(await page.locator('.transcription-workspace').innerText(),/maximum simultaneous notes 3/);
+        assert.match(await page.locator('.transcription-workspace').innerText(),new RegExp('maximum simultaneous notes '+(analysisMode==='mixed'?4:3)));
         const downloadReport=page.waitForEvent('download');await page.getByRole('button',{name:'Export analysis',exact:true}).click();
         const report=await downloadReport;const reportPath=path.join(output,'browser.json');await report.saveAs(reportPath);
         const browserReport=JSON.parse(fs.readFileSync(reportPath,'utf8')), cli=JSON.parse(fs.readFileSync(cliReport,'utf8'));
@@ -63,7 +66,16 @@ function fixture(name, seconds, noise=false) {
             a.Confidence=b.Confidence;
         }
         assert.deepEqual(browserScore,cliScore);
-        assert.equal(browserReport.Transcription.Polyphony.MaximumSimultaneousNotes,3);
+        assert.equal(browserReport.Transcription.Polyphony.MaximumSimultaneousNotes,analysisMode==='mixed'?4:3);
+        if(analysisMode==='mixed') {
+            await page.locator('#role-harmony').uncheck();assert.equal(await exportSource.isEnabled(),false);
+            await analyze.click();await finish();
+            const selected=await page.locator('#transcription-source').inputValue();
+            assert.match(selected,/track bass/);assert.match(selected,/track melody/);assert.doesNotMatch(selected,/track harmony/);
+            await page.getByRole('button',{name:'Play analyzed bass',exact:true}).click();await finish();
+            await page.getByRole('button',{name:'Stop',exact:true}).click();
+            await page.locator('#role-harmony').check();await analyze.click();await finish();
+        }
         await page.locator('#transcription-start').fill('0.2');await page.locator('#transcription-start').blur();
         await page.locator('#transcription-duration').fill('0.4');await page.locator('#transcription-duration').blur();
         assert.equal(await exportSource.isEnabled(),false);
@@ -85,7 +97,7 @@ function fixture(name, seconds, noise=false) {
         assert.match(fs.readFileSync(path.join(output,'edited.ss'),'utf8'),/tempo 100/);
         await page.getByRole('button',{name:'Stop',exact:true}).click();
         await page.locator('#transcription-mode').selectOption('ExtractMelody');assert.equal(await exportSource.isEnabled(),false);
-        await page.locator('#transcription-mode').selectOption('Polyphonic');
+        await page.locator('#transcription-mode').selectOption(browserMode);
         await page.locator('#transcription-file').setInputFiles(noise);await ready();await analyze.click();await finish();
         assert.equal(await exportSource.isEnabled(),false);assert.match(await page.locator('.transcription-workspace [role="status"]').innerText(),/rejected/i);
         await page.locator('#transcription-file').setInputFiles(long);await ready();await analyze.click();
@@ -96,6 +108,6 @@ function fixture(name, seconds, noise=false) {
         await page.screenshot({path:path.join(output,'polyphonic-mobile.png'),fullPage:true});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
         assert.deepEqual(errors,[]);
-        console.log('PASS polyphonic CLI/browser score parity, simultaneous notes, excerpt playback, editing/replay, exports, rejection, stale-output invalidation, cancellation and mobile layout');
+        console.log(analysisMode + ': PASS CLI/browser score parity, simultaneous notes, excerpt playback, editing/replay, exports, rejection, stale-output invalidation, cancellation and mobile layout');
     } finally {await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

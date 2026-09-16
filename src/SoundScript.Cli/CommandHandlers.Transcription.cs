@@ -24,8 +24,10 @@ public static partial class CommandHandlers
         Console.WriteLine($"Media duration {media.DurationSeconds:F3} seconds; maximum analysis 120 seconds. Input: {media.SampleRate} Hz, {media.Channels} channels; analysis: mono 16000 Hz.");
         var audio=input.DecodeAsync(args.Input,excerpt,token).GetAwaiter().GetResult();
         int? tempo=args.Value("tempo") is null or "auto"?null:int.Parse(args.Value("tempo")!,System.Globalization.CultureInfo.InvariantCulture);
-        var mode = args.Value("mode") switch { "polyphonic" => TranscriptionMode.Polyphonic, "extract-melody" => TranscriptionMode.ExtractMelody, _ => TranscriptionMode.Monophonic };
-        var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??(mode == TranscriptionMode.Polyphonic ? "piano" : "flute"))),mode,token);
+        var mode = args.Value("mode") switch { "mixed" => TranscriptionMode.Mixed, "polyphonic" => TranscriptionMode.Polyphonic, "extract-melody" => TranscriptionMode.ExtractMelody, _ => TranscriptionMode.Monophonic };
+        var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??(mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed ? "piano" : "flute"))) { Roles = args.Value("roles")?.Split(',') },mode,token);
+        if (result.Mixed is { } mixed)
+            foreach (var role in mixed.Roles) Console.WriteLine($"Role {role.Role}: {role.DetectedNotes} observed notes; selected={role.Selected}; rank agreement {role.MeanRankAgreement:P1}. {role.Method}");
         if (result.Polyphony is { } poly)
             Console.WriteLine($"Polyphonic / Piano (Experimental): {poly.DetectedNotes} notes; maximum simultaneous notes {poly.MaximumSimultaneousNotes}; {poly.ChordCount} simultaneous pitch groups; mean active polyphony {poly.MeanActivePolyphony:F2}; polyphonic coverage {poly.PolyphonicCoverage:P1}; residual fundamental share {poly.MeanFundamentalShare:P1}; ambiguous frames {poly.AmbiguousFrameFraction:P1}; octave ambiguity {poly.OctaveAmbiguousFraction:P1}.");
         if (result.Extraction is { } extraction)
@@ -39,7 +41,7 @@ public static partial class CommandHandlers
             throw new InvalidDataException(suitability.Reason + " No SoundScript or preview written; existing output files, if any, belong to an earlier run.");
         }
         var generationScore=TranscriptionSuitability.ScoreForGeneration(result);
-        if (mode == TranscriptionMode.Polyphonic)
+        if (mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed)
         {
             var polyphonicValidation = PolyphonicComparison.Validate(generationScore, token);
             token.ThrowIfCancellationRequested();
@@ -48,7 +50,7 @@ public static partial class CommandHandlers
                 AtomicOutput.Write(polyphonicPreview, p => File.WriteAllBytes(p, polyphonicValidation.PreviewWave), p => PcmWaveInput.Decode(File.ReadAllBytes(p)));
             if (args.Value("report") is { } polyphonicReport)
                 AtomicOutput.Write(polyphonicReport, p => File.WriteAllText(p, JsonSerializer.Serialize(new {
-                    Media = media, Excerpt = excerpt, Generated = true, Mode = "polyphonic", Transcription = result,
+                    Media = media, Excerpt = excerpt, Generated = true, Mode = mode == TranscriptionMode.Mixed ? "mixed" : "polyphonic", Transcription = result,
                     RoundTrip = polyphonicValidation.ScoreToRenderedAudio,
                     ComparisonMeaning = "Round trip compares the generated note schedule to polyphonic reanalysis of its render; it is not source ground truth."
                 }, AnalysisJsonOutput.Options)), p => { using var document = JsonDocument.Parse(File.ReadAllText(p)); });
