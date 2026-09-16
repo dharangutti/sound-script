@@ -1,0 +1,131 @@
+[
+  {
+    "Recording": "alban_gogh-funk-drums-solo-301208.mp3",
+    "Excerpt": {
+      "StartSeconds": 0,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Hits": 52,
+    "Classes": {
+      "Kick": 24,
+      "Snare": 28,
+      "Hat": 0,
+      "Click": 0
+    },
+    "RejectedTransients": 0,
+    "Tempo": 120,
+    "GridFit": 0.9254807692307708,
+    "TempoAlternatives": [
+      {
+        "Bpm": 120,
+        "GridFit": 0.9254807692307708
+      },
+      {
+        "Bpm": 60,
+        "GridFit": 0.4374999999999989
+      },
+      {
+        "Bpm": 240,
+        "GridFit": 0.9254807692307708
+      }
+    ],
+    "RoundTrip": {
+      "OnsetPrecision": 1,
+      "OnsetRecall": 0.9230769230769231,
+      "MatchedClassAgreement": 1,
+      "MeanOnsetErrorSeconds": 0.0029166666666665467,
+      "MissedHits": 4,
+      "ExtraHits": 0
+    },
+    "ComparisonMeaning": "Generated hit schedule versus percussion reanalysis of synthetic playback, not source ground truth.",
+    "HumanListening": "Deferred by user; no source accuracy or recognizable playback verdict recorded."
+  },
+  {
+    "Recording": "alban_gogh-funk-drums-solo-301208.mp3",
+    "Excerpt": {
+      "StartSeconds": 10,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Hits": 50,
+    "Classes": {
+      "Kick": 26,
+      "Snare": 20,
+      "Hat": 0,
+      "Click": 4
+    },
+    "RejectedTransients": 1,
+    "Tempo": 239,
+    "GridFit": 0.6773012552301253,
+    "TempoAlternatives": [
+      {
+        "Bpm": 239,
+        "GridFit": 0.6773012552301253
+      },
+      {
+        "Bpm": 120,
+        "GridFit": 0.2749999999999973
+      },
+      {
+        "Bpm": 218,
+        "GridFit": 0.6635321100917451
+      }
+    ],
+    "RoundTrip": {
+      "OnsetPrecision": 1,
+      "OnsetRecall": 1,
+      "MatchedClassAgreement": 0.92,
+      "MeanOnsetErrorSeconds": 5.188284528667708e-8,
+      "MissedHits": 0,
+      "ExtraHits": 0
+    },
+    "ComparisonMeaning": "Generated hit schedule versus percussion reanalysis of synthetic playback, not source ground truth.",
+    "HumanListening": "Deferred by user; no source accuracy or recognizable playback verdict recorded."
+  },
+  {
+    "Recording": "alban_gogh-funk-drums-solo-301208.mp3",
+    "Excerpt": {
+      "StartSeconds": 20,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Hits": 38,
+    "Classes": {
+      "Kick": 24,
+      "Snare": 10,
+      "Hat": 0,
+      "Click": 4
+    },
+    "RejectedTransients": 1,
+    "Tempo": 237,
+    "GridFit": 0.7044470353097891,
+    "TempoAlternatives": [
+      {
+        "Bpm": 237,
+        "GridFit": 0.7044470353097891
+      },
+      {
+        "Bpm": 118,
+        "GridFit": 0.39919714540588547
+      },
+      {
+        "Bpm": 218,
+        "GridFit": 0.6678536938676982
+      }
+    ],
+    "RoundTrip": {
+      "OnsetPrecision": 1,
+      "OnsetRecall": 1,
+      "MatchedClassAgreement": 0.8947368421052632,
+      "MeanOnsetErrorSeconds": 3.9296051792653565e-16,
+      "MissedHits": 0,
+      "ExtraHits": 0
+    },
+    "ComparisonMeaning": "Generated hit schedule versus percussion reanalysis of synthetic playback, not source ground truth.",
+    "HumanListening": "Deferred by user; no source accuracy or recognizable playback verdict recorded."
+  }
+]

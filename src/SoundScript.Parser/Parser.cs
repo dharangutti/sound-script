@@ -110,6 +110,9 @@ public sealed partial class Parser
         if (Match(TokenType.Velocity))
             return ParseVelocityStatement();
 
+        if (Match(TokenType.Hit))
+            return ParseHitStatement();
+
         if (Match(TokenType.Rest))
             return ParseRestStatement();
 
@@ -555,6 +558,9 @@ public sealed partial class Parser
         if (Match(TokenType.Bar))
             return new BarNode(Previous().Line);
 
+        if (Match(TokenType.Hit))
+            return ParseHitStatement();
+
         if (Match(TokenType.Rest))
             return ParseRestStatement();
 
@@ -664,6 +670,9 @@ public sealed partial class Parser
 
         if (Match(TokenType.Bar))
             return new BarNode(Previous().Line);
+
+        if (Match(TokenType.Hit))
+            return ParseHitStatement();
 
         if (Match(TokenType.Rest))
             return ParseRestStatement();
@@ -843,6 +852,9 @@ public sealed partial class Parser
 
         if (Match(TokenType.Bar))
             return new BarNode(Previous().Line);
+
+        if (Match(TokenType.Hit))
+            return ParseHitStatement();
 
         if (Match(TokenType.Rest))
             return ParseRestStatement();
@@ -1306,6 +1318,15 @@ public sealed partial class Parser
         };
     }
 
+    private HitNode ParseHitStatement()
+    {
+        var sound = Expect(TokenType.Identifier, "percussion sound (kick, snare, hat or click)");
+        if (!Enum.TryParse<SoundScript.Core.PercussionSound>(sound.Value, true, out var kind) || !Enum.IsDefined(kind))
+            throw Invalid(sound, "Expected percussion sound: kick, snare, hat or click.");
+        var (beats, _) = ParseRestDuration();
+        return new HitNode { Sound = kind, DurationBeats = beats, Velocity = ParseOptionalVelocity() };
+    }
+
     private RestNode ParseRestStatement()
     {
         var (durationBeats, standardDuration) = ParseRestDuration();
@@ -1647,7 +1668,7 @@ public sealed partial class Parser
             or TokenType.Curve or TokenType.Transition or TokenType.Pattern
             or TokenType.PatternRhythm or TokenType.Orchestration
             or TokenType.Voice or TokenType.Sing or TokenType.Vocal
-            or TokenType.Effect or TokenType.Speak or TokenType.Sample;
+            or TokenType.Effect or TokenType.Speak or TokenType.Sample or TokenType.Hit;
 
     private static int ParsePositiveInt(Token token, string label)
     {

@@ -29,6 +29,7 @@ public static class NoteRenderer
     /// </summary>
     internal static float[] Render(NoteEvent note, int sampleRate, bool useLegacyTrigOscillator)
     {
+        if (note.Percussion is { } sound) return PercussionRenderer.Render(sound, note.DurationSeconds, note.Velocity, sampleRate);
         var release = Math.Max(0.0, note.Timbre.Envelope.Release);
         var totalSeconds = Math.Max(0.0, note.DurationSeconds) + release;
         var sampleCount = Math.Max(0, (int)Math.Ceiling(totalSeconds * sampleRate));

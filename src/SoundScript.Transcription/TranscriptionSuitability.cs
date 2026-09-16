@@ -13,7 +13,7 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     public static MusicalScore ScoreForGeneration(TranscriptionResult result)
     {
         if (!result.Suitability.CanGenerate) throw new InvalidDataException(result.Suitability.Reason);
-        if (result.Polyphony != null) return result.Score;
+        if (result.Polyphony != null || result.Percussion != null) return result.Score;
         var notes=SupportedNotes(result);
         if (result.Score.Tracks.Count!=1) throw new NotSupportedException("Monophonic generation requires one track.");
         if (notes.Length==result.Score.Tracks[0].Notes.Count) return result.Score;
@@ -25,6 +25,9 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     }
     public static TranscriptionSuitability Evaluate(TranscriptionResult result)
     {
+        if (result.Percussion is { } percussion)
+            return new(percussion.Hits.Count > 0 ? "Experimental" : "Rejected", 0, 0, 0, 0,
+                percussion.Hits.Count > 0 ? "Experimental unpitched rhythm estimate; spectral classes and tempo need review." : "No supported decaying transients; no rhythm generated.", 0, 0);
         if (result.Polyphony is { } poly)
         {
             int count = result.Score.Tracks.Sum(t => t.Notes.Count);

@@ -102,6 +102,9 @@ public static class WaveSpeechTimeline
                 case LoopNode loop:
                     ExecuteLoop(GetDefaultTrack(), loop, context, words);
                     break;
+                case HitNode hit:
+                    AdvanceBeat(GetDefaultTrack(), hit.DurationBeats);
+                    break;
                 case RestNode rest:
                     AdvanceBeat(GetDefaultTrack(), rest.Rest.DurationBeats);
                     break;
@@ -143,6 +146,9 @@ public static class WaveSpeechTimeline
                 case TimeSignatureNode time:
                     context.TimeSignatureNumerator = time.Numerator;
                     context.TimeSignatureDenominator = time.Denominator;
+                    break;
+                case HitNode hit:
+                    AdvanceBeat(track, hit.DurationBeats);
                     break;
                 case RestNode rest:
                     AdvanceBeat(track, rest.Rest.DurationBeats);
@@ -224,6 +230,9 @@ public static class WaveSpeechTimeline
         {
             switch (statement)
             {
+                case HitNode hit:
+                    AdvanceBeat(track, hit.DurationBeats);
+                    break;
                 case RestNode rest:
                     AdvanceBeat(track, rest.Rest.DurationBeats);
                     break;

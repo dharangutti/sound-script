@@ -24,7 +24,7 @@ public static partial class CommandHandlers
         Console.WriteLine($"Media duration {media.DurationSeconds:F3} seconds; maximum analysis 120 seconds. Input: {media.SampleRate} Hz, {media.Channels} channels; analysis: mono 16000 Hz.");
         var audio=input.DecodeAsync(args.Input,excerpt,token).GetAwaiter().GetResult();
         int? tempo=args.Value("tempo") is null or "auto"?null:int.Parse(args.Value("tempo")!,System.Globalization.CultureInfo.InvariantCulture);
-        var mode = args.Value("mode") switch { "mixed" => TranscriptionMode.Mixed, "polyphonic" => TranscriptionMode.Polyphonic, "extract-melody" => TranscriptionMode.ExtractMelody, _ => TranscriptionMode.Monophonic };
+        var mode = args.Value("mode") switch { "percussion" => TranscriptionMode.Percussion, "mixed" => TranscriptionMode.Mixed, "polyphonic" => TranscriptionMode.Polyphonic, "extract-melody" => TranscriptionMode.ExtractMelody, _ => TranscriptionMode.Monophonic };
         var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??(mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed ? "piano" : "flute"))) { Roles = args.Value("roles")?.Split(',') },mode,token);
         if (result.Mixed is { } mixed)
             foreach (var role in mixed.Roles) Console.WriteLine($"Role {role.Role}: {role.DetectedNotes} observed notes; selected={role.Selected}; rank agreement {role.MeanRankAgreement:P1}. {role.Method}");
@@ -33,7 +33,7 @@ public static partial class CommandHandlers
         if (result.Extraction is { } extraction)
             Console.WriteLine($"Extract Melody (Experimental): {extraction.ExtractedNoteCount} notes; melody coverage {extraction.MelodyCoverage:P1}; mean spectral share {extraction.MeanSpectralShare:P1}; competing pitches {extraction.CompetingPitchFraction:P1}; octave uncertainty {extraction.OctaveUncertainFraction:P1}; {extraction.RejectedSections.Count} rejected sections (see report).");
         var suitability = result.Suitability;
-        Console.WriteLine($"{suitability.Status}: {suitability.DetectedNotes} detected notes, {suitability.UsableNotes} usable candidates; stable active coverage {suitability.StableActiveFraction:P1}; voiced active coverage {suitability.VoicedActiveFraction:P1}. {suitability.Reason}");
+        if (result.Percussion == null) Console.WriteLine($"{suitability.Status}: {suitability.DetectedNotes} detected notes, {suitability.UsableNotes} usable candidates; stable active coverage {suitability.StableActiveFraction:P1}; voiced active coverage {suitability.VoicedActiveFraction:P1}. {suitability.Reason}");
         if (!suitability.CanGenerate)
         {
             if (args.Value("report") is { } failedReport)
@@ -41,6 +41,25 @@ public static partial class CommandHandlers
             throw new InvalidDataException(suitability.Reason + " No SoundScript or preview written; existing output files, if any, belong to an earlier run.");
         }
         var generationScore=TranscriptionSuitability.ScoreForGeneration(result);
+        if (mode == TranscriptionMode.Percussion)
+        {
+            var rhythm = PercussionComparison.Validate(generationScore, token);
+            token.ThrowIfCancellationRequested();
+            AtomicOutput.Write(args.Value("out")!, p => File.WriteAllText(p, rhythm.Source), p => SoundScriptOutput.Parse(File.ReadAllText(p)));
+            if (args.Value("preview") is { } rhythmPreview)
+                AtomicOutput.Write(rhythmPreview, p => File.WriteAllBytes(p, rhythm.PreviewWave), p => PcmWaveInput.Decode(File.ReadAllBytes(p)));
+            if (args.Value("report") is { } rhythmReport)
+                AtomicOutput.Write(rhythmReport, p => File.WriteAllText(p, JsonSerializer.Serialize(new {
+                    Media = media, Excerpt = excerpt, Generated = true, Mode = "percussion", Transcription = result,
+                    RoundTrip = rhythm.ScoreToRenderedAudio,
+                    ComparisonMeaning = "Generated hit schedule versus percussion reanalysis of synthetic playback, not source ground truth."
+                }, AnalysisJsonOutput.Options)), p => { using var document = JsonDocument.Parse(File.ReadAllText(p)); });
+            Console.WriteLine($"Experimental percussion: {result.Percussion!.Hits.Count} hits; tempo hypothesis {generationScore.TempoMap[0].Bpm} BPM; grid fit {result.TimingGridFit:P1}.");
+            Console.WriteLine($"Render comparison: onset precision {rhythm.ScoreToRenderedAudio.OnsetPrecision:P1}, recall {rhythm.ScoreToRenderedAudio.OnsetRecall:P1}, class agreement {rhythm.ScoreToRenderedAudio.MatchedClassAgreement:P1}.");
+            foreach (var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
+            Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");
+            return 0;
+        }
         if (mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed)
         {
             var polyphonicValidation = PolyphonicComparison.Validate(generationScore, token);

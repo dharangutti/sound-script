@@ -4,8 +4,8 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const analysisMode = process.argv[3] || 'polyphonic';
-assert.ok(['polyphonic','mixed'].includes(analysisMode));
-const browserMode = analysisMode === 'mixed' ? 'Mixed' : 'Polyphonic';
+assert.ok(['polyphonic','mixed','percussion'].includes(analysisMode));
+const browserMode = analysisMode === 'percussion' ? 'Percussion' : analysisMode === 'mixed' ? 'Mixed' : 'Polyphonic';
 const root = path.resolve(process.argv[2] || 'artifacts/polyphonic-playground');
 const output = path.resolve(`artifacts/${analysisMode}-browser`); fs.mkdirSync(output, { recursive: true });
 const types = { '.html':'text/html', '.js':'text/javascript', '.wasm':'application/wasm', '.css':'text/css', '.json':'application/json' };
@@ -24,6 +24,9 @@ function fixture(name, seconds, noise=false) {
         const t=i/16000, local=t%1;let sample=0;
         seed=(1664525*seed+1013904223)>>>0;
         if(noise) sample=(seed/4294967296*2-1)*.5;
+        else if(analysisMode==='percussion') {
+            if(local>=.2) sample=.55*Math.sin(2*Math.PI*(65*(local-.2)+.7*(1-Math.exp(-(local-.2)*50))))*Math.exp(-(local-.2)*25);
+        }
         else if(local>=.2&&local<.8) for(const pitch of (analysisMode === 'mixed' ? [43,60,65,76] : [60,64,67])) {
             const phase=2*Math.PI*440*2**((pitch-69)/12)*(local-.2);
             sample+=.18*(Math.sin(phase)+.33*Math.sin(2*phase)+.16*Math.sin(3*phase))*Math.min(1,(local-.2)/.008)*Math.min(1,(.8-local)/.015)*Math.exp(-(local-.2)*1.2);
@@ -48,12 +51,14 @@ function fixture(name, seconds, noise=false) {
         const finish=()=>page.waitForFunction(()=>!document.querySelector('#transcription-file').disabled,null,{timeout:60000});
         await page.locator('#transcription-file').setInputFiles(triad);await ready();
         await page.locator('#transcription-mode').selectOption(browserMode);
-        assert.equal(await page.locator('#transcription-instrument').inputValue(),'0');
+        if(analysisMode==='percussion') assert.equal(await page.locator('#transcription-instrument').isDisabled(),true);
+        else assert.equal(await page.locator('#transcription-instrument').inputValue(),'0');
         await page.locator('#transcription-tempo').fill('120');await page.locator('#transcription-tempo').blur();
         await analyze.click();await finish();
         assert.equal(await exportSource.isEnabled(),true);
         assert.equal(await page.locator('#transcription-source').inputValue(),fs.readFileSync(cliSource,'utf8'));
-        assert.match(await page.locator('.transcription-workspace').innerText(),new RegExp('maximum simultaneous notes '+(analysisMode==='mixed'?4:3)));
+        if(analysisMode==='percussion') assert.match(await page.locator('.transcription-workspace').innerText(),/2 detected hits/);
+        else assert.match(await page.locator('.transcription-workspace').innerText(),new RegExp('maximum simultaneous notes '+(analysisMode==='mixed'?4:3)));
         const downloadReport=page.waitForEvent('download');await page.getByRole('button',{name:'Export analysis',exact:true}).click();
         const report=await downloadReport;const reportPath=path.join(output,'browser.json');await report.saveAs(reportPath);
         const browserReport=JSON.parse(fs.readFileSync(reportPath,'utf8')), cli=JSON.parse(fs.readFileSync(cliReport,'utf8'));
@@ -65,8 +70,16 @@ function fixture(name, seconds, noise=false) {
             assert.ok(Math.abs(a.Confidence-b.Confidence)<=1e-12,'evidence drift exceeds cross-runtime tolerance');
             a.Confidence=b.Confidence;
         }
+        if(analysisMode==='percussion') {
+            for(let t=0;t<cliScore.Tracks.length;t++)for(let n=0;n<cliScore.Tracks[t].Percussion.length;n++) {
+                const a=browserScore.Tracks[t].Percussion[n],b=cliScore.Tracks[t].Percussion[n];
+                for(const key of ['OnsetStrength','LowShare','MidShare','HighShare']) { assert.ok(Math.abs(a[key]-b[key])<=1e-12);a[key]=b[key]; }
+                assert.ok(Math.abs(a.Classification.Confidence-b.Classification.Confidence)<=1e-12);a.Classification.Confidence=b.Classification.Confidence;
+            }
+            assert.ok(cliScore.Tracks.every(t=>t.Notes.length===0));
+        }
         assert.deepEqual(browserScore,cliScore);
-        assert.equal(browserReport.Transcription.Polyphony.MaximumSimultaneousNotes,analysisMode==='mixed'?4:3);
+        if(analysisMode!=='percussion') assert.equal(browserReport.Transcription.Polyphony.MaximumSimultaneousNotes,analysisMode==='mixed'?4:3);
         if(analysisMode==='mixed') {
             await page.locator('#role-harmony').uncheck();assert.equal(await exportSource.isEnabled(),false);
             await analyze.click();await finish();
@@ -107,7 +120,14 @@ function fixture(name, seconds, noise=false) {
         await page.setViewportSize({width:390,height:844});
         await page.screenshot({path:path.join(output,'polyphonic-mobile.png'),fullPage:true});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+        if(analysisMode==='percussion') {
+            await page.locator('#music-workspace-tab').click();
+            await page.locator('#midi-editor textarea').fill('tempo 120 track drums { hit kick :0.5 hit snare :0.5 hit hat :0.5 }');
+            await page.getByRole('button',{name:'Run',exact:true}).first().click();
+            await page.getByText('SoundScript.Wave · no MIDI step',{exact:true}).first().waitFor();
+            assert.equal(await page.getByRole('button',{name:'Download WAV',exact:true}).first().isVisible(),true);
+        }
         assert.deepEqual(errors,[]);
-        console.log(analysisMode + ': PASS CLI/browser score parity, simultaneous notes, excerpt playback, editing/replay, exports, rejection, stale-output invalidation, cancellation and mobile layout');
+        console.log(analysisMode + ': PASS CLI/browser score parity, detected events, excerpt playback, editing/replay, exports, rejection, stale-output invalidation, cancellation and mobile layout');
     } finally {await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

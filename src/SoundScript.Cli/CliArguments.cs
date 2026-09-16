@@ -11,7 +11,7 @@ public sealed class CliArguments
 {
     public static readonly CommandDefinition[] Commands =
     [
-        new("transcribe", "<media> --out <score.ss> [--mode monophonic|extract-melody|polyphonic|mixed] [--start seconds] [--duration seconds] [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg start duration mode roles", "verbose"),
+        new("transcribe", "<media> --out <score.ss> [--mode monophonic|extract-melody|polyphonic|mixed|percussion] [--start seconds] [--duration seconds] [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg start duration mode roles", "verbose"),
         new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", "verbose", PositionalOutput: true),
         new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
         new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
@@ -97,7 +97,7 @@ public sealed class CliArguments
     {
         if (Command == "transcribe")
         {
-            if (Value("mode") is { } mode && mode is not ("monophonic" or "extract-melody" or "polyphonic" or "mixed")) throw new CliUsageException("--mode requires monophonic, extract-melody, polyphonic or mixed.");
+            if (Value("mode") is { } mode && mode is not ("monophonic" or "extract-melody" or "polyphonic" or "mixed" or "percussion")) throw new CliUsageException("--mode requires monophonic, extract-melody, polyphonic, mixed or percussion.");
             if (Value("roles") is { } roles)
             {
                 if (Value("mode") != "mixed") throw new CliUsageException("--roles requires --mode mixed.");

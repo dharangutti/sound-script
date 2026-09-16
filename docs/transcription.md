@@ -142,3 +142,5 @@ See [engineering report](transcription-engineering-report.md) and
 [fixture ground truth and measurements](../src/SoundScript.Tests/Golden/transcription/measurements.json).
 
 [Mixed audio / musical roles](mixed-audio-transcription.md) supports selected melody, harmony and bass estimates without claiming audio stem separation.
+
+[Percussion / rhythm](percussion-transcription.md) adds a separate transient path and genuine unpitched hit events, with no drum-resonance note inference.

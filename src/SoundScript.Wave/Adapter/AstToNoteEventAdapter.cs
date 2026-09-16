@@ -139,6 +139,9 @@ public static partial class AstToNoteEventAdapter
                 case RestNode rest:
                     AdvanceBeat(GetDefaultTrack(), rest.Rest.DurationBeats);
                     break;
+                case HitNode hit:
+                    EmitHit(GetDefaultTrack(), hit, context);
+                    break;
                 case NoteNode note:
                     EmitNote(GetDefaultTrack(), note, context);
                     break;
@@ -252,6 +255,9 @@ public static partial class AstToNoteEventAdapter
                 case RestNode rest:
                     AdvanceBeat(track, rest.Rest.DurationBeats);
                     break;
+                case HitNode hit:
+                    EmitHit(track, hit, context);
+                    break;
                 case NoteNode note:
                     EmitNote(track, note, context);
                     break;
@@ -337,6 +343,15 @@ public static partial class AstToNoteEventAdapter
     {
         for (var i = 0; i < loop.Count; i++)
             ExecuteStatements(track, loop.Body, context, options);
+    }
+
+    private static void EmitHit(TrackState track, HitNode hit, ExecutionContext context)
+    {
+        if (!Enum.IsDefined(hit.Sound) || !double.IsFinite(hit.DurationBeats) || hit.DurationBeats <= 0 || hit.Velocity is < 1 or > 127)
+            throw new InvalidDataException("Invalid percussion hit.");
+        var (start, velocity) = ApplyHumanize(track, BeatsToSeconds(context, 0, track.CurrentBeat), ResolveVelocity(track, hit.Velocity));
+        track.Notes.Add(new NoteEvent(0, start, BeatsToSeconds(context, track.CurrentBeat, hit.DurationBeats), velocity, TimbreParams.Default) { Percussion = hit.Sound });
+        AdvanceBeat(track, hit.DurationBeats);
     }
 
     private static void EmitNote(TrackState track, NoteNode note, ExecutionContext context)

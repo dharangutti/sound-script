@@ -1970,6 +1970,7 @@ public partial class Playground : IDisposable
       switch (statement)
       {
         case EffectNode:
+        case HitNode:
         case SpeakNode speak when string.IsNullOrWhiteSpace(speak.SamplePath):
         case SampleNode:
           return true;
