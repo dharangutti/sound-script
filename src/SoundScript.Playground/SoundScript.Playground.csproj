@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SoundScript.Playground</RootNamespace>
     <AssemblyName>SoundScript.Playground</AssemblyName>
-    <PublishDir>$(MSBuildThisFileDirectory)..\..\docs\playground\</PublishDir>
+    <PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\playground\</PublishDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +48,8 @@
   </Target>
 
   <Target Name="FlattenPlaygroundPublish" AfterTargets="Publish">
+    <!-- Replace the framework generation, including obsolete boot manifests. -->
+    <RemoveDir Directories="$(PublishDir)_framework" />
     <ItemGroup>
       <_WwwrootFiles Include="$(PublishDir)wwwroot\**\*" />
     </ItemGroup>
@@ -57,6 +59,7 @@
     <Delete Files="$(PublishDir)Melanchall_DryWetMidi_Native32.dll" ContinueOnError="true" />
     <Delete Files="$(PublishDir)Melanchall_DryWetMidi_Native64.dll" ContinueOnError="true" />
     <Delete Files="$(PublishDir)Melanchall_DryWetMidi_Native64.dylib" ContinueOnError="true" />
+    <Exec Command="node &quot;$(MSBuildThisFileDirectory)..\..\scripts\verify-playground-integrity.cjs&quot; &quot;$(PublishDir).&quot;" />
   </Target>
 
 </Project>
