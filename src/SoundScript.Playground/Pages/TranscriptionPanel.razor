@@ -12,6 +12,15 @@
     <p>WAV is recommended. MP3 and video support depend on browser codecs; the CLI supports FFmpeg. Maximum 64 MiB / 120 seconds. Use a solo melody; simultaneous sources are unsupported.</p>
     <label for="transcription-file">Media file</label>
     <InputFile id="transcription-file" OnChange="SelectFile" accept="audio/*,video/mp4,video/webm,.wav,.mp3,.mp4,.m4a,.webm" disabled="@busy" />
+    @if (media != null)
+    {
+        <p>Detected media duration: @media.DurationSeconds.ToString("F3") seconds. Supported maximum: 120 seconds per analysis. Decoded: @media.SampleRate Hz, @media.Channels channels; analysis: mono 16000 Hz.</p>
+        @if (media.DurationSeconds > 120) { <p role="alert">This recording exceeds the 120-second limit. Select an excerpt below before analysis.</p> }
+        <label for="transcription-start">Excerpt start (seconds)</label>
+        <input id="transcription-start" type="number" min="0" step="0.1" @bind="excerptStart" @bind:after="InvalidateResult" disabled="@busy" />
+        <label for="transcription-duration">Excerpt duration (seconds, maximum 120; blank to end)</label>
+        <input id="transcription-duration" type="number" min="0.01" max="120" step="0.1" @bind="excerptDuration" @bind:after="InvalidateResult" disabled="@busy" />
+    }
     <label for="transcription-tempo">Tempo (blank for automatic estimate)</label>
     <input id="transcription-tempo" type="number" min="20" max="300" @bind="tempo" disabled="@busy" />
     <label for="transcription-instrument">Playback instrument</label>
@@ -19,18 +28,20 @@
         <option value="73">Flute</option><option value="0">Piano</option><option value="40">Violin</option><option value="80">Synth lead</option>
     </select>
     <div class="playground-playbar">
-        <button class="btn btn-primary" disabled="@(busy || file == null)" @onclick="Analyze">@(busy ? "Working…" : "Analyze / Transcribe")</button>
+        <button class="btn btn-primary" disabled="@(busy || media == null)" @onclick="Analyze">@(busy ? "Working…" : "Analyze / Transcribe")</button>
         @if (busy) { <button class="btn btn-secondary" @onclick="Cancel">Cancel analysis</button> }
-        <button class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(source))" @onclick="Play">Play edited source</button>
+        <button class="btn btn-primary" disabled="@(!CanUseSource)" @onclick="Play">Play edited source</button>
         <button class="btn btn-secondary" @onclick="Stop">Stop</button>
-        <button class="btn btn-secondary" disabled="@(busy || string.IsNullOrWhiteSpace(source))" @onclick="ExportSource">Export SoundScript</button>
-        <button class="btn btn-secondary" disabled="@(busy || string.IsNullOrWhiteSpace(source))" @onclick="ExportWave">Export WAV</button>
+        <button class="btn btn-secondary" disabled="@(!CanUseSource)" @onclick="ExportSource">Export SoundScript</button>
+        <button class="btn btn-secondary" disabled="@(!CanUseSource)" @onclick="ExportWave">Export WAV</button>
         <button class="btn btn-secondary" disabled="@(busy || result == null)" @onclick="ExportReport">Export analysis</button>
     </div>
     @if (error != null) { <p role="alert">@error</p> }
     <p role="status" aria-live="polite">@status</p>
     @if (result != null)
     {
+        <p><strong>@result.Suitability.Status</strong>: @result.Suitability.Reason</p>
+        <p>@result.Suitability.UsableNotes usable candidates. Stable supported coverage of active audio: @result.Suitability.StableActiveFraction.ToString("P1"); voiced coverage: @result.Suitability.VoicedActiveFraction.ToString("P1"); active-audio periodicity: @result.Suitability.ActivePeriodicity.ToString("P1"); fundamental support: @result.Suitability.FundamentalSupportedFraction.ToString("P1"). Detected fragments are not a verified melody.</p>
         <p>@result.Score.Tracks[0].Notes.Count notes · Tempo hypothesis @result.Score.TempoMap[0].Bpm BPM · Pitch periodicity @result.PitchConfidence.ToString("P1") · Timing grid fit @result.TimingGridFit.ToString("P1")</p>
         <ul>@foreach (var diagnostic in result.Diagnostics) { <li>@diagnostic.Message</li> }</ul>
         @if (comparison != null) { <p>Reconstruction check: pitch recall @comparison.PitchAccuracy.ToString("P1"), @comparison.MissedNotes missed, @comparison.ExtraNotes extra notes. This compares the generated score to its rendered audio; it does not prove source accuracy.</p> }
@@ -49,43 +60,64 @@
     private TranscriptionResult? result;
     private ComparisonMetrics? comparison;
     private CancellationTokenSource? cancellation;
+    private MediaInfo? media;
+    private byte[]? inputBytes;
+    private bool nativeWave, generated;
+    private double excerptStart;
+    private double? excerptDuration;
+    private bool CanUseSource => !busy && generated && !string.IsNullOrWhiteSpace(source);
+    private void InvalidateResult() { generated = false; result = null; comparison = null; error = null; status = "Selection changed. Analyze again; previous editor text is inactive."; }
     private void Cancel() => cancellation?.Cancel();
 
-    private void SelectFile(InputFileChangeEventArgs args) { file = args.File; error = null; status = $"Selected {file.Name}."; }
+    private async Task SelectFile(InputFileChangeEventArgs args)
+    {
+        file = args.File; InvalidateResult(); media = null; inputBytes = null; nativeWave = false;
+        error = null; busy = true; excerptStart = 0; excerptDuration = null; status = "Reading media duration…";
+        try
+        {
+            await Stop();
+            await Js.InvokeVoidAsync("SoundScriptTranscription.clear");
+            using var input = file.OpenReadStream(64 * 1024 * 1024);
+            using var memory = new MemoryStream(); await input.CopyToAsync(memory); inputBytes = memory.ToArray();
+            if (Path.GetExtension(file.Name).Equals(".wav",StringComparison.OrdinalIgnoreCase))
+            {
+                try { PcmWaveInput.Decode(inputBytes,new(0,.00001),value => media = value); nativeWave = true; }
+                catch (NotSupportedException) { }
+            }
+            if (!nativeWave) media = await Js.InvokeAsync<MediaInfo>("SoundScriptTranscription.inspect",inputBytes);
+            status = "Media ready. Choose an excerpt if needed, then analyze.";
+        }
+        catch (Exception ex) { media = null; error = ex.Message.Split('\n')[0]; status = "Media could not be prepared. Playback and export are inactive."; }
+        finally { busy = false; }
+    }
     private async Task Analyze()
     {
-        if (file == null || busy) return;
+        if (file == null || media == null || inputBytes == null || busy) return;
         busy = true; error = null; status = "Decoding and analyzing melody…";
-        result = null; comparison = null;
+        result = null; comparison = null; generated = false;
         cancellation?.Dispose(); cancellation = new CancellationTokenSource();
         try
         {
+            await Stop();
             await Task.Yield();
-            using var input = file.OpenReadStream(64 * 1024 * 1024);
-            using var memory = new MemoryStream(); await input.CopyToAsync(memory);
-            var bytes = memory.ToArray();
-            AnalysisAudio audio;
-            if (Path.GetExtension(file.Name).Equals(".wav", StringComparison.OrdinalIgnoreCase))
-            {
-                try { audio = PcmWaveInput.Decode(bytes); }
-                catch (NotSupportedException) { audio = await DecodeBrowser(bytes); }
-            }
-            else audio = await DecodeBrowser(bytes);
+            var excerpt = new MediaExcerpt(excerptStart,excerptDuration);
+            double duration = excerpt.Validate(media.DurationSeconds);
+            AnalysisAudio audio = nativeWave ? PcmWaveInput.Decode(inputBytes,excerpt) : await DecodeBrowser(excerptStart,duration);
             var observations = await new MonophonicAnalyzer().AnalyzeAsync(audio, cancellation.Token);
             result = new MonophonicTranscriber().Interpret(observations, new(tempo, instrument));
-            if (result.Score.Tracks.All(t => t.Notes.Count == 0)) { status = "No stable musical notes found. Try a clear solo melody."; return; }
+            if (!result.Suitability.CanGenerate) { status = "Transcription rejected. No source generated; playback and source/WAV export are inactive. You can export the analysis diagnostics."; return; }
             status = "Rendering and checking the reconstruction…"; StateHasChanged();
-            var validation = await MusicalComparison.ValidateAsync(result.Score, cancellation.Token);
-            source = validation.Source; comparison = validation.ScoreToRenderedAudio;
-            status = "Ready. Play, edit the source, and play again. Analysis describes the original import.";
+            var validation = await MusicalComparison.ValidateAsync(TranscriptionSuitability.ScoreForGeneration(result), cancellation.Token);
+            source = validation.Source; comparison = validation.ScoreToRenderedAudio; generated = true;
+            status = result.Suitability.Status == "Experimental" ? "Experimental partial result. Review every note before using or exporting; overlapping parts are unsupported." : "Ready. Play, edit the source, and play again. Analysis describes the original import.";
         }
         catch (OperationCanceledException) { status = "Analysis cancelled; your editor text is preserved."; }
-        catch (Exception ex) { error = ex.Message; status = "Transcription failed; your editor text is preserved."; }
+        catch (Exception ex) { error = ex.Message.Split('\n')[0]; status = "Transcription failed; previous editor text is preserved but playback and export are inactive."; }
         finally { busy = false; }
     }
-    private async Task<AnalysisAudio> DecodeBrowser(byte[] bytes)
+    private async Task<AnalysisAudio> DecodeBrowser(double start, double duration)
     {
-        await using var reference = await Js.InvokeAsync<IJSStreamReference>("SoundScriptTranscription.decode", bytes);
+        await using var reference = await Js.InvokeAsync<IJSStreamReference>("SoundScriptTranscription.excerpt", start, duration);
         await using var stream = await reference.OpenReadStreamAsync(AnalysisAudio.SampleRate * AnalysisAudio.MaximumSeconds * 4L);
         using var memory = new MemoryStream(); await stream.CopyToAsync(memory);
         var data = memory.ToArray();
@@ -97,12 +129,12 @@
     private async Task ExportWave() => await WithSource(async bytes => await Js.InvokeVoidAsync("SoundScriptAudio.download", Convert.ToBase64String(bytes), "transcription.wav"));
     private async Task WithSource(Func<byte[], Task> action)
     {
-        if (busy) return; busy = true; error = null;
-        try { await Task.Yield(); var bytes = WaveRenderer.RenderToBytes(SoundScriptOutput.Parse(source)); await action(bytes); }
+        if (!CanUseSource) return; busy = true; error = null;
+        try { await Task.Yield(); var bytes = TranscriptionPlayback.Render(source); await action(bytes); }
         catch (Exception ex) { error = ex.Message; }
         finally { busy = false; }
     }
     private async Task Stop() => await Js.InvokeVoidAsync("SoundScriptAudio.stop");
-    private async Task ExportSource() => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(source)), "transcription.ss");
-    private async Task ExportReport() => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new { Transcription = result, RoundTrip = comparison }, AnalysisJsonOutput.Options))), "transcription.json");
+    private async Task ExportSource() => await WithSource(async _ => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(source)), "transcription.ss"));
+    private async Task ExportReport() => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new { Media = media, Excerpt = new MediaExcerpt(excerptStart,excerptDuration), Generated = generated, Transcription = result, RoundTrip = comparison }, AnalysisJsonOutput.Options))), "transcription.json");
 }

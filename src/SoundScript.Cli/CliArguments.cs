@@ -11,7 +11,7 @@ public sealed class CliArguments
 {
     public static readonly CommandDefinition[] Commands =
     [
-        new("transcribe", "<media> --out <score.ss> [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg", "verbose"),
+        new("transcribe", "<media> --out <score.ss> [--start seconds] [--duration seconds] [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg start duration", "verbose"),
         new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", "verbose", PositionalOutput: true),
         new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
         new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
@@ -97,6 +97,10 @@ public sealed class CliArguments
     {
         if (Command == "transcribe")
         {
+            foreach (var name in new[] { "start", "duration" })
+                if (Value(name) is { } text && (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds)
+                    || !double.IsFinite(seconds) || seconds < 0 || name == "duration" && (seconds == 0 || seconds > 120)))
+                    throw new CliUsageException($"--{name} requires finite seconds; start >= 0, duration > 0 and <= 120.");
             if (!Has("out") || !Value("out")!.EndsWith(".ss", StringComparison.OrdinalIgnoreCase)) throw new CliUsageException("transcribe requires --out <score.ss>.");
             if (Value("tempo") is { } tempo && tempo != "auto" && (!int.TryParse(tempo, out var bpm) || bpm is < 20 or > 300)) throw new CliUsageException("--tempo requires auto or an integer from 20 to 300.");
             if (Value("instrument") is { } instrument && !SoundScript.Core.InstrumentMap.TryResolve(instrument, out _)) throw new CliUsageException("Unknown --instrument; use a General MIDI name or program 0-127.");
