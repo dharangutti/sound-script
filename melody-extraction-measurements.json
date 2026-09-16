@@ -1,0 +1,344 @@
+{
+  "Date": "2026-09-16",
+  "Meaning": "Local recordings; no independently annotated pitches. Coverage is evidence, not accuracy. RoundTrip compares generated score to rendered output only.",
+  "Results": [
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 0,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 9,
+      "StableActiveCoverage": 0.19023397761953204,
+      "Extraction": {
+        "MeanSpectralShare": 0.40844043041048456,
+        "CompetingPitchFraction": 0.7507629704984741,
+        "OctaveUncertainFraction": 0.6398779247202442,
+        "RejectedSectionCount": 79
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 0,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 14,
+      "StableActiveCoverage": 0.07019328585961343,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 110,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 14,
+      "StableActiveCoverage": 0.232,
+      "Extraction": {
+        "MeanSpectralShare": 0.4189584179001424,
+        "CompetingPitchFraction": 0.726,
+        "OctaveUncertainFraction": 0.479,
+        "RejectedSectionCount": 70
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 110,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 18,
+      "StableActiveCoverage": 0.035,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 60,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 22,
+      "StableActiveCoverage": 0.427,
+      "Extraction": {
+        "MeanSpectralShare": 0.4998012049567113,
+        "CompetingPitchFraction": 0.482,
+        "OctaveUncertainFraction": 0.385,
+        "RejectedSectionCount": 70
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 60,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 19,
+      "StableActiveCoverage": 0.074,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 90,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 18,
+      "StableActiveCoverage": 0.322,
+      "Extraction": {
+        "MeanSpectralShare": 0.47950511620605263,
+        "CompetingPitchFraction": 0.592,
+        "OctaveUncertainFraction": 0.395,
+        "RejectedSectionCount": 75
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 90,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 24,
+      "StableActiveCoverage": 0.073,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 13,
+      "StableActiveCoverage": 0.285,
+      "Extraction": {
+        "MeanSpectralShare": 0.45258911157944726,
+        "CompetingPitchFraction": 0.661,
+        "OctaveUncertainFraction": 0.389,
+        "RejectedSectionCount": 82
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alanajordan-piano-solo-245698",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 18,
+      "StableActiveCoverage": 0.121,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alban_gogh-funk-drums-solo-301208",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 26,
+      "StableActiveCoverage": 0.19489795918367347,
+      "Extraction": {
+        "MeanSpectralShare": 0.36234986328354385,
+        "CompetingPitchFraction": 0.5081632653061224,
+        "OctaveUncertainFraction": 0.06020408163265306,
+        "RejectedSectionCount": 127
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alban_gogh-funk-drums-solo-301208",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 3,
+      "StableActiveCoverage": 0.02040816326530612,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alex-morgan-latin-jazz-solo-sunny-cafe-560053",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 15,
+      "StableActiveCoverage": 0.2922922922922923,
+      "Extraction": {
+        "MeanSpectralShare": 0.5053297992220389,
+        "CompetingPitchFraction": 0.5355355355355356,
+        "OctaveUncertainFraction": 0.35935935935935936,
+        "RejectedSectionCount": 110
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "alex-morgan-latin-jazz-solo-sunny-cafe-560053",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 24,
+      "StableActiveCoverage": 0.3073073073073073,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 0,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 17,
+      "StableActiveCoverage": 0.2780638516992791,
+      "Extraction": {
+        "MeanSpectralShare": 0.4578343293918737,
+        "CompetingPitchFraction": 0.5355303810504635,
+        "OctaveUncertainFraction": 0.1596292481977343,
+        "RejectedSectionCount": 86
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 0,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 8,
+      "StableActiveCoverage": 0.018537590113285273,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 110,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 15,
+      "StableActiveCoverage": 0.3105906313645621,
+      "Extraction": {
+        "MeanSpectralShare": 0.5107559369448805,
+        "CompetingPitchFraction": 0.4775967413441955,
+        "OctaveUncertainFraction": 0.054989816700611,
+        "RejectedSectionCount": 98
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 110,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 21,
+      "StableActiveCoverage": 0.14052953156822812,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 60,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 21,
+      "StableActiveCoverage": 0.4653679653679654,
+      "Extraction": {
+        "MeanSpectralShare": 0.5304798963395739,
+        "CompetingPitchFraction": 0.5043290043290043,
+        "OctaveUncertainFraction": 0.11688311688311688,
+        "RejectedSectionCount": 71
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 60,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 27,
+      "StableActiveCoverage": 0.11688311688311688,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 90,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Experimental",
+      "DetectedNotes": 23,
+      "StableActiveCoverage": 0.5527156549520766,
+      "Extraction": {
+        "MeanSpectralShare": 0.638416367264614,
+        "CompetingPitchFraction": 0.40042598509052185,
+        "OctaveUncertainFraction": 0.010649627263045794,
+        "RejectedSectionCount": 49
+      },
+      "RoundTrip": {
+        "ReferenceNotes": 23,
+        "DetectedNotes": 19,
+        "MatchedNotes": 19,
+        "MissedNotes": 4,
+        "ExtraNotes": 0,
+        "PitchAccuracy": 0.8260869565217391,
+        "OnsetMaeSeconds": 0.00870260709914327,
+        "DurationMaeSeconds": 0.1082741370869032,
+        "MelodicContourAccuracy": 1,
+        "TempoErrorBpm": null,
+        "RestIntersectionOverUnion": 0.6423372160978486,
+        "RepeatedReferenceNotes": 13,
+        "MatchedRepeatedNotes": 7
+      }
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 90,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 28,
+      "StableActiveCoverage": 0.3194888178913738,
+      "Extraction": null,
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "extract-melody",
+      "Status": "Rejected",
+      "DetectedNotes": 21,
+      "StableActiveCoverage": 0.42411642411642414,
+      "Extraction": {
+        "MeanSpectralShare": 0.5312206093725106,
+        "CompetingPitchFraction": 0.5384615384615384,
+        "OctaveUncertainFraction": 0.20374220374220375,
+        "RejectedSectionCount": 77
+      },
+      "RoundTrip": null
+    },
+    {
+      "Recording": "music_for_videos-emotional-solo-piano-166032",
+      "StartSeconds": 30,
+      "DurationSeconds": 10,
+      "Mode": "monophonic",
+      "Status": "Rejected",
+      "DetectedNotes": 21,
+      "StableActiveCoverage": 0.08108108108108109,
+      "Extraction": null,
+      "RoundTrip": null
+    }
+  ]
+}

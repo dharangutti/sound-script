@@ -545,3 +545,9 @@ soundscript wave examples/full-song-wave.ss jingle.wav
 - [text-to-melody.md](text-to-melody.md) — Text-to-melody engine (V3.1)
 - [pipeline.md](pipeline.md) — Interpreter pipeline
 - [examples.md](examples.md) — Example catalog
+
+## Unpitched percussion (experimental)
+
+`hit kick|snare|hat|click :beats [vN]` represents a genuine percussion event
+without a note pitch. It uses the Wave backend; MIDI mapping is not implemented.
+See [percussion syntax and transcription](percussion-transcription.md).

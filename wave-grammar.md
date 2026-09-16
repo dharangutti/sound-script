@@ -257,3 +257,13 @@ rendered through the wave backend).
 - [humanization.md](humanization.md) — bare-number `humanize` (unchanged)
 - [whats-new-v7.md](whats-new-v7.md) — V7 changelog
 - [PLAYGROUND.md](PLAYGROUND.md) — in-browser verification checklist
+
+## Unpitched percussion hits
+
+`hit kick :0.5 v90` emits an unpitched synthetic drum event and advances the
+track by half a beat. Classes are `kick`, `snare`, `hat`, and generic `click`.
+Durations use existing beat or duration-alias syntax; velocity is optional.
+Ordinary tracks, loops, sequences, blocks and phrases support hits.
+MIDI rejects this wave-only construct explicitly. See
+[percussion transcription](percussion-transcription.md) for the canonical
+hit representation, examples and limitations.
