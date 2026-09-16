@@ -9,6 +9,10 @@ single dominant line from more complex audio. Use `--mode extract-melody` or sel
 the mode in Playground. Monophonic remains the default; all extraction results are
 experimental, and most real piano excerpts tested still reject.
 
+[Polyphonic / Piano (Experimental)](polyphonic-transcription.md) adds simultaneous
+notes through `--mode polyphonic` and a third Playground mode. It uses parallel
+SoundScript tracks, with separate polyphony/ambiguity diagnostics and comparisons.
+
 ## CLI
 
 ```powershell

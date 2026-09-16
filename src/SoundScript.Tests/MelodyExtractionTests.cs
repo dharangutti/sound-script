@@ -82,7 +82,7 @@ public sealed class MelodyExtractionTests
         Assert.Throws<OperationCanceledException>(() => engine.Transcribe(Mixture("dominant"), mode: TranscriptionMode.ExtractMelody, cancellationToken: cancel.Token));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => engine.TranscribeAsync(Mixture("dominant"), mode: TranscriptionMode.ExtractMelody, cancellationToken: cancel.Token));
         Assert.Throws<ArgumentOutOfRangeException>(() => engine.Transcribe(new([]), mode: (TranscriptionMode)99));
-        Assert.Throws<CliUsageException>(() => CliArguments.Parse(["transcribe", "input.wav", "--out", "x.ss", "--mode", "polyphonic"]));
+        Assert.Throws<CliUsageException>(() => CliArguments.Parse(["transcribe", "input.wav", "--out", "x.ss", "--mode", "unimplemented"]));
     }
 
     [Theory] [InlineData("dominant", true)] [InlineData("equal", false)]

@@ -1,6 +1,6 @@
 namespace SoundScript.Transcription;
 
-public enum TranscriptionMode { Monophonic, ExtractMelody }
+public enum TranscriptionMode { Monophonic, ExtractMelody, Polyphonic }
 public sealed record RejectedMelodySection(double StartSeconds, double EndSeconds, string Reason);
 public sealed record MelodyExtractionEvidence(int ExtractedNoteCount, double MelodyCoverage,
     double MeanSpectralShare, double CompetingPitchFraction, double OctaveUncertainFraction,
@@ -15,12 +15,15 @@ public sealed class TranscriptionEngine
         {
             TranscriptionMode.Monophonic => new MonophonicTranscriber().Transcribe(audio, options, cancellationToken),
             TranscriptionMode.ExtractMelody => Finish(new MelodyExtractor().Analyze(audio, cancellationToken), options),
+            TranscriptionMode.Polyphonic => PolyphonicTranscriber.Interpret(new PolyphonicAnalyzer().Analyze(audio, cancellationToken), options ?? new(Instrument: 0)),
             _ => throw new ArgumentOutOfRangeException(nameof(mode))
         };
 
     public async Task<TranscriptionResult> TranscribeAsync(AnalysisAudio audio, TranscriptionOptions? options = null,
         TranscriptionMode mode = TranscriptionMode.Monophonic, CancellationToken cancellationToken = default)
     {
+        if (mode == TranscriptionMode.Polyphonic)
+            return PolyphonicTranscriber.Interpret(await new PolyphonicAnalyzer().AnalyzeAsync(audio, cancellationToken), options ?? new(Instrument: 0));
         if (mode == TranscriptionMode.ExtractMelody)
             return Finish(await new MelodyExtractor().AnalyzeAsync(audio, cancellationToken), options);
         if (mode != TranscriptionMode.Monophonic) throw new ArgumentOutOfRangeException(nameof(mode));

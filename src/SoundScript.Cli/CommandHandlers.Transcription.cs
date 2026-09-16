@@ -24,8 +24,10 @@ public static partial class CommandHandlers
         Console.WriteLine($"Media duration {media.DurationSeconds:F3} seconds; maximum analysis 120 seconds. Input: {media.SampleRate} Hz, {media.Channels} channels; analysis: mono 16000 Hz.");
         var audio=input.DecodeAsync(args.Input,excerpt,token).GetAwaiter().GetResult();
         int? tempo=args.Value("tempo") is null or "auto"?null:int.Parse(args.Value("tempo")!,System.Globalization.CultureInfo.InvariantCulture);
-        var mode = args.Value("mode") == "extract-melody" ? TranscriptionMode.ExtractMelody : TranscriptionMode.Monophonic;
-        var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??"flute")),mode,token);
+        var mode = args.Value("mode") switch { "polyphonic" => TranscriptionMode.Polyphonic, "extract-melody" => TranscriptionMode.ExtractMelody, _ => TranscriptionMode.Monophonic };
+        var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??(mode == TranscriptionMode.Polyphonic ? "piano" : "flute"))),mode,token);
+        if (result.Polyphony is { } poly)
+            Console.WriteLine($"Polyphonic / Piano (Experimental): {poly.DetectedNotes} notes; maximum simultaneous notes {poly.MaximumSimultaneousNotes}; {poly.ChordCount} simultaneous pitch groups; mean active polyphony {poly.MeanActivePolyphony:F2}; polyphonic coverage {poly.PolyphonicCoverage:P1}; residual fundamental share {poly.MeanFundamentalShare:P1}; ambiguous frames {poly.AmbiguousFrameFraction:P1}; octave ambiguity {poly.OctaveAmbiguousFraction:P1}.");
         if (result.Extraction is { } extraction)
             Console.WriteLine($"Extract Melody (Experimental): {extraction.ExtractedNoteCount} notes; melody coverage {extraction.MelodyCoverage:P1}; mean spectral share {extraction.MeanSpectralShare:P1}; competing pitches {extraction.CompetingPitchFraction:P1}; octave uncertainty {extraction.OctaveUncertainFraction:P1}; {extraction.RejectedSections.Count} rejected sections (see report).");
         var suitability = result.Suitability;
@@ -37,6 +39,25 @@ public static partial class CommandHandlers
             throw new InvalidDataException(suitability.Reason + " No SoundScript or preview written; existing output files, if any, belong to an earlier run.");
         }
         var generationScore=TranscriptionSuitability.ScoreForGeneration(result);
+        if (mode == TranscriptionMode.Polyphonic)
+        {
+            var polyphonicValidation = PolyphonicComparison.Validate(generationScore, token);
+            token.ThrowIfCancellationRequested();
+            AtomicOutput.Write(args.Value("out")!, p => File.WriteAllText(p, polyphonicValidation.Source), p => SoundScriptOutput.Parse(File.ReadAllText(p)));
+            if (args.Value("preview") is { } polyphonicPreview)
+                AtomicOutput.Write(polyphonicPreview, p => File.WriteAllBytes(p, polyphonicValidation.PreviewWave), p => PcmWaveInput.Decode(File.ReadAllBytes(p)));
+            if (args.Value("report") is { } polyphonicReport)
+                AtomicOutput.Write(polyphonicReport, p => File.WriteAllText(p, JsonSerializer.Serialize(new {
+                    Media = media, Excerpt = excerpt, Generated = true, Mode = "polyphonic", Transcription = result,
+                    RoundTrip = polyphonicValidation.ScoreToRenderedAudio,
+                    ComparisonMeaning = "Round trip compares the generated note schedule to polyphonic reanalysis of its render; it is not source ground truth."
+                }, AnalysisJsonOutput.Options)), p => { using var document = JsonDocument.Parse(File.ReadAllText(p)); });
+            var metrics = polyphonicValidation.ScoreToRenderedAudio;
+            Console.WriteLine($"Experimental: generated {generationScore.Tracks.Sum(t => t.Notes.Count)} notes in {generationScore.Tracks.Count} parallel voices. Render comparison: note precision {metrics.NotePrecision:P1}, recall {metrics.NoteRecall:P1}, missed {metrics.MissedNotes}, extra {metrics.ExtraNotes}.");
+            foreach (var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
+            Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");
+            return 0;
+        }
         var validation=MusicalComparison.Validate(generationScore,token);
         var reconstructed=new MonophonicTranscriber().Transcribe(PcmWaveInput.Decode(validation.PreviewWave),new(tempo??(int)result.Score.TempoMap[0].Bpm,Quantize:false),token);
         var sourceComparison=MusicalComparison.Compare(result.Score.Tracks[0].Notes,reconstructed.Score.Tracks[0].Notes);
@@ -56,4 +77,3 @@ public static partial class CommandHandlers
         return 0;
     }
 }
-

@@ -13,6 +13,7 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     public static MusicalScore ScoreForGeneration(TranscriptionResult result)
     {
         if (!result.Suitability.CanGenerate) throw new InvalidDataException(result.Suitability.Reason);
+        if (result.Polyphony != null) return result.Score;
         var notes=SupportedNotes(result);
         if (result.Score.Tracks.Count!=1) throw new NotSupportedException("Monophonic generation requires one track.");
         if (notes.Length==result.Score.Tracks[0].Notes.Count) return result.Score;
@@ -24,6 +25,15 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     }
     public static TranscriptionSuitability Evaluate(TranscriptionResult result)
     {
+        if (result.Polyphony is { } poly)
+        {
+            bool accepted = poly.DetectedNotes > 0 && poly.StableActiveCoverage >= .5 && poly.AmbiguousFrameFraction < .5;
+            return new(accepted ? "Experimental" : "Rejected", poly.DetectedNotes, poly.StableActiveCoverage,
+                poly.StableActiveCoverage, 0, accepted
+                    ? "Experimental simultaneous-pitch reconstruction. Harmonics, quiet notes and sustain remain uncertain; compare the original excerpt and generated voices."
+                    : "Insufficient stable polyphonic evidence: diffuse, dense or ambiguous sections prevent a defensible reconstruction.",
+                poly.MeanFundamentalShare, poly.DetectedNotes);
+        }
         var frames = result.Observations.Frames;
         double threshold = Math.Max(.003, frames.Select(f => f.Rms).DefaultIfEmpty().Max() * .035);
         var active = frames.Where(f => f.Rms >= threshold).ToArray();

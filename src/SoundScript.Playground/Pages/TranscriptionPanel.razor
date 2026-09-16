@@ -8,19 +8,21 @@
 @inject IJSRuntime Js
 
 <div class="transcription-workspace">
-    <h2>Transcribe a melody</h2>
-    <p>Import a solo instrument or humming recording, edit the generated SoundScript, and hear it reconstructed. Audio stays in this browser.</p>
+    <h2>Transcribe music</h2>
+    <p>Import a solo melody or piano recording, edit the generated SoundScript, and hear it reconstructed. Audio stays in this browser.</p>
     <p>WAV is recommended. MP3 and video support depend on browser codecs; the CLI supports FFmpeg. Maximum 64 MiB / 120 seconds. Choose Monophonic for solo melodies or try experimental extraction for complex audio.</p>
     <label for="transcription-mode">Analysis mode</label>
-    <select id="transcription-mode" @bind="mode" @bind:after="InvalidateResult" disabled="@busy">
+    <select id="transcription-mode" @bind="mode" @bind:after="ModeChanged" disabled="@busy">
         <option value="Monophonic">Monophonic</option>
         <option value="ExtractMelody">Extract Melody from Complex Audio (Experimental)</option>
+        <option value="Polyphonic">Polyphonic / Piano (Experimental)</option>
     </select>
-    <p>@(mode == TranscriptionMode.Monophonic ? "One clean solo line; simultaneous sources are unsupported." : "Attempts only one dominant line and discards accompaniment. Ambiguous sections may be rejected. Output is experimental, not exact transcription.")</p>
+    <p>@(mode == TranscriptionMode.Polyphonic ? "Attempts simultaneous piano pitches and overlapping notes in parallel voices. Dense mixtures and uncertain harmonics may be rejected; this is experimental, not an exact score." : mode == TranscriptionMode.Monophonic ? "One clean solo line; simultaneous sources are unsupported." : "Attempts only one dominant line and discards accompaniment. Ambiguous sections may be rejected. Output is experimental, not exact transcription.")</p>
     @if (originalUrl != null)
     {
         <label for="transcription-original">Original recording (full file; excerpt times below)</label>
         <audio id="transcription-original" controls src="@originalUrl" preload="metadata"></audio>
+        <button class="btn btn-secondary" disabled="@(busy || media == null)" @onclick="PlayOriginalExcerpt">Play original excerpt</button>
     }
     <label for="transcription-file">Media file</label>
     <InputFile id="transcription-file" OnChange="SelectFile" accept="audio/*,video/mp4,video/webm,.wav,.mp3,.mp4,.m4a,.webm" disabled="@busy" />
@@ -53,7 +55,12 @@
     @if (result != null)
     {
         <p><strong>@result.Suitability.Status</strong>: @result.Suitability.Reason</p>
-        @if (result.Extraction is { } extraction)
+        @if (result.Polyphony is { } poly)
+        {
+            <p>@poly.DetectedNotes detected notes; maximum simultaneous notes @poly.MaximumSimultaneousNotes; @poly.ChordCount simultaneous pitch groups (observed chords, not named chord recognition); mean active polyphony @poly.MeanActivePolyphony.ToString("F2").</p>
+            <p>Polyphonic coverage @poly.PolyphonicCoverage.ToString("P1"); stable active coverage @poly.StableActiveCoverage.ToString("P1"); residual fundamental energy share @poly.MeanFundamentalShare.ToString("P1"); rejected/ambiguous frames @poly.AmbiguousFrameFraction.ToString("P1"); octave ambiguity @poly.OctaveAmbiguousFraction.ToString("P1"). Energy and frame fractions are not accuracy probabilities.</p>
+        }
+        else if (result.Extraction is { } extraction)
         {
             <p>@extraction.ExtractedNoteCount extracted notes; melody coverage @extraction.MelodyCoverage.ToString("P1"); mean spectral share @extraction.MeanSpectralShare.ToString("P1"); competing-pitch ambiguity @extraction.CompetingPitchFraction.ToString("P1"); octave uncertainty @extraction.OctaveUncertainFraction.ToString("P1"). These are measured energy/frame fractions, not accuracy probabilities.</p>
             <details><summary>@extraction.RejectedSections.Count rejected sections</summary>
@@ -64,8 +71,9 @@
         {
         <p>@result.Suitability.UsableNotes usable candidates. Stable supported coverage of active audio: @result.Suitability.StableActiveFraction.ToString("P1"); voiced coverage: @result.Suitability.VoicedActiveFraction.ToString("P1"); active-audio periodicity: @result.Suitability.ActivePeriodicity.ToString("P1"); fundamental support: @result.Suitability.FundamentalSupportedFraction.ToString("P1"). Detected fragments are not a verified melody.</p>
         }
-        <p>@result.Score.Tracks[0].Notes.Count notes · Tempo hypothesis @result.Score.TempoMap[0].Bpm BPM · @(result.Extraction == null ? "Pitch periodicity" : "Selected spectral share") @result.PitchConfidence.ToString("P1") · Timing grid fit @result.TimingGridFit.ToString("P1")</p>
+        <p>@result.Score.Tracks.Sum(t => t.Notes.Count) notes · Tempo hypothesis @result.Score.TempoMap[0].Bpm BPM · @(result.Polyphony != null ? "Residual fundamental share" : result.Extraction == null ? "Pitch periodicity" : "Selected spectral share") @result.PitchConfidence.ToString("P1") · Timing grid fit @result.TimingGridFit.ToString("P1")</p>
         <ul>@foreach (var diagnostic in result.Diagnostics) { <li>@diagnostic.Message</li> }</ul>
+        @if (polyphonicComparison != null) { <p>Reconstruction check: note precision @polyphonicComparison.NotePrecision.ToString("P1"), recall @polyphonicComparison.NoteRecall.ToString("P1"), @polyphonicComparison.MissedNotes missed, @polyphonicComparison.ExtraNotes extra notes. Generated-score reanalysis does not establish source accuracy.</p> }
         @if (comparison != null) { <p>Reconstruction check: pitch recall @comparison.PitchAccuracy.ToString("P1"), @comparison.MissedNotes missed, @comparison.ExtraNotes extra notes. This compares the generated score to its rendered audio; it does not prove source accuracy.</p> }
     }
     <label for="transcription-source">Editable SoundScript</label>
@@ -83,6 +91,7 @@
     private string? status, error;
     private TranscriptionResult? result;
     private ComparisonMetrics? comparison;
+    private PolyphonicMetrics? polyphonicComparison;
     private CancellationTokenSource? cancellation;
     private MediaInfo? media;
     private byte[]? inputBytes;
@@ -90,7 +99,8 @@
     private double excerptStart;
     private double? excerptDuration;
     private bool CanUseSource => !busy && generated && !string.IsNullOrWhiteSpace(source);
-    private void InvalidateResult() { generated = false; result = null; comparison = null; error = null; status = "Selection changed. Analyze again; previous editor text is inactive."; }
+    private void InvalidateResult() { generated = false; result = null; comparison = null; polyphonicComparison = null; error = null; status = "Selection changed. Analyze again; previous editor text is inactive."; }
+    private void ModeChanged() { if (mode == TranscriptionMode.Polyphonic) instrument = 0; InvalidateResult(); }
     private void Cancel() => cancellation?.Cancel();
 
     private async Task SelectFile(InputFileChangeEventArgs args)
@@ -118,8 +128,8 @@
     private async Task Analyze()
     {
         if (file == null || media == null || inputBytes == null || busy) return;
-        busy = true; error = null; status = "Decoding and analyzing melody…";
-        result = null; comparison = null; generated = false;
+        busy = true; error = null; status = "Decoding and analyzing music…";
+        result = null; comparison = null; polyphonicComparison = null; generated = false;
         cancellation?.Dispose(); cancellation = new CancellationTokenSource();
         try
         {
@@ -131,9 +141,18 @@
             result = await new TranscriptionEngine().TranscribeAsync(audio, new(tempo, instrument), mode, cancellation.Token);
             if (!result.Suitability.CanGenerate) { status = "Transcription rejected. No source generated; playback and source/WAV export are inactive. You can export the analysis diagnostics."; return; }
             status = "Rendering and checking the reconstruction…"; StateHasChanged();
-            var validation = await MusicalComparison.ValidateAsync(TranscriptionSuitability.ScoreForGeneration(result), cancellation.Token);
-            source = validation.Source; comparison = validation.ScoreToRenderedAudio; generated = true;
-            status = result.Suitability.Status == "Experimental" ? "Experimental partial result. Review every note before using or exporting; accompaniment is not reproduced." : "Ready. Play, edit the source, and play again. Analysis describes the original import.";
+            if (result.Polyphony != null)
+            {
+                var validation = await PolyphonicComparison.ValidateAsync(TranscriptionSuitability.ScoreForGeneration(result), cancellation.Token);
+                source = validation.Source; polyphonicComparison = validation.ScoreToRenderedAudio;
+            }
+            else
+            {
+                var validation = await MusicalComparison.ValidateAsync(TranscriptionSuitability.ScoreForGeneration(result), cancellation.Token);
+                source = validation.Source; comparison = validation.ScoreToRenderedAudio;
+            }
+            cancellation.Token.ThrowIfCancellationRequested(); generated = true;
+            status = result.Polyphony != null ? "Experimental polyphonic result. Review simultaneous notes, sustain and harmonics against the original excerpt before exporting." : result.Suitability.Status == "Experimental" ? "Experimental partial result. Review every note before using or exporting; accompaniment is not reproduced." : "Ready. Play, edit the source, and play again. Analysis describes the original import.";
         }
         catch (OperationCanceledException) { status = "Analysis cancelled; your editor text is preserved."; }
         catch (Exception ex) { error = ex.Message.Split('\n')[0]; status = "Transcription failed; previous editor text is preserved but playback and export are inactive."; }
@@ -148,6 +167,17 @@
         if (data.Length % 4 != 0) throw new InvalidDataException("Partial PCM data returned by browser.");
         var samples = new float[data.Length / 4]; Buffer.BlockCopy(data, 0, samples, 0, data.Length);
         return new(samples);
+    }
+    private async Task PlayOriginalExcerpt()
+    {
+        if (media == null || busy) return;
+        try
+        {
+            error = null; await Stop();
+            double duration = new MediaExcerpt(excerptStart, excerptDuration).Validate(media.DurationSeconds);
+            await Js.InvokeVoidAsync("SoundScriptTranscription.playOriginalExcerpt", excerptStart, duration);
+        }
+        catch (Exception ex) { error = ex.Message.Split('\n')[0]; }
     }
     private async Task Play() { await Stop(); await WithSource(async bytes => await Js.InvokeVoidAsync("SoundScriptAudio.playWavBytes", bytes)); }
     private async Task ExportWave() => await WithSource(async bytes => await Js.InvokeVoidAsync("SoundScriptAudio.download", Convert.ToBase64String(bytes), "transcription.wav"));
@@ -170,5 +200,5 @@
         catch (JSDisconnectedException) { }
     }
     private async Task ExportSource() => await WithSource(async _ => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(source)), "transcription.ss"));
-    private async Task ExportReport() => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new { Media = media, Excerpt = new MediaExcerpt(excerptStart,excerptDuration), Generated = generated, Transcription = result, RoundTrip = comparison }, AnalysisJsonOutput.Options))), "transcription.json");
+    private async Task ExportReport() => await Js.InvokeVoidAsync("SoundScriptText.download", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new { Media = media, Excerpt = new MediaExcerpt(excerptStart,excerptDuration), Generated = generated, Transcription = result, RoundTrip = (object?)polyphonicComparison ?? comparison }, AnalysisJsonOutput.Options))), "transcription.json");
 }

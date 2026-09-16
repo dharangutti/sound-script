@@ -30,6 +30,8 @@ see the [measured accuracy and limitations](docs/transcription-engineering-repor
 Opt-in [experimental melody extraction](docs/melody-extraction.md) is available via
 `--mode extract-melody` and the Playground mode selector. It preserves only one
 dominant line and conservatively rejects ambiguous material.
+For simultaneous piano notes, use `--mode polyphonic` or **Polyphonic / Piano
+(Experimental)**; see [measurements and limitations](docs/polyphonic-transcription.md).
 
 The repository includes a temporal audio/visual composition with source, a
 browser demo, and a decode-verified WebM export:
