@@ -11,7 +11,7 @@ public sealed class PcmWaveInput : ITranscriptionInputAdapter<byte[]>
         return Task.FromResult(Decode(input));
     }
 
-    public static AnalysisAudio Decode(byte[] bytes)
+    public static AnalysisAudio Decode(byte[] bytes, MediaExcerpt? excerpt = null, Action<MediaInfo>? inspected = null)
     {
         var span = bytes.AsSpan();
         if (span.Length < 12 || !span[..4].SequenceEqual("RIFF"u8) || !span.Slice(8,4).SequenceEqual("WAVE"u8))
@@ -43,7 +43,15 @@ public sealed class PcmWaveInput : ITranscriptionInputAdapter<byte[]>
             throw new NotSupportedException("WAV encoding requires FFmpeg; native decoding supports PCM 8/16/24/32 and float32.");
         if (data.Length % align != 0) throw new InvalidDataException("Partial WAV sample frame.");
         int count = data.Length / align;
-        if ((double)count / rate > AnalysisAudio.MaximumSeconds) throw new InvalidDataException("Audio exceeds the 120-second analysis limit.");
+        double mediaDuration = (double)count / rate;
+        inspected?.Invoke(new(mediaDuration, rate, channels));
+        // Preserve empty PCM decoding for diagnostics and renderer verification.
+        if (count == 0 && excerpt == null) return new([]);
+        excerpt ??= new();
+        double duration = excerpt.Validate(mediaDuration);
+        int begin = (int)Math.Round(excerpt.StartSeconds * rate);
+        count = Math.Min(count - begin, (int)Math.Round(duration * rate));
+        data = data.Slice(begin * align, count * align);
         var mono = new float[count];
         for (int i = 0; i < count; i++)
         {

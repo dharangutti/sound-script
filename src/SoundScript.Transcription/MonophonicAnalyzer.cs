@@ -5,6 +5,22 @@ public sealed class MonophonicAnalyzer : IMusicalAnalyzer
 {
     public const int Hop = 160;
     public const int Window = 640;
+    private static readonly double[] Hann = Enumerable.Range(0,Window).Select(i=>.5-.5*Math.Cos(2*Math.PI*i/(Window-1))).ToArray();
+    /// <summary>Energy at the detected fundamental relative to its first six harmonics.
+    /// A chord can fool YIN with a common subharmonic absent from the signal.</summary>
+    public static double FundamentalShare(ReadOnlySpan<float> samples, double frequency)
+    {
+        double fundamental=0,total=0;
+        for (int harmonic=1;harmonic<=6;harmonic++)
+        {
+            double coefficient=2*Math.Cos(2*Math.PI*frequency*harmonic/AnalysisAudio.SampleRate),a=0,b=0;
+            for (int i=0;i<Window;i++) { double next=samples[i]*Hann[i]+coefficient*a-b; b=a; a=next; }
+            double energy=Math.Max(0,a*a+b*b-coefficient*a*b);
+            if (harmonic==1) fundamental=energy;
+            total+=energy;
+        }
+        return total<=1e-15?0:fundamental/total;
+    }
     public static (double? Frequency, double Periodicity) DetectPitch(ReadOnlySpan<float> samples)
     {
         if (samples.Length < Window) return (null, 0);
@@ -67,15 +83,16 @@ public sealed class MonophonicAnalyzer : IMusicalAnalyzer
         for (int i=0;i<rms.Length;i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            double? frequency=null; double periodicity=0;
+            double? frequency=null, fundamentalShare=null; double periodicity=0;
             if (rms[i]>=threshold)
             {
                 Array.Clear(window);
                 int start=i*Hop-Window/2+Hop/2;
                 for (int j=0;j<Window;j++) if (start+j>=0 && start+j<samples.Length) window[j]=samples[start+j];
                 (frequency,periodicity)=DetectPitch(window);
+                if (frequency.HasValue) fundamentalShare=FundamentalShare(window,frequency.Value);
             }
-            yield return new(i*.01,frequency,periodicity,rms[i]);
+            yield return new(i*.01,frequency,periodicity,rms[i],fundamentalShare);
         }
     }
 
