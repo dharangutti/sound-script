@@ -4,6 +4,11 @@ Import a solo melody from media, obtain editable SoundScript, and measure its
 reconstruction through the existing renderer. This is an additive, local monophonic
 subsystem; it does not reconstruct arbitrary mixed songs.
 
+An opt-in [experimental melody extraction mode](melody-extraction.md) attempts a
+single dominant line from more complex audio. Use `--mode extract-melody` or select
+the mode in Playground. Monophonic remains the default; all extraction results are
+experimental, and most real piano excerpts tested still reject.
+
 ## CLI
 
 ```powershell

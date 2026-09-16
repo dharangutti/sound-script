@@ -29,6 +29,16 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
         var active = frames.Where(f => f.Rms >= threshold).ToArray();
         var notes = result.Score.Tracks.SelectMany(t => t.Notes).ToArray();
         var usable = SupportedNotes(result);
+        if (result.Extraction is { } extraction)
+        {
+            bool accepted = usable.Length > 0 && extraction.MelodyCoverage >= .5 && result.Score.DurationSeconds >= .1;
+            return new(accepted ? "Experimental" : "Rejected", notes.Length,
+                active.Length == 0 ? 0 : active.Count(f => f.Frequency.HasValue) / (double)active.Length,
+                extraction.MelodyCoverage, 0,
+                accepted ? "Experimental dominant line; accompaniment is omitted and the intended melody is not verified. Compare source and generated playback."
+                    : "No defensible dominant line covers at least half of active audio. Competing pitches, octave ambiguity or diffuse energy prevent melody extraction.",
+                0, usable.Length);
+        }
         // Count supported active frames instead of dividing note duration by recording length:
         // intentional rests must not penalize a clear solo phrase.
         double stable = active.Length == 0 ? 0 : active.Count(f => usable.Any(n =>

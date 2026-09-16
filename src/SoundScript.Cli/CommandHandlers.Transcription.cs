@@ -24,7 +24,10 @@ public static partial class CommandHandlers
         Console.WriteLine($"Media duration {media.DurationSeconds:F3} seconds; maximum analysis 120 seconds. Input: {media.SampleRate} Hz, {media.Channels} channels; analysis: mono 16000 Hz.");
         var audio=input.DecodeAsync(args.Input,excerpt,token).GetAwaiter().GetResult();
         int? tempo=args.Value("tempo") is null or "auto"?null:int.Parse(args.Value("tempo")!,System.Globalization.CultureInfo.InvariantCulture);
-        var result=new MonophonicTranscriber().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??"flute")),token);
+        var mode = args.Value("mode") == "extract-melody" ? TranscriptionMode.ExtractMelody : TranscriptionMode.Monophonic;
+        var result=new TranscriptionEngine().Transcribe(audio,new(tempo,InstrumentMap.Resolve(args.Value("instrument")??"flute")),mode,token);
+        if (result.Extraction is { } extraction)
+            Console.WriteLine($"Extract Melody (Experimental): {extraction.ExtractedNoteCount} notes; melody coverage {extraction.MelodyCoverage:P1}; mean spectral share {extraction.MeanSpectralShare:P1}; competing pitches {extraction.CompetingPitchFraction:P1}; octave uncertainty {extraction.OctaveUncertainFraction:P1}; {extraction.RejectedSections.Count} rejected sections (see report).");
         var suitability = result.Suitability;
         Console.WriteLine($"{suitability.Status}: {suitability.DetectedNotes} detected notes, {suitability.UsableNotes} usable candidates; stable active coverage {suitability.StableActiveFraction:P1}; voiced active coverage {suitability.VoicedActiveFraction:P1}. {suitability.Reason}");
         if (!suitability.CanGenerate)
@@ -46,7 +49,7 @@ public static partial class CommandHandlers
                 ComparisonMeaning="Source comparison uses detected observations as a proxy; it is not independent source ground truth." },AnalysisJsonOutput.Options);
             AtomicOutput.Write(report,p=>File.WriteAllText(p,json),p=>{using var document=JsonDocument.Parse(File.ReadAllText(p));});
         }
-        Console.WriteLine($"{suitability.Status}: generated {generationScore.Tracks[0].Notes.Count} notes; tempo hypothesis {result.Score.TempoMap[0].Bpm:0} BPM; detected-note periodicity {result.PitchConfidence:P1}; timing grid fit {result.TimingGridFit:P1}.");
+        Console.WriteLine($"{suitability.Status}: generated {generationScore.Tracks[0].Notes.Count} notes; tempo hypothesis {result.Score.TempoMap[0].Bpm:0} BPM; {(result.Extraction == null ? "detected-note periodicity" : "selected spectral share")} {result.PitchConfidence:P1}; timing grid fit {result.TimingGridFit:P1}.");
         Console.WriteLine($"Render comparison: pitch recall {validation.ScoreToRenderedAudio.PitchAccuracy:P1}, missed {validation.ScoreToRenderedAudio.MissedNotes}, extra {validation.ScoreToRenderedAudio.ExtraNotes}.");
         foreach(var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
         Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");

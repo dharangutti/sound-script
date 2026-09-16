@@ -30,7 +30,7 @@ public sealed class MonophonicTranscriber(IMusicalAnalyzer? analyzer = null)
             if (smoothed[begin]>=0 && segmentEnd-frames[begin].Seconds>=.06-1e-8)
             {
                 var range=frames.Skip(begin).Take(i-begin).ToArray();
-                segments.Add((smoothed[begin],frames[begin].Seconds,segmentEnd,range.Average(f=>f.Periodicity),range.Average(f=>f.Rms)));
+                segments.Add((smoothed[begin],frames[begin].Seconds,segmentEnd,range.Average(f=>f.SpectralShare ?? f.Periodicity),range.Average(f=>f.Rms)));
             }
             begin=i;
         }
@@ -48,7 +48,9 @@ public sealed class MonophonicTranscriber(IMusicalAnalyzer? analyzer = null)
                 if (quantizedEnd>quantizedStart) { start=quantizedStart; end=quantizedEnd; }
             }
             start=Math.Max(previousEnd,start); end=Math.Max(start+.01,end);
-            notes.Add(new(n.Pitch,n.Start,n.End-n.Start,start,end-start,Math.Clamp((int)Math.Round(100*Math.Sqrt(n.Rms)),35,110),new(n.Confidence,"Mean YIN periodicity (1-CMND), not a calibrated probability")));
+            notes.Add(new(n.Pitch,n.Start,n.End-n.Start,start,end-start,Math.Clamp((int)Math.Round(100*Math.Sqrt(n.Rms)),35,110),new(n.Confidence,
+                frames.Any(f => f.SpectralShare.HasValue) ? "Mean selected spectral peak energy / total window energy; not periodicity or a correctness probability"
+                    : "Mean YIN periodicity (1-CMND), not a calibrated probability")));
             previousEnd=end;
         }
         var rests=new List<MusicalRest>(); double cursor=0;

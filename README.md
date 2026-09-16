@@ -27,6 +27,9 @@ dotnet run --project src/SoundScript.Cli -- transcribe melody.mp4 --out melody.s
 
 Compressed desktop formats require FFmpeg. The first release supports solo melodies;
 see the [measured accuracy and limitations](docs/transcription-engineering-report.md).
+Opt-in [experimental melody extraction](docs/melody-extraction.md) is available via
+`--mode extract-melody` and the Playground mode selector. It preserves only one
+dominant line and conservatively rejects ambiguous material.
 
 The repository includes a temporal audio/visual composition with source, a
 browser demo, and a decode-verified WebM export:

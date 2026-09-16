@@ -18,12 +18,18 @@ public sealed record MusicalTrack(string Name, string Role, int Instrument,
 public sealed record MusicalScore(IReadOnlyList<TempoPoint> TempoMap, Meter? Meter, KeyEstimate? Key,
     IReadOnlyList<MusicalTrack> Tracks, IReadOnlyList<Section> Sections, double DurationSeconds);
 public sealed record AnalysisDiagnostic(string Code, string Message);
-public sealed record PitchFrame(double Seconds, double? Frequency, double Periodicity, double Rms, double? FundamentalShare = null);
+public sealed record PitchFrame(double Seconds, double? Frequency, double Periodicity, double Rms, double? FundamentalShare = null)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public double? SpectralShare { get; init; }
+}
 public sealed record MusicalObservations(IReadOnlyList<PitchFrame> Frames, double DurationSeconds,
     IReadOnlyList<AnalysisDiagnostic> Diagnostics);
 public sealed record TranscriptionResult(MusicalScore Score, MusicalObservations Observations,
     double PitchConfidence, double TimingGridFit, IReadOnlyList<AnalysisDiagnostic> Diagnostics)
 {
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public MelodyExtractionEvidence? Extraction { get; init; }
     public TranscriptionSuitability Suitability => TranscriptionSuitability.Evaluate(this);
 }
 public sealed record TranscriptionOptions(int? Tempo = null, int Instrument = 73, bool Quantize = true);

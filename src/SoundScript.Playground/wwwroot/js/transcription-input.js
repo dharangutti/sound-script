@@ -1,6 +1,10 @@
 // Browser codec boundary. The decoded buffer stays local and is replaced on each import.
 window.SoundScriptTranscription = (() => {
-    let buffer;
+    let buffer, originalUrl;
+    function stopOriginal() { document.getElementById("transcription-original")?.pause(); }
+    function releaseOriginal() {
+        if (originalUrl) { stopOriginal(); URL.revokeObjectURL(originalUrl); originalUrl = null; }
+    }
     async function inspect(bytes) {
         buffer = null;
         const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -27,5 +31,7 @@ window.SoundScriptTranscription = (() => {
         for (let i = 0; i < mono.length; i++) mono[i] = Math.max(-1, Math.min(1, mono[i]));
         return new Uint8Array(mono.buffer);
     }
-    return { inspect, excerpt, clear() { buffer = null; }, async decode(bytes) { await inspect(bytes); return excerpt(); } };
+    return { inspect, excerpt, stopOriginal,
+        sourceUrl(bytes, type) { releaseOriginal(); originalUrl = URL.createObjectURL(new Blob([bytes], { type: type || "audio/wav" })); return originalUrl; },
+        clear() { buffer = null; releaseOriginal(); }, async decode(bytes) { await inspect(bytes); return excerpt(); } };
 })();
