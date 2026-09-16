@@ -5,6 +5,7 @@ obj/
 .vs/
 output.mid
 artifacts/
+node_modules/
 **/TestResults/
 # docs/playground/*
 !docs/playground/.gitkeep

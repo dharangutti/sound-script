@@ -5,3 +5,6 @@
 # even though nothing about the code's behavior changed.
 src/SoundScript.Tests/*.cs text eol=lf
 src/SoundScript.Tests/Golden/*.txt text eol=lf
+
+# Generated boot metadata refers to exact bytes, including JavaScript newlines.
+docs/playground/** -text

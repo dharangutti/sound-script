@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -27,8 +27,13 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Publish Playground to docs/playground
-        run: dotnet publish src/SoundScript.Playground/SoundScript.Playground.csproj -c Release
+      - name: Setup Node for integrity verification
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test integrity verifier
+        run: node --test scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
 
       - name: Stamp homepage version badge from Directory.Build.props
         shell: pwsh
@@ -56,12 +61,24 @@ jobs:
         shell: pwsh
         run: ./scripts/update-site-metrics.ps1
 
+      - name: Build and verify a fresh site artifact
+        shell: pwsh
+        run: ./scripts/publish-site.ps1
+
+      - name: Validate browser startup before deployment
+        run: |
+          npm ci --prefix scripts
+          npx --prefix scripts playwright install --with-deps chromium
+          node scripts/verify-playground-startup.cjs artifacts/site/playground
+
       - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./artifacts/site
           publish_branch: gh-pages
+          keep_files: false
+          enable_jekyll: false
 
       - name: Remind Pages source setting
         if: success()

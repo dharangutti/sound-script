@@ -50,5 +50,5 @@ public class PlaygroundPublishTests
 
     private static string GetPlaygroundPublishDir() =>
         Environment.GetEnvironmentVariable("SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR")
-        ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../docs/playground"));
+        ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/playground"));
 }
