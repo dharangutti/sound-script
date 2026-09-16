@@ -24,6 +24,24 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
             if (track.Chords?.Count > 0 || track.LegitimateText != null || track.Notes.Any(n => n.Expression?.Count > 0))
                 throw new NotSupportedException("Chord, lyric and expression emission requires an extended output writer.");
             var node = new TrackNode { Name = track.Name };
+            if (track.Percussion != null)
+            {
+                if (track.Notes.Count > 0) throw new NotSupportedException("Keep pitched notes and percussion in separate tracks.");
+                double hitCursor = 0;
+                foreach (var hit in track.Percussion.OrderBy(h => h.StartBeat))
+                {
+                    if (!Enum.IsDefined(hit.Sound) || !double.IsFinite(hit.StartBeat) || !double.IsFinite(hit.DurationBeats) ||
+                        hit.StartBeat < hitCursor - 1e-7 || hit.DurationBeats <= 0 || hit.Velocity is < 1 or > 127 ||
+                        track.Rests.Any(r => r.StartBeat < hit.StartBeat + hit.DurationBeats - 1e-7 && r.StartBeat + r.DurationBeats > hit.StartBeat + 1e-7))
+                        throw new NotSupportedException("Invalid, overlapping percussion events or rests.");
+                    AddRest(node, hit.StartBeat - hitCursor);
+                    node.Body.Add(new HitNode { Sound = hit.Sound, DurationBeats = hit.DurationBeats, Velocity = hit.Velocity });
+                    hitCursor = hit.StartBeat + hit.DurationBeats;
+                }
+                AddRest(node, track.Rests.Select(r => r.StartBeat + r.DurationBeats).DefaultIfEmpty(hitCursor).Max() - hitCursor);
+                ast.Statements.Add(node);
+                continue;
+            }
             node.Body.Add(new InstrumentNode { ProgramNumber = track.Instrument });
             double cursor = 0;
             foreach (var note in track.Notes.OrderBy(n => n.StartBeat))

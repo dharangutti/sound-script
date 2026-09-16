@@ -60,7 +60,7 @@ public sealed class SourceAnalysis
             analysis.Diagnostics.Add(Cli.Diagnostics.Warning(message, path, location, "SS2101"));
         var nodes = Walk(loaded.Program.Statements).ToArray();
         CheckRecursion(loaded.Program);
-        var waveOnly = nodes.Any(n => n is SpeakNode or SampleNode or EffectNode);
+        var waveOnly = nodes.Any(n => n is SpeakNode or SampleNode or EffectNode or HitNode);
         var visual = nodes.Any(n => n is VisualNode or VisualWaitNode or AudioSyncNode);
         analysis.Timeline = VisualInterpreter.Interpret(loaded.Program);
         var metadata = analysis.Metadata;
@@ -77,11 +77,11 @@ public sealed class SourceAnalysis
             metadata.AudioBackend = "wave";
             metadata.Tempo = adapted.TempoMap.GetBpmAt(0);
             metadata.TrackCount = adapted.Tracks.Count;
-            metadata.NoteCount = adapted.Tracks.Values.Sum(t => t.Count);
-            metadata.EventCount = metadata.NoteCount + adapted.SampleOverlays.Count;
+            metadata.NoteCount = adapted.Tracks.Values.Sum(t => t.Count(n => n.Percussion == null));
+            metadata.EventCount = adapted.Tracks.Values.Sum(t => t.Count) + adapted.SampleOverlays.Count;
             var endSamples = adapted.Tracks.Values.SelectMany(t => t).Select(n =>
                 Math.Max(0, Math.Round(n.StartTimeSeconds * WavWriter.SampleRate)) +
-                Math.Ceiling((Math.Max(0, n.DurationSeconds) + Math.Max(0, n.Timbre.Envelope.Release)) * WavWriter.SampleRate)).DefaultIfEmpty(0).Max();
+                Math.Ceiling((Math.Max(0, n.DurationSeconds) + (n.Percussion is { } sound ? SoundScript.Wave.Synthesis.PercussionRenderer.TailSeconds(sound) : Math.Max(0, n.Timbre.Envelope.Release))) * WavWriter.SampleRate)).DefaultIfEmpty(0).Max();
             foreach (var overlay in adapted.SampleOverlays)
             {
                 // Media's established profile resolves samples from the process working directory.

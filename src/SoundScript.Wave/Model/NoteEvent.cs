@@ -14,6 +14,8 @@ public record NoteEvent(
     TimbreParams Timbre
 )
 {
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public SoundScript.Core.PercussionSound? Percussion { get; init; }
     public SoundScript.Core.Performance.PerformanceIntent? PerformanceIntent { get; init; }
     public SoundScript.Core.Performance.PerformanceShape? Performance { get; init; }
     public int PerformanceVoice { get; init; }

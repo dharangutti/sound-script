@@ -62,6 +62,12 @@ public static class SsPrinter
             case NoteNode note:
                 AppendLine(sb, indentLevel, FormatNote(note));
                 break;
+            case HitNode hit:
+                if (!Enum.IsDefined(hit.Sound) || !double.IsFinite(hit.DurationBeats) || hit.DurationBeats <= 0 || hit.Velocity is < 1 or > 127)
+                    throw new NotSupportedException("Invalid percussion sound, duration or velocity.");
+                AppendLine(sb, indentLevel, "hit " + hit.Sound.ToString().ToLowerInvariant() + " :" +
+                    hit.DurationBeats.ToString(CultureInfo.InvariantCulture) + (hit.Velocity is { } v ? " v" + v : ""));
+                break;
             case RestNode rest:
                 if (!double.IsFinite(rest.Rest.DurationBeats) || rest.Rest.DurationBeats <= 0)
                     throw new NotSupportedException("Rest duration must be positive and finite.");

@@ -4,6 +4,15 @@ Import a solo melody from media, obtain editable SoundScript, and measure its
 reconstruction through the existing renderer. This is an additive, local monophonic
 subsystem; it does not reconstruct arbitrary mixed songs.
 
+An opt-in [experimental melody extraction mode](melody-extraction.md) attempts a
+single dominant line from more complex audio. Use `--mode extract-melody` or select
+the mode in Playground. Monophonic remains the default; all extraction results are
+experimental, and most real piano excerpts tested still reject.
+
+[Polyphonic / Piano (Experimental)](polyphonic-transcription.md) adds simultaneous
+notes through `--mode polyphonic` and a third Playground mode. It uses parallel
+SoundScript tracks, with separate polyphony/ambiguity diagnostics and comparisons.
+
 ## CLI
 
 ```powershell
@@ -131,3 +140,7 @@ Run browser bridge checks with `node --test scripts/transcription-browser-input.
 Real MP3/MP4 tests require FFmpeg; they explicitly skip if it cannot be found.
 See [engineering report](transcription-engineering-report.md) and
 [fixture ground truth and measurements](../src/SoundScript.Tests/Golden/transcription/measurements.json).
+
+[Mixed audio / musical roles](mixed-audio-transcription.md) supports selected melody, harmony and bass estimates without claiming audio stem separation.
+
+[Percussion / rhythm](percussion-transcription.md) adds a separate transient path and genuine unpitched hit events, with no drum-resonance note inference.

@@ -14,19 +14,38 @@ public sealed record MusicalRest(double StartBeat, double DurationBeats);
 public sealed record MusicalChord(double StartBeat, double DurationBeats, IReadOnlyList<int> Pitches, Evidence Evidence);
 public sealed record MusicalTrack(string Name, string Role, int Instrument,
     IReadOnlyList<MusicalNote> Notes, IReadOnlyList<MusicalRest> Rests,
-    IReadOnlyList<MusicalChord>? Chords = null, string? LegitimateText = null);
+    IReadOnlyList<MusicalChord>? Chords = null, string? LegitimateText = null)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<PercussionHit>? Percussion { get; init; }
+}
 public sealed record MusicalScore(IReadOnlyList<TempoPoint> TempoMap, Meter? Meter, KeyEstimate? Key,
     IReadOnlyList<MusicalTrack> Tracks, IReadOnlyList<Section> Sections, double DurationSeconds);
 public sealed record AnalysisDiagnostic(string Code, string Message);
-public sealed record PitchFrame(double Seconds, double? Frequency, double Periodicity, double Rms, double? FundamentalShare = null);
+public sealed record PitchFrame(double Seconds, double? Frequency, double Periodicity, double Rms, double? FundamentalShare = null)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public double? SpectralShare { get; init; }
+}
 public sealed record MusicalObservations(IReadOnlyList<PitchFrame> Frames, double DurationSeconds,
     IReadOnlyList<AnalysisDiagnostic> Diagnostics);
 public sealed record TranscriptionResult(MusicalScore Score, MusicalObservations Observations,
     double PitchConfidence, double TimingGridFit, IReadOnlyList<AnalysisDiagnostic> Diagnostics)
 {
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public MelodyExtractionEvidence? Extraction { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public PolyphonicEvidence? Polyphony { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public MixedEvidence? Mixed { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public PercussionEvidence? Percussion { get; init; }
     public TranscriptionSuitability Suitability => TranscriptionSuitability.Evaluate(this);
 }
-public sealed record TranscriptionOptions(int? Tempo = null, int Instrument = 73, bool Quantize = true);
+public sealed record TranscriptionOptions(int? Tempo = null, int Instrument = 73, bool Quantize = true)
+{
+    public IReadOnlyList<string>? Roles { get; init; }
+}
 
 public interface ITranscriptionInputAdapter<in T>
 {

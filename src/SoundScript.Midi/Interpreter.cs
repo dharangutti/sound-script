@@ -167,6 +167,8 @@ public static class Interpreter
                         "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
                         "phoneme-level frequency mapping. Render this file through the wave backend instead.");
+                case HitNode:
+                    throw new NotSupportedException("Unpitched hit playback currently requires the wave backend; MIDI percussion mapping is not implemented.");
                 case SampleNode:
                     throw new NotSupportedException(
                         "'sample' (external WAV stem overlay) is a wave-backend directive " +
@@ -365,6 +367,8 @@ public static class Interpreter
                         "'speak' (phoneme/prosody tone mapping) is a wave-backend directive " +
                         "(SoundScript.Wave, .ssw files): the MIDI backend cannot express " +
                         "phoneme-level frequency mapping. Render this file through the wave backend instead.");
+                case HitNode:
+                    throw new NotSupportedException("Unpitched hit playback currently requires the wave backend; MIDI percussion mapping is not implemented.");
                 case SampleNode:
                     throw new NotSupportedException(
                         "'sample' (external WAV stem overlay) is a wave-backend directive " +

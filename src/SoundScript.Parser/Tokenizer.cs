@@ -92,7 +92,8 @@ public sealed class Tokenizer
         ["vocal"] = TokenType.Vocal,
         ["effect"] = TokenType.Effect,
         ["speak"] = TokenType.Speak,
-        ["sample"] = TokenType.Sample
+        ["sample"] = TokenType.Sample,
+        ["hit"] = TokenType.Hit
     };
 
     private static readonly string[] ChordSuffixes =

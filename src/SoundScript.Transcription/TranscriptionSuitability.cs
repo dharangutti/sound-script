@@ -13,6 +13,7 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     public static MusicalScore ScoreForGeneration(TranscriptionResult result)
     {
         if (!result.Suitability.CanGenerate) throw new InvalidDataException(result.Suitability.Reason);
+        if (result.Polyphony != null || result.Percussion != null) return result.Score;
         var notes=SupportedNotes(result);
         if (result.Score.Tracks.Count!=1) throw new NotSupportedException("Monophonic generation requires one track.");
         if (notes.Length==result.Score.Tracks[0].Notes.Count) return result.Score;
@@ -24,11 +25,38 @@ public sealed record TranscriptionSuitability(string Status, int DetectedNotes, 
     }
     public static TranscriptionSuitability Evaluate(TranscriptionResult result)
     {
+        if (result.Percussion is { } percussion)
+            return new(percussion.Hits.Count > 0 ? "Experimental" : "Rejected", 0, 0, 0, 0,
+                percussion.Hits.Count > 0 ? "Experimental unpitched rhythm estimate; spectral classes and tempo need review." : "No supported decaying transients; no rhythm generated.", 0, 0);
+        if (result.Polyphony is { } poly)
+        {
+            int count = result.Score.Tracks.Sum(t => t.Notes.Count);
+            bool accepted = count > 0 && poly.StableActiveCoverage >= .5 && poly.AmbiguousFrameFraction < .5;
+            if (result.Mixed != null)
+                return new(accepted ? "Experimental" : "Rejected", count, poly.StableActiveCoverage,
+                    poly.StableActiveCoverage, 0, accepted ? "Experimental symbolic roles; source isolation and lead/bass identity are not verified. Unsupported mixture content is omitted."
+                        : "No supported notes in the selected roles, or insufficient stable mixture evidence.", poly.MeanFundamentalShare, count);
+            return new(accepted ? "Experimental" : "Rejected", poly.DetectedNotes, poly.StableActiveCoverage,
+                poly.StableActiveCoverage, 0, accepted
+                    ? "Experimental simultaneous-pitch reconstruction. Harmonics, quiet notes and sustain remain uncertain; compare the original excerpt and generated voices."
+                    : "Insufficient stable polyphonic evidence: diffuse, dense or ambiguous sections prevent a defensible reconstruction.",
+                poly.MeanFundamentalShare, poly.DetectedNotes);
+        }
         var frames = result.Observations.Frames;
         double threshold = Math.Max(.003, frames.Select(f => f.Rms).DefaultIfEmpty().Max() * .035);
         var active = frames.Where(f => f.Rms >= threshold).ToArray();
         var notes = result.Score.Tracks.SelectMany(t => t.Notes).ToArray();
         var usable = SupportedNotes(result);
+        if (result.Extraction is { } extraction)
+        {
+            bool accepted = usable.Length > 0 && extraction.MelodyCoverage >= .5 && result.Score.DurationSeconds >= .1;
+            return new(accepted ? "Experimental" : "Rejected", notes.Length,
+                active.Length == 0 ? 0 : active.Count(f => f.Frequency.HasValue) / (double)active.Length,
+                extraction.MelodyCoverage, 0,
+                accepted ? "Experimental dominant line; accompaniment is omitted and the intended melody is not verified. Compare source and generated playback."
+                    : "No defensible dominant line covers at least half of active audio. Competing pitches, octave ambiguity or diffuse energy prevent melody extraction.",
+                0, usable.Length);
+        }
         // Count supported active frames instead of dividing note duration by recording length:
         // intentional rests must not penalize a clear solo phrase.
         double stable = active.Length == 0 ? 0 : active.Count(f => usable.Any(n =>

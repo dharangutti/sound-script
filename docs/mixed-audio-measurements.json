@@ -1,0 +1,149 @@
+[
+  {
+    "File": "latin-jazz-0.json",
+    "Excerpt": {
+      "StartSeconds": 0,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Roles": [
+      {
+        "Role": "melody",
+        "Selected": true,
+        "DetectedNotes": 14,
+        "MeanRankAgreement": 0.9910714285714286,
+        "Method": "Pitch >= C4 and at least three semitones above others in >=80% of its observed frames; not verified lead identity"
+      },
+      {
+        "Role": "harmony",
+        "Selected": true,
+        "DetectedNotes": 38,
+        "MeanRankAgreement": 0.7227251463706572,
+        "Method": "Remaining simultaneous notes; rank ambiguity is retained as harmony, not a named chord or stem"
+      },
+      {
+        "Role": "bass",
+        "Selected": true,
+        "DetectedNotes": 22,
+        "MeanRankAgreement": 1,
+        "Method": "Pitch <= G3 and strictly lowest supported note in >=80% of its observed frames; not instrument recognition"
+      }
+    ],
+    "UnsupportedFrameFraction": 0.2591093117408907,
+    "RoundTrip": {
+      "ReferenceNotes": 74,
+      "DetectedNotes": 72,
+      "MatchedNotes": 71,
+      "MissedNotes": 3,
+      "ExtraNotes": 1,
+      "OctaveErrors": 0,
+      "NotePrecision": 0.9861111111111112,
+      "NoteRecall": 0.9594594594594594,
+      "OnsetMaeSeconds": 0.026807511737089205,
+      "DurationMaeSeconds": 0.10431924882629105,
+      "ChordTonePrecision": 0.6908579465541491,
+      "ChordToneRecall": 0.9614405950283809,
+      "SimultaneousGroupingAgreement": 0.38681655595298897
+    },
+    "ListeningReview": "Deferred; no human judgment supplied"
+  },
+  {
+    "File": "latin-jazz-30.json",
+    "Excerpt": {
+      "StartSeconds": 30,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Roles": [
+      {
+        "Role": "melody",
+        "Selected": true,
+        "DetectedNotes": 17,
+        "MeanRankAgreement": 1,
+        "Method": "Pitch >= C4 and at least three semitones above others in >=80% of its observed frames; not verified lead identity"
+      },
+      {
+        "Role": "harmony",
+        "Selected": true,
+        "DetectedNotes": 43,
+        "MeanRankAgreement": 0.6468624954861716,
+        "Method": "Remaining simultaneous notes; rank ambiguity is retained as harmony, not a named chord or stem"
+      },
+      {
+        "Role": "bass",
+        "Selected": true,
+        "DetectedNotes": 20,
+        "MeanRankAgreement": 1,
+        "Method": "Pitch <= G3 and strictly lowest supported note in >=80% of its observed frames; not instrument recognition"
+      }
+    ],
+    "UnsupportedFrameFraction": 0.174,
+    "RoundTrip": {
+      "ReferenceNotes": 80,
+      "DetectedNotes": 79,
+      "MatchedNotes": 74,
+      "MissedNotes": 6,
+      "ExtraNotes": 5,
+      "OctaveErrors": 0,
+      "NotePrecision": 0.9367088607594937,
+      "NoteRecall": 0.925,
+      "OnsetMaeSeconds": 0.02839143927059582,
+      "DurationMaeSeconds": 0.10462719309671119,
+      "ChordTonePrecision": 0.7086268470106842,
+      "ChordToneRecall": 0.916467525373381,
+      "SimultaneousGroupingAgreement": 0.38676446875487297
+    },
+    "ListeningReview": "Deferred; no human judgment supplied"
+  },
+  {
+    "File": "latin-jazz-60.json",
+    "Excerpt": {
+      "StartSeconds": 60,
+      "DurationSeconds": 10
+    },
+    "Generated": true,
+    "Status": "Experimental",
+    "Roles": [
+      {
+        "Role": "melody",
+        "Selected": true,
+        "DetectedNotes": 20,
+        "MeanRankAgreement": 0.99,
+        "Method": "Pitch >= C4 and at least three semitones above others in >=80% of its observed frames; not verified lead identity"
+      },
+      {
+        "Role": "harmony",
+        "Selected": true,
+        "DetectedNotes": 32,
+        "MeanRankAgreement": 0.7413441206518799,
+        "Method": "Remaining simultaneous notes; rank ambiguity is retained as harmony, not a named chord or stem"
+      },
+      {
+        "Role": "bass",
+        "Selected": true,
+        "DetectedNotes": 17,
+        "MeanRankAgreement": 1,
+        "Method": "Pitch <= G3 and strictly lowest supported note in >=80% of its observed frames; not instrument recognition"
+      }
+    ],
+    "UnsupportedFrameFraction": 0.184,
+    "RoundTrip": {
+      "ReferenceNotes": 69,
+      "DetectedNotes": 64,
+      "MatchedNotes": 61,
+      "MissedNotes": 8,
+      "ExtraNotes": 3,
+      "OctaveErrors": 0,
+      "NotePrecision": 0.953125,
+      "NoteRecall": 0.8840579710144928,
+      "OnsetMaeSeconds": 0.03840017776022121,
+      "DurationMaeSeconds": 0.13616830930278492,
+      "ChordTonePrecision": 0.6823702089992624,
+      "ChordToneRecall": 0.9212710022644378,
+      "SimultaneousGroupingAgreement": 0.3028890847289947
+    },
+    "ListeningReview": "Deferred; no human judgment supplied"
+  }
+]

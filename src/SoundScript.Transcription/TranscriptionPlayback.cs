@@ -17,6 +17,6 @@ public static class TranscriptionPlayback
         var samples = WavReader.ReadMono(stream);
         // Same absolute activity floor as analysis; avoid treating dither/roundoff as music.
         if (samples.Length == 0 || !samples.Any(x => Math.Abs(x) >= .003f))
-            throw new InvalidDataException("Generated playback contains no audible signal. Add usable pitched notes before playback or export.");
+            throw new InvalidDataException("Generated playback contains no audible signal. Add usable notes or percussion hits before playback or export.");
     }
 }

@@ -1,0 +1,1739 @@
+[
+  {
+    "Name": "arpeggio",
+    "Tempo": 120,
+    "Duration": 1.9,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.3,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.6,
+        "DurationSeconds": 0.3,
+        "StartBeat": 1.2,
+        "DurationBeats": 0.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 1,
+        "DurationSeconds": 0.3,
+        "StartBeat": 2,
+        "DurationBeats": 0.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 72,
+        "StartSeconds": 1.4,
+        "DurationSeconds": 0.3,
+        "StartBeat": 2.8,
+        "DurationBeats": 0.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 4,
+      "DetectedNotes": 4,
+      "MatchedNotes": 4,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 4.163336342344337e-17,
+      "ChordTonePrecision": 0.9999999999999998,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 4,
+      "DetectedNotes": 4,
+      "MatchedNotes": 4,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 5.551115123125783e-17,
+      "DurationMaeSeconds": 6.938893903907228e-17,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.9999999999999998,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelodySuitability": "Experimental",
+    "Polyphony": {
+      "DetectedNotes": 4,
+      "MaximumSimultaneousNotes": 1,
+      "ChordCount": 0,
+      "MeanActivePolyphony": 1,
+      "PolyphonicCoverage": 0,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.8351029384178695,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": []
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 4,
+      "DetectedNotes": 4,
+      "MatchedNotes": 4,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08,
+      "ChordTonePrecision": 0.7894736842105263,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    }
+  },
+  {
+    "Name": "dyad",
+    "Tempo": 120,
+    "Duration": 1.2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 2,
+      "MatchedNotes": 2,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 1
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 2,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 2,
+      "MaximumSimultaneousNotes": 2,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 2,
+      "PolyphonicCoverage": 1,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.43520023424487586,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.7,
+          "Pitches": [
+            60,
+            67
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 2,
+      "MatchedNotes": 2,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.8974358974358974,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.8974358974358974
+    }
+  },
+  {
+    "Name": "harmonics",
+    "Tempo": 120,
+    "Duration": 1.5,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1,
+        "StartBeat": 0.4,
+        "DurationBeats": 2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 1,
+      "DetectedNotes": 1,
+      "MatchedNotes": 1,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 1,
+      "DetectedNotes": 1,
+      "MatchedNotes": 1,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelodySuitability": "Experimental",
+    "Polyphony": {
+      "DetectedNotes": 1,
+      "MaximumSimultaneousNotes": 1,
+      "ChordCount": 0,
+      "MeanActivePolyphony": 1,
+      "PolyphonicCoverage": 0,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.8793062163470718,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": []
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 1,
+      "DetectedNotes": 1,
+      "MatchedNotes": 1,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.9259259259259258,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    }
+  },
+  {
+    "Name": "major-triad",
+    "Tempo": 120,
+    "Duration": 1.2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 1
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 3,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 3,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 3,
+      "PolyphonicCoverage": 1,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.2875719692676381,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.7,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.8974358974358974,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.8974358974358974
+    }
+  },
+  {
+    "Name": "melody-block",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 48,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 3,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 55,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 3,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 3,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 76,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.4,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 79,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.4,
+        "StartBeat": 1.4,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 74,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.4,
+        "StartBeat": 2.4,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 6,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.013333333333333327,
+      "DurationMaeSeconds": 0.08333333333333323,
+      "ChordTonePrecision": 0.9642857142857143,
+      "ChordToneRecall": 0.9473684210526317,
+      "SimultaneousGroupingAgreement": 0.826666666666667
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 1,
+      "MatchedNotes": 1,
+      "MissedNotes": 5,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 0.16666666666666666,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.009999999999999898,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.06842105263157897,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 6,
+      "MaximumSimultaneousNotes": 4,
+      "ChordCount": 4,
+      "MeanActivePolyphony": 3.7333333333333334,
+      "PolyphonicCoverage": 0.9333333333333333,
+      "StableActiveCoverage": 0.96,
+      "MeanFundamentalShare": 0.2465201483033285,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 1,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.44,
+          "Pitches": [
+            48,
+            55,
+            60,
+            76
+          ]
+        },
+        {
+          "StartSeconds": 0.64,
+          "DurationSeconds": 0.040000000000000036,
+          "Pitches": [
+            48,
+            55,
+            60
+          ]
+        },
+        {
+          "StartSeconds": 0.68,
+          "DurationSeconds": 0.45999999999999985,
+          "Pitches": [
+            48,
+            55,
+            60,
+            79
+          ]
+        },
+        {
+          "StartSeconds": 1.14,
+          "DurationSeconds": 0.4600000000000002,
+          "Pitches": [
+            48,
+            55,
+            60,
+            74
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 6,
+      "DetectedNotes": 6,
+      "MatchedNotes": 5,
+      "MissedNotes": 1,
+      "ExtraNotes": 1,
+      "OctaveErrors": 0,
+      "NotePrecision": 0.8333333333333334,
+      "NoteRecall": 0.8333333333333334,
+      "OnsetMaeSeconds": 0.007999999999999962,
+      "DurationMaeSeconds": 0.096,
+      "ChordTonePrecision": 0.8993055555555557,
+      "ChordToneRecall": 0.925,
+      "SimultaneousGroupingAgreement": 0.5333333333333333
+    }
+  },
+  {
+    "Name": "melody-broken",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 48,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.45,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.9,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 55,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.45,
+        "StartBeat": 1.4,
+        "DurationBeats": 0.9,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.45,
+        "StartBeat": 2.4,
+        "DurationBeats": 0.9,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 76,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.8,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.6,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 74,
+        "StartSeconds": 1.1,
+        "DurationSeconds": 0.55,
+        "StartBeat": 2.2,
+        "DurationBeats": 1.1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.03200000000000001,
+      "DurationMaeSeconds": 0.04799999999999995,
+      "ChordTonePrecision": 0.9149659863945578,
+      "ChordToneRecall": 0.996296296296296,
+      "SimultaneousGroupingAgreement": 0.8652482269503545
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 2,
+      "MatchedNotes": 2,
+      "MissedNotes": 3,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 0.4,
+      "OnsetMaeSeconds": 0.020000000000000018,
+      "DurationMaeSeconds": 0.275,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.16666666666666663,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 5,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 6,
+      "MeanActivePolyphony": 2.0136986301369864,
+      "PolyphonicCoverage": 0.958904109589041,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.41820980059629465,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.44,
+          "Pitches": [
+            48,
+            76
+          ]
+        },
+        {
+          "StartSeconds": 0.64,
+          "DurationSeconds": 0.040000000000000036,
+          "Pitches": [
+            48,
+            55,
+            76
+          ]
+        },
+        {
+          "StartSeconds": 0.68,
+          "DurationSeconds": 0.33999999999999997,
+          "Pitches": [
+            55,
+            76
+          ]
+        },
+        {
+          "StartSeconds": 1.06,
+          "DurationSeconds": 0.07999999999999985,
+          "Pitches": [
+            55,
+            74
+          ]
+        },
+        {
+          "StartSeconds": 1.14,
+          "DurationSeconds": 0.040000000000000036,
+          "Pitches": [
+            55,
+            60,
+            74
+          ]
+        },
+        {
+          "StartSeconds": 1.18,
+          "DurationSeconds": 0.45999999999999996,
+          "Pitches": [
+            60,
+            74
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 5,
+      "DetectedNotes": 5,
+      "MatchedNotes": 5,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.023999999999999976,
+      "DurationMaeSeconds": 0.12000000000000002,
+      "ChordTonePrecision": 0.8305084745762711,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.7012987012987014
+    }
+  },
+  {
+    "Name": "minor-triad",
+    "Tempo": 120,
+    "Duration": 1.2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 57,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 1
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 3,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 3,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 3,
+      "PolyphonicCoverage": 1,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.28771928037002126,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.7,
+          "Pitches": [
+            57,
+            60,
+            64
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.8974358974358974,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.8974358974358974
+    }
+  },
+  {
+    "Name": "monophonic",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.4,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.8,
+        "DurationSeconds": 0.4,
+        "StartBeat": 1.6,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 1.4,
+        "DurationSeconds": 0.4,
+        "StartBeat": 2.8,
+        "DurationBeats": 0.8,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 9.251858538542972e-17,
+      "ChordTonePrecision": 0.9999999999999998,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 7.401486830834377e-17,
+      "DurationMaeSeconds": 9.251858538542972e-17,
+      "ChordTonePrecision": 0.9999999999999998,
+      "ChordToneRecall": 0.9999999999999998,
+      "SimultaneousGroupingAgreement": null
+    },
+    "ExtractMelodySuitability": "Experimental",
+    "Polyphony": {
+      "DetectedNotes": 3,
+      "MaximumSimultaneousNotes": 1,
+      "ChordCount": 0,
+      "MeanActivePolyphony": 1,
+      "PolyphonicCoverage": 0,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.8426847532818548,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": []
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.07999999999999997,
+      "ChordTonePrecision": 0.8333333333333335,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": null
+    }
+  },
+  {
+    "Name": "octaves",
+    "Tempo": 120,
+    "Duration": 1.2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 72,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.7,
+        "StartBeat": 0.4,
+        "DurationBeats": 1.4,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 2,
+      "MatchedNotes": 2,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 1
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 2,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 2,
+      "MaximumSimultaneousNotes": 2,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 2,
+      "PolyphonicCoverage": 1,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.40911806408626517,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 1,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.7,
+          "Pitches": [
+            60,
+            72
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 2,
+      "DetectedNotes": 1,
+      "MatchedNotes": 1,
+      "MissedNotes": 1,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 0.5,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.8974358974358974,
+      "ChordToneRecall": 0.5,
+      "SimultaneousGroupingAgreement": 0
+    }
+  },
+  {
+    "Name": "overlap",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1,
+        "StartBeat": 0.4,
+        "DurationBeats": 2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.5,
+        "DurationSeconds": 1,
+        "StartBeat": 1,
+        "DurationBeats": 2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.8,
+        "DurationSeconds": 1,
+        "StartBeat": 1.6,
+        "DurationBeats": 2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.040000000000000015,
+      "DurationMaeSeconds": 0.04666666666666671,
+      "ChordTonePrecision": 0.9554140127388536,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.8679245283018867
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 2,
+      "MatchedNotes": 1,
+      "MissedNotes": 2,
+      "ExtraNotes": 1,
+      "OctaveErrors": 0,
+      "NotePrecision": 0.5,
+      "NoteRecall": 0.3333333333333333,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.7,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.21000000000000005,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 3,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 3,
+      "MeanActivePolyphony": 1.9625,
+      "PolyphonicCoverage": 0.6625,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.43245765825430055,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.44,
+          "DurationSeconds": 0.3,
+          "Pitches": [
+            60,
+            64
+          ]
+        },
+        {
+          "StartSeconds": 0.74,
+          "DurationSeconds": 0.48,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        },
+        {
+          "StartSeconds": 1.22,
+          "DurationSeconds": 0.28,
+          "Pitches": [
+            64,
+            67
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.03333333333333335,
+      "DurationMaeSeconds": 0.1266666666666667,
+      "ChordTonePrecision": 0.8920454545454544,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.7540983606557375
+    }
+  },
+  {
+    "Name": "repeated-legato",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 0.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.5,
+        "StartBeat": 1.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.5,
+        "StartBeat": 1.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.5,
+        "StartBeat": 1.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 2.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 2.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.5,
+        "StartBeat": 2.4,
+        "DurationBeats": 1,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 9,
+      "MatchedNotes": 9,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0.013333333333333345,
+      "DurationMaeSeconds": 0.013333333333333345,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 1
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 9,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 9,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 3,
+      "PolyphonicCoverage": 1,
+      "StableActiveCoverage": 1,
+      "MeanFundamentalShare": 0.28098692985858964,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 1.5,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 8,
+      "MatchedNotes": 8,
+      "MissedNotes": 1,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 0.8888888888888888,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.09250000000000003,
+      "ChordTonePrecision": 0.9493670886075949,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.9493670886075949
+    }
+  },
+  {
+    "Name": "repeated",
+    "Tempo": 120,
+    "Duration": 1.8,
+    "GroundTruth": [
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 0.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.35,
+        "StartBeat": 1.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.35,
+        "StartBeat": 1.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 0.7,
+        "DurationSeconds": 0.35,
+        "StartBeat": 1.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 2.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 2.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 67,
+        "StartSeconds": 1.2,
+        "DurationSeconds": 0.35,
+        "StartBeat": 2.4,
+        "DurationBeats": 0.7,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 9,
+      "MatchedNotes": 9,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.009999999999999917,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.9714285714285718,
+      "SimultaneousGroupingAgreement": 0.9714285714285719
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 9,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 9,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 3,
+      "MeanActivePolyphony": 2.8333333333333335,
+      "PolyphonicCoverage": 0.9444444444444444,
+      "StableActiveCoverage": 0.9444444444444444,
+      "MeanFundamentalShare": 0.2753161674266309,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 0.34,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        },
+        {
+          "StartSeconds": 0.7,
+          "DurationSeconds": 0.3400000000000001,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        },
+        {
+          "StartSeconds": 1.2,
+          "DurationSeconds": 0.3400000000000001,
+          "Pitches": [
+            60,
+            64,
+            67
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 9,
+      "DetectedNotes": 9,
+      "MatchedNotes": 9,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.8095238095238094,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.8095238095238095
+    }
+  },
+  {
+    "Name": "sustained",
+    "Tempo": 120,
+    "Duration": 2,
+    "GroundTruth": [
+      {
+        "MidiPitch": 55,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.6,
+        "StartBeat": 0.4,
+        "DurationBeats": 3.2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 60,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.6,
+        "StartBeat": 0.4,
+        "DurationBeats": 3.2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      },
+      {
+        "MidiPitch": 64,
+        "StartSeconds": 0.2,
+        "DurationSeconds": 1.6,
+        "StartBeat": 0.4,
+        "DurationBeats": 3.2,
+        "Velocity": 80,
+        "PitchEvidence": {
+          "Confidence": 1,
+          "Method": "Authored synthetic ground truth"
+        },
+        "Expression": null
+      }
+    ],
+    "Polyphonic": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 1,
+      "ChordToneRecall": 0.95,
+      "SimultaneousGroupingAgreement": 0.95
+    },
+    "ExtractMelody": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 0,
+      "MatchedNotes": 0,
+      "MissedNotes": 3,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 0,
+      "NoteRecall": 0,
+      "OnsetMaeSeconds": null,
+      "DurationMaeSeconds": null,
+      "ChordTonePrecision": 0,
+      "ChordToneRecall": 0,
+      "SimultaneousGroupingAgreement": 0
+    },
+    "ExtractMelodySuitability": "Rejected",
+    "Polyphony": {
+      "DetectedNotes": 3,
+      "MaximumSimultaneousNotes": 3,
+      "ChordCount": 1,
+      "MeanActivePolyphony": 2.85,
+      "PolyphonicCoverage": 0.95,
+      "StableActiveCoverage": 0.95,
+      "MeanFundamentalShare": 0.2916256916997772,
+      "AmbiguousFrameFraction": 0,
+      "OctaveAmbiguousFraction": 0,
+      "Groups": [
+        {
+          "StartSeconds": 0.2,
+          "DurationSeconds": 1.52,
+          "Pitches": [
+            55,
+            60,
+            64
+          ]
+        }
+      ]
+    },
+    "RoundTrip": {
+      "ReferenceNotes": 3,
+      "DetectedNotes": 3,
+      "MatchedNotes": 3,
+      "MissedNotes": 0,
+      "ExtraNotes": 0,
+      "OctaveErrors": 0,
+      "NotePrecision": 1,
+      "NoteRecall": 1,
+      "OnsetMaeSeconds": 0,
+      "DurationMaeSeconds": 0.08000000000000007,
+      "ChordTonePrecision": 0.95,
+      "ChordToneRecall": 1,
+      "SimultaneousGroupingAgreement": 0.95
+    }
+  }
+]
