@@ -14,11 +14,13 @@ repository evidence only; local packing does not publish to nuget.org.
 - Version: 13.0.0
 - Project: src/SoundScript/SoundScript.csproj
 - Target framework: net10.0
-- Package size: fill from the final nupkg.
+- Package size: 5,297,334 bytes for artifacts/nuget/SoundScript.13.0.0.nupkg
+  (11,106 bytes for the accompanying symbols package).
 - Contents: facade and bundled SoundScript libraries, transcription, XML docs,
   README, icon, licenses, repository metadata, and the packaged wordbank corpus.
-- XML documentation: verify the facade XML is present in the package; bundled
-  library XML status should be recorded from package inspection.
+- XML documentation: SoundScript.xml is present in lib/net10.0. The bundled
+  component XML files are generated during build but are not currently included
+  in the nupkg.
 
 ## Public API
 
@@ -73,3 +75,55 @@ Reconstruction consistency does not establish ground-truth accuracy.
 - Final HEAD: fill after all milestone commits.
 - Working tree: fill after final git status --short.
 - Suggested PR title: Prepare SoundScript for NuGet distribution, developer docs and real-world samples
+
+## Ready-to-paste PR description
+
+### What user problem does this solve?
+
+SoundScript now has a discoverable .NET package and an onboarding path for
+developers who want deterministic audio/media generation or editable source
+from suitable recordings.
+
+### What changed?
+
+The V13 SoundScript facade bundles the reusable libraries behind stable compile,
+render, and transcription entry points. The CLI and Playground continue to use
+the existing language and rendering behavior.
+
+### NuGet packaging
+
+Package ID SoundScript, version 13.0.0, targets net10.0. It includes the
+facade, bundled libraries, transcription, package README, icon, license
+metadata, repository metadata, and wordbank corpus. The manually triggered
+publishing workflow defaults publish to false.
+
+### Documentation
+
+The documentation hub now routes readers through quick start, common tasks,
+.NET API, NuGet, application samples, language, CLI, transcription, and
+architecture guides. README and homepage copy describe both source-to-media
+and audio-to-editable-source workflows.
+
+### Application demos
+
+DynamicAudio demonstrates event-driven cues; DevOpsSonification maps test/build
+state to deterministic audio; TestFixtureGenerator creates repeatable WAV/MIDI
+fixtures through the facade.
+
+### Validation
+
+Replace this line with the exact package, consumer, sample, CLI, .NET, Node,
+browser, Release, and determinism results from the final validation run.
+
+### Compatibility and determinism
+
+The change is additive. Existing CLI commands, language semantics, Playground
+behavior, and renderer paths remain in use. Identical source, options, assets,
+and engine version produce repeatable output.
+
+### Known limitations
+
+Transcription modes beyond Monophonic are experimental. Mixed roles are
+symbolic estimates rather than isolated stems, percussion is Wave-only because
+MIDI rejects unpitched hits, and round-trip consistency is not ground-truth
+accuracy.
