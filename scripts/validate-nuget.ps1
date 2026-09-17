@@ -159,6 +159,8 @@ try {
     foreach ($requiredRootEntry in @('README.md', 'icon.png')) {
         if ($entryNames -notcontains $requiredRootEntry) { Fail "Package is missing root entry '$requiredRootEntry'." }
     }
+    $iconEntry = $entries | Where-Object { $_.FullName -eq 'icon.png' } | Select-Object -First 1
+    if ($null -ne $iconEntry -and $iconEntry.Length -gt 1MB) { Fail "Package icon is larger than 1 MiB ($($iconEntry.Length) bytes)." }
     if (-not (@($entryNames | Where-Object { $_ -match '(?i)^LICENSE(?:/|$)' }).Count -gt 0)) {
         Fail 'Package does not contain a bundled LICENSE file.'
     }
@@ -226,6 +228,19 @@ try {
     foreach ($lib in $libEntries) {
         $base = $lib.FullName.Substring(0, $lib.FullName.Length - 4)
         if ($entryNames -notcontains "$base.xml") { Fail "XML documentation is missing for $($lib.FullName)." }
+        $dllPath = Join-Path $extractRoot ($lib.FullName -replace '/', [string][IO.Path]::DirectorySeparatorChar)
+        $dllBytes = [IO.File]::ReadAllBytes($dllPath)
+        if ($dllBytes.Length -lt 2 -or $dllBytes[0] -ne 0x4d -or $dllBytes[1] -ne 0x5a) { Fail "Bundled assembly is not a valid PE image: $($lib.FullName)." }
+        $xmlPath = Join-Path $extractRoot (($base + '.xml') -replace '/', [string][IO.Path]::DirectorySeparatorChar)
+        try {
+            [xml]$assemblyXml = Get-Content -LiteralPath $xmlPath -Raw
+            $documentedNameNode = $assemblyXml.SelectSingleNode("//*[local-name()='assembly']/*[local-name()='name']")
+            $documentedName = if ($null -eq $documentedNameNode) { '' } else { [string]$documentedNameNode.InnerText }
+            $expectedName = [IO.Path]::GetFileNameWithoutExtension($lib.Name)
+            if ($documentedName -ne $expectedName) { Fail "XML documentation '$($base).xml' identifies '$documentedName'; expected '$expectedName'." }
+        } catch {
+            Fail "XML documentation '$($base).xml' is not well-formed: $($_.Exception.Message)"
+        }
     }
     Pass 'Checked XML documentation for every bundled assembly'
 
@@ -234,11 +249,22 @@ try {
         Fail "Companion symbol package is missing: $symbolPackagePath"
     } else {
         $symbolArchive = [IO.Compression.ZipFile]::OpenRead($symbolPackagePath)
-        try { $symbolEntryNames = @($symbolArchive.Entries | ForEach-Object FullName) }
+        try {
+            $symbolEntryNames = @($symbolArchive.Entries | ForEach-Object FullName)
+            $symbolExtractRoot = Join-Path $tempRoot 'symbols'
+            [IO.Compression.ZipFile]::ExtractToDirectory($symbolPackagePath, $symbolExtractRoot)
+        }
         finally { $symbolArchive.Dispose() }
         foreach ($lib in $libEntries) {
             $symbolName = $lib.FullName.Substring(0, $lib.FullName.Length - 4) + '.pdb'
             if ($symbolEntryNames -notcontains $symbolName) { Fail "Portable symbols are missing from .snupkg for $($lib.FullName)." }
+            else {
+                $pdbPath = Join-Path $symbolExtractRoot ($symbolName -replace '/', [string][IO.Path]::DirectorySeparatorChar)
+                $pdbBytes = [IO.File]::ReadAllBytes($pdbPath)
+                if ($pdbBytes.Length -lt 4 -or [Text.Encoding]::ASCII.GetString($pdbBytes, 0, 4) -ne 'BSJB') {
+                    Fail "Portable symbols entry '$symbolName' does not have a Portable PDB BSJB header."
+                }
+            }
         }
         Pass 'Checked portable symbols in the companion .snupkg for every bundled assembly'
     }
