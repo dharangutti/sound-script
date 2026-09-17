@@ -58,9 +58,9 @@ require a separate FFmpeg installation.
 ## CLI relationship and links
 
 This library complements the existing `soundscript` CLI; it neither installs nor
-changes CLI commands. The package contains the reusable libraries, the public
-SoundScript facade's XML IntelliSense documentation, and the vocal corpus,
-without CLI or Playground binaries.
+changes CLI commands. The package contains the reusable libraries, XML
+IntelliSense documentation for the bundled public assemblies, and the vocal
+corpus, without CLI or Playground binaries.
 
 - [Quick start](https://soundscript.net/doc.html?p=quick-start.md)
 - [.NET API guide](https://soundscript.net/doc.html?p=dotnet-api.md)
