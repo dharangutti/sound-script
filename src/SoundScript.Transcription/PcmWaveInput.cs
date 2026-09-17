@@ -2,15 +2,29 @@ using System.Buffers.Binary;
 
 namespace SoundScript.Transcription;
 
-/// <summary>Strict RIFF PCM/IEEE-float decoder; unsupported encodings can use the desktop FFmpeg adapter.</summary>
+/// <summary>Decodes RIFF PCM or IEEE-float WAV bytes into analysis audio.</summary>
+/// <remarks>Native decoding accepts PCM 8/16/24/32-bit and IEEE float32 WAV files.
+/// Other encodings can use the desktop FFmpeg adapter before calling the transcription API.</remarks>
 public sealed class PcmWaveInput : ITranscriptionInputAdapter<byte[]>
 {
+    /// <summary>Decodes a WAV byte array asynchronously.</summary>
+    /// <param name="input">Complete RIFF/WAVE file contents.</param>
+    /// <param name="cancellationToken">Token checked before decoding.</param>
+    /// <returns>A task containing mono, 16 kHz analysis audio.</returns>
+    /// <exception cref="InvalidDataException">The WAV container or samples are malformed.</exception>
     public Task<AnalysisAudio> DecodeAsync(byte[] input, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(Decode(input));
     }
 
+    /// <summary>Decodes a WAV file and optionally selects a bounded excerpt.</summary>
+    /// <param name="bytes">Complete RIFF/WAVE file contents.</param>
+    /// <param name="excerpt">Optional start and duration in seconds.</param>
+    /// <param name="inspected">Optional callback receiving source duration, sample rate, and channel count.</param>
+    /// <returns>Mono floating-point PCM normalized to <see cref="AnalysisAudio.SampleRate"/>.</returns>
+    /// <exception cref="InvalidDataException">The WAV container or samples are malformed.</exception>
+    /// <exception cref="NotSupportedException">The WAV encoding is not one of the native PCM/float formats.</exception>
     public static AnalysisAudio Decode(byte[] bytes, MediaExcerpt? excerpt = null, Action<MediaInfo>? inspected = null)
     {
         var span = bytes.AsSpan();
@@ -74,6 +88,12 @@ public sealed class PcmWaveInput : ITranscriptionInputAdapter<byte[]>
         return Normalize(mono, rate);
     }
 
+    /// <summary>Validates PCM and resamples it to the analyzer's 16 kHz contract.</summary>
+    /// <param name="samples">Mono floating-point samples in [-1, 1].</param>
+    /// <param name="sampleRate">Source sample rate in Hz.</param>
+    /// <returns>A cloned, validated <see cref="AnalysisAudio"/> buffer.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The sample rate is outside the supported range.</exception>
+    /// <exception cref="InvalidDataException">The samples are invalid or exceed the duration limit.</exception>
     public static AnalysisAudio Normalize(float[] samples, int sampleRate)
     {
         if (sampleRate is < 8000 or > 192000) throw new ArgumentOutOfRangeException(nameof(sampleRate));

@@ -5,8 +5,15 @@ using SoundScript.Parser;
 
 namespace SoundScript.Transcription;
 
+/// <summary>Writes a supported transcription score as a parsed SoundScript program or source string.</summary>
+/// <remarks>The current writer emits a single tempo, pitched monophonic tracks, and percussion tracks.
+/// Meter, key, sections, chords, lyrics, and expression metadata require an extended writer.</remarks>
 public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
 {
+    /// <summary>Converts a supported score to the SoundScript syntax tree.</summary>
+    /// <param name="score">Score to write.</param>
+    /// <returns>A program AST that can be rendered by the existing parser and renderers.</returns>
+    /// <exception cref="NotSupportedException">The score contains metadata or events not supported by this writer.</exception>
     public ProgramNode Write(MusicalScore score)
     {
         if (score.TempoMap.Count != 1 || score.TempoMap[0].Beat != 0 || !double.IsFinite(score.TempoMap[0].Bpm)
@@ -69,21 +76,38 @@ public sealed class SoundScriptOutput : ITranscriptionOutput<ProgramNode>
     {
         if (beats > 1e-7) node.Body.Add(new RestNode { Rest = new NotatedRest { DurationBeats = Math.Round(beats,6) } });
     }
+    /// <summary>Converts a supported score to canonical SoundScript source and reparses it for validation.</summary>
+    /// <param name="score">Score to write.</param>
+    /// <returns>Parseable SoundScript source.</returns>
+    /// <exception cref="NotSupportedException">The score contains metadata or events not supported by this writer.</exception>
     public string Source(MusicalScore score)
     {
         string source = SsPrinter.Print(Write(score));
         _ = Parse(source); // The actual parser is the authority, including identifiers and durations.
         return source;
     }
+    /// <summary>Parses SoundScript source into the canonical program syntax tree.</summary>
+    /// <param name="source">Source text to parse.</param>
+    /// <returns>The parsed program.</returns>
+    /// <exception cref="InvalidOperationException">The source contains invalid SoundScript syntax.</exception>
     public static ProgramNode Parse(string source) => new SoundScript.Parser.Parser(new Tokenizer(source).Tokenize()).Parse();
 }
 
+/// <summary>Projects a transcription score onto a time-ordered list of pitched notes.</summary>
 public sealed class TimelineOutput : ITranscriptionOutput<IReadOnlyList<MusicalNote>>
 {
+    /// <summary>Returns all pitched notes from all tracks ordered by source start time.</summary>
+    /// <param name="score">Score to flatten.</param>
+    /// <returns>An ordered, materialized note list.</returns>
     public IReadOnlyList<MusicalNote> Write(MusicalScore score) => score.Tracks.SelectMany(t => t.Notes).OrderBy(n => n.StartSeconds).ToArray();
 }
+/// <summary>Serializes transcription results as indented JSON.</summary>
 public sealed class AnalysisJsonOutput
 {
+    /// <summary>JSON settings used by <see cref="Write(TranscriptionResult)"/>.</summary>
     public static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
+    /// <summary>Serializes a transcription result, including available evidence and diagnostics.</summary>
+    /// <param name="result">Result to serialize.</param>
+    /// <returns>Indented JSON text.</returns>
     public string Write(TranscriptionResult result) => JsonSerializer.Serialize(result, Options);
 }
