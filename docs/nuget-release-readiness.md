@@ -17,8 +17,8 @@ repository evidence only; local packing does not publish to nuget.org.
 - Package size: pending the authoritative final package-validation run.
 - Contents: facade and bundled SoundScript libraries, transcription, XML docs,
   README, icon, licenses, repository metadata, and the packaged wordbank corpus.
-- XML documentation: final acceptance requires SoundScript.xml and XML files
-  for all bundled public assemblies in lib/net10.0. PDB files belong in the
+- XML documentation: final acceptance requires SoundScript.Api.xml and XML
+  files for all bundled public assemblies in lib/net10.0. PDB files belong in the
   companion symbols package (snupkg). The pre-fix package inspection is not
   release evidence because component XML/PDB coverage was incomplete.
 
