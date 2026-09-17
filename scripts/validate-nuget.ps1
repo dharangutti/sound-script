@@ -12,6 +12,7 @@ $ErrorActionPreference = 'Stop'
 $script:Failures = [System.Collections.Generic.List[string]]::new()
 $script:Warnings = [System.Collections.Generic.List[string]]::new()
 $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$script:PreviousNugetPackages = $env:NUGET_PACKAGES
 $resolvedPackagePath = (Resolve-Path -LiteralPath $PackagePath).Path
 
 function Pass([string] $Message) {
@@ -281,11 +282,16 @@ try {
     <add key="local" value="$escapedFeed" />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
   </packageSources>
+  <packageSourceMapping>
+    <clear />
+    <packageSource key="local"><package pattern="SoundScript" /></packageSource>
+    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+  </packageSourceMapping>
 </configuration>
 "@ | Set-Content -LiteralPath $configPath -Encoding UTF8
 
     $consumerProject = Join-Path $consumerRoot 'Consumer.csproj'
-    Invoke-DotNet @('new', 'console', '--framework', $tfm, '--output', $consumerRoot, '--no-restore') | Out-Null
+    Invoke-DotNet @('new', 'console', '--name', 'Consumer', '--framework', $tfm, '--output', $consumerRoot, '--no-restore') | Out-Null
     $consumerProgram = @'
 using System.Security.Cryptography;
 using SoundScript;
@@ -305,6 +311,7 @@ if (!wav.AsSpan(0, 4).SequenceEqual("RIFF"u8) || !wav.AsSpan(8, 4).SequenceEqual
 if (!midi.AsSpan(0, 4).SequenceEqual("MThd"u8)) throw new Exception("MIDI header check failed.");
 if (!wav.SequenceEqual(optionsWav)) throw new Exception("Options overload changed default WAV output.");
 if (!wav.SequenceEqual(wavAgain) || !midi.SequenceEqual(midiAgain)) throw new Exception("Output is not deterministic.");
+if (transcription.Score.Tracks.Sum(track => track.Notes.Count) <= 0) throw new Exception("Transcription produced no notes.");
 File.WriteAllBytes(Path.Combine(Environment.CurrentDirectory, "consumer.wav"), wav);
 File.WriteAllBytes(Path.Combine(Environment.CurrentDirectory, "consumer.mid"), midi);
 Console.WriteLine($"WAV_BYTES={wav.Length}");
@@ -332,7 +339,7 @@ Console.WriteLine($"TRANSCRIPTION_NOTES={transcription.Score.Tracks.Sum(track =>
         Fail 'Fresh consumer did not write both media outputs.'
     }
 
-    $cachedPackageRoot = Join-Path $nugetCache ("$($packageId.ToLowerInvariant())\$nuspecVersion\lib\$tfm")
+    $cachedPackageRoot = Join-Path (Join-Path (Join-Path (Join-Path $nugetCache $packageId.ToLowerInvariant()) $nuspecVersion) 'lib') $tfm
     foreach ($xmlEntry in @($libEntries | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) + '.xml' })) {
         if (-not (Test-Path -LiteralPath (Join-Path $cachedPackageRoot $xmlEntry))) { Fail "Consumer NuGet cache is missing XML docs '$xmlEntry'." }
     }
@@ -355,7 +362,11 @@ catch {
     Fail $_.Exception.Message
 }
 finally {
-    Remove-Item Env:NUGET_PACKAGES -ErrorAction SilentlyContinue
+    if ($null -eq $script:PreviousNugetPackages) {
+        Remove-Item Env:NUGET_PACKAGES -ErrorAction SilentlyContinue
+    } else {
+        $env:NUGET_PACKAGES = $script:PreviousNugetPackages
+    }
     Write-Host "Validation workspace retained at: $tempRoot"
     if ($script:Warnings.Count -gt 0) { Write-Host "Warnings: $($script:Warnings.Count)" -ForegroundColor Yellow }
     if ($script:Failures.Count -gt 0) {
