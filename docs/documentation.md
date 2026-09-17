@@ -19,6 +19,13 @@ audio-to-code transcription for suitable recordings.
 | Convert suitable audio into editable source | [Transcription](transcription.md) |
 | Understand the implementation boundaries | [Architecture](architecture.md) |
 
+The language reference covers notes, rests, chords, tracks, layers, phrases,
+dynamics, timing, tempo, patterns, vocals, Wave and SoundCSS authoring,
+visuals, synchronization, and the experimental unpitched hit syntax. Its
+dedicated links lead to [Wave grammar](wave-grammar.md), [Vocal](vocal.md),
+[Visual timelines](visual-temporal.md), [SoundCSS](soundcss.md), and
+[Percussion transcription](percussion-transcription.md).
+
 ## Existing reference material
 
 The repository keeps its detailed, versioned references in place. These are

@@ -30,6 +30,10 @@ returns a complete mono PCM WAV; RenderStereoWave() returns a stereo WAV;
 RenderMidi() returns a standard MIDI file. The bytes are ready to write to a
 file, HTTP response, object store, or test fixture.
 
+Each WAV method has a parameterless overload and an overload accepting
+WaveRenderOptions?. The parameterless form uses the entry-file directory when
+available; pass explicit options when selecting sample paths or overlays.
+
 Compilation does not start a CLI process. Syntax errors and parser errors are
 reported when compiling. Backend-specific validation happens while rendering,
 so a script can compile successfully and still be unsuitable for MIDI.
