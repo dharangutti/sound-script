@@ -72,7 +72,8 @@ function Get-ProjectGraph([string] $RootProject) {
         foreach ($reference in @($projectXml.SelectNodes("//*[local-name()='ProjectReference']"))) {
             $include = [string]$reference.Include
             if ([string]::IsNullOrWhiteSpace($include)) { continue }
-            $referencePath = [IO.Path]::GetFullPath((Join-Path $baseDirectory $include))
+            $normalizedInclude = $include -replace '[\\/]', [string][IO.Path]::DirectorySeparatorChar
+            $referencePath = [IO.Path]::GetFullPath((Join-Path $baseDirectory $normalizedInclude))
             if (Test-Path -LiteralPath $referencePath -PathType Leaf) {
                 $pending.Enqueue($referencePath)
             } else {
@@ -81,6 +82,16 @@ function Get-ProjectGraph([string] $RootProject) {
         }
     }
     return @($projects)
+}
+
+function Dependency-VersionMatches([string] $Declared, [string] $ProjectVersion) {
+    if ($Declared -eq $ProjectVersion) { return $true }
+    # NuGet commonly emits an exact project PackageReference as [x,); accept
+    # that equivalent lower-bound form while still rejecting a different floor.
+    if ($Declared -match '^\[(?<minimum>[^,\]]+),') {
+        return $Matches.minimum -eq $ProjectVersion
+    }
+    return $false
 }
 
 $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ("soundscript-nuget-validation-" + [guid]::NewGuid().ToString('N'))
@@ -197,7 +208,7 @@ try {
             foreach ($version in $componentPackages[$id]) {
                 if (-not $nuspecDependencies.ContainsKey($id)) {
                     Fail "Component graph references package '$id' $version, but it is absent from nuspec dependencies."
-                } elseif ($nuspecDependencies[$id] -ne $version) {
+                } elseif (-not (Dependency-VersionMatches $nuspecDependencies[$id] $version)) {
                     Fail "Dependency '$id' is $($nuspecDependencies[$id]) in nuspec but $version in a component project."
                 }
             }
@@ -215,9 +226,22 @@ try {
     foreach ($lib in $libEntries) {
         $base = $lib.FullName.Substring(0, $lib.FullName.Length - 4)
         if ($entryNames -notcontains "$base.xml") { Fail "XML documentation is missing for $($lib.FullName)." }
-        if ($entryNames -notcontains "$base.pdb") { Fail "Portable symbols are missing for $($lib.FullName)." }
     }
-    Pass 'Checked XML documentation and portable symbols for every bundled assembly'
+    Pass 'Checked XML documentation for every bundled assembly'
+
+    $symbolPackagePath = [IO.Path]::ChangeExtension($resolvedPackagePath, '.snupkg')
+    if (-not (Test-Path -LiteralPath $symbolPackagePath -PathType Leaf)) {
+        Fail "Companion symbol package is missing: $symbolPackagePath"
+    } else {
+        $symbolArchive = [IO.Compression.ZipFile]::OpenRead($symbolPackagePath)
+        try { $symbolEntryNames = @($symbolArchive.Entries | ForEach-Object FullName) }
+        finally { $symbolArchive.Dispose() }
+        foreach ($lib in $libEntries) {
+            $symbolName = $lib.FullName.Substring(0, $lib.FullName.Length - 4) + '.pdb'
+            if ($symbolEntryNames -notcontains $symbolName) { Fail "Portable symbols are missing from .snupkg for $($lib.FullName)." }
+        }
+        Pass 'Checked portable symbols in the companion .snupkg for every bundled assembly'
+    }
 
     $env:NUGET_PACKAGES = $nugetCache
     Copy-Item -LiteralPath $resolvedPackagePath -Destination $localFeed -Force
@@ -267,7 +291,12 @@ Console.WriteLine($"TRANSCRIPTION_NOTES={transcription.Score.Tracks.Sum(track =>
     Invoke-DotNet @('add', $consumerProject, 'package', $packageId, '--version', $nuspecVersion, '--no-restore') | Out-Null
     Invoke-DotNet @('restore', $consumerProject, '--configfile', $configPath, '--packages', $nugetCache) | Out-Null
     Invoke-DotNet @('build', $consumerProject, '--no-restore', '-c', 'Release') | Out-Null
-    $consumerOutput = Invoke-DotNet @('run', '--project', $consumerProject, '--no-build', '-c', 'Release')
+    Push-Location $consumerRoot
+    try {
+        $consumerOutput = Invoke-DotNet @('run', '--project', $consumerProject, '--no-build', '-c', 'Release')
+    } finally {
+        Pop-Location
+    }
     if ($consumerOutput -notmatch 'WAV_BYTES=([0-9]+)') { Fail 'Fresh consumer did not report WAV output.' }
     if ($consumerOutput -notmatch 'MIDI_BYTES=([0-9]+)') { Fail 'Fresh consumer did not report MIDI output.' }
     if ($consumerOutput -notmatch 'TRANSCRIPTION_NOTES=([0-9]+)') { Fail 'Fresh consumer did not complete transcription.' }
@@ -281,8 +310,11 @@ Console.WriteLine($"TRANSCRIPTION_NOTES={transcription.Score.Tracks.Sum(track =>
     foreach ($xmlEntry in @($libEntries | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) + '.xml' })) {
         if (-not (Test-Path -LiteralPath (Join-Path $cachedPackageRoot $xmlEntry))) { Fail "Consumer NuGet cache is missing XML docs '$xmlEntry'." }
     }
-    if (Test-Path -LiteralPath (Join-Path $cachedPackageRoot 'SoundScript.xml')) { Pass 'Fresh consumer package cache contains facade XML documentation' }
-    else { Fail 'Fresh consumer package cache is missing SoundScript.xml.' }
+    if (@(Get-ChildItem -LiteralPath $cachedPackageRoot -Filter 'SoundScript*.xml' -File -ErrorAction SilentlyContinue).Count -gt 0) {
+        Pass 'Fresh consumer package cache contains facade XML documentation'
+    } else {
+        Fail 'Fresh consumer package cache is missing facade XML documentation.'
+    }
 
     $consumerBin = Join-Path $consumerRoot 'bin'
     $corpusFiles = @()

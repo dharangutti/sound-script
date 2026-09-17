@@ -48,17 +48,21 @@ jobs:
       - name: Build Release
         run: dotnet build SoundScript.sln -c Release --no-restore
 
+      - name: Publish Playground
+        run: dotnet publish src/SoundScript.Playground -c Release --no-restore -p:PublishDir=${{ github.workspace }}/artifacts/playground/
+
       - name: Run .NET tests (Debug)
+        env:
+          SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR: ${{ github.workspace }}/artifacts/playground
         run: dotnet test src/SoundScript.Tests -c Debug --no-build --logger "trx;LogFileName=tests-debug.trx" --logger "console;verbosity=normal"
 
       - name: Run .NET tests (Release)
+        env:
+          SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR: ${{ github.workspace }}/artifacts/playground
         run: dotnet test src/SoundScript.Tests -c Release --no-build --logger "trx;LogFileName=tests-release.trx" --logger "console;verbosity=normal"
 
       - name: Run Node and browser boundary tests
         run: node --test scripts/transcription-browser-input.test.cjs scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
-
-      - name: Publish Playground
-        run: dotnet publish src/SoundScript.Playground -c Release --no-restore -p:PublishDir=${{ github.workspace }}/artifacts/playground/
 
       - name: Install browser verification dependencies
         run: |

@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>SoundScript.Api</AssemblyName>
+    <AssemblyName>SoundScript.Api</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <PackageId>SoundScript</PackageId>
+    <Title>SoundScript — programmable audio and media</Title>
+    <Authors>Anup Jayant Dharangutti</Authors>
+    <Description>Deterministic audio and media programming for .NET: compile SoundScript, render MIDI and WAV, use vocals and synchronized visuals, and experiment with audio-to-code transcription.</Description>
+    <PackageTags>audio;music;midi;wav;media;transcription;sonification;audio-programming;music-programming;dotnet;soundscript;deterministic</PackageTags>
+    <PackageProjectUrl>https://soundscript.net/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dharangutti/sound-script</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReleaseNotes>https://github.com/dharangutti/sound-script/blob/main/RELEASE_NOTES.md</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeSoundScriptLibraries</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);IncludeSoundScriptSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
+  </PropertyGroup>
+  <!-- One distribution, existing assembly boundaries. PrivateAssets prevents
+       NuGet from inventing dependencies on unpublished component packages. -->
+  <ItemGroup>
+    <ProjectReference Include="../SoundScript.Transcription/SoundScript.Transcription.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../SoundScript.Vocal/SoundScript.Vocal.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../SoundScript.Prosody/SoundScript.Prosody.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../SoundScript.Voice/SoundScript.Voice.csproj" PrivateAssets="all" />
+    <!-- External runtime dependencies of the bundled libraries. Keep versions
+         aligned with the component projects; package validation checks these. -->
+    <PackageReference Include="Melanchall.DryWetMidi" Version="8.0.3" />
+    <PackageReference Include="OggVorbisEncoder" Version="1.2.2" />
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.4" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.5" />
+    <None Include="../../packaging/README.md" Pack="true" PackagePath="/" />
+    <None Include="../../docs/assets/soundscript-logo.png" Pack="true" PackagePath="/icon.png" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/LICENSE" />
+    <None Include="../../wordbank/LICENSE" Pack="true" PackagePath="/licenses/Wordbank-CC0.txt" />
+    <None Include="../SoundScript.Media/Fonts/LICENSE.txt" Pack="true" PackagePath="/licenses/Fonts.txt" />
+    <Content Include="../SoundScript.Wordbank/Data/corpus/**/*" Pack="true" PackagePath="contentFiles/any/any/Data/corpus/%(RecursiveDir)%(Filename)%(Extension)" PackageCopyToOutput="true" BuildAction="None" />
+  </ItemGroup>
+  <Target Name="IncludeSoundScriptLibraries" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_SoundScriptProjectReferenceOutputs Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(ReferenceCopyLocalPaths.Extension)' == '.dll' and $([System.String]::Copy('%(ReferenceCopyLocalPaths.Filename)').StartsWith('SoundScript.'))" />
+      <BuildOutputInPackage Include="@(_SoundScriptProjectReferenceOutputs)" />
+      <BuildOutputInPackage Include="@(_SoundScriptProjectReferenceOutputs)">
+        <TargetPath>%(Filename).xml</TargetPath>
+        <FinalOutputPath>$([System.IO.Path]::ChangeExtension('%(FullPath)', '.xml'))</FinalOutputPath>
+      </BuildOutputInPackage>
+    </ItemGroup>
+  </Target>
+  <Target Name="IncludeSoundScriptSymbols" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_SoundScriptProjectReferenceOutputs Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(ReferenceCopyLocalPaths.Extension)' == '.dll' and $([System.String]::Copy('%(ReferenceCopyLocalPaths.Filename)').StartsWith('SoundScript.'))" />
+      <TfmSpecificDebugSymbolsFile Include="@(_SoundScriptProjectReferenceOutputs)">
+        <TargetPath>%(Filename).pdb</TargetPath>
+        <FinalOutputPath>$([System.IO.Path]::ChangeExtension('%(FullPath)', '.pdb'))</FinalOutputPath>
+        <TargetFramework>$(TargetFramework)</TargetFramework>
+      </TfmSpecificDebugSymbolsFile>
+    </ItemGroup>
+  </Target>
+</Project>
