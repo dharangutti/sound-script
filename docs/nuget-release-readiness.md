@@ -14,13 +14,13 @@ repository evidence only; local packing does not publish to nuget.org.
 - Version: 13.0.0
 - Project: src/SoundScript/SoundScript.csproj
 - Target framework: net10.0
-- Package size: 5,297,334 bytes for artifacts/nuget/SoundScript.13.0.0.nupkg
-  (11,106 bytes for the accompanying symbols package).
+- Package size: pending the authoritative final package-validation run.
 - Contents: facade and bundled SoundScript libraries, transcription, XML docs,
   README, icon, licenses, repository metadata, and the packaged wordbank corpus.
-- XML documentation: SoundScript.xml is present in lib/net10.0. The bundled
-  component XML files are generated during build but are not currently included
-  in the nupkg.
+- XML documentation: final acceptance requires SoundScript.xml and the XML/PDB
+  metadata for bundled public assemblies in lib/net10.0. The pre-fix package
+  inspection is not release evidence because component XML/PDB coverage was
+  incomplete.
 
 ## Public API
 
@@ -43,13 +43,13 @@ public facade.
 
 Record exact results from the final validation run:
 
-- dotnet pack: fill result and package path.
+- dotnet pack: pending authoritative package-validation report.
 - Package size and file list: fill from inspection.
 - Fresh local consumer install and execution: fill result.
-- .NET tests: fill exact passed/failed/skipped totals.
-- Node/browser tests: fill exact totals.
-- Sample builds and runs: fill exact results.
-- Release build and package validation: fill exact results.
+- .NET tests: pending authoritative final report.
+- Node/browser tests: pending authoritative final report.
+- Sample builds and runs: pending authoritative final report.
+- Release build and package validation: pending authoritative final report.
 - CLI smoke tests: fill exact commands and results.
 - Determinism checks: fill exact comparison/hash evidence.
 
