@@ -44,8 +44,9 @@ Wave options, transcription, and expected errors.
 ## Package metadata
 
 The package project records the SoundScript ID, V13 version, .NET 10 target,
-project and repository URLs, MIT license metadata, discoverability tags, XML
-documentation, README, icon, and Source Link metadata. The package README is
+project and repository URLs, MIT license metadata, discoverability tags, the
+public facade's XML documentation, README, icon, and Source Link metadata. The
+package README is
 packaging/README.md and is kept concise for Visual Studio and nuget.org
 discovery; this documentation site contains the longer guides.
 
