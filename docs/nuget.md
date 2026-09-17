@@ -46,9 +46,9 @@ Wave options, transcription, and expected errors.
 The package project records the SoundScript ID, V13 version, .NET 10 target,
 project and repository URLs, MIT license metadata, discoverability tags, XML
 documentation for the public facade and bundled public APIs, README, icon, and
-Source Link metadata. Final package inspection must verify that the XML and PDB
-files for the bundled public assemblies are present alongside the facade. The
-package README is
+Source Link metadata. Final package inspection must verify XML files for all
+bundled public assemblies in the nupkg; PDB files belong in the companion
+symbols package (snupkg). The package README is
 packaging/README.md and is kept concise for Visual Studio and nuget.org
 discovery; this documentation site contains the longer guides.
 
