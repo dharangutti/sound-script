@@ -14,6 +14,10 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Library XML travels with the public package. Existing advanced types
+         remain public for compatibility; document entry points incrementally. -->
+    <GenerateDocumentationFile Condition="'$(MSBuildProjectName)' != 'SoundScript.Tests' and '$(MSBuildProjectName)' != 'SoundScript.Playground' and '$(MSBuildProjectName)' != 'SoundScript.Web' and '$(MSBuildProjectName)' != 'SoundScript.Cli' and '$(MSBuildProjectName)' != 'SoundScript.Cli.TestFfmpeg'">true</GenerateDocumentationFile>
+    <NoWarn Condition="'$(MSBuildProjectName)' != 'SoundScript'">$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
