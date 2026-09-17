@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoundScript\SoundScript.csproj" />
     <ProjectReference Include="..\SoundScript.Cli.TestFfmpeg\SoundScript.Cli.TestFfmpeg.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
     <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
