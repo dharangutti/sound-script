@@ -5,6 +5,11 @@ This checklist prepares a SoundScript release without publishing anything.
 version, label, and release name. Update its three release properties together,
 then describe the user-visible change in `RELEASE_NOTES.md`.
 
+The public library package is the single `SoundScript` project at
+`src/SoundScript/SoundScript.csproj`. It targets `net10.0`, bundles the reusable
+component assemblies, and includes transcription. The CLI package and CLI
+release archives remain separate products.
+
 ## Verify from a clean checkout
 
 Use the SDK selected by `global.json` and run the complete suite before a
@@ -20,6 +25,20 @@ The test workflow runs this suite on Windows, Ubuntu, and macOS. The CLI release
 workflow produces self-contained archives for Windows x64, Linux x64, macOS
 x64, and macOS arm64. Its archives are named with the ref/version and runtime
 identifier and each has a SHA-256 checksum.
+
+## Pack and smoke-test the SoundScript library locally
+
+Pack the library to a local source and inspect it before any external release:
+
+```sh
+dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
+```
+
+The `.nupkg` should contain the `SoundScript` facade, bundled SoundScript
+assemblies, XML documentation, package README, icon, license files, and
+repository metadata. Install it only from the local source in a fresh
+`net10.0` consumer as described in [NuGet](nuget.md). This does not publish to
+nuget.org.
 
 ## Pack and smoke-test the .NET tool locally
 
@@ -49,14 +68,16 @@ identifier, and `soundscript` tool command.
 
 Do these only after explicit release approval:
 
-1. Confirm ownership of the `SoundScript.Cli` package ID and configure the
-   NuGet.org API key in the release environment.
-2. Review the version, release notes, local package smoke test, four runtime
+1. Confirm ownership of the `SoundScript` and `SoundScript.Cli` package IDs and
+   configure the `NUGET_API_KEY` repository secret in the release environment.
+2. Review the version, release notes, local library and tool package smoke tests, four runtime
    archives, and their checksums.
-3. Push an approved `v<version>` tag to run the release workflow, then verify
-   the resulting GitHub Release and artifacts.
-4. Publish the reviewed `.nupkg` to NuGet.org and verify the public global
-   installation command in a clean environment.
+3. Use the manually triggered NuGet workflow only when publication is intended;
+   its `publish` input defaults to `false` and must be explicitly set to
+   `true`.
+4. Verify the resulting public package and the CLI global installation command
+   in a clean environment.
 
 The local build, pack, and tool-install commands above do not publish a
-package, push a tag, create a GitHub Release, or deploy the website.
+package, push a tag, create a GitHub Release, or deploy the website. No package
+is considered published merely because a local `.nupkg` exists.

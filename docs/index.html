@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundScript — Deterministic Audio and Media Programming Language</title>
-    <meta name="description" content="SoundScript is an independent open-source temporal media language for deterministic MIDI, WAV, visual timelines, and browser-playable audio-visual clips. Use the .NET 10 CLI or browser playground, entirely offline and without an account.">
-    <meta name="keywords" content="SoundScript, music DSL, music programming language, text to MIDI, MIDI generator, deterministic music, C# music library, music as code, industrial audio cues, browser MIDI playground">
+    <meta name="description" content="SoundScript is a deterministic programming language and .NET toolkit for MIDI, WAV, vocals, synchronized media, and experimental audio-to-code transcription.">
+    <meta name="keywords" content="SoundScript, music DSL, music programming language, audio to code, text to MIDI, MIDI generator, deterministic music, C# music library, NuGet audio, music as code, sonification">
     <meta name="author" content="Anup Jayant Dharangutti">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://soundscript.net/">
@@ -14,7 +14,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SoundScript">
     <meta property="og:title" content="SoundScript — Deterministic Audio and Media Programming Language">
-    <meta property="og:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 10 CLI and client-side browser playground.">
+    <meta property="og:description" content="Write audio and media like code, then turn suitable recordings back into editable SoundScript with the .NET toolkit, CLI, or Playground.">
     <meta property="og:url" content="https://soundscript.net/">
     <meta property="og:locale" content="en_US">
     <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png">
@@ -23,7 +23,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="SoundScript — Deterministic Audio and Media Programming Language">
-    <meta name="twitter:description" content="Write versionable audio programs that compile to deterministic MIDI or WAV. Open-source .NET 10 CLI and browser playground.">
+    <meta name="twitter:description" content="Write audio and media like code, then turn suitable recordings back into editable SoundScript with the .NET toolkit, CLI, or Playground.">
     <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
     <meta name="twitter:image:alt" content="SoundScript logo">
 
@@ -813,14 +813,16 @@
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
             <div class="badge"><!--VERSION_BADGE-->Version: V13 — Media-to-SoundScript Transcription<!--/VERSION_BADGE--></div>
-            <h1>Write audio like <span>code</span></h1>
+            <h1>Write audio like <span>code</span> — edit it back</h1>
             <p class="lead">
-                SoundScript is an independent open-source audio and media programming language. Write timed visuals, melodies, phrases,
-                orchestration, vocal cues, and industrial sonification as plain text; compile them to deterministic
-                MIDI, WAV, or a browser-playable audio-visual clip with the .NET CLI or a client-side browser playground.
+                SoundScript is a deterministic programming language and .NET toolkit for programmable audio and media. Write timed visuals,
+                melodies, vocal cues, and sonification as plain text; compile them to deterministic MIDI, WAV, or synchronized media,
+                or transcribe suitable audio into editable SoundScript with one of five analysis modes.
             </p>
             <div class="cta-row">
                 <a class="btn btn-primary" href="playground/">Open the Playground</a>
+                <a class="btn btn-secondary" href="doc.html?p=nuget.md">Use the NuGet package</a>
+                <a class="btn btn-secondary" href="doc.html?p=quick-start.md">Read the Quick Start</a>
                 <a class="btn btn-secondary" href="playground/#visual-workspace-tab">Try Visual Timeline Export</a>
                 <a class="btn btn-secondary" href="doc.html?p=user-guide.md">Read the User Guide</a>
                 <a class="btn btn-secondary" href="https://github.com/dharangutti/sound-script">View on GitHub</a>
@@ -1261,19 +1263,20 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="documentation" aria-labelledby="documentation-title">
                 <h2 id="documentation-title">Documentation</h2>
                 <div class="grid-2">
-                    <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=user-guide.md"><strong>User Guide</strong></a><br><a href="doc.html?p=SoundScript.md">Documentation hub</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
+                    <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=quick-start.md"><strong>Quick Start</strong></a><br><a href="doc.html?p=documentation.md">Documentation hub</a><br><a href="doc.html?p=nuget.md">NuGet package</a><br><a href="doc.html?p=dotnet-api.md">.NET API guide</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
+                    <article class="card"><h3>Application integration</h3><p><a href="doc.html?p=application-samples.md">Application samples</a><br><a href="doc.html?p=common-tasks.md">Common tasks</a><br><a href="doc.html?p=use-cases.md">Use cases</a><br><a href="doc.html?p=cli.md">CLI reference</a></p></article>
                     <article class="card"><h3>Language &amp; CLI</h3><p><a href="doc.html?p=language-reference.md">Language reference</a><br><a href="doc.html?p=cli.md">CLI reference</a><br><a href="doc.html?p=notation.md">Notation engine</a><br><a href="doc.html?p=expressive-notation.md">Expressive notation</a></p></article>
                     <article class="card"><h3>Audio/Visual — V10/V11</h3><p><a href="doc.html?p=whats-new-v11.md">V11 media export</a><br><a href="doc.html?p=visual-temporal.md">V10 timing and supported primitives</a><br><a href="doc.html?p=use-cases.md">Audio/Visual use cases</a><br><a href="doc.html?p=visual-temporal.md">Temporal media export</a><br><a href="playground/#visual-workspace-tab">Audio/Visual Playground</a><br><a href="doc.html?p=examples.md">Runnable examples</a></p></article>
                     <article class="card"><h3>Wave &amp; Vocals</h3><p><a href="doc.html?p=wave-grammar.md">Wave grammar</a><br><a href="doc.html?p=vocal.md">Vocal tracks</a><br><a href="doc.html?p=whats-new-v8.md">V8 vocal stems</a><br><a href="doc.html?p=playback-quality.md">Playback quality</a></p></article>
                     <article class="card"><h3>Composition</h3><p><a href="doc.html?p=text-to-melody.md">Text-to-melody</a><br><a href="doc.html?p=phrases.md">Phrases</a><br><a href="doc.html?p=orchestration.md">Orchestration</a><br><a href="doc.html?p=tempo-automation.md">Tempo automation</a></p></article>
-                    <article class="card"><h3>Engine Internals</h3><p><a href="doc.html?p=architecture.md">Architecture</a><br><a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br><a href="doc.html?p=timbre-engine.md">Timbre engine</a><br><a href="doc.html?p=whats-new-v1.2.md">v1.2 foundation</a></p></article>
+                    <article class="card"><h3>Engine Internals</h3><p><a href="doc.html?p=architecture.md">Architecture</a><br><a href="doc.html?p=pipeline.md">Interpreter pipeline</a><br><a href="doc.html?p=timbre-engine.md">Timbre engine</a><br><a href="doc.html?p=releasing.md">Release checklist</a></p></article>
                 </div>
             </section>
 
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V13</span><div><strong>Media-to-SoundScript Transcription</strong><span class="release-label">Current</span><br>Import a solo melody into editable SoundScript with a canonical musical model, deterministic monophonic analysis, CLI support, a dedicated Transcription Playground tab, and measured round-trip validation. <a href="doc.html?p=transcription.md">Usage and limitations →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V13</span><div><strong>Media-to-SoundScript Transcription</strong><span class="release-label">Current</span><br>Convert suitable media into editable SoundScript through Monophonic, Extract Melody, Polyphonic / Piano, Mixed Audio / Roles, or Percussion / Rhythm analysis. The last four modes are experimental and report conservative evidence. <a href="doc.html?p=transcription.md">Usage and limitations →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><br>SoundScript now targets .NET 10 and broadens conventional notation with the full MIDI pitch and General MIDI program ranges, extended harmony, dotted rhythm, tuplets, grace notes, and expanded dynamics—while keeping the deterministic MIDI, Wave, SoundCSS, voice, and temporal-media workflows compatible. <a href="doc.html?p=musical-completeness.md">Capability details →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>
@@ -1297,7 +1300,8 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <a href="/industrial/">Industrial Audio</a> ·
                 <a href="doc.html?p=transcription.md">What's New in V13</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
-                <a href="doc.html?p=SoundScript.md">Documentation</a> ·
+                <a href="doc.html?p=documentation.md">Documentation</a> ·
+                <a href="doc.html?p=nuget.md">NuGet</a> ·
                 <a href="/contact/">Contact</a>
             </p>
             <p style="margin-top:0.5rem;">Independent Open Source Project · MIT License · Deterministic Audio and Media Programming Language</p>
