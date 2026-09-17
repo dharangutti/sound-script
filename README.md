@@ -1,17 +1,20 @@
 # SoundScript
 
-Write deterministic music and media as code.
+Write audio and media like code — and turn suitable audio back into editable
+SoundScript.
 
 [![Tests](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml/badge.svg)](https://github.com/dharangutti/sound-script/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-SoundScript is a programming language for writing deterministic music and
-temporal media as plain text. Its `.ss`, `.ssw`, and `.ssv` scripts compile to
-reproducible MIDI, WAV, and WebM outputs. The cross-platform `soundscript` CLI
-validates and inspects source, renders audio, and exports temporal media.
+SoundScript is a deterministic programming language and .NET toolkit for
+programmable audio and media. Its `.ss`, `.ssw`, and `.ssv` scripts compile
+to reproducible MIDI, WAV, and WebM outputs. V13 also provides experimental
+audio-to-code transcription for suitable recordings. The cross-platform
+`soundscript` CLI validates and inspects source, renders audio, and exports
+temporal media.
 
-[Try the Playground](https://soundscript.net/playground/) · [CLI reference](docs/cli.md) · [Contributing](CONTRIBUTING.md)
+[Try the Playground](https://soundscript.net/playground/) · [Quick start](docs/quick-start.md) · [NuGet guide](docs/nuget.md) · [CLI reference](docs/cli.md) · [Contributing](CONTRIBUTING.md)
 
 ## See it work
 
@@ -25,13 +28,17 @@ a dedicated **Transcription** tab for local upload, analysis, editing and playba
 dotnet run --project src/SoundScript.Cli -- transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav
 ```
 
-Compressed desktop formats require FFmpeg. The first release supports solo melodies;
-see the [measured accuracy and limitations](docs/transcription-engineering-report.md).
+Compressed desktop formats require FFmpeg. Monophonic transcription is the
+supported baseline; the other four modes are explicitly experimental. See the
+[measured accuracy and limitations](docs/transcription-engineering-report.md).
 Opt-in [experimental melody extraction](docs/melody-extraction.md) is available via
 `--mode extract-melody` and the Playground mode selector. It preserves only one
 dominant line and conservatively rejects ambiguous material.
 For simultaneous piano notes, use `--mode polyphonic` or **Polyphonic / Piano
 (Experimental)**; see [measurements and limitations](docs/polyphonic-transcription.md).
+Mixed Audio / Roles estimates symbolic roles rather than isolated stems, and
+Percussion / Rhythm emits unpitched `hit` events. See the
+[transcription guide](docs/transcription.md) for all five modes.
 
 The repository includes a temporal audio/visual composition with source, a
 browser demo, and a decode-verified WebM export:
@@ -75,21 +82,25 @@ state at exactly 1.5 seconds.
 - **Deterministic:** identical source produces identical MIDI and WAV bytes; use hashes in CI when reproducibility matters.
 - **One CLI:** validate, inspect, compose text to melody, render audio, and export WebM without changing tools.
 - **Standard outputs:** generated MIDI, WAV, OGG, and WebM files can move into existing audio and media workflows.
-- **Two useful surfaces:** the CLI is the automation and production path; the Playground is the no-install learning and experimentation path.
+- **Two-way workflow:** author source into audio/media, or transcribe suitable audio into editable SoundScript.
+- **Three developer surfaces:** use the CLI for automation, the NuGet package for in-process .NET integration, and the Playground for no-install exploration.
 
 SoundScript is not a DAW, an AI music generator, or merely a MIDI library. It
 does not replace live recording, arranging by ear, or generative composition;
 it gives developers an inspectable, version-controlled language for defining
 the musical and media behavior they want to render.
 
-SoundScript is an independent open-source project. The engine is active and
-cross-platform, while the public release and package distribution process is
-still maturing.
+SoundScript is an independent open-source project. The V13 package is prepared
+as a single `SoundScript` net10.0 distribution; local packing is documented
+while the public NuGet release is being prepared.
 
 ## Musical and media capabilities
 
-V13 adds monophonic media transcription while retaining the existing deterministic,
-backward-compatible authoring workflow. Highlights include:
+V13 includes media-to-SoundScript transcription while retaining the existing
+deterministic, backward-compatible authoring workflow. Five modes are available:
+Monophonic, Extract Melody (Experimental), Polyphonic / Piano (Experimental),
+Mixed Audio / Roles (Experimental), and Percussion / Rhythm (Experimental).
+Highlights include:
 
 - Media-to-SoundScript transcription, a canonical musical model, round-trip
   validation, and a dedicated Playground Transcription tab
@@ -168,25 +179,26 @@ Use `video --check` to preflight an export without writing media.
 
 ## Installation
 
-The source checkout is the supported installation path today:
+The CLI is available from a source checkout:
 
 ```bash
 dotnet build SoundScript.sln
 dotnet run --project src/SoundScript.Cli -- --version
 ```
 
-`SoundScript.Cli` is configured and locally verifiable as a .NET tool package,
-but it is not yet published to NuGet. After publication, the intended global
-installation is:
+The `SoundScript.Cli` tool and the `SoundScript` library package are locally
+verifiable, but neither is claimed as published to NuGet in this workflow.
+After publication, the intended CLI installation is:
 
 ```bash
 dotnet tool install --global SoundScript.Cli
 soundscript --version
 ```
 
-Until then, build from source, install a locally generated package as described
-in [the release checklist](docs/releasing.md), or use a reviewed release archive
-when one is available on the [Releases page](https://github.com/dharangutti/sound-script/releases).
+For the library, pack `src/SoundScript/SoundScript.csproj` and install the
+result from a local package source as described in the [NuGet guide](docs/nuget.md).
+See the [release checklist](docs/releasing.md) for package inspection and
+publishing safeguards.
 
 The current release identity is `13.0.0` (V13, Media-to-SoundScript Transcription).
 [Directory.Build.props](Directory.Build.props) is the version source of truth;
@@ -200,6 +212,12 @@ release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## Documentation
 
+- [Documentation hub](docs/documentation.md) — choose a path by goal
+- [Quick start](docs/quick-start.md) — Playground, CLI, package, and first script
+- [Common tasks](docs/common-tasks.md) — WAV, MIDI, media sync, vocals, and transcription
+- [.NET API guide](docs/dotnet-api.md) — compile, render, and transcribe from C#
+- [NuGet guide](docs/nuget.md) — local package use and release status
+- [Application samples](docs/application-samples.md) — DynamicAudio, DevOpsSonification, and TestFixtureGenerator
 - [User guide](docs/user-guide.md) — hands-on introduction
 - [Language reference](docs/language-reference.md) — complete syntax
 - [CLI reference](docs/cli.md) — commands, JSON schema, exit codes, and FFmpeg

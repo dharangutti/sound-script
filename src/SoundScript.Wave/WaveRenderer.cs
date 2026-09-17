@@ -27,6 +27,10 @@ namespace SoundScript.Wave;
 /// </summary>
 public static class WaveRenderer
 {
+    /// <summary>Renders a parsed program to deterministic mono WAV bytes.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
+    /// <returns>A complete RIFF/WAVE file in memory.</returns>
     public static byte[] RenderToBytes(ProgramNode program, WaveRenderOptions? options = null)
     {
         using var stream = new MemoryStream();
@@ -34,6 +38,10 @@ public static class WaveRenderer
         return stream.ToArray();
     }
 
+    /// <summary>Renders a parsed program to a mono WAV file.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="outputWavPath">Destination path for the WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void Render(ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
         var mixed = MixProgram(program, options);
@@ -45,6 +53,10 @@ public static class WaveRenderer
     /// the AST lowering step. The adaptation is reused when the options do not
     /// require a different speak/sample policy.
     /// </summary>
+    /// <param name="adapted">Previously lowered note events and overlays.</param>
+    /// <param name="program">Original program syntax tree, used for effects and metadata.</param>
+    /// <param name="outputWavPath">Destination path for the WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void Render(WaveAdaptationResult adapted, ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(adapted);
@@ -52,12 +64,20 @@ public static class WaveRenderer
         WavWriter.Write(outputWavPath, mixed);
     }
 
+    /// <summary>Renders a parsed program to a mono WAV stream.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="destination">Writable stream receiving the complete WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void RenderTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
         var mixed = MixProgram(program, options);
         WavWriter.WriteTo(destination, mixed, WavWriter.SampleRate);
     }
 
+    /// <summary>Renders a parsed program to deterministic stereo WAV bytes.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
+    /// <returns>A complete RIFF/WAVE file in memory.</returns>
     public static byte[] RenderStereoToBytes(ProgramNode program, WaveRenderOptions? options = null)
     {
         using var stream = new MemoryStream();
@@ -65,6 +85,10 @@ public static class WaveRenderer
         return stream.ToArray();
     }
 
+    /// <summary>Renders a parsed program to a stereo WAV file.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="outputWavPath">Destination path for the WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void RenderStereo(ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
         var (left, right) = MixProgramStereo(program, options);
@@ -72,6 +96,10 @@ public static class WaveRenderer
     }
 
     /// <summary>Stereo counterpart to <see cref="Render(WaveAdaptationResult, ProgramNode, string, WaveRenderOptions?)"/>.</summary>
+    /// <param name="adapted">Previously lowered note events and overlays.</param>
+    /// <param name="program">Original program syntax tree, used for effects and metadata.</param>
+    /// <param name="outputWavPath">Destination path for the WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void RenderStereo(WaveAdaptationResult adapted, ProgramNode program, string outputWavPath, WaveRenderOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(adapted);
@@ -79,15 +107,27 @@ public static class WaveRenderer
         WavWriter.WriteStereo(outputWavPath, left, right);
     }
 
+    /// <summary>Renders a parsed program to a stereo WAV stream.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="destination">Writable stream receiving the complete WAV file.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
     public static void RenderStereoTo(ProgramNode program, Stream destination, WaveRenderOptions? options = null)
     {
         var (left, right) = MixProgramStereo(program, options);
         WavWriter.WriteStereoTo(destination, left, right, WavWriter.SampleRate);
     }
 
+    /// <summary>Computes the SHA-256 digest of deterministic mono WAV output.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
+    /// <returns>Uppercase hexadecimal SHA-256 digest.</returns>
     public static string RenderSha256(ProgramNode program, WaveRenderOptions? options = null) =>
         Convert.ToHexString(SHA256.HashData(RenderToBytes(program, options)));
 
+    /// <summary>Computes the SHA-256 digest of deterministic stereo WAV output.</summary>
+    /// <param name="program">Program syntax tree to render.</param>
+    /// <param name="options">Optional rendering and sample-overlay settings.</param>
+    /// <returns>Uppercase hexadecimal SHA-256 digest.</returns>
     public static string RenderStereoSha256(ProgramNode program, WaveRenderOptions? options = null) =>
         Convert.ToHexString(SHA256.HashData(RenderStereoToBytes(program, options)));
 

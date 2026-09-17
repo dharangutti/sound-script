@@ -1,0 +1,119 @@
+name: Publish SoundScript NuGet package
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the validated package to nuget.org
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install eSpeak
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng
+
+      - name: Sync wordbank data
+        run: ./scripts/sync-wordbank.sh
+        shell: bash
+
+      - name: Restore solution
+        run: dotnet restore SoundScript.sln
+
+      - name: Build Debug
+        run: dotnet build SoundScript.sln -c Debug --no-restore
+
+      - name: Build Release
+        run: dotnet build SoundScript.sln -c Release --no-restore
+
+      - name: Publish Playground
+        run: dotnet publish src/SoundScript.Playground -c Release --no-restore -p:PublishDir=${{ github.workspace }}/artifacts/playground/
+
+      - name: Run .NET tests (Debug)
+        env:
+          SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR: ${{ github.workspace }}/artifacts/playground
+        run: dotnet test src/SoundScript.Tests -c Debug --no-build --logger "trx;LogFileName=tests-debug.trx" --logger "console;verbosity=normal"
+
+      - name: Run .NET tests (Release)
+        env:
+          SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR: ${{ github.workspace }}/artifacts/playground
+        run: dotnet test src/SoundScript.Tests -c Release --no-build --logger "trx;LogFileName=tests-release.trx" --logger "console;verbosity=normal"
+
+      - name: Run Node and browser boundary tests
+        run: node --test scripts/transcription-browser-input.test.cjs scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
+
+      - name: Install browser verification dependencies
+        run: |
+          npm ci --prefix scripts
+          npx --prefix scripts playwright install --with-deps chromium
+
+      - name: Verify Playground startup and integrity
+        run: node scripts/verify-playground-startup.cjs artifacts/playground
+
+      - name: Build application samples
+        run: |
+          dotnet build samples/DynamicAudio/DynamicAudio.csproj -c Release --no-restore
+          dotnet build samples/DevOpsSonification/DevOpsSonification.csproj -c Release --no-restore
+          dotnet build samples/TestFixtureGenerator/TestFixtureGenerator.csproj -c Release --no-restore
+
+      - name: Pack SoundScript
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path artifacts/nuget -Force | Out-Null
+          dotnet pack src/SoundScript/SoundScript.csproj -c Release --no-restore --output artifacts/nuget
+
+      - name: Validate package with fresh consumer
+        shell: pwsh
+        run: |
+          $package = Get-ChildItem -LiteralPath artifacts/nuget -Filter 'SoundScript.*.nupkg' |
+            Where-Object { $_.Name -notlike '*.symbols.nupkg' } |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+          if ($null -eq $package) { throw 'No SoundScript package was created.' }
+          ./scripts/validate-nuget.ps1 -PackagePath $package.FullName
+
+      - name: Upload validated package
+        uses: actions/upload-artifact@v4
+        with:
+          name: soundscript-nuget-${{ github.run_number }}
+          path: artifacts/nuget/*
+          if-no-files-found: error
+
+      - name: Publish to nuget.org
+        if: ${{ inputs.publish == true }}
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo 'NUGET_API_KEY is required when publish=true.' >&2
+            exit 1
+          fi
+          package=$(find artifacts/nuget -maxdepth 1 -type f -name 'SoundScript.*.nupkg' ! -name '*.symbols.nupkg' -print -quit)
+          test -n "$package"
+          dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

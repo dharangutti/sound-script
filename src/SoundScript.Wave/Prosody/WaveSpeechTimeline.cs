@@ -245,7 +245,7 @@ public static class WaveSpeechTimeline
 
     /// <summary>
     /// Emits one <see cref="WaveSpeechWord"/> per spoken word in a <c>sing</c>
-    /// line, mirroring <see cref="SoundScript.Voice.VocalSpeechTimeline"/> timing
+    /// line, mirroring <c>SoundScript.Voice.VocalSpeechTimeline</c> timing
     /// semantics (melisma extends the current word; overflow merges into the
     /// final note). Pitch comes from the first note of each word.
     /// </summary>

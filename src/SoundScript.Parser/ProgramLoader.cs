@@ -3,15 +3,25 @@ using SoundScript.Core;
 
 namespace SoundScript.Parser;
 
+/// <summary>Parsed program plus diagnostics collected while resolving imports.</summary>
 public sealed class LoadResult
 {
+    /// <summary>The merged program after all relative imports have been loaded.</summary>
     public ProgramNode Program { get; set; } = new();
+    /// <summary>Human-readable warnings, including duplicate block replacements.</summary>
     public List<string> Warnings { get; } = [];
+    /// <summary>Warnings paired with their source locations when available.</summary>
     public List<(string Message, SourceLocation? Location)> SourceWarnings { get; } = [];
 }
 
+/// <summary>Loads a SoundScript entry file and recursively merges its relative imports.</summary>
 public static class ProgramLoader
 {
+    /// <summary>Loads and parses an entry file and all of its relative imports.</summary>
+    /// <param name="entryPath">Path to the root <c>.ss</c> source file.</param>
+    /// <returns>The merged program and any non-fatal load warnings.</returns>
+    /// <exception cref="FileNotFoundException">The entry file or an imported file does not exist.</exception>
+    /// <exception cref="InvalidOperationException">An import is absolute/empty or an import cycle is detected.</exception>
     public static LoadResult Load(string entryPath)
     {
         var fullEntryPath = Path.GetFullPath(entryPath);
