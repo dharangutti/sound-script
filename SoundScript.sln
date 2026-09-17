@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevOpsSonification", "sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestFixtureGenerator", "samples\TestFixtureGenerator\TestFixtureGenerator.csproj", "{6A52BBB9-7969-43DA-A298-47305CB157EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScript.Cli.TestFfmpeg", "src\SoundScript.Cli.TestFfmpeg\SoundScript.Cli.TestFfmpeg.csproj", "{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -311,6 +313,18 @@ Global
 		{6A52BBB9-7969-43DA-A298-47305CB157EA}.Release|x64.Build.0 = Release|Any CPU
 		{6A52BBB9-7969-43DA-A298-47305CB157EA}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A52BBB9-7969-43DA-A298-47305CB157EA}.Release|x86.Build.0 = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|x64.Build.0 = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Debug|x86.Build.0 = Debug|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|x64.ActiveCfg = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|x64.Build.0 = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|x86.ActiveCfg = Release|Any CPU
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -337,5 +351,6 @@ Global
 		{CAF9202F-3A36-4EAC-ABEC-753D577EFC01} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 		{1EEC2B0E-BB63-48B1-A323-EB095C024FB2} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 		{6A52BBB9-7969-43DA-A298-47305CB157EA} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{59C8BDDE-B1F8-4AD5-A814-E23664A6FE21} = {7074BDC5-03B6-4A6D-8D2A-24609998D2B8}
 	EndGlobalSection
 EndGlobal
