@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../../src/SoundScript.Wave/SoundScript.Wave.csproj" />
+  </ItemGroup>
+</Project>

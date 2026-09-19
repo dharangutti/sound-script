@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SoundScript.Labs/SoundScript.Labs.csproj" />
+  <Project Path="SoundScript.Labs.Cli/SoundScript.Labs.Cli.csproj" />
+  <Project Path="SoundScript.Labs.Tests/SoundScript.Labs.Tests.csproj" />
+</Solution>

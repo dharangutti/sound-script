@@ -1,0 +1,14 @@
+# EXPERIMENTAL: software-only coherent tone for numerical verification.
+experiment tone_check {
+    generate sine {
+        frequency 1000Hz
+        duration 128ms
+        sample_rate 32kHz
+        amplitude 0.5
+    }
+    analyze { fft; peaks; rms; frequency }
+    export json
+    export wav
+    export pcm
+    export float32
+}

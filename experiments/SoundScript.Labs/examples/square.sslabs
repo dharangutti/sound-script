@@ -1,0 +1,7 @@
+# EXPERIMENTAL: ideal sampled square; harmonics can alias.
+signal square_check {
+    waveform square
+    frequency 1kHz
+    duration 100ms
+    sample_rate 48kHz
+}

@@ -1,0 +1,8 @@
+# EXPERIMENTAL: chirp and sweep share linear frequency semantics in v1.
+signal chirp_check {
+    waveform chirp
+    start 2000Hz
+    end 200Hz
+    duration 100ms
+    sample_rate 48kHz
+}

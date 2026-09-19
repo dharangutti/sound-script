@@ -1,0 +1,12 @@
+# EXPERIMENTAL: analyze the synthetic stimulus, not a physical response.
+experiment sweep_check {
+    generate sweep {
+        start 100Hz
+        end 20kHz
+        duration 5s
+        sample_rate 192kHz
+    }
+    analyze { fft; peaks; rms; frequency }
+    export json
+    export wav
+}

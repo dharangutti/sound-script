@@ -1,0 +1,17 @@
+<Project>
+  <Import Project="../../Directory.Build.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <Version>0.1.0-labs</Version>
+    <SoundScriptVersionLabel>LABS</SoundScriptVersionLabel>
+    <SoundScriptCodename>Experimental Simulator POC</SoundScriptCodename>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Update="SoundScriptVersionLabel" Value="$(SoundScriptVersionLabel)" />
+    <AssemblyMetadata Update="SoundScriptCodename" Value="$(SoundScriptCodename)" />
+  </ItemGroup>
+</Project>
