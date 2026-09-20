@@ -12,6 +12,11 @@ evidence and remaining limitations. The supplied private strategy PDF stays outs
 the public documentation tree; its identity and relationship to this POC are recorded
 in the report.
 
+The completed v0.1 checkpoint is preserved at `labs-signal-poc-v0.1.0`.
+See [VISION.md](VISION.md) for the future generic signal model, backend capability
+principle and explicit decision to defer v0.2. That direction is research only;
+it adds no implementation or production commitment.
+
 ## Run from the repository root
 
 Use the repository's existing .NET 10 SDK selection in `global.json`.
@@ -87,6 +92,10 @@ The samples have amplitude 0.5; the result is calculated, not copied from an exa
 | Peaks | Non-DC local maxima above max(1e-12, maxMagnitude*1e-6); top 8, amplitude descending then frequency ascending |
 | Frequency | Strongest qualifying spectral peak, or null for silence/no peak; not a fundamental/resonance estimator |
 | Source size | At most 65536 decoded characters |
+
+The sample-rate ceiling and frequency validation above are **v0.1 simulator
+constraints**, not permanent universal SoundScript language limits. See
+[VISION.md](VISION.md#backend-capability-principle) for the proposed future boundary.
 
 `peaks` and `frequency` compute FFT even without an explicit `fft` request. JSON
 includes FFT size/resolution and requested peak metrics, not every spectrum bin.
