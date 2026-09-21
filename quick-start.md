@@ -40,11 +40,10 @@ dotnet run --project src/SoundScript.Cli -- inspect examples/visual-temporal.ssv
 
 The package project is src/SoundScript/SoundScript.csproj. It targets net10.0
 and bundles the reusable SoundScript libraries, including the transcription
-assembly, into one SoundScript distribution. Build a local package while the
-public NuGet release is being prepared:
+assembly, into one SoundScript distribution. Install the published V13 library:
 
 ~~~bash
-dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
+dotnet add package SoundScript --version 13.0.0
 ~~~
 
 For package installation and API examples, see [NuGet](nuget.md) and the

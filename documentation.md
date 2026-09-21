@@ -39,6 +39,7 @@ useful follow-on guides rather than replacements for the entry points above.
 - [SoundCSS](soundcss.md) — deterministic timbre styling.
 - [Playground guide](PLAYGROUND.md) — browser workflow and export checks.
 - [Release checklist](releasing.md) — local package and release preparation.
+- [V13 Reliability & Release Hardening](v13-reliability-hardening.md) — clean validation, import boundaries, process safety and provenance.
 
 SoundScript's CLI and Playground continue to use the existing language and
 rendering pipeline. The NuGet facade adds a programmatic .NET surface without

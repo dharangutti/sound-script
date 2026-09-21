@@ -1,5 +1,11 @@
 # NuGet release readiness
 
+Current distribution (checked 2026-09-21): the [SoundScript 13.0.0 library](https://www.nuget.org/packages/SoundScript/13.0.0)
+is published. [V13 CLI release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0)
+and the [browser Playground](https://soundscript.net/playground/) also exist.
+`SoundScript.Cli` is not published on nuget.org. The evidence below is a
+historical record of the earlier packaging task, which did not itself publish.
+
 This report is the release handoff for the V13 SoundScript package. It records
 repository evidence only; local packing does not publish to nuget.org.
 
@@ -97,7 +103,8 @@ The current validation evidence is:
 
 ## Publishing
 
-The package was not published as part of this work. The manual workflow
+The earlier packaging task did not publish; SoundScript 13.0.0 is now available
+on NuGet as linked above. The manual workflow
 .github/workflows/publish-nuget.yml is the controlled publication path; its
 publish input defaults to false and publication requires the NUGET_API_KEY
 repository secret.
@@ -168,7 +175,8 @@ rejection) plus all four transcription modes. All three application samples
 built and ran. CLI smoke and repeated-output hashes are recorded above. The
 final package was validated as SoundScript 13.0.0 with 14 bundled DLL/XML pairs,
 14 portable PDBs in the companion symbols package, a successful isolated
-consumer, and 73 copied corpus files. The package was not published.
+consumer, and 73 copied corpus files. That earlier task did not publish;
+the library was subsequently published as SoundScript 13.0.0.
 
 ### Compatibility and determinism
 
