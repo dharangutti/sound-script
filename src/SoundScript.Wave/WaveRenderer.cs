@@ -200,7 +200,8 @@ public static class WaveRenderer
     {
         foreach (var overlay in overlays)
         {
-            var path = WavePathResolver.Resolve(options?.ScriptDirectory, overlay.RelativePath);
+            var path = options?.AllowedRoot?.Resolve(options.ScriptDirectory ?? Directory.GetCurrentDirectory(), overlay.RelativePath)
+                ?? WavePathResolver.Resolve(options?.ScriptDirectory, overlay.RelativePath);
             if (options?.SkipMissingSamples == true && !File.Exists(path))
                 continue;
 

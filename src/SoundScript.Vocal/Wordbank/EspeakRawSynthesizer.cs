@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using SoundScript.Core;
 
 namespace SoundScript.Vocal.Wordbank;
 
@@ -26,7 +26,18 @@ public interface IEspeakRawSynthesizer
 /// </summary>
 public sealed class EspeakRawSynthesizer : IEspeakRawSynthesizer
 {
-    private readonly Lazy<string> _version = new(ResolveVersion);
+    private readonly Lazy<string> _version;
+    private readonly CancellationToken cancellationToken;
+    private readonly TimeSpan processTimeout;
+
+    public EspeakRawSynthesizer() : this(CancellationToken.None) { }
+
+    public EspeakRawSynthesizer(CancellationToken cancellationToken, TimeSpan? processTimeout = null)
+    {
+        this.cancellationToken = cancellationToken;
+        this.processTimeout = processTimeout ?? TimeSpan.FromMinutes(1);
+        _version = new(ResolveVersion);
+    }
 
     public bool IsAvailable => EspeakNgVocalEngine.ResolveExecutable() is not null;
 
@@ -34,11 +45,11 @@ public sealed class EspeakRawSynthesizer : IEspeakRawSynthesizer
 
     public void Synthesize(string text, string voice, string outputWavPath)
     {
-        var options = new VocalEngineOptions { Voice = voice };
+        var options = new VocalEngineOptions { Voice = voice, CancellationToken = cancellationToken, ProcessTimeout = processTimeout };
         new EspeakNgVocalEngine().Synthesize(text, outputWavPath, options);
     }
 
-    private static string ResolveVersion()
+    private string ResolveVersion()
     {
         var executable = EspeakNgVocalEngine.ResolveExecutable();
         if (executable is null)
@@ -46,25 +57,11 @@ public sealed class EspeakRawSynthesizer : IEspeakRawSynthesizer
 
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = executable,
-                ArgumentList = { "--version" },
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-            };
-
-            using var process = Process.Start(startInfo);
-            if (process is null)
-                return "unknown";
-
-            var stdout = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
-            // Example: "eSpeak NG text-to-speech: 1.51  Data at: ..."
-            return ParseVersion(stdout);
+            var result = SafeProcess.RunAsync(executable, ["--version"],
+                TimeSpan.FromSeconds(5), cancellationToken).GetAwaiter().GetResult();
+            return result.ExitCode == 0 ? ParseVersion(result.StandardOutput) : "unknown";
         }
+        catch (OperationCanceledException) { throw; }
         catch
         {
             return "unknown";

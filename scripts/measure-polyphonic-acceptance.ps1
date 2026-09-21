@@ -1,11 +1,12 @@
 param(
     [Parameter(Mandatory=$true)][string]$RecordingsDirectory,
-    [Parameter(Mandatory=$true)][string]$OutputDirectory
+    [Parameter(Mandatory=$true)][string]$OutputDirectory,
+    [ValidateSet('Release', 'Debug')][string]$Configuration = 'Release'
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
-$cli = Join-Path $repo 'src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll'
-if (!(Test-Path -LiteralPath $cli)) { throw 'Build the Debug CLI before measuring.' }
+$cli = Join-Path $repo "src/SoundScript.Cli/bin/$Configuration/net10.0/soundscript.dll"
+if (!(Test-Path -LiteralPath $cli)) { throw "Build the $Configuration CLI before measuring." }
 if ((Test-Path -LiteralPath $OutputDirectory) -and (Get-ChildItem -LiteralPath $OutputDirectory | Select-Object -First 1)) { throw 'Choose an empty output directory to avoid stale acceptance artifacts.' }
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 $out = (Resolve-Path -LiteralPath $OutputDirectory).Path

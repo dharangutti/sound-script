@@ -5,6 +5,7 @@ const path = require('node:path');
 const http = require('node:http');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
+const cli = require('./cli-build-path.cjs');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(process.argv[2] || 'artifacts/melody-playground');
 const output = path.resolve('artifacts/melody-browser');
@@ -33,8 +34,8 @@ function fixture(name, equal = false, seconds = 2) {
 (async () => {
     const dominant = fixture('dominant'), equal = fixture('equal', true), long = fixture('long', false, 30);
     const cliSource = path.join(output, 'cli.ss');
-    execFileSync('dotnet', ['src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll', 'transcribe', dominant,
-        '--mode', 'extract-melody', '--tempo', '120', '--out', cliSource], { stdio: 'pipe' });
+    execFileSync('dotnet', [cli, 'transcribe', dominant,
+        '--mode', 'extract-melody', '--tempo', '120', '--out', cliSource], { stdio: 'pipe', timeout: 120000 });
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined });
     try {

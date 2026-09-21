@@ -16,7 +16,7 @@ public sealed class CliProductTests : IDisposable
     private string FilePath(string name) => Path.Combine(root, name);
     private string Source(string source, string name = "input.ss") { var path = FilePath(name); File.WriteAllText(path, source); return path; }
     public void Dispose() => Directory.Delete(root, true);
-    private static string BuildPath(string project, string file) => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../..", project, "bin", new DirectoryInfo(AppContext.BaseDirectory).Parent!.Name, "net10.0", file));
+    private static string BuildPath(string project, string file) => TestBuildPaths.ProjectOutput(project, file);
     private static string FakeFfmpeg => BuildPath("SoundScript.Cli.TestFfmpeg", "SoundScript.Cli.TestFfmpeg" + (OperatingSystem.IsWindows() ? ".exe" : ""));
 
     private (int Code, string Out, string Error) Run(params string[] args) => RunWithEnvironment(null, args);

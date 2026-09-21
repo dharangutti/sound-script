@@ -3,6 +3,9 @@ namespace SoundScript.Wave;
 /// <summary>Optional render-time inputs for SoundScript.Wave (V8 vocal stems / CLI overlays).</summary>
 public sealed class WaveRenderOptions
 {
+    /// <summary>Optional boundary applied before opening every filesystem sample.</summary>
+    public SoundScript.Core.AllowedPathRoot? AllowedRoot { get; init; }
+
     /// <summary>Directory containing the source script — used to resolve relative sample paths.</summary>
     public string? ScriptDirectory { get; init; }
 

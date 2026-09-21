@@ -29,8 +29,8 @@ public sealed class PerformanceCliTests : IDisposable
         return path;
     }
 
-    private static string CliDll => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../SoundScript.Cli/bin/Debug/net10.0/soundscript.dll"));
-    private static string FakeFfmpeg => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../..", "SoundScript.Cli.TestFfmpeg", "bin", "Debug", "net10.0", "SoundScript.Cli.TestFfmpeg" + (OperatingSystem.IsWindows() ? ".exe" : "")));
+    private static string CliDll => TestBuildPaths.CliDll;
+    private static string FakeFfmpeg => TestBuildPaths.ProcessFixture;
 
     private (int ExitCode, string StdOut, string StdErr) Run(params string[] arguments)
     {
@@ -47,7 +47,7 @@ public sealed class PerformanceCliTests : IDisposable
         using var process = Process.Start(start)!;
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
-        Assert.True(process.WaitForExit(60_000), "CLI process timed out.");
+        if (!process.WaitForExit(60_000)) { process.Kill(true); throw new TimeoutException("CLI process timed out."); }
         return (process.ExitCode, output.GetAwaiter().GetResult(), error.GetAwaiter().GetResult());
     }
 

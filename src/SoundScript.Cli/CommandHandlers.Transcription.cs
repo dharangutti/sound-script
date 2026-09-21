@@ -10,13 +10,17 @@ public static partial class CommandHandlers
     private static int Transcribe(CliArguments args)
     {
         var outputs=new[]{args.Value("out"),args.Value("report"),args.Value("preview")}.OfType<string>().ToArray();
+        var completionPath = TranscriptionCompletion.ManifestPath(args.Value("out")!);
         for(int i=0;i<outputs.Length;i++)
         {
             AtomicOutput.ValidatePath(outputs[i]);
-            if(PathEquals(outputs[i],args.Input) || outputs.Take(i).Any(p=>PathEquals(p,outputs[i])))
+            if(PathEquals(outputs[i],args.Input) || PathEquals(outputs[i],completionPath) || outputs.Take(i).Any(p=>PathEquals(p,outputs[i])))
                 throw new CliUsageException("Transcription output, report, preview and input must have distinct paths.");
         }
+        if (PathEquals(completionPath, args.Input)) throw new CliUsageException("Completion manifest and input must have distinct paths.");
         var token=CliRuntime.CancellationToken;
+        token.ThrowIfCancellationRequested();
+        TranscriptionCompletion.Invalidate(completionPath);
         var input = new DesktopMediaInput(args.Value("ffmpeg"));
         var media = input.InspectAsync(args.Input,token).GetAwaiter().GetResult();
         var excerpt = new MediaExcerpt(args.Value("start") is { } start ? double.Parse(start,System.Globalization.CultureInfo.InvariantCulture) : 0,
@@ -58,6 +62,7 @@ public static partial class CommandHandlers
             Console.WriteLine($"Render comparison: onset precision {rhythm.ScoreToRenderedAudio.OnsetPrecision:P1}, recall {rhythm.ScoreToRenderedAudio.OnsetRecall:P1}, class agreement {rhythm.ScoreToRenderedAudio.MatchedClassAgreement:P1}.");
             foreach (var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
             Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");
+            TranscriptionCompletion.Write(completionPath, "percussion", outputs, token);
             return 0;
         }
         if (mode is TranscriptionMode.Polyphonic or TranscriptionMode.Mixed)
@@ -77,6 +82,7 @@ public static partial class CommandHandlers
             Console.WriteLine($"Experimental: generated {generationScore.Tracks.Sum(t => t.Notes.Count)} notes in {generationScore.Tracks.Count} parallel voices. Render comparison: note precision {metrics.NotePrecision:P1}, recall {metrics.NoteRecall:P1}, missed {metrics.MissedNotes}, extra {metrics.ExtraNotes}.");
             foreach (var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
             Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");
+            TranscriptionCompletion.Write(completionPath, mode == TranscriptionMode.Mixed ? "mixed" : "polyphonic", outputs, token);
             return 0;
         }
         var validation=MusicalComparison.Validate(generationScore,token);
@@ -95,6 +101,7 @@ public static partial class CommandHandlers
         Console.WriteLine($"Render comparison: pitch recall {validation.ScoreToRenderedAudio.PitchAccuracy:P1}, missed {validation.ScoreToRenderedAudio.MissedNotes}, extra {validation.ScoreToRenderedAudio.ExtraNotes}.");
         foreach(var diagnostic in result.Diagnostics) Console.WriteLine($"[{diagnostic.Code}] {diagnostic.Message}");
         Console.WriteLine($"SoundScript: {Path.GetFullPath(args.Value("out")!)}");
+        TranscriptionCompletion.Write(completionPath, mode == TranscriptionMode.ExtractMelody ? "extract-melody" : "monophonic", outputs, token);
         return 0;
     }
 }

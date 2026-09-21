@@ -33,6 +33,11 @@ public sealed class CorpusLemmaEntry
     public string? License { get; init; }
     public string? Source { get; init; }
     public string? Attribution { get; init; }
+    /// <summary>Declared, unresolved, or verified; absent means declared, never verified.</summary>
+    public string? ProvenanceStatus { get; init; }
+    public string? ProvenanceNote { get; init; }
+    public string? SourceUrl { get; init; }
+    public string? ProvenanceEvidence { get; init; }
     public string? Audio { get; init; }
     public double TrimStartMs { get; init; }
     public double? TrimEndMs { get; init; }

@@ -13,7 +13,8 @@ public class PlaygroundPublishTests
     public void PublishedArtifacts_ContainRequiredPlaygroundFiles()
     {
         var playgroundDir = GetPlaygroundPublishDir();
-        Assert.True(File.Exists(Path.Combine(playgroundDir, "index.html")), "Missing index.html");
+        Assert.True(File.Exists(Path.Combine(playgroundDir, "index.html")),
+            $"Missing published index.html in '{playgroundDir}'. Run pwsh scripts/validate-release.ps1 for explicit publish prerequisites.");
         Assert.True(File.Exists(Path.Combine(playgroundDir, "_framework", "blazor.webassembly.js")),
             "Missing _framework/blazor.webassembly.js");
 

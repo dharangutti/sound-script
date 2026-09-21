@@ -38,9 +38,8 @@ jobs:
       - name: Install eSpeak
         run: sudo apt-get update && sudo apt-get install -y espeak-ng
 
-      - name: Sync wordbank data
-        run: ./scripts/sync-wordbank.sh
-        shell: bash
+      - name: Validate reviewed wordbank metadata
+        run: node scripts/corpus-provenance.cjs
 
       - name: Restore solution
         run: dotnet restore SoundScript.sln
@@ -65,7 +64,7 @@ jobs:
         run: dotnet test src/SoundScript.Tests -c Release --no-build --logger "trx;LogFileName=tests-release.trx" --logger "console;verbosity=normal"
 
       - name: Run Node and browser boundary tests
-        run: node --test scripts/transcription-browser-input.test.cjs scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
+        run: node --test scripts/transcription-browser-input.test.cjs scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs scripts/corpus-provenance.test.cjs
 
       - name: Install browser verification dependencies
         run: |

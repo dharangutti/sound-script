@@ -7,9 +7,8 @@ separate application surface.
 
 ## Install
 
-The package is being prepared for NuGet distribution. It has not been claimed
-as published to nuget.org in this repository workflow. Once the approved V13
-package is available publicly, install it with:
+The [SoundScript 13.0.0 library is published on nuget.org](https://www.nuget.org/packages/SoundScript/13.0.0).
+Install it with:
 
 ~~~bash
 dotnet add package SoundScript --version 13.0.0

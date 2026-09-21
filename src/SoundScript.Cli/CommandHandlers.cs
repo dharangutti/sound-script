@@ -279,6 +279,7 @@ public static partial class CommandHandlers
     private static void EnsureEmbeddedCorpus() { if (!CorpusCatalog.IsLoaded) CorpusCatalog.TryLoadEmbedded(); }
     private static VocalEngineOptions BuildVocalOptions(CliArguments args) => new()
     {
+        CancellationToken = CliRuntime.CancellationToken,
         Voice = args.Value("voice") ?? args.Value("offline-tts-voice") ?? "en", Locale = args.Value("locale"),
         Seed = args.Integer("seed", 7), Continuous = args.Has("continuous"),
         Pronunciations = args.Value("css") is { } css ? SoundCSSParser.ParsePronunciations(File.ReadAllText(css)) : null
@@ -318,7 +319,8 @@ public static partial class CommandHandlers
         progress.Stage("Preparing wordbank");
         ConfigureWordbank(args); EnsureEmbeddedCorpus();
         progress.CompleteStage(); progress.Stage("Ensuring lemma");
-        var result = new WordbankAutoGenerate(new WordbankAutoGenerateOptions { Voice = args.Value("voice") }).EnsureLemma(args.Input, args.Value("locale") ?? WordbankCatalog.ActiveLocaleCode, args.Has("auto-generate-missing"));
+        var result = new WordbankAutoGenerate(new WordbankAutoGenerateOptions { Voice = args.Value("voice") },
+            espeak: new EspeakRawSynthesizer(CliRuntime.CancellationToken)).EnsureLemma(args.Input, args.Value("locale") ?? WordbankCatalog.ActiveLocaleCode, args.Has("auto-generate-missing"));
         if (result.Status is not (WordbankAutoGenerateStatus.AlreadyPresent or WordbankAutoGenerateStatus.Generated)) throw new DependencyException(result.Reason!);
         progress.Completed(result.Path!);
         if (result.Status == WordbankAutoGenerateStatus.AlreadyPresent)

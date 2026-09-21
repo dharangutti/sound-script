@@ -85,10 +85,10 @@ public sealed class FfmpegFactAttribute : FactAttribute
     {
         try
         {
-            using var p=Process.Start(new ProcessStartInfo(Executable,"-version"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true})!;
-            p.StandardOutput.ReadToEnd();p.StandardError.ReadToEnd();
-            if(!p.WaitForExit(5000) || p.ExitCode!=0) Skip="Real FFmpeg integration requires an installed FFmpeg executable.";
+            var result = SoundScript.Core.SafeProcess.RunAsync(Executable, ["-version"], TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
+            if(result.ExitCode!=0) Skip="Real FFmpeg integration requires an installed FFmpeg executable.";
         }
         catch(System.ComponentModel.Win32Exception){Skip="Real FFmpeg integration requires an installed FFmpeg executable.";}
+        catch(TimeoutException){Skip="Installed FFmpeg did not respond within five seconds.";}
     }
 }

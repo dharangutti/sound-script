@@ -1,5 +1,11 @@
 # V13 release identity audit
 
+Current distribution (2026-09-21): [SoundScript 13.0.0 is on NuGet](https://www.nuget.org/packages/SoundScript/13.0.0),
+[V13 CLI artifacts are on GitHub](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0),
+and the [Playground is deployed](https://soundscript.net/playground/).
+The audit and validation counts below describe the earlier identity update.
+See [V13 Reliability & Release Hardening](v13-reliability-hardening.md) for current engineering validation.
+
 The transcription implementation initially retained the V12 product identity.
 The release identity is now **13.0.0 / V13 — Media-to-SoundScript Transcription**.
 

@@ -389,15 +389,17 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [examples.md](examples.md) — example catalog
 ## V13 CLI installation and automation
 
-The `SoundScript.Cli` package is prepared as a .NET tool. Once a reviewed
-package is published to NuGet, install it globally with:
+Download the archive for your platform from the
+[V13 GitHub release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0),
+verify the accompanying SHA-256 checksum, and extract it. Run the executable
+from that directory (or add that directory to your PATH):
 
 ```sh
-dotnet tool install --global SoundScript.Cli
 soundscript --version
 ```
 
-Until then, use a source checkout or install a locally packed `.nupkg` from a
+`SoundScript.Cli` is not published on nuget.org. You can also use a source
+checkout or install a locally packed `.nupkg` from a
 trusted directory; [the release checklist](releasing.md) has the exact local
 verification command. V13 retains the strict `validate` and `inspect` commands
 and their stable automation behavior.

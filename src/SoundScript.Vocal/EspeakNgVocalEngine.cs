@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using SoundScript.Core;
 using SoundScript.Wave.Io;
 
 namespace SoundScript.Vocal;
@@ -13,6 +13,7 @@ public sealed class EspeakNgVocalEngine : IVocalEngine
 
     public void Synthesize(string text, string outputWavPath, VocalEngineOptions options)
     {
+        options.CancellationToken.ThrowIfCancellationRequested();
         if (string.IsNullOrWhiteSpace(text))
             throw new ArgumentException("Text must not be empty.", nameof(text));
 
@@ -28,33 +29,12 @@ public sealed class EspeakNgVocalEngine : IVocalEngine
 
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = executable,
-                ArgumentList =
-                {
-                    "-v", options.Voice,
-                    "-w", tempPath,
-                    text,
-                },
-                RedirectStandardError = true,
-                UseShellExecute = false,
-            };
-
-            using var process = Process.Start(startInfo)
-                ?? throw new InvalidOperationException($"Failed to start {executable}.");
-
-            var stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-
-            if (process.ExitCode != 0 || !File.Exists(tempPath))
-            {
-                throw new InvalidOperationException(
-                    string.IsNullOrWhiteSpace(stderr)
-                        ? $"{executable} failed with exit code {process.ExitCode}."
-                        : stderr.Trim());
-            }
-
+            var result = SafeProcess.RunAsync(executable,
+                ["-v", options.Voice, "-w", tempPath, "--", text], options.ProcessTimeout, options.CancellationToken)
+                .GetAwaiter().GetResult();
+            if (result.ExitCode != 0 || !File.Exists(tempPath))
+                throw new InvalidOperationException($"eSpeak exited with code {result.ExitCode} or produced no WAV: {result.StandardError.Trim()}");
+            options.CancellationToken.ThrowIfCancellationRequested();
             var mono = WavReader.ReadMono(tempPath);
             mono = VocalStemNormalizer.Normalize(mono, options.OutputGain);
 
@@ -86,28 +66,12 @@ public sealed class EspeakNgVocalEngine : IVocalEngine
 
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = executable,
-                ArgumentList = { "-v", options.Voice, "-w", tempPath, text },
-                RedirectStandardError = true,
-                UseShellExecute = false,
-            };
-
-            using var process = Process.Start(startInfo)
-                ?? throw new InvalidOperationException($"Failed to start {executable}.");
-
-            var stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-
-            if (process.ExitCode != 0 || !File.Exists(tempPath))
-            {
-                throw new InvalidOperationException(
-                    string.IsNullOrWhiteSpace(stderr)
-                        ? $"{executable} failed with exit code {process.ExitCode}."
-                        : stderr.Trim());
-            }
-
+            var result = SafeProcess.RunAsync(executable,
+                ["-v", options.Voice, "-w", tempPath, "--", text], options.ProcessTimeout, options.CancellationToken)
+                .GetAwaiter().GetResult();
+            if (result.ExitCode != 0 || !File.Exists(tempPath))
+                throw new InvalidOperationException($"eSpeak exited with code {result.ExitCode} or produced no WAV: {result.StandardError.Trim()}");
+            options.CancellationToken.ThrowIfCancellationRequested();
             var mono = WavReader.ReadMono(tempPath);
             mono = VocalStemNormalizer.Normalize(mono, options.OutputGain);
 

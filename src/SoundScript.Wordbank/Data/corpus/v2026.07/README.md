@@ -23,7 +23,7 @@ corpus/v2026.07/
 
 | Locale | Pilot list | Lemma harvest |
 |--------|------------|---------------|
-| `en` | 1000 lemmas (`pilot-1k.txt`) | **66** harvested pronunciations (Commons CC0/CC-BY) — includes full Jingle Bells word set |
+| `en` | 1000 lemmas (`pilot-1k.txt`) | **66** pronunciations: 61 with declared Commons sources, 5 with unresolved provenance; see [SOURCES.md](en/SOURCES.md) |
 | `es` | Deferred | Stub only |
 | `fr` | Deferred | Stub only |
 
@@ -32,7 +32,11 @@ Locale packs under `data/` remain the runtime source for SoundScript engines. Th
 ## Validation
 
 ```bash
-python3 scripts/validate.py
+node scripts/corpus-provenance.cjs
+node --test scripts/corpus-provenance.test.cjs
 ```
 
-Checks corpus manifest, lemma stubs, pilot line count, and CI fixture overlap.
+Run from the SoundScript repository root. Checks source metadata and the generated
+source list; it does not establish license validity or human/source verification.
+Upstream wordbank schema/fixture tests also run in the .NET suite. Do not infer
+CC0 status from a historical `license` field without the original receipt.

@@ -107,12 +107,9 @@ public class WordbankAutoGenerateTests : IDisposable
         Assert.NotNull(result.Reason);
     }
 
-    [Fact]
+    [EspeakFact]
     public void EnsureLemma_WithRealEspeak_GeneratesWhenInstalled()
     {
-        if (!new EspeakRawSynthesizer().IsAvailable)
-            return; // eSpeak not installed on this host — integration path covered by fake-backed tests.
-
         var generator = new WordbankAutoGenerate();
         var result = generator.EnsureLemma("hazelnut", "en", autoGenerateMissing: true);
 
@@ -125,15 +122,11 @@ public class WordbankAutoGenerateTests : IDisposable
         Assert.Equal(WordbankAutoGenerateStatus.AlreadyPresent, again.Status);
     }
 
-    [Fact]
+    [EspeakFact]
     public void Cli_WordbankEnsure_AutoGenerateMissing_ThenResolves()
     {
-        if (!new EspeakRawSynthesizer().IsAvailable)
-            return; // eSpeak not installed — CLI path relies on the real binary.
-
         var wordbankRoot = TryResolveWordbankRoot();
-        if (wordbankRoot is null)
-            return; // no wordbank checkout available in this environment
+        Assert.NotNull(wordbankRoot);
 
         var temp = Path.Combine(Path.GetTempPath(), "ss-wb-cli-" + Guid.NewGuid().ToString("N"));
         CopyDirectory(wordbankRoot, temp);
@@ -162,8 +155,7 @@ public class WordbankAutoGenerateTests : IDisposable
     public void Cli_WordbankNormalize_ProducesCanonicalWavFromCorpusAudio()
     {
         var wordbankRoot = TryResolveWordbankRoot();
-        if (wordbankRoot is null)
-            return; // no wordbank checkout available in this environment
+        Assert.NotNull(wordbankRoot);
 
         var temp = Path.Combine(Path.GetTempPath(), "ss-wb-norm-cli-" + Guid.NewGuid().ToString("N"));
         CopyDirectory(wordbankRoot, temp);
@@ -223,9 +215,7 @@ public class WordbankAutoGenerateTests : IDisposable
 
     private static (int ExitCode, string StdOut, string StdErr) RunCli(string arguments)
     {
-        var cliDll = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "../../../../SoundScript.Cli/bin/Debug/net10.0/soundscript.dll"));
+        var cliDll = TestBuildPaths.CliDll;
 
         var psi = new System.Diagnostics.ProcessStartInfo
         {
@@ -237,10 +227,10 @@ public class WordbankAutoGenerateTests : IDisposable
         };
 
         using var process = System.Diagnostics.Process.Start(psi)!;
-        var stdout = process.StandardOutput.ReadToEnd();
-        var stderr = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        return (process.ExitCode, stdout, stderr);
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(60_000)) { process.Kill(true); throw new TimeoutException("CLI process timed out."); }
+        return (process.ExitCode, stdout.GetAwaiter().GetResult(), stderr.GetAwaiter().GetResult());
     }
 
     private JsonElement LoadEntry(string lemma)

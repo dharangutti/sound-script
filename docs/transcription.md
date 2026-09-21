@@ -31,6 +31,24 @@ export. Each successful import parses, renders and reanalyzes the generated sour
 even when no preview/report file is requested. Silent/unpitched inputs fail without
 writing an empty score. Output paths must differ from the input and each other.
 Files are individually staged and atomically replaced; the set is not a transaction.
+The CLI now invalidates any earlier `<source>.completion.json` marker after path
+preflight, before analysis/writing, and writes it last on success. It records the operation, mode, product
+version, relative output paths, sizes and SHA-256 hashes. Consumers should require
+`state: "complete"` and verify all hashes before accepting a set; a missing marker
+means the attempt did not complete. A rejected attempt may leave earlier source
+or preview files and a new rejection report, but no completion marker. Use separate
+output paths for concurrent jobs. This marker covers CLI filesystem outputs;
+Playground downloads and in-memory library results are unchanged.
+
+## Human acceptance boundary
+
+Monophonic remains the supported baseline. Extract Melody, Polyphonic / Piano,
+Mixed Audio / Roles and Percussion / Rhythm remain experimental. Repository
+fixtures and round-trip comparisons do not establish accuracy on representative
+real-world recordings. Future acceptance needs a rights-cleared recording corpus,
+independent note/onset annotations, human listening review, rejection counts,
+missed/extra notes, octave-error analysis and explicit listening acceptance.
+None of those external measurements are supplied by the reliability pass.
 
 ## Playground
 

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using SoundScript.Core;
 using System.Globalization;
 
 namespace SoundScript.Media;
@@ -159,44 +159,17 @@ public static class FfmpegWebmExporter
 
     private static string Run(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = executable,
-            UseShellExecute = false,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            CreateNoWindow = true,
-        };
-        foreach (var argument in arguments)
-            startInfo.ArgumentList.Add(argument);
-
         try
         {
-            using var process = Process.Start(startInfo)
-                ?? throw new InvalidOperationException($"Could not start FFmpeg at '{executable}'.");
-            var stderr = process.StandardError.ReadToEndAsync();
-            var stdout = process.StandardOutput.ReadToEndAsync();
-            // Both redirected pipes must drain concurrently, including capability listings.
-            try
-            {
-                var waitTask = process.WaitForExitAsync(cancellationToken);
-                var completedTask = Task.WhenAny(waitTask, Task.Delay(TimeSpan.FromMinutes(10))).GetAwaiter().GetResult();
-                if (completedTask != waitTask)
-                {
-                    try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
-                    throw new ExportException("FFmpeg timed out after ten minutes.");
-                }
-                waitTask.GetAwaiter().GetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
-                throw;
-            }
-            Task.WaitAll(stderr, stdout);
-            if (process.ExitCode != 0)
-                throw new ExportException($"FFmpeg exited with code {process.ExitCode}:\n{stderr.Result}{stdout.Result}");
-            return stdout.Result + stderr.Result;
+            var result = SafeProcess.RunAsync(executable, arguments, TimeSpan.FromMinutes(10), cancellationToken)
+                .GetAwaiter().GetResult();
+            if (result.ExitCode != 0)
+                throw new ExportException($"FFmpeg exited with code {result.ExitCode}:\n{result.StandardError}{result.StandardOutput}");
+            return result.StandardOutput + result.StandardError;
+        }
+        catch (TimeoutException ex)
+        {
+            throw new ExportException("FFmpeg timed out after ten minutes.", ex);
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
