@@ -41,6 +41,9 @@ if [[ -d "$SOURCE/corpus/v2026.07" ]]; then
   fi
 
   echo "Synced corpus v2026.07 (metadata + audio)"
+  # Upstream pilot metadata may still contain narrative placeholders. Reapply
+  # local provenance hygiene before exposing it as repository release data.
+  node "$ROOT/scripts/corpus-provenance.cjs" --write
 fi
 
 echo "Synced wordbank data from $SOURCE to $TARGET"

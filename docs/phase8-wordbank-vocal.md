@@ -52,7 +52,7 @@ to, SoundScript → eSpeak when installed (intelligible speech), else G2P timbre
 
 | Lemma | License | Source |
 |-------|---------|--------|
-| 66 pilot lemmas (v0.6.2) | CC0 / CC-BY | Wikimedia Commons + Lingua Libre (`scripts/harvest_commons_en.py`) |
+| 66 pilot lemmas (v0.6.2) | Declared CC0 / CC-BY | 61 declared Commons sources; bobtail, dashing, sleighing, test, world still require external provenance evidence. See the [source register](../src/SoundScript.Wordbank/Data/corpus/v2026.07/en/SOURCES.md). |
 | CI coverage | 27/50 en | See `fixtures/ci-50.json` overlap |
 
 v0.6.2 adds the full **Jingle Bells** word set (chorus + verse 1) — see the
