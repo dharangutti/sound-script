@@ -50,6 +50,12 @@ CompileFile resolves relative imports and sample paths from the entry file's
 directory. It reads the local filesystem; load only trusted scripts and assets.
 Use Compile for source that contains no imports.
 
+For hosted execution, use `CompileFile(path, new SoundScript.Core.AllowedPathRoot(jobDirectory))`.
+The explicit boundary constrains the entry, nested imports and filesystem samples;
+render options cannot remove it. The host must prevent concurrent filesystem
+mutation and provide separate process/resource isolation. See
+[V13 Reliability & Release Hardening](v13-reliability-hardening.md#import-and-resource-root).
+
 ## Render options
 
 Pass SoundScript.Wave.WaveRenderOptions to RenderWave or RenderStereoWave when a

@@ -22,14 +22,20 @@ public static class ProgramLoader
     /// <returns>The merged program and any non-fatal load warnings.</returns>
     /// <exception cref="FileNotFoundException">The entry file or an imported file does not exist.</exception>
     /// <exception cref="InvalidOperationException">An import is absolute/empty or an import cycle is detected.</exception>
-    public static LoadResult Load(string entryPath)
+    public static LoadResult Load(string entryPath) => LoadCore(entryPath, null);
+
+    /// <summary>Loads an import graph constrained to an explicit allowed root.</summary>
+    public static LoadResult Load(string entryPath, AllowedPathRoot allowedRoot)
+        => LoadCore(entryPath, allowedRoot ?? throw new ArgumentNullException(nameof(allowedRoot)));
+
+    private static LoadResult LoadCore(string entryPath, AllowedPathRoot? allowedRoot)
     {
-        var fullEntryPath = Path.GetFullPath(entryPath);
+        var fullEntryPath = allowedRoot?.Validate(entryPath) ?? Path.GetFullPath(entryPath);
         var result = new LoadResult();
         var loading = new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         var merged = new MergedProgram();
 
-        LoadFile(fullEntryPath, merged, result, loading);
+        LoadFile(fullEntryPath, merged, result, loading, allowedRoot);
 
         result.Program = merged.ToProgramNode();
         return result;
@@ -39,8 +45,10 @@ public static class ProgramLoader
         string filePath,
         MergedProgram merged,
         LoadResult result,
-        HashSet<string> loading)
+        HashSet<string> loading,
+        AllowedPathRoot? allowedRoot)
     {
+        filePath = allowedRoot?.Validate(filePath) ?? filePath;
         if (!loading.Add(filePath))
             throw new InvalidOperationException($"Circular import detected: '{filePath}'.");
 
@@ -57,8 +65,11 @@ public static class ProgramLoader
             {
                 if (statement is ImportNode import)
                 {
-                    var resolvedPath = ResolveImportPath(import.Path, baseDirectory);
-                    try { LoadFile(resolvedPath, merged, result, loading); }
+                    try
+                    {
+                        var resolvedPath = ResolveImportPath(import.Path, baseDirectory, allowedRoot);
+                        LoadFile(resolvedPath, merged, result, loading, allowedRoot);
+                    }
                     catch (Exception ex) { SourceLocation.Attach(ex, import); throw; }
                     continue;
                 }
@@ -77,15 +88,15 @@ public static class ProgramLoader
         }
     }
 
-    private static string ResolveImportPath(string importPath, string baseDirectory)
+    private static string ResolveImportPath(string importPath, string baseDirectory, AllowedPathRoot? allowedRoot)
     {
         if (string.IsNullOrWhiteSpace(importPath))
             throw new InvalidOperationException("Import path cannot be empty.");
 
-        if (Path.IsPathRooted(importPath))
-            throw new InvalidOperationException($"Import path must be relative: '{importPath}'.");
+        AllowedPathRoot.RequireRelative(importPath);
 
-        var combined = Path.GetFullPath(Path.Combine(baseDirectory, importPath));
+        var combined = allowedRoot?.Resolve(baseDirectory, importPath)
+            ?? Path.GetFullPath(Path.Combine(baseDirectory, importPath));
 
         if (!combined.EndsWith(".ss", StringComparison.OrdinalIgnoreCase)
             && File.Exists(combined + ".ss"))
@@ -93,7 +104,7 @@ public static class ProgramLoader
             combined += ".ss";
         }
 
-        return combined;
+        return allowedRoot?.Validate(combined) ?? combined;
     }
 
     private sealed class MergedProgram

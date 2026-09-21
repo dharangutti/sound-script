@@ -1,4 +1,5 @@
 using SoundScript.Core.Ast;
+using SoundScript.Core;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Wave;
@@ -7,7 +8,7 @@ namespace SoundScript;
 
 /// <summary>Compiles SoundScript source for the existing deterministic renderers.</summary>
 /// <remarks>Compilation parses source; renderer-specific validation occurs when rendering.
-/// No CLI process is started. Use <see cref="CompileFile"/> for filesystem imports.</remarks>
+/// No CLI process is started. Use <see cref="CompileFile(string)"/> for filesystem imports.</remarks>
 public static class SoundScriptEngine
 {
     /// <summary>Parses an in-memory script without resolving filesystem imports.</summary>
@@ -38,6 +39,16 @@ public static class SoundScriptEngine
         var loaded = ProgramLoader.Load(fullPath);
         return new(loaded.Program, Path.GetDirectoryName(fullPath), loaded.Warnings.AsReadOnly());
     }
+
+    /// <summary>Compiles a file with imports and filesystem samples constrained to an explicit root.</summary>
+    /// <remarks>The host must keep the root stable for the lifetime of this compilation.</remarks>
+    public static SoundScriptCompilation CompileFile(string path, AllowedPathRoot allowedRoot)
+    {
+        ArgumentNullException.ThrowIfNull(allowedRoot);
+        var fullPath = allowedRoot.Validate(path);
+        var loaded = ProgramLoader.Load(fullPath, allowedRoot);
+        return new(loaded.Program, Path.GetDirectoryName(fullPath), loaded.Warnings.AsReadOnly(), allowedRoot);
+    }
 }
 
 /// <summary>A parsed script rendered through SoundScript's existing WAV and MIDI pipelines.</summary>
@@ -47,11 +58,13 @@ public sealed class SoundScriptCompilation
 {
     private readonly ProgramNode program;
     private readonly string? scriptDirectory;
+    private readonly AllowedPathRoot? allowedRoot;
 
-    internal SoundScriptCompilation(ProgramNode program, string? scriptDirectory, IReadOnlyList<string> warnings)
+    internal SoundScriptCompilation(ProgramNode program, string? scriptDirectory, IReadOnlyList<string> warnings, AllowedPathRoot? allowedRoot = null)
     {
         this.program = program;
         this.scriptDirectory = scriptDirectory;
+        this.allowedRoot = allowedRoot;
         Warnings = warnings;
     }
 
@@ -68,7 +81,7 @@ public sealed class SoundScriptCompilation
     /// <remarks>Explicit options replace the default options, including ScriptDirectory.
     /// Determinism assumes identical source, external assets, options, and renderer version.</remarks>
     public byte[] RenderWave(WaveRenderOptions? options) =>
-        WaveRenderer.RenderToBytes(program, options ?? new() { ScriptDirectory = scriptDirectory });
+        WaveRenderer.RenderToBytes(program, RenderOptions(options));
 
     /// <summary>Renders a complete stereo PCM WAV using supported track panning.</summary>
     /// <returns>A stereo RIFF/WAVE file in memory.</returns>
@@ -78,7 +91,23 @@ public sealed class SoundScriptCompilation
     /// <param name="options">Sample resolution and overlay inputs, or entry-file defaults.</param>
     /// <returns>A stereo RIFF/WAVE file in memory.</returns>
     public byte[] RenderStereoWave(WaveRenderOptions? options) =>
-        WaveRenderer.RenderStereoToBytes(program, options ?? new() { ScriptDirectory = scriptDirectory });
+        WaveRenderer.RenderStereoToBytes(program, RenderOptions(options));
+
+    private WaveRenderOptions RenderOptions(WaveRenderOptions? options)
+    {
+        options ??= new() { ScriptDirectory = scriptDirectory };
+        if (allowedRoot is null) return options;
+        // Explicit render options cannot remove a compilation's sandbox boundary.
+        return new()
+        {
+            AllowedRoot = allowedRoot,
+            ScriptDirectory = options.ScriptDirectory ?? scriptDirectory,
+            AdditionalSampleOverlays = options.AdditionalSampleOverlays,
+            ExternalOverlays = options.ExternalOverlays,
+            SkipMissingSamples = options.SkipMissingSamples,
+            SuppressSyntheticSpeak = options.SuppressSyntheticSpeak
+        };
+    }
 
     /// <summary>Interprets pitched musical events and writes a standard MIDI file.</summary>
     /// <returns>Standard MIDI file bytes, starting with the MThd header.</returns>
