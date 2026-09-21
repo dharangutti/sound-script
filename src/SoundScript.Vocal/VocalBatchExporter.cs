@@ -53,6 +53,8 @@ public static class VocalBatchExporter
                 var stemOptions = new VocalEngineOptions
                 {
                     Voice = options.Voice,
+                    ProcessTimeout = options.ProcessTimeout,
+                    CancellationToken = options.CancellationToken,
                     Locale = options.Locale,
                     Seed = speak.Seed ?? options.Seed,
                     OutputGain = options.OutputGain,

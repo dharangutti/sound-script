@@ -5,6 +5,12 @@ namespace SoundScript.Vocal;
 /// <summary>Options passed to offline vocal engines.</summary>
 public sealed class VocalEngineOptions
 {
+    /// <summary>Maximum duration of each external eSpeak invocation (default one minute).</summary>
+    public TimeSpan ProcessTimeout { get; init; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>Cancels external eSpeak invocations, including process-tree cleanup.</summary>
+    public CancellationToken CancellationToken { get; init; }
+
     /// <summary>Engine-specific voice id (e.g. eSpeak <c>en</c>).</summary>
     public string Voice { get; init; } = "en";
 

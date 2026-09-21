@@ -75,6 +75,7 @@ public sealed class CompositeVocalEngine : IVocalEngine
 
     private float[] SynthesizeWordWithFallback(string word, string locale, VocalEngineOptions options)
     {
+        options.CancellationToken.ThrowIfCancellationRequested();
         if (WordbankVocalSynthesizer.TrySynthesizeCorpusWord(word, locale, out var corpus))
             return corpus;
 
@@ -88,6 +89,8 @@ public sealed class CompositeVocalEngine : IVocalEngine
                     Locale = options.Locale,
                     Seed = options.Seed,
                     OutputGain = 1.0,
+                    CancellationToken = options.CancellationToken,
+                    ProcessTimeout = options.ProcessTimeout,
                 };
                 return EspeakNgVocalEngine.SynthesizeToSamples(word, espeakOptions);
             }
