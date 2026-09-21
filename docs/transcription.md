@@ -31,8 +31,8 @@ export. Each successful import parses, renders and reanalyzes the generated sour
 even when no preview/report file is requested. Silent/unpitched inputs fail without
 writing an empty score. Output paths must differ from the input and each other.
 Files are individually staged and atomically replaced; the set is not a transaction.
-The CLI now invalidates any earlier `<source>.completion.json` marker before an
-attempt and writes it last on success. It records the operation, mode, product
+The CLI now invalidates any earlier `<source>.completion.json` marker after path
+preflight, before analysis/writing, and writes it last on success. It records the operation, mode, product
 version, relative output paths, sizes and SHA-256 hashes. Consumers should require
 `state: "complete"` and verify all hashes before accepting a set; a missing marker
 means the attempt did not complete. A rejected attempt may leave earlier source

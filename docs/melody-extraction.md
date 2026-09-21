@@ -1,8 +1,9 @@
 # Experimental dominant melody extraction
 
 Milestone 1 implementation, 2026-09-16. See the [phased plan](melody-extraction-plan.md).
-Default transcription remains V13 monophonic. Only these two modes are exposed;
-full polyphony and source separation are not implemented.
+Default transcription remains V13 monophonic. This page records the extraction
+milestone; V13 now also exposes experimental polyphonic, mixed-role and percussion
+modes (see [transcription](transcription.md)). Mixed roles do not provide isolated stems.
 
 ```powershell
 dotnet run --project src/SoundScript.Cli -- transcribe input.mp3 --mode extract-melody --start 30 --duration 10 --out melody.ss --report analysis.json --preview melody.wav
