@@ -6,13 +6,13 @@ transcription. Use it for application cues, sonification, or reproducible media 
 
 ## Install
 
-Requires .NET 10. Once this release is published to nuget.org:
+Requires .NET 10. SoundScript 13.0.0 is available on nuget.org:
 
 ```sh
 dotnet add package SoundScript --version 13.0.0
 ```
 
-Before publication, [build and install from a local feed](https://soundscript.net/doc.html?p=nuget.md).
+For development, you can also [build and install from a local feed](https://soundscript.net/doc.html?p=nuget.md).
 
 ## Five-minute example
 

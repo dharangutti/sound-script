@@ -90,9 +90,9 @@ does not replace live recording, arranging by ear, or generative composition;
 it gives developers an inspectable, version-controlled language for defining
 the musical and media behavior they want to render.
 
-SoundScript is an independent open-source project. The V13 package is prepared
-as a single `SoundScript` net10.0 distribution; local packing is documented
-while the public NuGet release is being prepared.
+SoundScript is an independent open-source project. The `SoundScript` 13.0.0
+library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/13.0.0).
+The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0).
 
 ## Musical and media capabilities
 
@@ -186,17 +186,19 @@ dotnet build SoundScript.sln
 dotnet run --project src/SoundScript.Cli -- --version
 ```
 
-The `SoundScript.Cli` tool and the `SoundScript` library package are locally
-verifiable, but neither is claimed as published to NuGet in this workflow.
-After publication, the intended CLI installation is:
+For the CLI, download the archive for your platform from the
+[V13 release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0),
+verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+`SoundScript.Cli` is not published on nuget.org; a locally packed tool can also
+be installed as described in the [release checklist](docs/releasing.md).
+
+For the .NET library, install the published package:
 
 ```bash
-dotnet tool install --global SoundScript.Cli
-soundscript --version
+dotnet add package SoundScript --version 13.0.0
 ```
 
-For the library, pack `src/SoundScript/SoundScript.csproj` and install the
-result from a local package source as described in the [NuGet guide](docs/nuget.md).
+Local library packing and consumer validation are described in the [NuGet guide](docs/nuget.md).
 See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
