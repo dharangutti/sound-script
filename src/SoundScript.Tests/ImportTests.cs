@@ -216,21 +216,20 @@ public class ImportTests
 
     private static int RunCli(string scriptPath, string outputPath)
     {
-        var cliProject = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "../../../../../src/SoundScript.Cli/SoundScript.Cli.csproj"));
-
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run --project \"{cliProject}\" --no-build -- run \"{scriptPath}\" \"{outputPath}\"",
+            ArgumentList = { TestBuildPaths.CliDll, "run", scriptPath, outputPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
         };
 
         using var process = Process.Start(psi)!;
-        process.WaitForExit();
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(60_000)) { process.Kill(true); throw new TimeoutException("CLI process timed out."); }
+        Task.WaitAll(stdout, stderr);
         return process.ExitCode;
     }
 

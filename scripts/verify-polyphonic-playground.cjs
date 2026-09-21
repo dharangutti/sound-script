@@ -1,7 +1,8 @@
-// Run after a Release publish and a Debug CLI build. No third-party media.
+// Run after a Release publish and CLI build. SOUNDSCRIPT_BUILD_CONFIGURATION can select Debug.
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
+const cliDll = require('./cli-build-path.cjs');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const analysisMode = process.argv[3] || 'polyphonic';
 assert.ok(['polyphonic','mixed','percussion'].includes(analysisMode));
@@ -38,7 +39,7 @@ function fixture(name, seconds, noise=false) {
 (async()=>{
     const triad=fixture('triad',2),noise=fixture('noise',2,true),long=fixture('long',30);
     const cliSource=path.join(output,'cli.ss'),cliReport=path.join(output,'cli.json');
-    execFileSync('dotnet',['src/SoundScript.Cli/bin/Debug/net10.0/soundscript.dll','transcribe',triad,'--mode',analysisMode,'--tempo','120','--out',cliSource,'--report',cliReport],{stdio:'pipe'});
+    execFileSync('dotnet',[cliDll,'transcribe',triad,'--mode',analysisMode,'--tempo','120','--out',cliSource,'--report',cliReport],{stdio:'pipe',timeout:120000});
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
     const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined});
     try {

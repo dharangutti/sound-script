@@ -115,9 +115,7 @@ public class WordbankVocalEngineTests
 
     private static (int ExitCode, string StdOut, string StdErr) RunCli(string arguments)
     {
-        var cliDll = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "../../../../SoundScript.Cli/bin/Debug/net10.0/soundscript.dll"));
+        var cliDll = TestBuildPaths.CliDll;
 
         var psi = new System.Diagnostics.ProcessStartInfo
         {
@@ -129,10 +127,10 @@ public class WordbankVocalEngineTests
         };
 
         using var process = System.Diagnostics.Process.Start(psi)!;
-        var stdout = process.StandardOutput.ReadToEnd();
-        var stderr = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        return (process.ExitCode, stdout, stderr);
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(60_000)) { process.Kill(true); throw new TimeoutException("CLI process timed out."); }
+        return (process.ExitCode, stdout.GetAwaiter().GetResult(), stderr.GetAwaiter().GetResult());
     }
 
     private sealed class TempOutputDirectory : IDisposable
