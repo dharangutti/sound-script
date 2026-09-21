@@ -6,10 +6,10 @@ transcription. Use it for application cues, sonification, or reproducible media 
 
 ## Install
 
-Requires .NET 10. SoundScript 13.0.0 is available on nuget.org:
+Requires .NET 10. Install SoundScript 13.0.2:
 
 ```sh
-dotnet add package SoundScript --version 13.0.0
+dotnet add package SoundScript --version 13.0.2
 ```
 
 For development, you can also [build and install from a local feed](https://soundscript.net/doc.html?p=nuget.md).
@@ -71,4 +71,14 @@ corpus, without CLI or Playground binaries.
 - [GitHub](https://github.com/dharangutti/sound-script)
 - [Project website](https://soundscript.net/)
 
-Engine: MIT. Included wordbank corpus: CC0. Font license notices are in `licenses/`.
+Engine: MIT. Included wordbank corpus licensing and provenance are recorded per entry
+in the bundled `contentFiles/any/any/Data/corpus/v2026.07/en/lemmas.json` and
+[`SOURCES.md`](https://github.com/dharangutti/sound-script/blob/main/src/SoundScript.Wordbank/Data/corpus/v2026.07/en/SOURCES.md)
+(also bundled alongside `lemmas.json`). Declared licenses include CC0-1.0 and
+CC-BY-4.0; these historical declarations are not verified licensing or provenance.
+Of the 66 English pronunciation entries, 61 have declared Commons sources. The five
+entries `bobtail`, `dashing`, `sleighing`, `test`, and `world` have unresolved
+provenance: their original recording/generation receipts are missing, and their
+historical CC0 declarations remain unverified. The wordbank CC0 notice in `licenses/`
+does not establish a blanket license for these recordings. Font license notices
+are also in `licenses/`.

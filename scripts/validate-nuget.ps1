@@ -160,6 +160,30 @@ try {
     foreach ($requiredRootEntry in @('README.md', 'icon.png')) {
         if ($entryNames -notcontains $requiredRootEntry) { Fail "Package is missing root entry '$requiredRootEntry'." }
     }
+    $readmeEntryName = Xml-Text $metadata 'readme'
+    if (-not $readmeEntryName -or $entryNames -cnotcontains $readmeEntryName) {
+        Fail "Nuspec README entry '$readmeEntryName' is missing from the package."
+    } else {
+        $readmeText = Get-Content -LiteralPath (Join-Path $extractRoot $readmeEntryName) -Raw
+        $readmeVersionPatterns = @{
+            'release text' = '\bSoundScript\s+(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)(?=[\s:.,;]|$)'
+            'install command' = '\bdotnet\s+add\s+package\s+SoundScript\s+--version\s+(?<version>[^\s`]+)'
+        }
+        foreach ($label in $readmeVersionPatterns.Keys) {
+            $versionMatches = [regex]::Matches($readmeText, $readmeVersionPatterns[$label])
+            if ($versionMatches.Count -eq 0) {
+                Fail "Packaged README has no version in its $label."
+            }
+            foreach ($versionMatch in $versionMatches) {
+                $readmeVersion = $versionMatch.Groups['version'].Value
+                if ($readmeVersion -cne $nuspecVersion) {
+                    Fail "Packaged README $label version '$readmeVersion' does not match nuspec/package version '$nuspecVersion'."
+                } else {
+                    Pass "Packaged README $label matches package version $nuspecVersion"
+                }
+            }
+        }
+    }
     $iconEntry = $entries | Where-Object { $_.FullName -eq 'icon.png' } | Select-Object -First 1
     if ($null -ne $iconEntry -and $iconEntry.Length -gt 1MB) { Fail "Package icon is larger than 1 MiB ($($iconEntry.Length) bytes)." }
     if (-not (@($entryNames | Where-Object { $_ -match '(?i)^LICENSE(?:/|$)' }).Count -gt 0)) {

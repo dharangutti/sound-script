@@ -160,7 +160,7 @@ public sealed class CliProductTests : IDisposable
 
     [Fact]
     public void VersionIsMachineFriendlyAndMatchesRelease()
-    { var result = Run("--version"); Assert.Equal(0, result.Code); Assert.Equal(VersionInfo.Number, result.Out.Trim()); Assert.Equal("13.0.1", result.Out.Trim()); }
+    { var result = Run("--version"); Assert.Equal(0, result.Code); Assert.Equal(VersionInfo.Number, result.Out.Trim()); Assert.Equal("13.0.2", result.Out.Trim()); }
 
     [Fact]
     public void JsonUsageFailureIsOnlyJson()
