@@ -51,7 +51,7 @@
                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
                 "license": "https://opensource.org/licenses/MIT",
                 "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "softwareVersion": "13.0.0",
+                "softwareVersion": "14.0.0",
                 "programmingLanguage": "C#",
                 "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
                 "softwareHelp": "https://soundscript.net/SoundScript.md",
@@ -812,7 +812,7 @@
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V13 — Media-to-SoundScript Transcription<!--/VERSION_BADGE--></div>
+            <div class="badge"><!--VERSION_BADGE-->Version: V14 — Programmable Media Runtime (candidate)<!--/VERSION_BADGE--></div>
             <h1>Write audio like <span>code</span> — edit it back</h1>
             <p class="lead">
                 SoundScript is a deterministic programming language and .NET toolkit for programmable audio and media. Write timed visuals,
@@ -1263,7 +1263,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="documentation" aria-labelledby="documentation-title">
                 <h2 id="documentation-title">Documentation</h2>
                 <div class="grid-2">
-                    <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=quick-start.md"><strong>Quick Start</strong></a><br><a href="doc.html?p=documentation.md">Documentation hub</a><br><a href="doc.html?p=nuget.md">NuGet package</a><br><a href="doc.html?p=dotnet-api.md">.NET API guide</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
+                    <article class="card"><h3>Start Here</h3><p><a href="doc.html?p=quick-start.md"><strong>Quick Start</strong></a><br><a href="doc.html?p=documentation.md">Documentation hub</a><br><a href="doc.html?p=tutorials/programmable-media.md">V14 tutorial</a><br><a href="doc.html?p=articles/programmable-media-runtime-dotnet.md">Programmable media article</a><br><a href="doc.html?p=nuget.md">NuGet package</a><br><a href="doc.html?p=dotnet-api.md">.NET API guide</a><br><a href="doc.html?p=examples.md">Example catalog</a></p></article>
                     <article class="card"><h3>Application integration</h3><p><a href="doc.html?p=application-samples.md">Application samples</a><br><a href="doc.html?p=common-tasks.md">Common tasks</a><br><a href="doc.html?p=use-cases.md">Use cases</a><br><a href="doc.html?p=cli.md">CLI reference</a></p></article>
                     <article class="card"><h3>Language &amp; CLI</h3><p><a href="doc.html?p=language-reference.md">Language reference</a><br><a href="doc.html?p=cli.md">CLI reference</a><br><a href="doc.html?p=notation.md">Notation engine</a><br><a href="doc.html?p=expressive-notation.md">Expressive notation</a></p></article>
                     <article class="card"><h3>Audio/Visual — V10/V11</h3><p><a href="doc.html?p=whats-new-v11.md">V11 media export</a><br><a href="doc.html?p=visual-temporal.md">V10 timing and supported primitives</a><br><a href="doc.html?p=use-cases.md">Audio/Visual use cases</a><br><a href="doc.html?p=visual-temporal.md">Temporal media export</a><br><a href="playground/#visual-workspace-tab">Audio/Visual Playground</a><br><a href="doc.html?p=examples.md">Runnable examples</a></p></article>
@@ -1276,7 +1276,7 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
             <section id="version-history" aria-labelledby="version-title">
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V13</span><div><strong>Media-to-SoundScript Transcription</strong><span class="release-label">Current</span><br>Convert suitable media into editable SoundScript through Monophonic, Extract Melody, Polyphonic / Piano, Mixed Audio / Roles, or Percussion / Rhythm analysis. The last four modes are experimental and report conservative evidence. <a href="doc.html?p=transcription.md">Usage and limitations →</a></div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V13</span><div><strong>Media-to-SoundScript Transcription</strong><span class="release-label">Published</span><br>Convert suitable media into editable SoundScript through Monophonic, Extract Melody, Polyphonic / Piano, Mixed Audio / Roles, or Percussion / Rhythm analysis. The last four modes are experimental and report conservative evidence. <a href="doc.html?p=transcription.md">Usage and limitations →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><br>SoundScript now targets .NET 10 and broadens conventional notation with the full MIDI pitch and General MIDI program ranges, extended harmony, dotted rhythm, tuplets, grace notes, and expanded dynamics—while keeping the deterministic MIDI, Wave, SoundCSS, voice, and temporal-media workflows compatible. <a href="doc.html?p=musical-completeness.md">Capability details →</a></div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V10</span><div><strong>Temporal Visual Playground.</strong> The original frame-free visual timeline, shared clock playback, exact scrubbing, and StateAt(t) inspector.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V8</span><div><strong>Previous release.</strong> Vocal stems in Wave export: mix recordings with <code>sample</code> / <code>speak sample=</code>, or generate offline stems with <code>soundscript vocal</code> and <code>wave --offline-tts</code>.</div></li>

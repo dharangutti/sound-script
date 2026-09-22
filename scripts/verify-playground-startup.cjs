@@ -48,6 +48,21 @@ const server = http.createServer((request, response) => {
                 }
                 if (scenario === '503') assert.ok(hits >= 2, '503 must actually exercise retry');
                 assert.equal(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length), 0);
+                const learning = page.getByRole('navigation', {name:'Learn SoundScript'});
+                assert.equal(await learning.getByRole('link').count(), 3);
+                for (const link of await learning.getByRole('link').all()) {
+                    const href = await link.getAttribute('href');
+                    const reader = await context.newPage();
+                    await reader.goto(new URL(href, url).href);
+                    await reader.locator('#content h1').waitFor({timeout:10000});
+                    assert.equal(await reader.locator('#content .error').count(), 0);
+                    assert.ok((await reader.locator('#content').innerText()).length > 500);
+                    if (href.includes('tutorials/')) {
+                        await reader.getByRole('link', {name:'runtime API guide', exact:true}).click();
+                        await reader.locator('#content h1').filter({hasText:'Programmable media runtime for .NET'}).waitFor();
+                    }
+                    await reader.close();
+                }
                 assert.deepEqual(errors, []);
                 // Reload within the same context to exercise HTTP/Blazor cached resources.
                 await page.reload();

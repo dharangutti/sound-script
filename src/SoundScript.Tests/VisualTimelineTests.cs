@@ -88,7 +88,7 @@ public class VisualTimelineTests
             visual "outro" for 1s
             """);
 
-        var outro = Assert.Single(timeline.Visuals.Where(visual => visual.Name == "outro"));
+        var outro = Assert.Single(timeline.Visuals, visual => visual.Name == "outro");
         Assert.Equal(TimeSpan.FromSeconds(10), outro.Start);
         Assert.Equal(TimeSpan.FromSeconds(11), outro.End);
         Assert.Equal(["background", "badge"], NamesAt(timeline, 4));
@@ -335,8 +335,8 @@ public class VisualTimelineTests
         timeline.StateAt(TimeSpan.FromSeconds(seconds)).Elements.Select(element => element.Name);
 
     private static decimal Property(VisualState state, string visualName, string propertyName) =>
-        Assert.Single(Assert.Single(state.Elements.Where(element => element.Name == visualName)).Properties
-            .Where(property => property.Property == propertyName)).Value;
+        Assert.Single(Assert.Single(state.Elements, element => element.Name == visualName).Properties,
+            property => property.Property == propertyName).Value;
 
     private static decimal PlanProperty(TemporalVideoSample sample, string visualName, string propertyName) =>
         Assert.Single(Assert.Single(sample.Elements, element => element.Name == visualName).Properties,

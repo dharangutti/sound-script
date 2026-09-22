@@ -38,7 +38,7 @@
                 "name": "SoundScript",
                 "applicationCategory": "MultimediaApplication",
                 "operatingSystem": "Windows, macOS, Linux, Web",
-                "softwareVersion": "13.0.0",
+                "softwareVersion": "14.0.0",
                 "license": "https://opensource.org/licenses/MIT",
                 "url": "https://soundscript.net/"
             },
@@ -297,7 +297,7 @@
     <div class="wrap">
         <nav aria-label="Primary navigation">
             <a class="logo" href="/" aria-label="SoundScript home">
-                <img src="/assets/soundscript-logo.png" alt="SoundScript">
+                <img src="assets/soundscript-logo.png" alt="SoundScript">
             </a>
             <div class="nav-links">
                 <a href="/">Home</a>
@@ -333,8 +333,10 @@
             var DEFAULT_PAGE = 'SoundScript.md';
             var param = new URLSearchParams(window.location.search).get('p') || DEFAULT_PAGE;
 
-            // Same-directory .md files only — no slashes, no traversal.
-            if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\.md$/.test(param)) {
+            // Repository-owned Markdown, optionally nested. Each segment starts with an
+            // alphanumeric character, so traversal, absolute URLs and encoded separators fail.
+            var markdownPath = /^(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.md$/;
+            if (!markdownPath.test(param)) {
                 param = DEFAULT_PAGE;
             }
 
@@ -381,7 +383,7 @@
                             name: 'SoundScript',
                             applicationCategory: 'MultimediaApplication',
                             operatingSystem: 'Windows, macOS, Linux, Web',
-                            softwareVersion: '13.0.0',
+                            softwareVersion: '14.0.0',
                             license: 'https://opensource.org/licenses/MIT',
                             url: 'https://soundscript.net/'
                         },
@@ -428,11 +430,15 @@
                         var path = parts[0];
                         var hash = parts[1] ? '#' + parts[1] : '';
 
-                        if (/^[A-Za-z0-9][A-Za-z0-9._-]*\.md$/.test(path)) {
-                            link.setAttribute('href', 'doc.html?p=' + path + hash);
+                        var docsRoot = new URL('./', window.location.href);
+                        var resolved = new URL(path, new URL(param, docsRoot));
+                        var relative = resolved.pathname.slice(docsRoot.pathname.length);
+                        if (resolved.origin === docsRoot.origin && resolved.pathname.startsWith(docsRoot.pathname) && markdownPath.test(relative)) {
+                            link.setAttribute('href', 'doc.html?p=' + encodeURIComponent(relative) + hash);
                         } else if (path.startsWith('../')) {
+                            var repositoryPath = new URL(path, 'https://repository.invalid/docs/' + param).pathname.slice(1);
                             link.setAttribute('href',
-                                'https://github.com/dharangutti/sound-script/blob/main/' + path.replace(/^(\.\.\/)+/, ''));
+                                'https://github.com/dharangutti/sound-script/blob/main/' + repositoryPath);
                         }
                     });
 

@@ -3,6 +3,7 @@ using SoundScript.Core;
 using SoundScript.Midi;
 using SoundScript.Parser;
 using SoundScript.Wave;
+using SoundScript.Media;
 
 namespace SoundScript;
 
@@ -70,6 +71,10 @@ public sealed class SoundScriptCompilation
 
     /// <summary>Import-loader warnings, including duplicate blocks overridden by later definitions.</summary>
     public IReadOnlyList<string> Warnings { get; }
+
+    /// <summary>Compiles the existing visual timeline alongside this program's deterministic audio.</summary>
+    /// <remarks>Filesystem assets retain this compilation's import/sample sandbox. No playback clock is created.</remarks>
+    public SoundScriptMediaCompilation CompileMedia() => new(program, RenderOptions(null));
 
     /// <summary>Renders a complete mono PCM WAV using the existing direct AST renderer.</summary>
     /// <returns>RIFF/WAVE bytes ready to save or return from an application.</returns>
