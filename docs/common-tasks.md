@@ -34,6 +34,10 @@ dotnet run --project src/SoundScript.Cli -- video examples/visual-temporal.ssv -
 The CLI video export requires FFmpeg with VP9 and Opus support. The Playground
 can preview and export the same temporal model in a browser.
 
+The NuGet package also exposes the temporal scene, audio, frame and FFmpeg
+export APIs. See the [Industrial Monitoring tutorial](tutorials/industrial-monitoring.md)
+for an application that changes synchronized media from typed telemetry values.
+
 ## Add vocals or speech cues
 
 Use voice, vocal, and speak syntax where supported by the selected backend. The

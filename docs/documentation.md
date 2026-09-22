@@ -14,6 +14,7 @@ audio-to-code transcription for suitable recordings.
 | Use it from a .NET application | [.NET API guide](dotnet-api.md) |
 | Understand the package and local installation | [NuGet](nuget.md) |
 | See developer-focused application demos | [Application samples](application-samples.md) |
+| Build complete NuGet media workflows | [NuGet end to end](nuget-end-to-end.md) |
 | Learn the language | [Language reference](language-reference.md) |
 | Use the command line | [CLI reference](cli.md) |
 | Convert suitable audio into editable source | [Transcription](transcription.md) |

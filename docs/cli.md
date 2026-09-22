@@ -432,7 +432,7 @@ Visual programs accept `--at <seconds>`.
 JSON mode uses schema version 1 and writes only JSON to stdout:
 
 ```json
-{"schemaVersion":1,"soundScriptVersion":"13.0.0","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
+{"schemaVersion":1,"soundScriptVersion":"13.0.2","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
 ```
 
 `video --check` preflights timing, dimensions, FPS, frame count, output path,

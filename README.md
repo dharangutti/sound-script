@@ -90,8 +90,8 @@ does not replace live recording, arranging by ear, or generative composition;
 it gives developers an inspectable, version-controlled language for defining
 the musical and media behavior they want to render.
 
-SoundScript is an independent open-source project. The `SoundScript` 13.0.0
-library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/13.0.0).
+SoundScript is an independent open-source project. The `SoundScript` 13.0.2
+library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/13.0.2).
 The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0).
 
 ## Musical and media capabilities
@@ -195,14 +195,14 @@ be installed as described in the [release checklist](docs/releasing.md).
 For the .NET library, install the published package:
 
 ```bash
-dotnet add package SoundScript --version 13.0.0
+dotnet add package SoundScript --version 13.0.2
 ```
 
 Local library packing and consumer validation are described in the [NuGet guide](docs/nuget.md).
 See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
-The current release identity is `13.0.0` (V13, Media-to-SoundScript Transcription).
+The current release identity is `13.0.2` (V13, Media-to-SoundScript Transcription).
 [Directory.Build.props](Directory.Build.props) is the version source of truth;
 release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -219,6 +219,7 @@ release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 - [Common tasks](docs/common-tasks.md) — WAV, MIDI, media sync, vocals, and transcription
 - [.NET API guide](docs/dotnet-api.md) — compile, render, and transcribe from C#
 - [NuGet guide](docs/nuget.md) — local package use and release status
+- [NuGet end to end](docs/nuget-end-to-end.md) — telemetry to MIDI/WAV/WebM, media round trip, and verified API parity
 - [Application samples](docs/application-samples.md) — DynamicAudio, DevOpsSonification, and TestFixtureGenerator
 - [User guide](docs/user-guide.md) — hands-on introduction
 - [Language reference](docs/language-reference.md) — complete syntax

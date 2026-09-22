@@ -107,8 +107,10 @@ estimates, not isolated stems. Percussion produces unpitched hit events.
 
 The package complements the existing CLI. It does not embed the CLI executable
 or change command names, output semantics, or Playground behavior. Use the CLI
-for shell automation and FFmpeg export; use the package when a .NET application
-needs to compile, render, transcribe, or generate fixtures in process.
+for shell automation; use the package for in-process .NET integration, including
+WebM through the bundled public `SoundScript.Media` APIs and external FFmpeg.
+See the [end-to-end samples and verified parity matrix](nuget-end-to-end.md)
+for temporal visuals, A/V export, transcription, and remaining CLI-only reports.
 
 ## Errors to handle
 
