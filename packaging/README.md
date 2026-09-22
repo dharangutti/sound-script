@@ -64,6 +64,7 @@ corpus, without CLI or Playground binaries.
 
 - [Quick start](https://soundscript.net/doc.html?p=quick-start.md)
 - [.NET API guide](https://soundscript.net/doc.html?p=dotnet-api.md)
+- [End-to-end NuGet samples and API parity](https://soundscript.net/doc.html?p=nuget-end-to-end.md)
 - [Full documentation](https://soundscript.net/doc.html?p=documentation.md)
 - [Application samples](https://github.com/dharangutti/sound-script/tree/main/samples)
 - [Transcription limits](https://soundscript.net/doc.html?p=transcription.md)

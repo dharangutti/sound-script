@@ -1,9 +1,22 @@
 # Application samples
 
 The application samples are small .NET console projects that consume the
-SoundScript facade. They demonstrate integration patterns rather than new
+SoundScript package through its facade and public component APIs. They demonstrate integration patterns rather than new
 language features or a new audio engine. Each sample uses the same source and
 render semantics as the CLI.
+
+## Complete NuGet workflows
+
+- [IndustrialMonitoring](../samples/IndustrialMonitoring): one typed scenario
+  builder maps Healthy, Warning and Critical telemetry to `.ss`, `.ssw` and
+  `.ssv`, MIDI, mono/stereo WAV, temporal states and optional decode-verified WebM.
+- [MediaRoundTrip](../samples/MediaRoundTrip): original PCM fixture → structured
+  transcription → editable source → instrument change → MIDI and WAV.
+
+Both use `PackageReference` to published SoundScript 13.0.2. Start with the
+[end-to-end guide](nuget-end-to-end.md),
+[monitoring tutorial](tutorials/industrial-monitoring.md) or
+[round-trip tutorial](tutorials/media-round-trip.md).
 
 ## DynamicAudio
 

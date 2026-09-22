@@ -7,11 +7,11 @@ separate application surface.
 
 ## Install
 
-The [SoundScript 13.0.0 library is published on nuget.org](https://www.nuget.org/packages/SoundScript/13.0.0).
+The [SoundScript 13.0.2 library is published on nuget.org](https://www.nuget.org/packages/SoundScript/13.0.2).
 Install it with:
 
 ~~~bash
-dotnet add package SoundScript --version 13.0.0
+dotnet add package SoundScript --version 13.0.2
 ~~~
 
 For local validation, pack and use a local source:
@@ -19,7 +19,7 @@ For local validation, pack and use a local source:
 ~~~bash
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
 dotnet new console -n PackageConsumer -f net10.0
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 13.0.0 --source artifacts/nuget
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 13.0.2 --source artifacts/nuget
 dotnet run --project PackageConsumer/PackageConsumer.csproj
 ~~~
 
@@ -39,6 +39,10 @@ File.WriteAllBytes("success.mid", cue.RenderMidi());
 
 See the [full .NET API guide](dotnet-api.md) for imports, stereo rendering,
 Wave options, transcription, and expected errors.
+
+For complete package consumers, see [NuGet end to end](nuget-end-to-end.md):
+typed monitoring scenarios generate MIDI, Wave audio and temporal A/V; a second
+application transcribes WAV, edits the score and regenerates MIDI/WAV.
 
 ## Package metadata
 
