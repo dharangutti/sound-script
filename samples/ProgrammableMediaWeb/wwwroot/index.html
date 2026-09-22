@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoundScript programmable media</title>
+<style>
+  body { max-width: 960px; margin: 2rem auto; padding: 0 1rem; font: 18px system-ui; background: #f8fafc; color: #172033; }
+  button, select { font: inherit; padding: .5rem; margin: .3rem; }
+  audio, img { display: block; width: 100%; }
+  img { aspect-ratio: 16 / 9; background: white; border: 1px solid #cbd5e1; border-radius: 12px; }
+  #error { color: #b91c1c; }
+</style>
+<h1>One program. Audio and visual state.</h1>
+<p>The audio player's position controls the scene. Pause, resume, or seek with the player below.</p>
+<label>Equipment state <select id="scenario"><option>Healthy</option><option>Warning</option><option>Critical</option></select></label>
+<button id="play">Play / Resume</button><button id="pause">Pause</button><button id="restart">Restart</button>
+<audio id="audio" controls preload="auto"></audio>
+<p><output id="position">0.00 s</output></p>
+<img id="scene" alt="Animated equipment status">
+<p id="error" role="alert"></p>
+<script src="app.js"></script>
+</html>
