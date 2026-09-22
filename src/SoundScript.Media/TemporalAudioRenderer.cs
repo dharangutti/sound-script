@@ -11,6 +11,26 @@ namespace SoundScript.Media;
 /// </summary>
 public static class TemporalAudioRenderer
 {
+    /// <summary>Renders the complete PCM rail and pads it with silence to cover a minimum media duration.</summary>
+    /// <remarks>Unlike the fixed-duration video overload, this never truncates audio. Explicit options preserve
+    /// the host's filesystem policy; missing samples are not silently skipped by default.</remarks>
+    public static byte[] RenderCompleteWavBytes(ProgramNode program, TimeSpan minimumDuration, WaveRenderOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        if (minimumDuration < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(minimumDuration));
+        var bytes = WaveRenderer.RenderToBytes(program, options);
+        using var input = new MemoryStream(bytes, writable: false);
+        var samples = WavReader.ReadMono(input);
+        var count = checked((int)Math.Ceiling(minimumDuration.TotalSeconds * WavWriter.SampleRate));
+        if (samples.Length >= count) return bytes;
+        // Preserve the original quantized PCM bytes exactly when extending the rail.
+        var padded = new byte[checked(44 + count * 2)];
+        bytes.CopyTo(padded, 0);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(padded.AsSpan(4), padded.Length - 8);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(padded.AsSpan(40), count * 2);
+        return padded;
+    }
+
     /// <summary>Uses the PCM adapter's clock, including Wave-only programs.</summary>
     public static SoundScript.Core.TempoAutomationMap BuildTempoMap(ProgramNode program)
     {
