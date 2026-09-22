@@ -92,7 +92,7 @@ the musical and media behavior they want to render.
 
 SoundScript is an independent open-source project. The `SoundScript` 13.0.2
 library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/13.0.2).
-The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0).
+The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.2).
 
 ## Musical and media capabilities
 
@@ -187,7 +187,7 @@ dotnet run --project src/SoundScript.Cli -- --version
 ```
 
 For the CLI, download the archive for your platform from the
-[V13 release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0),
+[V13 release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.2),
 verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
 `SoundScript.Cli` is not published on nuget.org; a locally packed tool can also
 be installed as described in the [release checklist](docs/releasing.md).
