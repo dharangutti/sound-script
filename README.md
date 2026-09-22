@@ -9,7 +9,7 @@ SoundScript.
 
 SoundScript is a deterministic programming language and .NET toolkit for
 programmable audio and media. Its `.ss`, `.ssw`, and `.ssv` scripts compile
-to reproducible MIDI, WAV, and WebM outputs. V13 also provides experimental
+to reproducible MIDI, WAV, and WebM outputs. V13 introduced experimental
 audio-to-code transcription for suitable recordings. The cross-platform
 `soundscript` CLI validates and inspects source, renders audio, and exports
 temporal media.
@@ -92,11 +92,11 @@ the musical and media behavior they want to render.
 
 SoundScript is an independent open-source project. The `SoundScript` 14.0.0
 library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
-The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.2).
+The CLI is distributed separately through [V14 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0).
 
 ## Musical and media capabilities
 
-V13 includes media-to-SoundScript transcription while retaining the existing
+V13 introduced media-to-SoundScript transcription while retaining the existing
 deterministic, backward-compatible authoring workflow. Five modes are available:
 Monophonic, Extract Melody (Experimental), Polyphonic / Piano (Experimental),
 Mixed Audio / Roles (Experimental), and Percussion / Rhythm (Experimental).
@@ -187,7 +187,7 @@ dotnet run --project src/SoundScript.Cli -- --version
 ```
 
 For the CLI, download the archive for your platform from the
-[V13 release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.2),
+[V14 release](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0),
 verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
 `SoundScript.Cli` is not published on nuget.org; a locally packed tool can also
 be installed as described in the [release checklist](docs/releasing.md).
