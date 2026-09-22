@@ -90,8 +90,8 @@ does not replace live recording, arranging by ear, or generative composition;
 it gives developers an inspectable, version-controlled language for defining
 the musical and media behavior they want to render.
 
-SoundScript is an independent open-source project. The `SoundScript` 13.0.2
-library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/13.0.2).
+SoundScript is an independent open-source project. The `SoundScript` 14.0.0
+library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
 The CLI is distributed separately through [V13 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.2).
 
 ## Musical and media capabilities
@@ -195,14 +195,14 @@ be installed as described in the [release checklist](docs/releasing.md).
 For the .NET library, install the published package:
 
 ```bash
-dotnet add package SoundScript --version 13.0.2
+dotnet add package SoundScript --version 14.0.0
 ```
 
 Local library packing and consumer validation are described in the [NuGet guide](docs/nuget.md).
 See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
-The current development candidate is `14.0.0` (V14, Programmable Media Runtime); it is not published by this change.
+The current release is `14.0.0` (V14, Programmable Media Runtime).
 [Directory.Build.props](Directory.Build.props) is the version source of truth;
 release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
@@ -223,8 +223,7 @@ string svg = TemporalSvgRenderer.Render(scene);
 
 See [architecture and API contracts](docs/programmatic-media-runtime.md),
 [the .NET sample](samples/ProgrammableMedia/README.md), [the HTML playback sample](samples/ProgrammableMediaWeb/README.md),
-and [acceptance evidence](docs/v14-acceptance-report.md). V14 is an additive local package candidate;
-the published 13.0.2 install/release links above remain historical release guidance.
+and [acceptance evidence](docs/v14-acceptance-report.md). SoundScript 14.0.0 is available as the published NuGet package.
 
 ## Supported platforms
 
