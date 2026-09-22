@@ -6,10 +6,10 @@ transcription. Use it for application cues, sonification, or reproducible media 
 
 ## Install
 
-Requires .NET 10. Install SoundScript 13.0.2:
+Requires .NET 10. Install the locally packed SoundScript 14.0.0 candidate:
 
 ```sh
-dotnet add package SoundScript --version 13.0.2
+dotnet add package SoundScript --version 14.0.0 --source ./artifacts/packages
 ```
 
 For development, you can also [build and install from a local feed](https://soundscript.net/doc.html?p=nuget.md).
@@ -25,6 +25,22 @@ File.WriteAllBytes("success.mid", cue.RenderMidi());
 ```
 
 ## Programmatic rendering
+
+V14 adds a typed programmable-media facade over the existing audio and visual engines:
+
+```csharp
+using SoundScript.Media;
+var media = SoundScriptEngine.Compile("track cue { C4 q } visual \"intro\" for 2s").CompileMedia();
+byte[] audio = media.RenderAudio();
+var scene = media.SceneAt(TimeSpan.FromSeconds(1));
+string json = TemporalVisualJson.Serialize(scene);
+string svg = TemporalSvgRenderer.Render(scene);
+```
+
+Hosts supply playback time. JSON schema 1.0 and safe SVG consume the existing typed scene;
+FFmpeg and browser frameworks are unnecessary. See the
+[runtime guide](https://github.com/dharangutti/sound-script/blob/main/docs/programmatic-media-runtime.md).
+
 
 ```csharp
 var compilation = SoundScriptEngine.CompileFile("notification.ss");

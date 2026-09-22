@@ -12,6 +12,9 @@ audio-to-code transcription for suitable recordings.
 | Try SoundScript in five minutes | [Quick start](quick-start.md) |
 | Solve a common application task | [Common tasks](common-tasks.md) |
 | Use it from a .NET application | [.NET API guide](dotnet-api.md) |
+| Build synchronized audio and visuals | [V14 hands-on tutorial](tutorials/programmable-media.md) |
+| Integrate queryable media state | [Programmable media runtime](programmatic-media-runtime.md) |
+| Read the design story | [SoundScript 14 article](articles/programmable-media-runtime-dotnet.md) |
 | Understand the package and local installation | [NuGet](nuget.md) |
 | See developer-focused application demos | [Application samples](application-samples.md) |
 | Build complete NuGet media workflows | [NuGet end to end](nuget-end-to-end.md) |
@@ -45,3 +48,9 @@ useful follow-on guides rather than replacements for the entry points above.
 SoundScript's CLI and Playground continue to use the existing language and
 rendering pipeline. The NuGet facade adds a programmatic .NET surface without
 changing CLI commands or language semantics.
+
+## V14 programmable media
+
+V14 exposes deterministic audio and queryable visual state through one compiled media facade.
+
+See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).

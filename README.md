@@ -202,9 +202,29 @@ Local library packing and consumer validation are described in the [NuGet guide]
 See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
-The current release identity is `13.0.2` (V13, Media-to-SoundScript Transcription).
+The current development candidate is `14.0.0` (V14, Programmable Media Runtime); it is not published by this change.
 [Directory.Build.props](Directory.Build.props) is the version source of truth;
 release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+## V14 programmable media
+
+SoundScript defines deterministic audio, visual state and media time. Applications choose playback and rendering.
+
+```csharp
+using SoundScript;
+using SoundScript.Media;
+
+var media = SoundScriptEngine.Compile("tempo 120 track cue { C4 q } visual \"intro\" for 2s").CompileMedia();
+byte[] wav = media.RenderAudio();
+var scene = media.SceneAt(TimeSpan.FromSeconds(1));
+string json = TemporalVisualJson.Serialize(scene);
+string svg = TemporalSvgRenderer.Render(scene);
+```
+
+See [architecture and API contracts](docs/programmatic-media-runtime.md),
+[the .NET sample](samples/ProgrammableMedia/README.md), [the HTML playback sample](samples/ProgrammableMediaWeb/README.md),
+and [acceptance evidence](docs/v14-acceptance-report.md). V14 is an additive local package candidate;
+the published 13.0.2 install/release links above remain historical release guidance.
 
 ## Supported platforms
 

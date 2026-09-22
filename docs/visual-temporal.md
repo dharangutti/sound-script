@@ -239,3 +239,9 @@ audio in preview and export.
 dotnet run --project src/SoundScript.Cli -- visual examples/visual-motion.ssv --at 3
 dotnet run --project src/SoundScript.Cli -- video examples/visual-motion.ssv --output motion.webm --fps 30
 ```
+
+## V14 programmable media
+
+The V14 facade preserves StateAt(t), half-open intervals, existing geometry and host-supplied media time.
+
+See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).

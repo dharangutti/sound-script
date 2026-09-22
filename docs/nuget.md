@@ -1,9 +1,12 @@
 # SoundScript NuGet package
 
-SoundScript is the single bundled package for programmatic .NET use. The V13
+SoundScript is the single bundled package for programmatic .NET use. The V14 candidate
 package targets net10.0 and includes the reusable parser, core, MIDI, Wave,
 media, vocal, prosody, voice, and transcription assemblies. The CLI remains a
 separate application surface.
+
+V14 adds the [programmable media runtime](programmatic-media-runtime.md). It is a local candidate;
+packing and acceptance validation do not publish it. Published-release links below still refer to 13.0.2.
 
 ## Install
 
@@ -19,7 +22,7 @@ For local validation, pack and use a local source:
 ~~~bash
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
 dotnet new console -n PackageConsumer -f net10.0
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 13.0.2 --source artifacts/nuget
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 14.0.0 --source artifacts/nuget
 dotnet run --project PackageConsumer/PackageConsumer.csproj
 ~~~
 
@@ -46,7 +49,7 @@ application transcribes WAV, edits the score and regenerates MIDI/WAV.
 
 ## Package metadata
 
-The package project records the SoundScript ID, V13 version, .NET 10 target,
+The package project records the SoundScript ID, V14 version, .NET 10 target,
 project and repository URLs, MIT license metadata, discoverability tags, XML
 documentation for the public facade and bundled public APIs, README, icon, and
 Source Link metadata. Final package inspection must verify XML files for all

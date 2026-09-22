@@ -124,3 +124,9 @@ for temporal visuals, A/V export, transcription, and remaining CLI-only reports.
 The public facade keeps the AST and parser implementation details out of normal
 consumer code while retaining the existing component assemblies inside the
 single package.
+
+## V14 programmable media
+
+Use CompileMedia() for synchronized audio, duration and SceneAt(t), followed by versioned JSON or safe SVG.
+
+See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).

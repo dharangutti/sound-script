@@ -63,3 +63,9 @@ short README with its output files and options.
 For existing language examples and ready-to-run scripts, see
 [examples.md](examples.md). For sonification case studies, see
 [use-cases.md](use-cases.md) and the [Industrial Audio site](https://soundscript.net/industrial/).
+
+## V14 programmable media
+
+V14 adds package-backed ProgrammableMedia and ProgrammableMediaWeb examples: console artifacts and plain HTML playback with three typed scenarios.
+
+See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).

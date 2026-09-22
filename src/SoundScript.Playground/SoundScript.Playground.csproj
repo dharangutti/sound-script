@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Bundle repository documentation so learning links also work in a standalone Playground publish. -->
+    <Content Include="../../docs/**/*.md" Exclude="../../docs/playground/**" Link="wwwroot/learn/%(RecursiveDir)%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../docs/doc.html" Link="wwwroot/learn/doc.html" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../docs/assets/marked.min.js" Link="wwwroot/learn/assets/marked.min.js" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../docs/assets/soundscript-logo.png" Link="wwwroot/learn/assets/soundscript-logo.png" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="..\..\examples\visual-*.ssv" LogicalName="VisualExamples.%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\..\examples\performance-*.ss" LogicalName="PerformanceExamples.%(Filename)%(Extension)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />

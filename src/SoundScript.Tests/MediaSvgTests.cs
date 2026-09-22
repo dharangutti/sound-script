@@ -7,6 +7,17 @@ namespace SoundScript.Tests;
 
 public class MediaSvgTests
 {
+    [Fact]
+    public void SecurityGoldenContainsOnlyEscapedTextAndAttributes()
+    {
+        var scene = new TemporalVisualScene(0, new[] {
+            new TemporalVisualPrimitive("\" onload=\"alert(1)", "generic", "<script>alert(1)</script> <img src=x onerror=alert(1)> < > & \" ' 日本語", 0, 0, 1280, 100, 1, 0)
+        });
+        var expected = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Golden/v14-security.svg"));
+        Assert.Equal(expected, TemporalSvgRenderer.Render(scene));
+        _ = XDocument.Parse(expected);
+    }
+
     [Theory]
     [InlineData("rectangle")]
     [InlineData("roundedRectangle")]

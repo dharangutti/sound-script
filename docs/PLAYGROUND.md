@@ -321,3 +321,10 @@ Audio unlock flow: compile synchronously → `startPlayback` is the first `await
 
 - [ ] Network tab shows no CDN or API requests after initial load
 - [ ] Soundfont loads from `/playground/soundfont/samples/*.wav` only
+# V14 learning resources
+
+The Playground header links to the [hands-on programmable-media tutorial](tutorials/programmable-media.md),
+[runtime API guide](programmatic-media-runtime.md) and [article draft](articles/programmable-media-runtime-dotnet.md).
+These repository documents are bundled under `learn/` in standalone Playground builds and are also
+available through the [documentation index](documentation.md). They use the same source and timing
+semantics as the Audio/Visual workspace; no separate tutorial runtime is introduced.
