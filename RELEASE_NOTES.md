@@ -1,6 +1,6 @@
 # SoundScript Release Notes
 
-## 14.0.0 — Programmable Media Runtime (candidate)
+## 14.0.0 — Programmable Media Runtime
 
 - Add `SoundScriptCompilation.CompileMedia()` with `RenderAudio()`, `Duration`, `Timeline` and `SceneAt(t)`.
 - Compose the existing parser, visual timeline, scene builder and deterministic Wave renderer; preserve host-controlled playback.
@@ -8,8 +8,6 @@
 - Add package-backed console and ASP.NET/plain HTML samples with three typed scenarios and synchronized playback.
 - Preserve 13.0.2 APIs and existing WebM/Playground behavior. No migration required.
 - See [contracts and limits](docs/programmatic-media-runtime.md) and [acceptance report](docs/v14-acceptance-report.md).
-
-This change prepares a local candidate only; it does not publish NuGet, tag, release or merge to main.
 
 ## V13 — Media-to-SoundScript Transcription
 
