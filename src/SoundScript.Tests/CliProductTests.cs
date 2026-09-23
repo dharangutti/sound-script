@@ -160,7 +160,7 @@ public sealed class CliProductTests : IDisposable
 
     [Fact]
     public void VersionIsMachineFriendlyAndMatchesRelease()
-    { var result = Run("--version"); Assert.Equal(0, result.Code); Assert.Equal(VersionInfo.Number, result.Out.Trim()); Assert.Equal("14.0.0", result.Out.Trim()); }
+    { var result = Run("--version"); Assert.Equal(0, result.Code); Assert.Equal(VersionInfo.Number, result.Out.Trim()); Assert.Matches(@"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$", result.Out.Trim()); }
 
     [Fact]
     public void JsonUsageFailureIsOnlyJson()

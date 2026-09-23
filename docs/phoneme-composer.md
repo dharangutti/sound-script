@@ -73,7 +73,7 @@ each syllable left to right:
 
 Examples:
 
-```
+```text
 star  → /s/ /t/ /aa/ /r/
 shine → /sh/ /ai/ /n/ /ee/
 queen → /k/ /w/ /ee/ /n/
@@ -146,7 +146,7 @@ notes using the existing phrase envelope machinery.
 
 `compose "star"` (one syllable, phonemes /s/ /t/ /aa/ /r/) builds:
 
-```
+```text
 ProgramNode
 ├── TempoNode { Bpm = 96 }
 └── TrackNode { Name = "phonemes" }

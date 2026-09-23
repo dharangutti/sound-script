@@ -8,7 +8,7 @@ Phase 4 adds interpretive intelligence that refines pitch register, harmonic spa
 
 Reduces extreme octave jumps (>12 semitones) while preserving pitch spelling.
 
-```
+```text
 Previous: C4 (60)
 Current:  C6 (84)  →  adjusted to C5 (72)
 ```
@@ -19,7 +19,7 @@ Warning: `Octave adjusted`
 
 Corrects wide melodic leaps (>7 semitones) by single-octave displacement.
 
-```
+```text
 Previous: C5 (72)
 Current:  A5 (81)  →  leap of 9, adjusted down one octave
 ```
@@ -46,7 +46,7 @@ Warning: `Phrase boundary smoothed`
 
 Ramps velocity across abrupt dynamic changes (≥24 velocity points) over **3 notes**:
 
-```
+```text
 p → f  (48 → 96)
 Note 1: velocity ~64
 Note 2: velocity ~80
@@ -57,7 +57,7 @@ Warning: `Dynamic ramp applied`
 
 ## Diagram: Musical Intelligence Flow
 
-```
+```text
 EmitNote / EmitChord
     │
     ├── OctaveSmoother     (extreme jumps)
@@ -91,7 +91,7 @@ Phase 4 extends notes with resolved pitch data:
 
 ### Melodic contour
 
-```
+```soundscript
 melody {
     C4 q
     G5 q
@@ -101,7 +101,7 @@ melody {
 
 ### Dynamic ramping
 
-```
+```soundscript
 melody {
     p
     C4 q D4 q E4 q

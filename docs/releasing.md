@@ -1,18 +1,23 @@
 # Release and package checklist
 
-This checklist prepares a SoundScript release without publishing anything.
-`Directory.Build.props` is the single source of truth for the package and CLI
-version, label, and release name. A future versioned release updates its three
-release properties together and describes changes in `RELEASE_NOTES.md`.
-The V13 Reliability & Release Hardening pass retains version 13.0.0.
+This checklist prepares a release without publishing anything. Development identity
+comes from Directory.Build.props; public distribution comes from release-state.json.
+See [documentation maintenance](documentation-maintenance.md) for schema, ownership
+and the explicit publication-state update process.
 
-The public library package is the single `SoundScript` project at
-`src/SoundScript/SoundScript.csproj`. It targets `net10.0`, bundles the reusable
-component assemblies, and includes transcription. The CLI package and CLI
-release archives remain separate products.
-The [13.0.0 library is already published](https://www.nuget.org/packages/SoundScript/13.0.0);
-[V13 CLI downloads](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0)
-and the [browser deployment](https://soundscript.net/playground/) exist.
+<!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
+Development: **15.0.0 / V15 — Documentation Reliability & Developer Experience**. Development identity does not imply publication.
+<!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
+
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
+Current public version: **14.0.0**. Publication channels are recorded in `docs/release-state.json`.
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
+
+<!-- GENERATED:CLI_DISTRIBUTION_START -->
+`SoundScript.Cli` 14.0.0 is not published on nuget.org.
+
+Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+<!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 ## Verify from a clean checkout
 

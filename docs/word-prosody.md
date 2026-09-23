@@ -10,7 +10,7 @@ changes; V5 is reached through its own CLI verb and library facade.
 dotnet run --project src/SoundScript.Cli -- prosody "Twinkle twinkle little star"
 ```
 
-```
+```console-output
 Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
 ```
 
@@ -33,7 +33,7 @@ contribute rhythm and articulation (via the existing `PhonemeMapper.Kind` /
 
 ## The pipeline
 
-```
+```text
 plain text
     ↓
 words → syllables            WordTokenizer      (reuses the existing Syllabifier)

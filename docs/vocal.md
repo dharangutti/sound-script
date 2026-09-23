@@ -18,7 +18,7 @@ The instrumental engine (tracks, layers, phrases, patterns) is untouched. The
 voice engine is a **separate pipeline branch** that shares only the parse step
 and the tempo map:
 
-```
+```text
 DSL script
     ↓
 Tokenizer → Parser → AST
@@ -166,7 +166,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
 
 Expected output:
 
-```
+```console-output
 Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vocal-song.mid at 100 BPM.
 ```
 

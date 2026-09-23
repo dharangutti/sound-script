@@ -63,7 +63,7 @@ System overview for the SoundScript engine and documentation suite.
 
 ## Project Layout
 
-```
+```text
 /src
     SoundScript.Core/       # AST, NotatedNote, TempoAutomationMap, InstrumentMap
     SoundScript.Parser/     # Tokenizer, Parser, ProgramLoader
@@ -123,7 +123,7 @@ System overview for the SoundScript engine and documentation suite.
 
 ## Layer Diagram (V4)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                     SoundScript.Cli                      │
 │                     Playground (WASM)                    │
@@ -147,7 +147,7 @@ System overview for the SoundScript engine and documentation suite.
 Five stages share one MIDI backbone; V4 adds a read-only audio branch and V5
 adds a second text-to-AST branch alongside `PhonemeComposer`:
 
-```
+```text
 Tokenizer → Parser → AST
     ├── Interpreter        (tracks)   → InterpretedTrack[]
     ├── VocalInterpreter   (voices)   → InterpretedVocalTrack[]
@@ -189,7 +189,7 @@ Both text branches expose their pre-interpretation `ProgramNode` via
 taps that same `ProgramNode` and prints it back out as `.ss` source instead
 of continuing straight to `Interpreter`/`MidiGenerator`:
 
-```
+```text
 PhonemeComposer.BuildAst / ProsodyComposer.BuildAst → ProgramNode
     ├── (default)      → Interpreter → MidiGenerator → output.mid
     └── (--emit-ss)    → SsPrinter → melody.ss → (Tokenizer → Parser → Interpreter → MidiGenerator) → output.mid

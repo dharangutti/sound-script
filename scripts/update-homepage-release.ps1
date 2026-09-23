@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$IndexPath,
     [string]$ReleaseNotesPath = (Join-Path $PSScriptRoot '../RELEASE_NOTES.md'),
-    [string]$PropsPath = (Join-Path $PSScriptRoot '../Directory.Build.props')
+    [string]$PropsPath = (Join-Path $PSScriptRoot '../Directory.Build.props'),
+    [string]$ReleaseStatePath = (Join-Path $PSScriptRoot '../docs/release-state.json')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,6 +49,19 @@ if ($version -notmatch '^(\d+)\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)
 $currentMajor = [int]$Matches[1]
 if ($label -cne "V$currentMajor") { throw "SoundScriptVersionLabel '$label' does not match Version '$version'." }
 
+# Public state is the default, including direct invocations outside site staging.
+# Callers testing another release supply their own state fixture explicitly.
+$publicStarted = -not $ReleaseStatePath
+if ($ReleaseStatePath) {
+    $publicState = Get-Content -LiteralPath $ReleaseStatePath -Raw | ConvertFrom-Json
+    if ($publicState.schemaVersion -ne 1 -or $publicState.publicVersion -notmatch '^(\d+)\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
+        throw 'Invalid public release state; run update-docs.ps1 -Check first.'
+    }
+    $version = [string]$publicState.publicVersion
+    $currentMajor = [int]$version.Split('.')[0]
+    $label = "V$currentMajor"
+}
+
 $notes = Get-Content -LiteralPath $ReleaseNotesPath -Raw
 $sections = [regex]::Matches($notes, '(?ms)^## ([^\r\n]+)\r?\n(.*?)(?=^## |\z)')
 $releases = @(
@@ -59,6 +73,10 @@ $releases = @(
         $releaseVersion = $Matches[1]
         $title = $Matches[2]
         $major = [int]($releaseVersion.Split('.')[0])
+        if (-not $publicStarted) {
+            if ($releaseVersion -ceq $version -or ($releaseVersion -notmatch '\.' -and $major -eq $currentMajor)) { $publicStarted = $true }
+            else { continue }
+        }
         if ($major -lt 8) { continue }
         $bullets = [System.Collections.Generic.List[string]]::new()
         $continuing = $false
@@ -76,6 +94,7 @@ $releases = @(
         [pscustomobject]@{ Version = $releaseVersion; Major = $major; Title = $title; Bullets = $bullets }
     }
 )
+if (-not $publicStarted) { throw "Release history does not match public version '$version'." }
 if ($releases.Count -eq 0) { throw 'No V8+ releases found in RELEASE_NOTES.md.' }
 # Release notes are newest first. Legacy V-major headings can only validate the major;
 # a full version heading must agree exactly, including patch/prerelease information.

@@ -35,27 +35,9 @@ jobs:
       - name: Test integrity verifier
         run: node --test scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
 
-      - name: Stamp homepage version badge from Directory.Build.props
+      - name: Check public documentation state
         shell: pwsh
-        run: |
-          $props = Get-Content Directory.Build.props -Raw
-          $label = [regex]::Match($props, '<SoundScriptVersionLabel>(.*?)</SoundScriptVersionLabel>').Groups[1].Value
-          $codename = [regex]::Match($props, '<SoundScriptCodename>(.*?)</SoundScriptCodename>').Groups[1].Value
-          if ([string]::IsNullOrEmpty($label)) {
-            Write-Warning "SoundScriptVersionLabel not found in Directory.Build.props; leaving docs/index.html badge as-is."
-            exit 0
-          }
-          $badgeText = if ($codename) { "Version: $label — $codename" } else { "Version: $label" }
-          $pattern = '(?s)(<!--VERSION_BADGE-->).*?(<!--/VERSION_BADGE-->)'
-          $index = Get-Content docs/index.html -Raw
-          if (-not [regex]::IsMatch($index, $pattern)) {
-            Write-Warning "VERSION_BADGE markers not found in docs/index.html; leaving it unchanged."
-            exit 0
-          }
-          $replacement = '${1}' + $badgeText + '${2}'
-          $updated = [regex]::Replace($index, $pattern, $replacement)
-          Set-Content docs/index.html $updated -NoNewline
-          Write-Host "Stamped homepage badge: $badgeText"
+        run: ./scripts/update-docs.ps1 -Check
 
       - name: Generate homepage repository metrics
         shell: pwsh

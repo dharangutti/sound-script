@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
+& (Join-Path $PSScriptRoot 'update-docs.ps1') -Check
 $artifacts = Join-Path $repo 'artifacts'
 New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
 $stage = Join-Path $artifacts ('site-build-' + [guid]::NewGuid().ToString('N'))
@@ -17,7 +18,7 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'docs') -Force |
     Copy-Item -Destination $site -Recurse -Force
 
 # Generate only in staging; validation failures leave the existing site untouched.
-& (Join-Path $PSScriptRoot 'update-homepage-release.ps1') -IndexPath (Join-Path $site 'index.html')
+& (Join-Path $PSScriptRoot 'update-homepage-release.ps1') -IndexPath (Join-Path $site 'index.html') -ReleaseStatePath (Join-Path $repo 'docs/release-state.json')
 
 Move-Item -LiteralPath $publish -Destination (Join-Path $site 'playground')
 # GitHub Pages must serve _framework verbatim. Never apply Git text conversion.

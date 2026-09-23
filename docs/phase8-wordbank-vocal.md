@@ -42,7 +42,7 @@ dotnet run --project src/SoundScript.Cli -- vocal generate \
 
 Per-word resolution:
 
-```
+```text
 hello  → corpus/audio/en/hello.wav (Wikimedia Commons, CC-BY)
 welcome → corpus/audio/en/welcome.wav
 to, SoundScript → eSpeak when installed (intelligible speech), else G2P timbre

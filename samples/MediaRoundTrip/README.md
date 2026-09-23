@@ -1,6 +1,6 @@
 # Media round trip
 
-A .NET 10 consumer of published `SoundScript` **13.0.2**. It generates an
+A .NET 10 consumer of the pinned SoundScript 13.0.2 compatibility baseline. It generates an
 original C4–E4–G4–C5 sine fixture, transcribes native PCM WAV into a structured
 score, saves editable source, changes flute to piano, and renders MIDI/WAV.
 No FFmpeg or SoundScript CLI is required.

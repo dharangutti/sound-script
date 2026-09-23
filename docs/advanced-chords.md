@@ -24,7 +24,7 @@ Modifiers appear **after** the chord token, before duration.
 
 ## Pipeline Position
 
-```
+```text
 ChordVoicing (Phase 1)
     ↓
 AdvancedChordVoicing    ← here

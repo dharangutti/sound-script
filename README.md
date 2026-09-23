@@ -90,9 +90,7 @@ does not replace live recording, arranging by ear, or generative composition;
 it gives developers an inspectable, version-controlled language for defining
 the musical and media behavior they want to render.
 
-SoundScript is an independent open-source project. The `SoundScript` 14.0.0
-library for net10.0 is [published on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
-The CLI is distributed separately through [V14 release downloads](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0).
+SoundScript is an independent open-source project. See [installation](#installation) for current distribution.
 
 ## Musical and media capabilities
 
@@ -186,25 +184,35 @@ dotnet build SoundScript.sln
 dotnet run --project src/SoundScript.Cli -- --version
 ```
 
-For the CLI, download the archive for your platform from the
-[V14 release](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0),
-verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
-`SoundScript.Cli` is not published on nuget.org; a locally packed tool can also
-be installed as described in the [release checklist](docs/releasing.md).
+<!-- GENERATED:CLI_DISTRIBUTION_START -->
+`SoundScript.Cli` 14.0.0 is not published on nuget.org.
 
-For the .NET library, install the published package:
+Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+<!-- GENERATED:CLI_DISTRIBUTION_END -->
+
+<!-- GENERATED:LIBRARY_INSTALL_START -->
+Install the published library:
 
 ```bash
 dotnet add package SoundScript --version 14.0.0
 ```
 
+[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+<!-- GENERATED:LIBRARY_INSTALL_END -->
+
 Local library packing and consumer validation are described in the [NuGet guide](docs/nuget.md).
 See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
-The current release is `14.0.0` (V14, Programmable Media Runtime).
-[Directory.Build.props](Directory.Build.props) is the version source of truth;
-release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
+Current public version: **14.0.0**. Publication channels are recorded in `docs/release-state.json`.
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
+
+<!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
+Development: **15.0.0 / V15 — Documentation Reliability & Developer Experience**. Development identity does not imply publication.
+<!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
+
+Release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## V14 programmable media
 
@@ -223,7 +231,7 @@ string svg = TemporalSvgRenderer.Render(scene);
 
 See [architecture and API contracts](docs/programmatic-media-runtime.md),
 [the .NET sample](samples/ProgrammableMedia/README.md), [the HTML playback sample](samples/ProgrammableMediaWeb/README.md),
-and [acceptance evidence](docs/v14-acceptance-report.md). SoundScript 14.0.0 is available as the published NuGet package.
+and [acceptance evidence](docs/v14-acceptance-report.md). See [installation](#installation) for the public package.
 
 ## Supported platforms
 

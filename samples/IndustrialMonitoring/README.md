@@ -1,6 +1,6 @@
 # Industrial monitoring media
 
-A .NET 10 application consuming published `SoundScript` **13.0.2** with a
+A .NET 10 application consuming the pinned SoundScript 13.0.2 compatibility baseline with a
 `PackageReference`. One typed scenario builder generates `.ss`, `.ssw` and
 `.ssv` programs from temperature, vibration, load and status. This demonstrates
 monitoring sonification, not a certified alarm or safety controller.

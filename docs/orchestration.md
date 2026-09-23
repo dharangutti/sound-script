@@ -25,7 +25,7 @@ Statements are **track-scoped** and affect all subsequent chords in that track. 
 
 ## Pipeline Position
 
-```
+```text
 ChordVoicing (Phase 1)
     ↓
 AdvancedChordVoicing
@@ -39,7 +39,7 @@ Orchestration runs **after voicing** and **before harmonic spacing**.
 
 ## Orchestration Diagram
 
-```
+```text
 Cmaj → [60, 64, 67]
          │
          ├─ reinforce bass  → add 48

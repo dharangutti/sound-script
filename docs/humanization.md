@@ -28,7 +28,7 @@ Same script + same seed → identical output every run.
 
 ## Pipeline Position
 
-```
+```text
 PlaybackShaper → track gain → TimedNote
                               ↓
                     HumanizeApplicator  ← here

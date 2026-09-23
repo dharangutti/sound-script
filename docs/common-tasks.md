@@ -80,4 +80,4 @@ perfectly.
 Keep a short script beside a test and render it during setup. Identical source,
 options, assets, and renderer version produce identical output bytes. Hash the
 result if a test needs an explicit reproducibility assertion. See the
-[Test Fixture Generator sample](application-samples.md#test-fixture-generator).
+[Test Fixture Generator sample](application-samples.md#testfixturegenerator).

@@ -11,6 +11,12 @@ an example, and run it in the browser. The Playground is client-side and needs
 no account or installation. It is the fastest way to hear a script and inspect
 the visual timeline.
 
+<!-- GENERATED:CLI_DISTRIBUTION_START -->
+`SoundScript.Cli` 14.0.0 is not published on nuget.org.
+
+Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+<!-- GENERATED:CLI_DISTRIBUTION_END -->
+
 ## Run the CLI from the repository
 
 Install the .NET 10 SDK, clone the repository, and build it:
@@ -38,13 +44,19 @@ dotnet run --project src/SoundScript.Cli -- inspect examples/visual-temporal.ssv
 
 ## Use the .NET package
 
-The package project is src/SoundScript/SoundScript.csproj. It targets net10.0
-and bundles the reusable SoundScript libraries, including the transcription
-assembly, into one SoundScript distribution. Install the published V13 library:
+<!-- GENERATED:DOTNET_REQUIREMENT_START -->
+Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for repository development.
+<!-- GENERATED:DOTNET_REQUIREMENT_END -->
 
-~~~bash
-dotnet add package SoundScript --version 13.0.0
-~~~
+<!-- GENERATED:LIBRARY_INSTALL_START -->
+Install the published library:
+
+```bash
+dotnet add package SoundScript --version 14.0.0
+```
+
+[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+<!-- GENERATED:LIBRARY_INSTALL_END -->
 
 For package installation and API examples, see [NuGet](nuget.md) and the
 [.NET API guide](dotnet-api.md).
