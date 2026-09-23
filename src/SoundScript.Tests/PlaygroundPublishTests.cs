@@ -31,6 +31,16 @@ public class PlaygroundPublishTests
         AssertSoundfontSamples(Path.Combine(wwwrootDir, "soundfont", "samples"));
     }
 
+    [Theory]
+    [InlineData("docs-code.js")]
+    [InlineData("docs-code.css")]
+    public void PublishedDocumentation_ContainsCodePresentationAssets(string asset)
+    {
+        var assetPath = Path.Combine(GetPlaygroundPublishDir(), "learn", "assets", asset);
+        Assert.True(File.Exists(assetPath), $"Missing published documentation asset: {assetPath}");
+        Assert.True(new FileInfo(assetPath).Length > 0, $"Empty published documentation asset: {assetPath}");
+    }
+
     private static void AssertSoundfontSamples(string samplesRoot)
     {
         Assert.True(Directory.Exists(samplesRoot), "Missing soundfont/samples directory");
