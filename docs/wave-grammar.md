@@ -37,7 +37,7 @@ If a `.ss` script using any of these three is run through the MIDI backend
 rejects it with a clear, named error rather than silently ignoring the
 directive or crashing:
 
-```
+```console-output
 'effect delay' is a wave-backend directive (SoundScript.Wave, .ssw files):
 the MIDI backend has no post-mix audio buffer to apply effects to.
 Render this file through the wave backend instead.

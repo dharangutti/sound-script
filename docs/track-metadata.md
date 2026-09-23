@@ -24,7 +24,7 @@ track piano {
 
 ## Pipeline Position
 
-```
+```text
 PlaybackShaper → track gain → TimedNote
                               ↓
                     HumanizeApplicator (post-pass)

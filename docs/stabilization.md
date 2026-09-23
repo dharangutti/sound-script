@@ -8,7 +8,7 @@ Phase 1 hardens the interpreter for reliable, balanced MIDI output across chords
 
 Deterministic beat arithmetic prevents floating-point drift in long sequences.
 
-```
+```text
 RoundBeat(beats)  →  rounds to 9 decimal places (1e-9 grid)
 AddBeats(a, b)    →  RoundBeat(a + b)
 ```
@@ -17,7 +17,7 @@ AddBeats(a, b)    →  RoundBeat(a + b)
 
 Refines chord register after interval expansion:
 
-```
+```text
 Input:  [36, 40, 43]   (low root < MIDI 40)
 Output: [48, 52, 55]   (raised one octave)
 
@@ -57,7 +57,7 @@ Loop iterations align to the beat grid to prevent cumulative timing errors in re
 
 ## Diagram: Stabilization Modules
 
-```
+```text
                     ┌──────────────────┐
                     │   Interpreter    │
                     └────────┬─────────┘
@@ -78,7 +78,7 @@ Loop iterations align to the beat grid to prevent cumulative timing errors in re
 
 ## Multi-Track Sync
 
-```
+```text
 track melody { C4 q D4 q }
 track bass   { C2 h     }
          ↓
@@ -91,7 +91,7 @@ See [examples/multitrack-sync.ss](../examples/multitrack-sync.ss).
 
 ## Chord Voicing Example
 
-```
+```soundscript
 tempo 120
 instrument piano
 

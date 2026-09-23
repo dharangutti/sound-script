@@ -11,7 +11,7 @@ attack/release envelopes.
 
 ## PlaybackShaper Pipeline
 
-```
+```text
 1. Base velocity
    note vN  OR  dynamic ramp  OR  dynamic level  OR  track velocity
         ↓
@@ -117,7 +117,7 @@ After shaping, notes carry:
 
 ## Diagram: Playback Shaping Pipeline
 
-```
+```text
                     ┌─────────────────┐
                     │  Base velocity  │
                     └────────┬────────┘
@@ -157,7 +157,7 @@ After shaping, notes carry:
 
 ## Example
 
-```
+```soundscript
 melody {
     f
     staccato C4 q

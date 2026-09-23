@@ -1,30 +1,37 @@
 # SoundScript NuGet package
 
-SoundScript is the single bundled package for programmatic .NET use. The V14 candidate
-package targets net10.0 and includes the reusable parser, core, MIDI, Wave,
+SoundScript is the single bundled package for programmatic .NET use. The package targets net10.0 and includes the reusable parser, core, MIDI, Wave,
 media, vocal, prosody, voice, and transcription assemblies. The CLI remains a
 separate application surface.
 
-V14 adds the [programmable media runtime](programmatic-media-runtime.md). It is a local candidate;
-packing and acceptance validation do not publish it. Published-release links below still refer to 13.0.2.
+The [programmable media runtime](programmatic-media-runtime.md) provides synchronized audio and queryable visual state.
 
 ## Install
 
-The [SoundScript 13.0.2 library is published on nuget.org](https://www.nuget.org/packages/SoundScript/13.0.2).
-Install it with:
+<!-- GENERATED:DOTNET_REQUIREMENT_START -->
+Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for repository development.
+<!-- GENERATED:DOTNET_REQUIREMENT_END -->
 
-~~~bash
-dotnet add package SoundScript --version 13.0.2
-~~~
+<!-- GENERATED:LIBRARY_INSTALL_START -->
+Install the published library:
 
-For local validation, pack and use a local source:
+```bash
+dotnet add package SoundScript --version 14.0.0
+```
 
-~~~bash
+[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+<!-- GENERATED:LIBRARY_INSTALL_END -->
+
+For local development validation, pack and use a local source:
+
+<!-- GENERATED:LOCAL_LIBRARY_INSTALL_START -->
+```powershell
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
 dotnet new console -n PackageConsumer -f net10.0
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 14.0.0 --source artifacts/nuget
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 15.0.0 --source artifacts/nuget
 dotnet run --project PackageConsumer/PackageConsumer.csproj
-~~~
+```
+<!-- GENERATED:LOCAL_LIBRARY_INSTALL_END -->
 
 Run the consumer outside the repository solution when checking package
 contents. A local package source verifies the nupkg without publishing it.
@@ -49,7 +56,7 @@ application transcribes WAV, edits the score and regenerates MIDI/WAV.
 
 ## Package metadata
 
-The package project records the SoundScript ID, V14 version, .NET 10 target,
+The package project records the SoundScript ID, inherited development version, .NET 10 target,
 project and repository URLs, MIT license metadata, discoverability tags, XML
 documentation for the public facade and bundled public APIs, README, icon, and
 Source Link metadata. Final package inspection must verify XML files for all

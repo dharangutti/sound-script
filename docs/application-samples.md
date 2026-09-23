@@ -13,7 +13,7 @@ render semantics as the CLI.
 - [MediaRoundTrip](../samples/MediaRoundTrip): original PCM fixture → structured
   transcription → editable source → instrument change → MIDI and WAV.
 
-Both use `PackageReference` to published SoundScript 13.0.2. Start with the
+Both use `PackageReference` to the pinned SoundScript 13.0.2 compatibility baseline. Start with the
 [end-to-end guide](nuget-end-to-end.md),
 [monitoring tutorial](tutorials/industrial-monitoring.md) or
 [round-trip tutorial](tutorials/media-round-trip.md).

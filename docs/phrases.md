@@ -25,7 +25,7 @@ phrase {
 
 ## Pipeline Position
 
-```
+```text
 MusicalIntelligence (contour, phrase smoothing)
     ↓
 PhraseShaper          ← phrase dynamics + curve + transition
@@ -37,7 +37,7 @@ PlaybackShaper
 
 ## Phrase Engine Diagram
 
-```
+```text
 ┌──────────────────────────────────────┐
 │ phrase {                             │
 │   curve soft ──► PhraseScope.Curve   │

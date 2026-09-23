@@ -2,7 +2,7 @@ param([Parameter(Mandatory=$true)][string]$PackagePath)
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
-$workspace = Join-Path ([IO.Path]::GetTempPath()) ('soundscript-v14-consumer-' + [guid]::NewGuid().ToString('N'))
+$workspace = Join-Path ([IO.Path]::GetTempPath()) ('soundscript-media-consumer-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $workspace | Out-Null
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($package)
@@ -12,7 +12,9 @@ try {
     try { [xml]$spec = $reader.ReadToEnd() } finally { $reader.Dispose() }
     $version = $spec.SelectSingleNode("//*[local-name()='metadata']/*[local-name()='version']").InnerText
 } finally { $archive.Dispose() }
-if ($version -ne '14.0.0') { throw "Expected 14.0.0, got $version" }
+[xml]$props = Get-Content -LiteralPath (Join-Path $repo 'Directory.Build.props') -Raw
+$developmentVersion = [string]$props.Project.PropertyGroup.Version
+if ($version -cne $developmentVersion) { throw "Expected development package $developmentVersion, got $version" }
 $feed = [System.Security.SecurityElement]::Escape((Split-Path $package))
 @"
 <configuration>
@@ -48,7 +50,7 @@ try {
     foreach ($attribute in $svg.SelectNodes('//@*')) {
         if ($attribute.Name -match '^on') { throw 'Unsafe SVG event attribute' }
     }
-    $evidence = Join-Path $repo 'artifacts/v14'
+    $evidence = Join-Path $repo 'artifacts/media-package-validation'
     New-Item -ItemType Directory -Force -Path $evidence | Out-Null
     Copy-Item first/hashes.json (Join-Path $evidence 'hashes.json')
     Copy-Item first/security.svg (Join-Path $evidence 'security.svg')

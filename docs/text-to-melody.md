@@ -8,7 +8,7 @@ no audio synthesis, no randomness — text in, standard MIDI out.
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
 ```
 
-```
+```console-output
 Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
 ```
 
@@ -18,7 +18,7 @@ The engine is a third pipeline branch beside the instrumental interpreter and
 the vocal subsystem. Nothing existing changed — the composer builds standard AST
 nodes in code and rides the same interpreter and MIDI generator as every script:
 
-```
+```text
 plain text
     ↓
 words → syllables            Syllabifier        (existing, SoundScript.Voice)
@@ -42,7 +42,7 @@ The existing `Syllabifier` (the same engine that aligns lyrics in `voice`
 blocks) splits each word using nucleus detection, maximal onset, and sonority
 sequencing — no dictionary, no randomness:
 
-```
+```text
 "Twinkle twinkle little star" → Twin · kle · twin · kle · lit · tle · star
 ```
 
@@ -52,7 +52,7 @@ sequencing — no dictionary, no randomness:
 first (`sh`, `ch`, `th`, `ee`, `oo`, `ai`, ...) and normalising every remaining
 letter to a canonical phoneme symbol:
 
-```
+```text
 star → /s/ /t/ /aa/ /r/
 twin → /t/ /w/ /ai/ /n/
 kle  → /k/ /l/ /ee/
@@ -66,7 +66,7 @@ the same syllable always yields the same phonemes, on every platform.
 `PhonemeMapper` looks each phoneme up in a fixed table. Every entry is pure
 data — a gesture kind, a pitch, and a duration:
 
-```
+```text
 /s/  → fade     D4 e
 /t/  → staccato B3 e
 /aa/ → legato   D4 q
@@ -104,7 +104,7 @@ each step splits one syllable into phonemes, maps each phoneme to a gesture,
 appends the gestures to the current phrase, and recurses on the remaining
 syllables:
 
-```
+```text
 compose(syllables, index):
     if index = length(syllables): return
     begin phrase
@@ -168,7 +168,7 @@ V4 adds an offline timbre pass **after** MIDI generation. The MIDI file remains
 the backbone for pitch, duration, timing, and articulation; SoundCSS supplies
 spectral styling:
 
-```
+```text
 composed MIDI
     ↓
 MidiToTimbreTimeline     align phonemes, build 8 ms frame grid

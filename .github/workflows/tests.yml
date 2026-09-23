@@ -45,6 +45,15 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Check documentation state and drift
+        shell: pwsh
+        run: ./scripts/update-docs.ps1 -Check
+
+      - name: Test documentation validation and homepage history
+        run: |
+          node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs
+          node scripts/verify-v15-acceptance.mjs
+
       # eSpeak powers the wordbank auto-generation integration tests. When it is
       # absent those tests soft-skip, so the Windows install is best-effort.
       - name: Install eSpeak (Linux)
@@ -87,6 +96,10 @@ jobs:
       - name: Verify real browser startup and integrity failure handling
         if: runner.os == 'Linux'
         run: node scripts/verify-playground-startup.cjs artifacts/playground
+
+      - name: Verify documentation code UX
+        if: runner.os == 'Linux'
+        run: node scripts/verify-docs-code.cjs
 
       - name: Run tests
         env:

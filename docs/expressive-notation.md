@@ -6,7 +6,7 @@ Phase 3 adds rests, ties, articulations, dynamics, and measure validation — al
 
 ## Rests
 
-```
+```soundscript
 melody {
     C4 q
     rest e
@@ -20,7 +20,7 @@ melody {
 
 ## Ties
 
-```
+```soundscript
 melody {
     C5 q ~ C5 q
 }
@@ -61,7 +61,7 @@ rests, repeated pitches, explicit phrase boundaries, or staccato/accent attacks.
 
 ## Dynamics
 
-```
+```soundscript
 melody {
     p
     C4 q
@@ -106,7 +106,7 @@ smoother.
 
 When `time` is declared and bar lines (`|`) are used, the interpreter validates measure durations:
 
-```
+```text
 time 4/4
 melody {
     C4 q E4 q G4 q |    ← incomplete (3 beats — warning)
@@ -121,7 +121,7 @@ Warnings (non-blocking):
 
 ## Interpreter Flow (Expressive Notation)
 
-```
+```text
 Parse note/rest/dynamic
     ↓
 Attach to NotatedNote (articulation, dynamic, tie)

@@ -35,7 +35,7 @@ Complete syntax reference for the SoundScript DSL. Whitespace separates tokens. 
 
 ## Program Structure
 
-```
+```text
 program ::= statement*
 ```
 
@@ -122,7 +122,7 @@ Repeated single-letter aliases (`qq`, `hh`) are rejected.
 
 ## Rests
 
-```
+```soundscript
 rest q
 rest e
 rest for 2
@@ -135,7 +135,7 @@ Rests advance the beat clock; no MIDI note is emitted. Duration syntax matches n
 
 ## Ties
 
-```
+```soundscript
 C5 q ~ C5 q
 C5 q ~ C5 q ~ C5 h
 ```
@@ -180,14 +180,14 @@ Dynamics persist on the track until changed. Per-note `vN` overrides apply befor
 
 ## Velocity
 
-```
+```soundscript
 velocity 90        // track-scoped default (1–127)
 C4 q v100          // per-note override
 ```
 
 ## Chords
 
-```
+```soundscript
 Cmaj q
 Dm h
 G7 q
@@ -221,7 +221,7 @@ write `Cmajor6` when a major-sixth chord is intended.
 
 Tokens like `G7` are lexed as notes. The parser reinterprets them as dominant-7 chords **only when a duration follows**:
 
-```
+```text
 G7 q      ← dominant-7 chord (octave 4)
 B7        ← note B, octave 7 (no duration)
 C7 h      ← dominant-7 chord
@@ -241,7 +241,7 @@ Dominant-7 chords cannot specify octave and cannot be tied.
 
 ## Time Signature & Measures
 
-```
+```soundscript
 time 4/4
 melody {
     C4 q E4 q G4 q |
@@ -256,7 +256,7 @@ When `time` is declared and bar lines (`|`) are used, measure durations are vali
 
 ## Tempo
 
-```
+```text
 bpm 120
 tempo 120
 tempo 120 → 140 over 4 bars
@@ -270,7 +270,7 @@ tempo 120 → 140 over 4 bars
 
 ## Instruments & Layers
 
-```
+```soundscript
 instrument piano
 layer piano
 layer cello
@@ -309,7 +309,7 @@ Blocks expand inline. Recursion is rejected. Body allows notes, chords, dynamics
 
 ## Sequences & Loops
 
-```
+```soundscript
 sequence intro { C4 q D4 q }
 play intro
 
@@ -406,7 +406,7 @@ track piano {
 
 ## Orchestration (V2)
 
-```
+```soundscript
 double octave
 reinforce bass
 brighten top
@@ -433,7 +433,7 @@ Track-scoped, sticky flags affecting all subsequent chords.
 
 ## Melody & Track Blocks
 
-```
+```soundscript
 melody {
     tempo 120
     C4 q E4 q G4 q | C5 h
@@ -511,7 +511,7 @@ soundscript wave examples/wave-effects.ssw [output.wav] [--stereo]
 soundscript wave examples/full-song-wave.ss jingle.wav
 ```
 
-→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v7)
+→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v8)
 
 ## AST Node Types
 

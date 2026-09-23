@@ -12,6 +12,7 @@ $ErrorActionPreference = 'Stop'
 $script:Failures = [System.Collections.Generic.List[string]]::new()
 $script:Warnings = [System.Collections.Generic.List[string]]::new()
 $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+& (Join-Path $PSScriptRoot 'update-docs.ps1') -Check
 $script:PreviousNugetPackages = $env:NUGET_PACKAGES
 $resolvedPackagePath = (Resolve-Path -LiteralPath $PackagePath).Path
 
@@ -165,23 +166,14 @@ try {
         Fail "Nuspec README entry '$readmeEntryName' is missing from the package."
     } else {
         $readmeText = Get-Content -LiteralPath (Join-Path $extractRoot $readmeEntryName) -Raw
-        $readmeVersionPatterns = @{
-            'release text' = '\bSoundScript\s+(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)(?=[\s:.,;]|$)'
-            'install command' = '\bdotnet\s+add\s+package\s+SoundScript\s+--version\s+(?<version>[^\s`]+)'
-        }
-        foreach ($label in $readmeVersionPatterns.Keys) {
-            $versionMatches = [regex]::Matches($readmeText, $readmeVersionPatterns[$label])
-            if ($versionMatches.Count -eq 0) {
-                Fail "Packaged README has no version in its $label."
-            }
-            foreach ($versionMatch in $versionMatches) {
-                $readmeVersion = $versionMatch.Groups['version'].Value
-                if ($readmeVersion -cne $nuspecVersion) {
-                    Fail "Packaged README $label version '$readmeVersion' does not match nuspec/package version '$nuspecVersion'."
-                } else {
-                    Pass "Packaged README $label matches package version $nuspecVersion"
-                }
-            }
+        # The package under test may be an unpublished development version. Its
+        # README must retain independently validated public onboarding, not
+        # advertise that development package as already available on NuGet.
+        $canonicalReadme = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'packaging/README.md') -Raw
+        if ($readmeText.Replace("`r`n", "`n") -cne $canonicalReadme.Replace("`r`n", "`n")) {
+            Fail 'Packaged README differs from the canonical, release-state-validated packaging/README.md. Regenerate documentation and repack.'
+        } else {
+            Pass 'Packaged README matches validated public documentation independently of development package version.'
         }
     }
     $iconEntry = $entries | Where-Object { $_.FullName -eq 'icon.png' } | Select-Object -First 1

@@ -24,7 +24,11 @@ HTML, SVG, Canvas and WebM are output strategies. They are not separate SoundScr
 
 ## The public API
 
-Requires .NET 10 and the `SoundScript` package. The V14 candidate is packed locally; this document does not imply publication.
+See the [NuGet guide](nuget.md) for package availability and installation.
+
+<!-- GENERATED:DOTNET_REQUIREMENT_START -->
+Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for repository development.
+<!-- GENERATED:DOTNET_REQUIREMENT_END -->
 
 ```csharp
 using SoundScript;

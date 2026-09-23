@@ -14,7 +14,7 @@ import "relative/path.ss"
 
 ## Behavior
 
-```
+```text
 main.ss
   └─ import "lib.ss"
        └─ import "shared.ss"   (nested imports allowed)
@@ -53,7 +53,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/imports.ss
 
 ## Import Resolution Diagram
 
-```
+```text
 ┌─────────────┐
 │  entry.ss   │
 └──────┬──────┘

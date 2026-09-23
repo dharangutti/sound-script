@@ -1,7 +1,8 @@
 # Programmable media in a browser
 
 ASP.NET Core and plain JavaScript consume the SoundScript NuGet package. No project references or frontend framework.
-From the repository root, first pack the candidate and restore this sample from that local feed:
+This sample follows the development version inherited from Directory.Build.props.
+From the repository root, pack that development snapshot and restore from its local feed:
 
 ```powershell
 dotnet pack src/SoundScript -c Release -o artifacts/packages

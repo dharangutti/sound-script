@@ -27,19 +27,21 @@ Candidate-only prose must not appear.
 - Seven must not appear.
 `;
 
-function fixture(t, { markdown = notes, html = template, version = '14.0.0', label = 'V14' } = {}) {
+function fixture(t, { markdown = notes, html = template, version = '14.0.0', label = 'V14', publicVersion = version } = {}) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'soundscript-homepage-'));
     t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
     const index = path.join(dir, 'index.html');
     const releaseNotes = path.join(dir, 'RELEASE_NOTES.md');
     const props = path.join(dir, 'Directory.Build.props');
+    const state = path.join(dir, 'release-state.json');
+    fs.writeFileSync(state, JSON.stringify({ schemaVersion: 1, publicVersion, library: { nugetPublished: true }, cli: { nugetPublished: false, githubReleasePublished: true } }));
     fs.writeFileSync(index, html);
     fs.writeFileSync(releaseNotes, markdown);
     fs.writeFileSync(props, `<Project><PropertyGroup><Version>${version}</Version><SoundScriptVersionLabel>${label}</SoundScriptVersionLabel></PropertyGroup></Project>`);
     return {
         read: () => fs.readFileSync(index, 'utf8'),
         run: () => spawnSync('pwsh', ['-NoProfile', '-File', path.join(__dirname, 'update-homepage-release.ps1'),
-            '-IndexPath', index, '-ReleaseNotesPath', releaseNotes, '-PropsPath', props], { encoding: 'utf8', cwd: dir })
+            '-IndexPath', index, '-ReleaseNotesPath', releaseNotes, '-PropsPath', props, '-ReleaseStatePath', state], { encoding: 'utf8', cwd: dir })
     };
 }
 
@@ -98,20 +100,29 @@ test('fails missing release summaries and unsafe link schemes without rewriting 
     }
 });
 
-test('real release notes generate every V8+ entry and preserve all static history', t => {
+test('real release notes generate public V8+ history and preserve all static history', t => {
     const html = fs.readFileSync(path.join(repo, 'docs/index.html'), 'utf8');
     const markdown = fs.readFileSync(path.join(repo, 'RELEASE_NOTES.md'), 'utf8');
     const props = fs.readFileSync(path.join(repo, 'Directory.Build.props'), 'utf8');
     const version = props.match(/<Version>([^<]+)<\/Version>/)[1];
     const label = props.match(/<SoundScriptVersionLabel>([^<]+)<\/SoundScriptVersionLabel>/)[1];
+    const publicVersion = JSON.parse(fs.readFileSync(path.join(repo, 'docs/release-state.json'))).publicVersion;
     const expected = [...markdown.matchAll(/^## [Vv]?(\d+(?:\.\d+){0,2})\s+[—–-]/gm)]
-        .map(m => m[1]).filter(v => Number.parseInt(v, 10) >= 8).map(v => `V${v}`);
-    expected[0] = label;
-    const f = fixture(t, { html, markdown, version, label });
+        .map(m => m[1]).filter(v => Number.parseInt(v, 10) >= 8 && Number.parseInt(v, 10) <= Number.parseInt(publicVersion, 10)).map(v => `V${v}`);
+    expected[0] = `V${publicVersion.split('.')[0]}`;
+    const f = fixture(t, { html, markdown, version, label, publicVersion });
     succeeds(f.run());
     const output = f.read();
     assert.deepEqual([...output.matchAll(/class="release-(?:current|previous)"><span[^>]+>([^<]+)/g)].map(m => m[1]),
         expected);
     assert.equal(output.split(start)[0], html.split(start)[0]);
     assert.equal(output.split(end)[1], html.split(end)[1]);
+});
+
+test('development V15 with public V14 cannot promote unreleased history', t => {
+    const markdown = '## 15.0.0 — Development (unreleased)\n- Never public yet.\n' + notes;
+    const f = fixture(t, { markdown, version: '15.0.0', label: 'V15', publicVersion: '14.0.0' });
+    succeeds(f.run());
+    assert.doesNotMatch(f.read(), /V15|Never public yet|unreleased/);
+    assert.match(f.read(), /release-current.*V14/);
 });

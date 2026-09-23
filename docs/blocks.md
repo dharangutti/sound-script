@@ -35,7 +35,7 @@ track melody {
 
 ## Block Expansion Flow
 
-```
+```text
 play intro
     │
     ├─► Capture track context
