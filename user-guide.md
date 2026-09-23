@@ -46,7 +46,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/melody.ss my-output.mid
 
 The CLI prints a summary and writes a standard `.mid` file you can open in any DAW, sequencer, or MIDI player:
 
-```
+```console-output
 Wrote 4 notes across 1 track(s) to my-output.mid at 120 BPM.
 ```
 
@@ -61,7 +61,7 @@ A few things worth knowing before you write your first line:
 
 A note is a pitch letter (`A`–`G`), an optional accidental (`#`, `b`), and an octave (`0`–`8`, where `4` is the middle-C octave). A duration letter follows the note.
 
-```
+```soundscript
 tempo 120
 instrument piano
 
@@ -72,7 +72,7 @@ That's a complete program: quarter notes walking up a C-major triad, landing on 
 
 You can also wrap notes in a `melody` block, which is handy once scripts grow:
 
-```
+```soundscript
 melody {
     tempo 120
     C4 q E4 q G4 q C5 h
@@ -95,7 +95,7 @@ Dotted-note suffixes (`q.`) are not supported — use the numeric forms for frac
 
 **Rests** advance time without sounding a note, and **ties** (`~`) merge adjacent notes of the same pitch into one sustained note:
 
-```
+```soundscript
 tempo 100
 instrument piano
 
@@ -124,7 +124,7 @@ Articulations shape individual notes, written as a prefix or suffix (one per not
 | `legato` | Smooth and connected (~97% length) |
 | `accent` | Emphasized (~110% velocity) |
 
-```
+```soundscript
 tempo 110
 instrument violin
 
@@ -139,7 +139,7 @@ For surgical control there is also per-note velocity: `C4 q v100` overrides the 
 
 Write a root, a quality suffix, and a duration:
 
-```
+```soundscript
 tempo 90
 instrument piano
 
@@ -164,7 +164,7 @@ One subtlety: `G7 q` is a dominant-seventh chord because a duration follows; a b
 
 Tracks give each musical voice its own instrument, dynamics, and metadata. Layers double one track across several instruments, each on its own MIDI channel:
 
-```
+```soundscript
 tempo 100
 
 track lead {
@@ -196,7 +196,7 @@ All tracks start at beat zero and play in parallel — arrangement is simply wha
 
 `tempo` (or `bpm`) sets the pulse. `time` declares a signature, and once bar lines (`|`) are used, the engine validates each measure and warns — without stopping — if a bar is short or long:
 
-```
+```soundscript
 time 4/4
 tempo 96
 instrument piano
@@ -209,7 +209,7 @@ melody {
 
 Tempo can also **ramp linearly** over a number of bars — an accelerando in one line:
 
-```
+```soundscript
 tempo 100 -> 132 over 4 bars
 instrument piano
 
@@ -227,7 +227,7 @@ Both `->` and the Unicode arrow `→` are accepted. Multiple top-level ramps cha
 
 A `block` is a named musical fragment; `play` expands it inline wherever you need it. Define once, reuse everywhere:
 
-```
+```soundscript
 tempo 112
 instrument guitar
 
@@ -251,7 +251,7 @@ track song {
 
 `sequence` is similar but allows full track-body statements (including `loop`), and `loop N { ... }` repeats its body N times:
 
-```
+```soundscript
 tempo 124
 instrument synth
 
@@ -265,7 +265,7 @@ track pulse {
 
 When a script grows past one file, `import` splits it into libraries. Imports are relative paths, may nest, and circular imports are rejected with a clear error:
 
-```
+```soundscript
 import "riffs.ss"
 
 track main {
@@ -280,7 +280,7 @@ Blocks defined later override earlier ones by name (with a warning) — imports 
 
 Patterns turn a single chord into motion. Define the pattern once, then apply it to any chord and duration with `play <pattern> <chord> <duration>`:
 
-```
+```soundscript
 tempo 104
 instrument guitar
 
@@ -312,7 +312,7 @@ track textures {
 
 The `phrase` block is where SoundScript stops sounding mechanical. Everything inside a phrase is shaped as one musical gesture — velocity curves, note-to-note transitions, dynamic envelopes, a default articulation, and deterministic timing feel:
 
-```
+```soundscript
 tempo 108
 instrument violin
 
@@ -379,7 +379,7 @@ The full pipeline is documented in [phrases.md](phrases.md) and [phrases-v3.md](
 
 Three track-level tools take output from correct to produced:
 
-```
+```soundscript
 tempo 92
 
 track keys {
@@ -402,7 +402,7 @@ track keys {
 
 SoundScript's determinism makes it useful beyond composition — auditable audio cues for machines, robots, and accessibility workflows. Here is a machine-state cue built from everything above: named blocks as a shared vocabulary, phrase shaping for meaning, one track sequencing the states:
 
-```
+```soundscript
 tempo 100
 instrument organ
 
@@ -452,7 +452,7 @@ dotnet run --project src/SoundScript.Cli -- run examples/industrial-machine-stat
 
 A `voice` block runs parallel to your tracks and binds **lyrics to pitches**. Write the words in a string after `sing`, followed by the notes to sing them on:
 
-```
+```soundscript
 tempo 100
 
 track accompaniment {
@@ -478,7 +478,7 @@ Inside a voice you can use `vocal` (timbre: `choir`, `oohs`, `synthvoice`), `sin
 dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-song.mid
 ```
 
-```
+```console-output
 Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vocal-song.mid at 100 BPM.
 ```
 
@@ -519,4 +519,4 @@ Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vo
 - **[examples.md](examples.md)** — 39 runnable scripts covering every feature
 - **[phrases-v3.md](phrases-v3.md)** — the full expressive-shaping reference
 - **[Industrial Applications](https://soundscript.net/industrial/)** — deterministic audio cues for real-world processes
-- **[SoundScript.md](SoundScript.md)** — the documentation hub
+- **[Documentation hub](documentation.md)** — the documentation hub

@@ -1,56 +1,87 @@
 # SoundScript documentation
 
-SoundScript is a deterministic programming language and .NET toolkit for
-programmable audio and media. It can turn editable source into MIDI, WAV,
-vocals, and synchronized visual media. V13 also includes experimental
-audio-to-code transcription for suitable recordings.
+SoundScript turns editable source into deterministic audio and queryable media.
+Choose a path by what you want to build. This is the canonical documentation index.
 
-## Choose a path
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
+Current public version: **14.0.0**. Publication channels are recorded in `docs/release-state.json`.
+<!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
-| I want to… | Start here |
-|---|---|
-| Try SoundScript in five minutes | [Quick start](quick-start.md) |
-| Solve a common application task | [Common tasks](common-tasks.md) |
-| Use it from a .NET application | [.NET API guide](dotnet-api.md) |
-| Build synchronized audio and visuals | [V14 hands-on tutorial](tutorials/programmable-media.md) |
-| Integrate queryable media state | [Programmable media runtime](programmatic-media-runtime.md) |
-| Read the design story | [SoundScript 14 article](articles/programmable-media-runtime-dotnet.md) |
-| Understand the package and local installation | [NuGet](nuget.md) |
-| See developer-focused application demos | [Application samples](application-samples.md) |
-| Build complete NuGet media workflows | [NuGet end to end](nuget-end-to-end.md) |
-| Learn the language | [Language reference](language-reference.md) |
-| Use the command line | [CLI reference](cli.md) |
-| Convert suitable audio into editable source | [Transcription](transcription.md) |
-| Understand the implementation boundaries | [Architecture](architecture.md) |
+## Start here
 
-The language reference covers notes, rests, chords, tracks, layers, phrases,
-dynamics, timing, tempo, patterns, vocals, Wave and SoundCSS authoring,
-visuals, synchronization, and the experimental unpitched hit syntax. Its
-dedicated links lead to [Wave grammar](wave-grammar.md), [Vocal](vocal.md),
-[Visual timelines](visual-temporal.md), [SoundCSS](soundcss.md), and
-[Percussion transcription](percussion-transcription.md).
+- [Quick start](quick-start.md) — hear your first script and choose browser, package or CLI.
+- [Playground](PLAYGROUND.md) — edit, preview and export without installation.
+- [User guide](user-guide.md) — learn the workflow from notes to complete media.
+- [Common tasks](common-tasks.md) — find a short recipe for WAV, MIDI, vocals or transcription.
 
-## Existing reference material
+## Build with .NET
 
-The repository keeps its detailed, versioned references in place. These are
-useful follow-on guides rather than replacements for the entry points above.
+- [NuGet](nuget.md) — install the public library or validate a local development package.
+- [.NET API](dotnet-api.md) — compile in memory, load files, render bytes and handle errors.
+- [Application samples](application-samples.md) — integrate cues, monitoring and media fixtures.
+- [Programmable media runtime](programmatic-media-runtime.md) — query synchronized media from a host clock.
 
-- [User guide](user-guide.md) — a hands-on tour from notes to media.
-- [Examples](examples.md) — runnable scripts and Playground presets.
-- [Wave grammar](wave-grammar.md) — direct .ssw audio authoring.
-- [Vocal](vocal.md) — lyrics, vocal cues, and offline stems.
-- [Visual timelines](visual-temporal.md) — timed visuals and media sync.
-- [SoundCSS](soundcss.md) — deterministic timbre styling.
-- [Playground guide](PLAYGROUND.md) — browser workflow and export checks.
-- [Release checklist](releasing.md) — local package and release preparation.
-- [V13 Reliability & Release Hardening](v13-reliability-hardening.md) — clean validation, import boundaries, process safety and provenance.
+## Use the CLI
 
-SoundScript's CLI and Playground continue to use the existing language and
-rendering pipeline. The NuGet facade adds a programmatic .NET surface without
-changing CLI commands or language semantics.
+- [Installation and distribution](cli.md#installation-and-automation) — choose a release archive or source checkout.
+- [CLI reference](cli.md) — discover commands, options, diagnostics and exit codes.
+- [Automation](cli.md#installation-and-automation) — validate inputs and consume JSON in CI.
+- [Common CLI tasks](common-tasks.md) — render, inspect and transcribe from a shell.
 
-## V14 programmable media
+## Author audio and music
 
-V14 exposes deterministic audio and queryable visual state through one compiled media facade.
+- [Language reference](language-reference.md) — look up supported musical and media syntax.
+- [Wave grammar](wave-grammar.md) — author direct audio effects and samples.
+- [SoundCSS](soundcss.md) — define deterministic timbre and synthesis settings.
+- [Vocal](vocal.md) — generate speech cues and mix vocal stems.
+- [Text to melody](text-to-melody.md) and [prosody](word-prosody.md) — turn words into musical phrasing.
+- [Examples](examples.md) — adapt runnable scores and Playground presets.
 
-See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).
+## Programmable media
+
+- [Temporal visuals](visual-temporal.md) — author seekable scenes and audio synchronization.
+- [Programmable media tutorial](tutorials/programmable-media.md) — build a host-driven experience.
+- [Audio/visual compositions](audio-visual-compositions.md) — learn from complete synchronized examples.
+- [Media primitives](media-primitives.md) — choose shapes, text, fills and animation.
+- [CLI WebM export](cli.md) — preflight FFmpeg and produce synchronized video.
+
+## Transcription
+
+- [Transcription guide](transcription.md) — choose inputs and understand the monophonic baseline.
+- [Melody extraction](melody-extraction.md) — assess dominant-line estimates in suitable recordings.
+- [Polyphonic/piano](polyphonic-transcription.md) — inspect experimental simultaneous-note analysis.
+- [Mixed roles](mixed-audio-transcription.md) — interpret symbolic role estimates and their limits.
+- [Percussion](percussion-transcription.md) — recover experimental unpitched rhythm events.
+
+## Automation and testing
+
+- [Deterministic fixtures](../samples/TestFixtureGenerator/README.md) — generate reproducible test media.
+- [DevOps sonification](../samples/DevOpsSonification/README.md) — map build states to cues.
+- [CI workflow](../.github/workflows/tests.yml) — inspect the OS/configuration validation matrix.
+- [NuGet end to end](nuget-end-to-end.md) — exercise complete consumer workflows.
+- [Release checklist](releasing.md) — prepare and validate without implicitly publishing.
+- [Documentation maintenance](documentation-maintenance.md) — update owned facts, classify files and check drift.
+
+## Architecture and internals
+
+- [Architecture](architecture.md) and [pipeline](pipeline.md) — locate compiler and renderer responsibilities.
+- [Runtime contracts](programmatic-media-runtime.md) — understand time, serialization and host boundaries.
+- [Package structure](nuget.md#package-metadata) — inspect bundled assemblies and metadata.
+- [Transcription architecture](transcription-architecture.md) — understand analysis and output boundaries.
+
+## Reference
+
+- [Language reference](language-reference.md) and [CLI reference](cli.md) — resolve syntax and command questions.
+- [Supported platforms](../README.md#supported-platforms) — check OS, browser and framework expectations.
+- [Dependencies and limits](programmatic-media-runtime.md) — separate core rendering from optional FFmpeg export.
+
+## Historical engineering evidence
+
+These reports describe recorded versions; package state and test counts are
+evidence, not current installation advice.
+
+- [V15 documentation reliability](v15-documentation-reliability-report.md) — inspect development acceptance and requirements.
+- [V14 acceptance](v14-acceptance-report.md) — review media compatibility and validation.
+- [V13 hardening](v13-reliability-hardening.md) and [readiness](v13-release-readiness.md) — inspect earlier reliability evidence.
+- [NuGet validation](nuget-end-to-end-validation.md) — review the pinned consumer baseline.
+- [Release history](../RELEASE_NOTES.md) — follow earlier release-specific changes.

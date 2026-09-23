@@ -1,6 +1,6 @@
 # From WAV to editable SoundScript and back
 
-This tutorial uses .NET 10 and published SoundScript 13.0.2. Run from the
+This tutorial uses .NET 10 and the pinned SoundScript 13.0.2 compatibility baseline. Run from the
 repository root:
 
 ```sh

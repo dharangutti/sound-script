@@ -38,7 +38,7 @@ dotnet run --project src/SoundScript.Cli -- -v
 
 ## `run` — compile a script
 
-```
+```bash
 soundscript run <script.ss> [output.mid]
 ```
 
@@ -53,13 +53,13 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
 
 Output:
 
-```
+```console-output
 Wrote 24 notes across 1 track(s) and 14 sung syllable(s) across 1 voice(s) to vocal-song.mid at 100 BPM.
 ```
 
 ## `visual` — inspect a temporal visual program
 
-```
+```bash
 soundscript visual <script.ss|script.ssv> [--at <seconds>]...
 ```
 
@@ -80,7 +80,7 @@ for source syntax and synchronization semantics.
 
 ## `video` — render a WebM clip
 
-```
+```bash
 soundscript video <script.ss|script.ssv> --output <clip.webm> [--fps 24|30|60] [--width <even-pixels>] [--height <even-pixels>] [--ffmpeg <path>]
 ```
 
@@ -122,7 +122,7 @@ Rendering: Frame[n] = StateAt(n / outputFPS)
 
 ## `compose` — text to melody (V3.1)
 
-```
+```bash
 soundscript compose "<text>" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]
 ```
 
@@ -134,7 +134,7 @@ Composes the text into its own MIDI file at 96 BPM:
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star"
 ```
 
-```
+```console-output
 Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
 ```
 
@@ -148,7 +148,7 @@ script's tempo:
 dotnet run --project src/SoundScript.Cli -- compose "How I wonder what you are" out.mid --append examples/vocal-song.ss
 ```
 
-```
+```console-output
 Composed 7 syllable(s) and appended the phoneme track to examples/vocal-song.ss: 41 note(s) across 2 track(s) to out.mid at 100 BPM.
 ```
 
@@ -199,7 +199,7 @@ dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" twinkle.wav --wave --emit-ss twinkle.ss
 ```
 
-```
+```console-output
 Composed 7 syllable(s) into 24 note(s) and rendered to twinkle.wav via SoundScript.Wave (no MIDI step) at 96 BPM.
 ```
 
@@ -213,7 +213,7 @@ Composed 7 syllable(s) into 24 note(s) and rendered to twinkle.wav via SoundScri
 
 ## `prosody` — word-level text to melody (V5)
 
-```
+```bash
 soundscript prosody "<text>" [output.mid|output.wav] [--append <script.ss>] [--emit-ss <path.ss>] [--wave] [--stereo]
 ```
 
@@ -229,7 +229,7 @@ a fixed pitch per phoneme. `compose`/`PhonemeComposer` are unaffected;
 dotnet run --project src/SoundScript.Cli -- prosody "Twinkle twinkle little star"
 ```
 
-```
+```console-output
 Composed 7 syllable(s) into 24 note(s) to output.mid at 96 BPM.
 ```
 
@@ -259,7 +259,7 @@ Also mutually exclusive with `--append`, for the same reason.
 
 ## `render` — MIDI to audio (V4)
 
-```
+```bash
 soundscript render <file.mid> --css <style.ssc> [--out <output.wav|ogg>] [--text "<source text>"]
 ```
 
@@ -272,7 +272,7 @@ dotnet run --project src/SoundScript.Cli -- render twinkle.mid \
   --text "Twinkle twinkle little star"
 ```
 
-```
+```console-output
 Rendered twinkle.mid with examples/default.ssc to twinkle.wav.
 ```
 
@@ -287,7 +287,7 @@ envelopes via the [timbre engine](timbre-engine.md).
 
 ## `wave` — script to WAV (V8)
 
-```
+```bash
 soundscript wave <script.ss|script.ssw> [output.wav] [--stereo]
   [--vocal <stem.wav>] [--vocal-at=<beats>] [--vocal-gain=<0-1>]
   [--tts-dir <folder>]
@@ -333,7 +333,7 @@ clear error; use `wave` (or the Playground's automatic wave routing) instead.
 
 ## `vocal` — offline stem generation (V8)
 
-```
+```bash
 soundscript vocal generate "<text>" --out <file.wav> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>]
 soundscript vocal batch <script.ss|script.ssw> --out-dir <folder> [--wordbank-dir <path>] [--engine wordbank|composite|espeak|prosody] [--locale <code>] [--voice <id>] [--seed=<n>] [--skip-existing]
 ```
@@ -368,7 +368,7 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 
 | Code | Meaning |
 |------|---------|
-| `0` | Output written successfully (MIDI, WAV, OGG, or WebM) |
+| `0` | Command completed successfully (warnings are allowed) |
 | `1` | Source compilation or validation error |
 | `2` | Invalid CLI usage |
 | `3` | Missing input or dependency/environment failure |
@@ -387,22 +387,17 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 - [timbre-engine.md](timbre-engine.md) — offline renderer (V4)
 - [language-reference.md](language-reference.md) — script syntax for `run`
 - [examples.md](examples.md) — example catalog
-## V13 CLI installation and automation
+## Installation and automation
 
-Download the archive for your platform from the
-[V13 GitHub release](https://github.com/dharangutti/sound-script/releases/tag/v13.0.0),
-verify the accompanying SHA-256 checksum, and extract it. Run the executable
-from that directory (or add that directory to your PATH):
+<!-- GENERATED:CLI_DISTRIBUTION_START -->
+`SoundScript.Cli` 14.0.0 is not published on nuget.org.
 
-```sh
-soundscript --version
-```
+Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+<!-- GENERATED:CLI_DISTRIBUTION_END -->
 
-`SoundScript.Cli` is not published on nuget.org. You can also use a source
-checkout or install a locally packed `.nupkg` from a
-trusted directory; [the release checklist](releasing.md) has the exact local
-verification command. V13 retains the strict `validate` and `inspect` commands
-and their stable automation behavior.
+Source checkout and local packaging validation are described in the
+[release checklist](releasing.md). The strict validate and inspect commands
+provide stable automation behavior.
 
 ```sh
 soundscript validate scene.ssv
@@ -429,11 +424,16 @@ visual, and SoundCSS semantic paths without writing media. Diagnostics have
 durations, synchronization points, supported outputs, and the duration basis.
 Visual programs accept `--at <seconds>`.
 
-JSON mode uses schema version 1 and writes only JSON to stdout:
+JSON mode uses schema version 1 and writes only JSON to stdout. The following
+historical 13.0.2 example illustrates the schema; the version reflects the running build:
+
+<!-- HISTORICAL_CONTEXT_START -->
 
 ```json
 {"schemaVersion":1,"soundScriptVersion":"13.0.2","success":true,"command":"validate","input":"scene.ssv","diagnostics":[],"metadata":{},"results":null}
 ```
+
+<!-- HISTORICAL_CONTEXT_END -->
 
 `video --check` preflights timing, dimensions, FPS, frame count, output path,
 FFmpeg, and the `libvpx-vp9`, `libopus`, and WebM capabilities without making
@@ -475,3 +475,42 @@ baseline) to 7.40 s with `--jobs 4`. The frame stage changed from roughly
 11.88 s to 4.46 s, while the resulting WebM remained 326,999 bytes. These are
 representative measurements rather than a runtime guarantee; codec and CPU
 hardware affect the result.
+
+## Public command coverage
+
+The registration in CliArguments.Commands owns this inventory. All entries are public;
+transcription modes can be experimental. No registrations are hidden or internal.
+
+| Command | Visibility |
+| --- | --- |
+| `transcribe` | public |
+| `run` | public |
+| `compose` | public |
+| `prosody` | public |
+| `render` | public |
+| `wave` | public |
+| `visual` | public |
+| `video` | public |
+| `validate` | public |
+| `inspect` | public |
+| `vocal generate` | public |
+| `vocal batch` | public |
+| `wordbank ensure` | public |
+| `wordbank normalize` | public |
+
+Program.cs also handles `help`, `--help`/`-h` and `--version`/`-v`.
+`--output`/`-o` alias `--out`; these are option aliases, not additional commands.
+
+## Exit-code source mapping
+
+Diagnostics.ExitCode owns exception values; Program.cs returns zero on success.
+
+| Source condition | Exit code |
+| --- | --- |
+| `success` | `0` |
+| `OperationCanceledException` | `4` |
+| `CliUsageException` | `2` |
+| `DependencyException or FileNotFoundException or DirectoryNotFoundException or UnauthorizedAccessException` | `3` |
+| `ExportException` | `4` |
+| `IOException` | `3` |
+| `_` | `1` |

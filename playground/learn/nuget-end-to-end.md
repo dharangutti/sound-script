@@ -1,12 +1,17 @@
 # SoundScript NuGet end to end
 
-Install the published **SoundScript 13.0.2** package in a .NET 10 application:
+<!-- GENERATED:LIBRARY_INSTALL_START -->
+Install the published library:
 
-```sh
-dotnet add package SoundScript --version 13.0.2
+```bash
+dotnet add package SoundScript --version 14.0.0
 ```
 
-The two complete applications below reference this package directly. They do not
+[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+<!-- GENERATED:LIBRARY_INSTALL_END -->
+
+The applications below pin SoundScript 13.0.2 as a compatibility baseline; use the
+current installation above for new applications. They reference the package directly and do not
 reference component projects or invoke the SoundScript CLI. Their source is the
 authority for every C# excerpt in this guide, the tutorials, and the
 [developer article](articles/programmable-media-dotnet.md).
@@ -211,5 +216,4 @@ and compares hashes and semantic properties. It also tests missing FFmpeg.
 consumer workspace under the user's local application data is retained for inspection. WebM bytes are excluded from
 hash guarantees because container/codec builds can vary; exported clips must
 pass the existing audio-and-video decode verification. No package publishing
-is part of this workflow. The version remains **13.0.2** because production
-APIs, packaging behavior and engine semantics are unchanged.
+is part of this workflow. The sample projects retain their pinned compatibility baseline; see their project files.

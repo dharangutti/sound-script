@@ -41,7 +41,7 @@ strings into source. The samples implement Healthy, Warning and Critical with a 
 
 ## 3. Use the package
 
-Install the locally packed V14 candidate following the [NuGet guide](../nuget.md). In a .NET 10 console app,
+Install the public package following the [NuGet guide](../nuget.md). In a .NET 10 console app,
 save the source above as `status.ssv` and write:
 
 ```csharp

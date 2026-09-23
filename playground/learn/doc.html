@@ -6,12 +6,12 @@
     <title>SoundScript Documentation — Deterministic Audio Programming</title>
     <meta name="description" content="SoundScript documentation for the deterministic audio programming language, including the language, CLI, MIDI and Wave pipelines, vocals, architecture, and examples.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://soundscript.net/doc.html?p=SoundScript.md">
+    <link rel="canonical" href="https://soundscript.net/doc.html?p=documentation.md">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="SoundScript">
     <meta property="og:title" content="SoundScript Documentation — Deterministic Audio Programming">
     <meta property="og:description" content="Language, CLI, MIDI, Wave, vocal, architecture, and example documentation for SoundScript.">
-    <meta property="og:url" content="https://soundscript.net/doc.html?p=SoundScript.md">
+    <meta property="og:url" content="https://soundscript.net/doc.html?p=documentation.md">
     <meta property="og:locale" content="en_US">
     <meta property="og:image" content="https://soundscript.net/assets/soundscript-logo.png">
     <meta property="og:image:alt" content="SoundScript logo">
@@ -20,39 +20,55 @@
     <meta name="twitter:description" content="Language, CLI, MIDI, Wave, vocal, architecture, and example documentation for SoundScript.">
     <meta name="twitter:image" content="https://soundscript.net/assets/soundscript-logo.png">
     <meta name="twitter:image:alt" content="SoundScript logo">
-    <script id="structured-data" type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "TechArticle",
-                "@id": "https://soundscript.net/doc.html?p=SoundScript.md#article",
-                "url": "https://soundscript.net/doc.html?p=SoundScript.md",
-                "name": "SoundScript Documentation",
-                "isPartOf": { "@id": "https://soundscript.net/#website" },
-                "breadcrumb": { "@id": "https://soundscript.net/doc.html?p=SoundScript.md#breadcrumb" }
+    <!-- GENERATED:SITE_METADATA_START -->
+<script id="structured-data" type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "TechArticle",
+            "@id": "https://soundscript.net/doc.html?p=documentation.md#article",
+            "url": "https://soundscript.net/doc.html?p=documentation.md",
+            "name": "SoundScript Documentation",
+            "isPartOf": {
+                "@id": "https://soundscript.net/#website"
             },
-            {
-                "@type": "SoftwareApplication",
-                "@id": "https://soundscript.net/#software",
-                "name": "SoundScript",
-                "applicationCategory": "MultimediaApplication",
-                "operatingSystem": "Windows, macOS, Linux, Web",
-                "softwareVersion": "14.0.0",
-                "license": "https://opensource.org/licenses/MIT",
-                "url": "https://soundscript.net/"
-            },
-            {
-                "@type": "BreadcrumbList",
-                "@id": "https://soundscript.net/doc.html?p=SoundScript.md#breadcrumb",
-                "itemListElement": [
-                    { "@type": "ListItem", "position": 1, "name": "SoundScript", "item": "https://soundscript.net/" },
-                    { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://soundscript.net/doc.html?p=SoundScript.md" }
-                ]
+            "breadcrumb": {
+                "@id": "https://soundscript.net/doc.html?p=documentation.md#breadcrumb"
             }
-        ]
-    }
-    </script>
+        },
+        {
+            "@type": "SoftwareApplication",
+            "@id": "https://soundscript.net/#software",
+            "name": "SoundScript",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "Windows, macOS, Linux, Web",
+            "softwareVersion": "14.0.0",
+            "license": "https://opensource.org/licenses/MIT",
+            "url": "https://soundscript.net/"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://soundscript.net/doc.html?p=documentation.md#breadcrumb",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "SoundScript",
+                    "item": "https://soundscript.net/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Documentation",
+                    "item": "https://soundscript.net/doc.html?p=documentation.md"
+                }
+            ]
+        }
+    ]
+}
+</script>
+<!-- GENERATED:SITE_METADATA_END -->
     <style>
         :root {
             --bg: #0b0d12;
@@ -291,6 +307,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="assets/docs-code.css">
 </head>
 <body>
     <a class="skip-link" href="#content">Skip to documentation</a>
@@ -303,7 +320,7 @@
                 <a href="/">Home</a>
                 <a href="/playground/">Playground</a>
                 <a href="/doc.html?p=user-guide.md">User Guide</a>
-                <a href="/doc.html?p=SoundScript.md">Docs</a>
+                <a href="/doc.html?p=documentation.md">Docs</a>
                 <a href="/industrial/">Industrial</a>
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a>
             </div>
@@ -318,7 +335,7 @@
                 <a href="/">Home</a> ·
                 <a href="/playground/">Playground</a> ·
                 <a href="/industrial/">Industrial Audio</a> ·
-                <a href="/doc.html?p=SoundScript.md">Documentation</a> ·
+                <a href="/doc.html?p=documentation.md">Documentation</a> ·
                 <a href="https://github.com/dharangutti/sound-script">GitHub</a> ·
                 <a href="/contact/">Contact</a>
             </p>
@@ -328,9 +345,11 @@
     </div>
 
     <script src="assets/marked.min.js"></script>
+    <script src="assets/docs-code.js"></script>
     <script>
         (function () {
-            var DEFAULT_PAGE = 'SoundScript.md';
+            var publicSoftwareVersion = JSON.parse(document.getElementById('structured-data').textContent)['@graph'].find(function (item) { return item['@type'] === 'SoftwareApplication'; }).softwareVersion;
+            var DEFAULT_PAGE = 'documentation.md';
             var param = new URLSearchParams(window.location.search).get('p') || DEFAULT_PAGE;
 
             // Repository-owned Markdown, optionally nested. Each segment starts with an
@@ -383,7 +402,7 @@
                             name: 'SoundScript',
                             applicationCategory: 'MultimediaApplication',
                             operatingSystem: 'Windows, macOS, Linux, Web',
-                            softwareVersion: '14.0.0',
+                            softwareVersion: publicSoftwareVersion,
                             license: 'https://opensource.org/licenses/MIT',
                             url: 'https://soundscript.net/'
                         },
@@ -410,7 +429,9 @@
                     return response.text();
                 })
                 .then(function (markdown) {
-                    content.innerHTML = marked.parse(markdown, { mangle: false, headerIds: true });
+                    content.innerHTML = SoundScriptDocs.render(markdown, marked);
+                    SoundScriptDocs.headings(content);
+                    SoundScriptDocs.enhance(content);
 
                     var heading = content.querySelector('h1');
                     var firstParagraph = content.querySelector('p');
@@ -453,7 +474,7 @@
         })();
     </script>
     <noscript>
-        <div class="error" style="margin:1rem;">JavaScript is required for the HTML view. The Markdown sources are available directly, e.g. <a href="/SoundScript.md">/SoundScript.md</a>.</div>
+        <div class="error" style="margin:1rem;">JavaScript is required for the HTML view. The Markdown sources are available directly, e.g. <a href="/documentation.md">/documentation.md</a>.</div>
     </noscript>
 </body>
 </html>

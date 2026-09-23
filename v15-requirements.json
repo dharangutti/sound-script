@@ -1,0 +1,792 @@
+{
+  "schemaVersion": 1,
+  "source": "User-provided SoundScript V15 — Documentation Reliability & Developer Experience specification",
+  "sourceSha256": "9814cae53c76ce785413e72f25eab055327c207ae0f3d91aa2eae2a99c71cda0",
+  "requirements": [
+    {
+      "id": "REQ-BASE-001",
+      "title": "Existing modern documentation hub",
+      "requirement": "`docs/documentation.md` already provides a goal-oriented documentation hub.\n\nIt currently includes paths such as:\n\n```text\nQuick start\nCommon tasks\n.NET API\nV14 programmable media\nNuGet\napplication samples\nlanguage reference\nCLI\ntranscription\narchitecture\n```\n\nPreserve its useful intent-oriented structure and evolve it into the canonical V15 documentation index."
+    },
+    {
+      "id": "REQ-BASE-002",
+      "title": "Existing legacy hub",
+      "requirement": "`docs/SoundScript.md` currently behaves as an older documentation index and contains substantial V11/V10/V9/etc. structure.\n\nIt currently describes itself as:\n\n```text\nthe documentation hub for V11\n```\n\nThis is stale as the primary documentation hub.\n\nDo not delete it without considering inbound links."
+    },
+    {
+      "id": "REQ-BASE-003",
+      "title": "Documentation viewer currently defaults to legacy hub",
+      "requirement": "`docs/doc.html` currently defines:\n\n```javascript\nvar DEFAULT_PAGE = 'SoundScript.md';\n```\n\nand primary Docs navigation also points at:\n\n```text\n/doc.html?p=SoundScript.md\n```\n\nV15 must resolve this intentionally."
+    },
+    {
+      "id": "REQ-BASE-004",
+      "title": "Existing docs rendering style",
+      "requirement": "`docs/doc.html` already has:\n\n```text\ndark developer-oriented theme\nmonospace code treatment\ninline code styling\nfenced code styling\nresponsive layout\nfocus-visible accessibility\nreduced-motion support\nMarkdown rendering through marked\n```\n\nPreserve this design language."
+    },
+    {
+      "id": "REQ-VERSION-001",
+      "title": "Bump development version",
+      "requirement": "Update canonical development identity in `Directory.Build.props`:\n\n```xml\n<Version>15.0.0</Version>\n<SoundScriptVersionLabel>V15</SoundScriptVersionLabel>\n<SoundScriptCodename>Documentation Reliability &amp; Developer Experience</SoundScriptCodename>\n```\n\nPreserve the existing property structure."
+    },
+    {
+      "id": "REQ-VERSION-002",
+      "title": "Development and public states differ",
+      "requirement": "During implementation this must be valid:\n\n```text\ndevelopmentVersion = 15.0.0\npublicVersion      = 14.0.0\n```"
+    },
+    {
+      "id": "REQ-VERSION-003",
+      "title": "No implicit publication",
+      "requirement": "Changing development version must never cause user-facing documentation to advertise V15 before public release state explicitly changes."
+    },
+    {
+      "id": "REQ-VERSION-004",
+      "title": "Release notes",
+      "requirement": "Add a V15 section to `RELEASE_NOTES.md`.\n\nDescribe the actual V15 work:\n\n```text\ndocumentation reliability\nstructured documentation hub\nrelease-state management\ngenerated current-state blocks\ndeveloper documentation UX\nCI documentation drift protection\n```\n\nDo not describe V15 as published."
+    },
+    {
+      "id": "REQ-SOURCE-001",
+      "title": "One authority per fact",
+      "requirement": "Every generated or validated current-state fact must have exactly one documented authoritative source.\n\nDo not hide release-specific constants in `update-docs.ps1`."
+    },
+    {
+      "id": "REQ-SOURCE-002",
+      "title": "Required ownership map",
+      "requirement": "Use this model unless repository inspection identifies a stronger existing source:\n\n| Fact                        | Authoritative source                                     |\n| --------------------------- | -------------------------------------------------------- |\n| Development version         | `Directory.Build.props`                                  |\n| V label                     | `Directory.Build.props`                                  |\n| Codename                    | `Directory.Build.props`                                  |\n| Public version              | `docs/release-state.json`                                |\n| Library publication state   | `docs/release-state.json`                                |\n| CLI NuGet publication state | `docs/release-state.json`                                |\n| CLI GitHub-release state    | `docs/release-state.json`                                |\n| Library package ID          | `src/SoundScript/SoundScript.csproj`                     |\n| CLI package ID              | `src/SoundScript.Cli/SoundScript.Cli.csproj`             |\n| CLI command name            | `src/SoundScript.Cli/SoundScript.Cli.csproj`             |\n| Target framework            | canonical project configuration                          |\n| CLI public commands         | actual CLI registration/help surface                     |\n| CLI exit codes              | canonical runtime/source definition                      |\n| Release history             | `RELEASE_NOTES.md`                                       |\n| Docs classification         | `docs/docs-manifest.json`                                |\n| Site/public base URL        | canonical existing repository configuration if available |"
+    },
+    {
+      "id": "REQ-SOURCE-003",
+      "title": "No unnecessary duplication",
+      "requirement": "Do not duplicate package IDs, CLI command name, target framework, repository identity, or other canonical project metadata into release-state JSON when they can be read reliably from project configuration."
+    },
+    {
+      "id": "REQ-SOURCE-004",
+      "title": "Stable URL templates allowed",
+      "requirement": "Tooling may contain stable templates such as:\n\n```text\nhttps://www.nuget.org/packages/{packageId}/{version}\nhttps://github.com/{owner}/{repo}/releases/tag/v{version}\n```\n\nInserted identifiers/version values must come from canonical sources."
+    },
+    {
+      "id": "REQ-STATE-001",
+      "title": "Add schema-validated release state",
+      "requirement": "Create:\n\n```text\ndocs/release-state.json\n```\n\nPreferred initial structure:\n\n```json\n{\n  \"schemaVersion\": 1,\n  \"publicVersion\": \"14.0.0\",\n  \"library\": {\n    \"nugetPublished\": true\n  },\n  \"cli\": {\n    \"nugetPublished\": false,\n    \"githubReleasePublished\": true\n  }\n}\n```\n\nKeep this intentionally small."
+    },
+    {
+      "id": "REQ-STATE-002",
+      "title": "Flags apply specifically to publicVersion",
+      "requirement": "Publication flags mean:\n\n```text\nIs this specific publicVersion available through this channel?\n```\n\nnot:\n\n```text\nHas any historical SoundScript version ever been published here?\n```"
+    },
+    {
+      "id": "REQ-STATE-003",
+      "title": "State invariants",
+      "requirement": "Validate before documentation generation:\n\n```text\nsupported schemaVersion\nrequired fields\ncorrect types\nvalid semantic version\npublicVersion <= developmentVersion\nlibrary NuGet command only when library.nugetPublished=true\nCLI NuGet command only when cli.nugetPublished=true\nGitHub Release link only when cli.githubReleasePublished=true\n```\n\nUnknown schema versions fail."
+    },
+    {
+      "id": "REQ-NOTES-001",
+      "title": "",
+      "requirement": "`RELEASE_NOTES.md` remains manually authored release history."
+    },
+    {
+      "id": "REQ-NOTES-002",
+      "title": "",
+      "requirement": "Do not derive install commands, publication flags, package IDs, target frameworks, or distribution status by parsing release-note prose."
+    },
+    {
+      "id": "REQ-NOTES-003",
+      "title": "",
+      "requirement": "Release notes may be used for consistency validation and by the already-existing homepage release-history generator."
+    },
+    {
+      "id": "REQ-NOTES-004",
+      "title": "",
+      "requirement": "Do not unnecessarily rewrite `update-homepage-release.ps1`.\n\nReuse its safe design patterns where useful."
+    },
+    {
+      "id": "REQ-SCOPE-001",
+      "title": "Deterministic scope",
+      "requirement": "Audit:\n\n```text\nroot *.md\ndocs/**/*.md\ndocs/**/*.html\ndocs documentation-state JSON\npackaging/**/*.md\nsample README files\ntutorial README files\nwebsite current-navigation/current-content files\nproject package metadata containing public guidance\nscript usage/help text\nworkflow files containing release/install commands\n```"
+    },
+    {
+      "id": "REQ-SCOPE-002",
+      "title": "Exclusions",
+      "requirement": "Exclude:\n\n```text\nartifacts/\nbin/\nobj/\ngenerated build output\nvendored dependencies\nbinary content\ntemporary files\nexperiments/SoundScript.Labs/\n```"
+    },
+    {
+      "id": "REQ-AUDIT-001",
+      "title": "",
+      "requirement": "Create:\n\n```text\ndocs/v15-documentation-audit.md\n```\n\nbefore large structural documentation edits."
+    },
+    {
+      "id": "REQ-AUDIT-002",
+      "title": "",
+      "requirement": "Record:\n\n```text\naudit scope\nfact ownership\nliving docs\nhistorical docs\nexcluded files\nunclassified files\nstale current guidance\ncontradictions\nduplicate instructions\nduplicate hubs/indexes\ngenerated-block candidates\nreviewed files needing no change\nhistorical wording intentionally preserved\nunresolved issues\n```"
+    },
+    {
+      "id": "REQ-AUDIT-003",
+      "title": "",
+      "requirement": "Explicitly inspect at minimum:\n\n```text\nREADME.md\ndocs/documentation.md\ndocs/SoundScript.md\ndocs/doc.html\ndocs/index.html\npackaging/README.md\ndocs/quick-start.md\ndocs/nuget.md\ndocs/dotnet-api.md\ndocs/cli.md\ndocs/common-tasks.md\ndocs/programmatic-media-runtime.md\ndocs/tutorials/programmable-media.md\ndocs/releasing.md\n```"
+    },
+    {
+      "id": "REQ-DOC-001",
+      "title": "Living docs",
+      "requirement": "Living documentation describes what users/developers can do now."
+    },
+    {
+      "id": "REQ-DOC-002",
+      "title": "Historical docs",
+      "requirement": "Historical documents preserve release-specific engineering evidence.\n\nExamples:\n\n```text\nv14-acceptance-report.md\nv13-reliability-hardening.md\nrelease-readiness reports\nhistorical implementation reports\nversion-specific engineering evidence\n```"
+    },
+    {
+      "id": "REQ-DOC-003",
+      "title": "Preserve historical truth",
+      "requirement": "Do not rewrite historically accurate:\n\n```text\nold versions\ncandidate terminology\nhistorical install commands\nhistorical test counts\nhistorical package state\nhistorical compatibility baselines\n```"
+    },
+    {
+      "id": "REQ-DOC-004",
+      "title": "",
+      "requirement": "Only correct historical content for a genuine factual mistake, explicit erratum, or broken local link that can be corrected without changing historical meaning."
+    },
+    {
+      "id": "REQ-MANIFEST-001",
+      "title": "",
+      "requirement": "Create:\n\n```text\ndocs/docs-manifest.json\n```\n\nPreferred concept:\n\n```json\n{\n  \"schemaVersion\": 1,\n  \"livingDocuments\": [],\n  \"historicalDocuments\": [],\n  \"historicalPatterns\": [],\n  \"generatedOnly\": [],\n  \"excluded\": {},\n  \"generatedBlocks\": {}\n}\n```"
+    },
+    {
+      "id": "REQ-MANIFEST-002",
+      "title": "Completeness",
+      "requirement": "Every in-scope documentation file must be:\n\n```text\nliving\nhistorical\ngenerated-only\nor explicitly excluded with a reason\n```\n\nUnclassified files fail validation."
+    },
+    {
+      "id": "REQ-MANIFEST-003",
+      "title": "Conflicts",
+      "requirement": "A file cannot simultaneously be living and historical.\n\nConflicts fail."
+    },
+    {
+      "id": "REQ-MANIFEST-004",
+      "title": "Explicit precedence",
+      "requirement": "Explicit file declarations take precedence over patterns, but contradictory classification must still require an explicit justified override rather than silently resolving."
+    },
+    {
+      "id": "REQ-MANIFEST-005",
+      "title": "Generated-block mapping",
+      "requirement": "Map allowed generated blocks per file.\n\nExample:\n\n```json\n\"generatedBlocks\": {\n  \"README.md\": [\n    \"LIBRARY_INSTALL\",\n    \"CLI_DISTRIBUTION\"\n  ],\n  \"docs/quick-start.md\": [\n    \"LIBRARY_INSTALL\",\n    \"CLI_DISTRIBUTION\"\n  ]\n}\n```"
+    },
+    {
+      "id": "REQ-HUB-001",
+      "title": "One canonical documentation index",
+      "requirement": "Establish:\n\n```text\ndocs/documentation.md\n```\n\nas the canonical structured documentation hub.\n\nDo not create another competing hub."
+    },
+    {
+      "id": "REQ-HUB-002",
+      "title": "Structured by developer intent",
+      "requirement": "The canonical hub should be organized approximately as:\n\n```text\nStart Here\n  Quick Start\n  Playground\n  User Guide\n\nBuild with .NET\n  NuGet\n  .NET API\n  Application Samples\n  Programmable Media Runtime\n\nUse the CLI\n  Installation / Distribution\n  CLI Reference\n  Automation / CI\n  Common CLI Tasks\n\nAuthor Audio & Music\n  Language Reference\n  Wave Grammar\n  SoundCSS\n  Vocal\n  Composition / Prosody\n  Examples\n\nProgrammable Media\n  Temporal Visuals\n  Programmable Media Tutorial\n  Audio/Visual Examples\n  WebM / Synchronization\n\nTranscription\n  Main Transcription Guide\n  Monophonic baseline\n  Melody extraction\n  Polyphonic/Piano\n  Mixed roles\n  Percussion\n\nAutomation & Testing\n  Deterministic fixtures\n  DevOps sonification\n  CI workflows\n  NuGet end-to-end examples\n\nArchitecture & Internals\n  Architecture\n  Pipeline\n  Runtime contracts\n  Package structure\n\nReference\n  Complete language reference\n  CLI reference\n  supported platforms\n  limitations/dependencies\n\nHistorical Engineering Evidence\n  V14 acceptance\n  V13 hardening\n  older release-specific reports\n```\n\nUse existing documents whenever possible.\n\nDo not create duplicate guides merely to fill categories."
+    },
+    {
+      "id": "REQ-HUB-003",
+      "title": "Goal-first descriptions",
+      "requirement": "Each hub entry should answer:\n\n```text\nWhy would a developer open this?\n```\n\nrather than simply repeat the filename."
+    },
+    {
+      "id": "REQ-HUB-004",
+      "title": "Current vs historical separation",
+      "requirement": "Historical engineering reports must have their own clearly identified section.\n\nDo not mix historical evidence into the normal getting-started path."
+    },
+    {
+      "id": "REQ-HUB-005",
+      "title": "Keep hub concise",
+      "requirement": "The canonical hub is an index/navigation surface, not another complete user guide."
+    },
+    {
+      "id": "REQ-HUB-006",
+      "title": "Do not retain competing V11 hub",
+      "requirement": "`docs/SoundScript.md` must no longer act as the primary full documentation index."
+    },
+    {
+      "id": "REQ-HUB-007",
+      "title": "Preserve inbound compatibility",
+      "requirement": "Do not break old URLs unnecessarily.\n\nPreferred solution:\n\nConvert `docs/SoundScript.md` into a concise compatibility landing page such as:\n\n```text"
+    },
+    {
+      "id": "REQ-HUB-008",
+      "title": "Viewer default",
+      "requirement": "Change `docs/doc.html` default page from:\n\n```javascript\nSoundScript.md\n```\n\nto:\n\n```javascript\ndocumentation.md\n```\n\nprovided validation confirms no architectural issue."
+    },
+    {
+      "id": "REQ-HUB-009",
+      "title": "Site Docs navigation",
+      "requirement": "Current Docs navigation should point to the canonical documentation hub.\n\nUpdate links such as:\n\n```text\n/doc.html?p=SoundScript.md\n```\n\nto:\n\n```text\n/doc.html?p=documentation.md\n```\n\nwhere they represent current Docs navigation.\n\nDo not rewrite legitimate historical links."
+    },
+    {
+      "id": "REQ-HUB-010",
+      "title": "Structured data/help links",
+      "requirement": "Audit:\n\n```text\nsoftwareHelp\ncanonical docs URLs\nstructured-data documentation URLs\nfooter Docs links\nsitemap entries if applicable\n```\n\nand point current documentation entry surfaces toward the canonical hub."
+    },
+    {
+      "id": "REQ-GEN-001",
+      "title": "",
+      "requirement": "Generate only volatile repeated current facts.\n\nCandidate block IDs:\n\n```text\nLIBRARY_INSTALL\nCLI_DISTRIBUTION\nCURRENT_PUBLIC_RELEASE\nCURRENT_DEVELOPMENT_VERSION\nDOTNET_REQUIREMENT\nCURRENT_PACKAGE_LINKS\nSUPPORTED_PLATFORMS\n```"
+    },
+    {
+      "id": "REQ-GEN-002",
+      "title": "",
+      "requirement": "Do not generate complete guides/tutorials/architecture reports."
+    },
+    {
+      "id": "REQ-GEN-003",
+      "title": "",
+      "requirement": "Use markers:\n\n```markdown\n<!-- GENERATED:LIBRARY_INSTALL_START -->\n...\n<!-- GENERATED:LIBRARY_INSTALL_END -->\n```"
+    },
+    {
+      "id": "REQ-GEN-004",
+      "title": "",
+      "requirement": "Reject:\n\n```text\nundeclared markers\nduplicate START\nduplicate END\nmismatched identifiers\nnested generated blocks\nEND-before-START\ngenerated current-state blocks in prohibited historical docs\n```"
+    },
+    {
+      "id": "REQ-GEN-005",
+      "title": "",
+      "requirement": "Never globally replace old version numbers."
+    },
+    {
+      "id": "REQ-TOOL-001",
+      "title": "",
+      "requirement": "Create:\n\n```text\nscripts/update-docs.ps1\n```"
+    },
+    {
+      "id": "REQ-TOOL-002",
+      "title": "Update mode",
+      "requirement": "```powershell\n./scripts/update-docs.ps1\n```\n\nmust:\n\n```text\nvalidate state\nvalidate manifest\nvalidate markers\nrender expected content in memory\nupdate only approved generated block bodies\npreserve surrounding prose\n```"
+    },
+    {
+      "id": "REQ-TOOL-003",
+      "title": "Check mode",
+      "requirement": "```powershell\n./scripts/update-docs.ps1 -Check\n```\n\nmust:\n\n```text\nmodify no tracked documentation\ndetect block drift\ndetect state errors\ndetect manifest errors\ndetect marker errors\ndetect stale current-state claims\ndetect distribution contradictions\nreturn non-zero on violations\n```"
+    },
+    {
+      "id": "REQ-TOOL-004",
+      "title": "Internal validation categories",
+      "requirement": "Structure implementation so tests can exercise:\n\n```text\nrelease state\nmanifest\nclassification\nmarkers\nrendering\ndrift\nstale current statements\nCLI docs\nexit codes\nlinks\n```\n\nindependently."
+    },
+    {
+      "id": "REQ-TOOL-005",
+      "title": "Idempotency",
+      "requirement": "Two consecutive updates with unchanged input must produce no second diff."
+    },
+    {
+      "id": "REQ-STALE-001",
+      "title": "",
+      "requirement": "An old version mention is not automatically stale.\n\nReject it only when presented as the current/recommended:\n\n```text\ninstall version\npackage version\nrelease identity\ndownload\npublic distribution\n```"
+    },
+    {
+      "id": "REQ-STALE-002",
+      "title": "",
+      "requirement": "Similarly, `candidate` is allowed in genuine historical/comparison context.\n\nReject it when living documentation incorrectly calls an already-public current artifact a candidate."
+    },
+    {
+      "id": "REQ-STALE-003",
+      "title": "",
+      "requirement": "Reject contradictions such as:\n\n```text\npublicVersion=14.0.0\nQuick Start says install 13.0.0\n```\n\nor:\n\n```text\nCLI nugetPublished=false\nREADME advertises dotnet tool install from NuGet.org\n```"
+    },
+    {
+      "id": "REQ-DIST-001",
+      "title": "",
+      "requirement": "Recognize that global-tool packaging already exists.\n\nDo not reimplement it."
+    },
+    {
+      "id": "REQ-DIST-002",
+      "title": "",
+      "requirement": "While:\n\n```json\n\"nugetPublished\": false\n```\n\nliving docs must not advertise:\n\n```bash\ndotnet tool install --global SoundScript.Cli\n```\n\nas a NuGet.org install path."
+    },
+    {
+      "id": "REQ-DIST-003",
+      "title": "",
+      "requirement": "When CLI NuGet is unpublished, current docs should:\n\n```text\nstate that fact\nshow supported GitHub release distribution if published\navoid local package smoke-test instructions as primary public onboarding\n```"
+    },
+    {
+      "id": "REQ-DIST-004",
+      "title": "",
+      "requirement": "Future state:\n\n```json\n\"nugetPublished\": true\n```\n\nmust automatically support generation of:\n\n```bash\ndotnet tool install --global SoundScript.Cli --version <publicVersion>\n```"
+    },
+    {
+      "id": "REQ-STYLE-001",
+      "title": "Preserve theme",
+      "requirement": "Enhance `docs/doc.html` within the existing design tokens and visual language.\n\nDo not introduce an unrelated third-party-looking code theme."
+    },
+    {
+      "id": "REQ-STYLE-002",
+      "title": "Code-block shell",
+      "requirement": "Every fenced rendered code block should be presented using a consistent developer code container:\n\n```text\n┌─────────────────────────────────────────┐\n│ C#                              [Copy] │\n├─────────────────────────────────────────┤\n│ var media = ...                        │\n└─────────────────────────────────────────┘\n```\n\nDo not add excessive decorative chrome."
+    },
+    {
+      "id": "REQ-STYLE-003",
+      "title": "Copy button",
+      "requirement": "Add an accessible Copy control to rendered fenced code blocks.\n\nRequirements:\n\n```text\ncopies exact source text\ndoes not copy language label\ndoes not copy UI chrome\ndoes not copy visual prompt decoration\ntemporarily indicates success\nreturns to Copy state\nworks independently for multiple blocks\n```"
+    },
+    {
+      "id": "REQ-STYLE-004",
+      "title": "Language labels",
+      "requirement": "Map Markdown language identifiers into clear labels.\n\nAt minimum:\n\n```text\ncsharp      → C#\ncs          → C#\nsoundscript → SoundScript\nbash        → Bash\nsh          → Shell\npowershell  → PowerShell\npwsh        → PowerShell\ncmd         → Command Prompt\njson        → JSON\nxml         → XML\njavascript  → JavaScript\njs          → JavaScript\nhtml        → HTML\ncss         → CSS\ntext        → Text\n```\n\nUnknown languages may use a safely escaped normalized label or no label."
+    },
+    {
+      "id": "REQ-STYLE-005",
+      "title": "Terminal style",
+      "requirement": "Command fences:\n\n```text\nbash\nsh\nshell\npowershell\npwsh\ncmd\n```\n\nshould receive a terminal-oriented presentation.\n\nTerminal style may use:\n\n```text\nTerminal\nPowerShell\nCommand Prompt\n```\n\nheaders.\n\nDo not modify underlying command content."
+    },
+    {
+      "id": "REQ-STYLE-006",
+      "title": "Prompt decoration",
+      "requirement": "If `$`, `PS>`, or `>` prompt decoration is displayed, it must be presentation-only.\n\nExample:\n\n```text\n$ dotnet add package SoundScript\n```\n\nCopy result must remain:\n\n```text\ndotnet add package SoundScript\n```\n\nunless the literal prompt is actually present in Markdown source."
+    },
+    {
+      "id": "REQ-STYLE-007",
+      "title": "Output blocks",
+      "requirement": "Provide a clear style for command output.\n\nPrefer an explicit documented fence convention such as:\n\n````markdown\n```console-output\nBuild succeeded.\n0 Warning(s)\n0 Error(s)\n````\n\n````\n\nor a similarly unambiguous identifier.\n\nOutput blocks should not visually imply that the text should be executed."
+    },
+    {
+      "id": "REQ-STYLE-008",
+      "title": "Copy behavior for output",
+      "requirement": "Determine intentionally whether output blocks receive Copy.\n\nRecommended:\n\n```text\nallow Copy for substantial output because developers often need logs,\nbut style them clearly as Output rather than Terminal.\n````\n\nDocument the chosen rule."
+    },
+    {
+      "id": "REQ-STYLE-009",
+      "title": "Inline code",
+      "requirement": "Retain existing lightweight inline-code styling.\n\nDo not add copy controls to inline identifiers."
+    },
+    {
+      "id": "REQ-HIGHLIGHT-001",
+      "title": "Progressive enhancement",
+      "requirement": "Implement syntax highlighting only if it can be done cleanly, securely, and without a disproportionate dependency.\n\nPriority order:\n\n```text\n1. code container\n2. Copy\n3. language labels\n4. terminal/output differentiation\n5. syntax highlighting\n```\n\nDo not hold the whole V15 documentation work hostage to advanced highlighting."
+    },
+    {
+      "id": "REQ-HIGHLIGHT-002",
+      "title": "Target languages",
+      "requirement": "If highlighting is added, prioritize:\n\n```text\nSoundScript\nC#\nBash/Shell\nPowerShell\nJSON\nXML\nJavaScript\nHTML\nCSS\n```"
+    },
+    {
+      "id": "REQ-HIGHLIGHT-003",
+      "title": "SoundScript",
+      "requirement": "Where practical, first-class SoundScript highlighting may distinguish:\n\n```text\ncomments\nkeywords/directives\nnotes\ndurations\nstrings\nnumbers\nstructural punctuation\n```\n\nDo not create or redefine grammar solely for highlighting."
+    },
+    {
+      "id": "REQ-HIGHLIGHT-004",
+      "title": "Security",
+      "requirement": "Never render untrusted code contents as executable HTML.\n\nCode text must remain escaped/safe."
+    },
+    {
+      "id": "REQ-A11Y-001",
+      "title": "",
+      "requirement": "Copy controls must be keyboard reachable."
+    },
+    {
+      "id": "REQ-A11Y-002",
+      "title": "",
+      "requirement": "Provide accessible names such as:\n\n```text\nCopy C# code\nCopy Bash command\nCopy SoundScript code\n```\n\nwhen practical."
+    },
+    {
+      "id": "REQ-A11Y-003",
+      "title": "",
+      "requirement": "Copy success state must not depend only on color."
+    },
+    {
+      "id": "REQ-A11Y-004",
+      "title": "",
+      "requirement": "Respect existing `prefers-reduced-motion`."
+    },
+    {
+      "id": "REQ-A11Y-005",
+      "title": "",
+      "requirement": "Focus-visible behavior must remain clear."
+    },
+    {
+      "id": "REQ-MOBILE-001",
+      "title": "",
+      "requirement": "Long commands/code must horizontally scroll rather than overflow the page."
+    },
+    {
+      "id": "REQ-MOBILE-002",
+      "title": "",
+      "requirement": "Copy buttons and labels must remain visible/usable on narrow displays."
+    },
+    {
+      "id": "REQ-MOBILE-003",
+      "title": "",
+      "requirement": "Do not force code wrapping if doing so makes commands misleading."
+    },
+    {
+      "id": "REQ-COPY-001",
+      "title": "",
+      "requirement": "Prefer:\n\n```javascript\nnavigator.clipboard.writeText(...)\n```\n\nwhen safely available."
+    },
+    {
+      "id": "REQ-COPY-002",
+      "title": "",
+      "requirement": "Provide a reasonable fallback where practical."
+    },
+    {
+      "id": "REQ-COPY-003",
+      "title": "",
+      "requirement": "Clipboard failure must not alter/destroy code contents."
+    },
+    {
+      "id": "REQ-COPY-004",
+      "title": "",
+      "requirement": "Do not request unnecessary browser permissions."
+    },
+    {
+      "id": "REQ-FENCE-001",
+      "title": "",
+      "requirement": "Audit living documentation for generic code fences.\n\nWhere the language/shell is known, use the correct fence identifier.\n\nExample:\n\nPrefer:\n\n````markdown\n```bash\ndotnet build\n````\n\n````\n\nover:\n\n```markdown\n````\n\ndotnet build\n\n```\n```"
+    },
+    {
+      "id": "REQ-FENCE-002",
+      "title": "",
+      "requirement": "Do not cosmetically rewrite historical engineering evidence merely to normalize fence labels."
+    },
+    {
+      "id": "REQ-CLI-001",
+      "title": "",
+      "requirement": "Determine public CLI command authority in this order:\n\n```text\n1. actual command registration\n2. deterministic local --help\n3. central command definition\n4. explicit documented allowlist only as last resort\n```\n\nRecord selected authority in the audit."
+    },
+    {
+      "id": "REQ-CLI-002",
+      "title": "",
+      "requirement": "Validate public command coverage.\n\nAt minimum inspect:\n\n```text\nvalidate\ninspect\nrun\ncompose\nprosody\nrender\nwave\nvideo\nvocal\ntranscribe\n```\n\nplus any other current public commands discovered."
+    },
+    {
+      "id": "REQ-CLI-003",
+      "title": "",
+      "requirement": "Distinguish where relevant:\n\n```text\npublic\nalias\nexperimental\nhidden\ninternal\n```"
+    },
+    {
+      "id": "REQ-EXIT-001",
+      "title": "",
+      "requirement": "Locate canonical runtime/source authority for CLI exit codes."
+    },
+    {
+      "id": "REQ-EXIT-002",
+      "title": "",
+      "requirement": "Validate current documentation against it."
+    },
+    {
+      "id": "REQ-EXIT-003",
+      "title": "",
+      "requirement": "Do not change runtime exit values just to match documentation.\n\nCorrect docs if docs are stale."
+    },
+    {
+      "id": "REQ-LINK-001",
+      "title": "Deterministic checks",
+      "requirement": "Validate where practical:\n\n```text\nrelative Markdown target exists\ndocs target exists\nheading fragment exists\nrepository file path exists\ngenerated NuGet URL has correct ID/version\ngenerated release URL has correct version\ncanonical docs navigation points to documentation.md\n```"
+    },
+    {
+      "id": "REQ-LINK-002",
+      "title": "Network checks separate",
+      "requirement": "Transient external-site availability must not make required local CI flaky.\n\nExternal availability may be:\n\n```text\noptional\nscheduled\nmanual\n```\n\nunless already reliably handled by existing CI."
+    },
+    {
+      "id": "REQ-META-001",
+      "title": "",
+      "requirement": "Audit current hardcoded release values in:\n\n```text\ndocs/doc.html structured data\ndocs/index.html structured data\nsoftwareVersion\nsoftwareHelp\ncanonical documentation URL\n```"
+    },
+    {
+      "id": "REQ-META-002",
+      "title": "",
+      "requirement": "Where current release/version facts are repeated, integrate them with the documentation state architecture where practical.\n\nDo not blindly inject build-time state into static HTML if it makes publishing unsafe.\n\nUse the simplest deterministic mechanism consistent with the rest of the documentation generator."
+    },
+    {
+      "id": "REQ-META-003",
+      "title": "",
+      "requirement": "Do not change branding/SEO positioning unnecessarily.\n\nCorrect stale facts only."
+    },
+    {
+      "id": "REQ-IA-001",
+      "title": "",
+      "requirement": "Preserve:\n\n```text\ncolor palette\ntypography\nlogo\nmajor layout\ncard language\ncode aesthetic\nnavigation style\ndeveloper-oriented tone\n```"
+    },
+    {
+      "id": "REQ-IA-002",
+      "title": "",
+      "requirement": "Keep the developer journey approximately:\n\n```text\nWhat is SoundScript?\n        ↓\nTry Playground\n        ↓\nInstall / integrate\n        ↓\nNuGet / CLI\n        ↓\nExamples / tutorials\n        ↓\nArchitecture\n        ↓\nReference\n```"
+    },
+    {
+      "id": "REQ-IA-003",
+      "title": "",
+      "requirement": "No major navigation restructuring unless the audit identifies a real usability problem.\n\nThe canonical documentation hub restructuring is explicitly approved because two competing hubs currently exist."
+    },
+    {
+      "id": "REQ-CI-001",
+      "title": "",
+      "requirement": "Add:\n\n```powershell\n./scripts/update-docs.ps1 -Check\n```\n\nto the appropriate existing CI workflow."
+    },
+    {
+      "id": "REQ-CI-002",
+      "title": "",
+      "requirement": "Do not create a conflicting parallel documentation CI pipeline if an appropriate existing workflow can host the check."
+    },
+    {
+      "id": "REQ-CI-003",
+      "title": "",
+      "requirement": "Final report must identify:\n\n```text\nworkflow\njob\nstep\ncommand\n```"
+    },
+    {
+      "id": "REQ-DIAG-001",
+      "title": "",
+      "requirement": "Failures should include:\n\n```text\nfile\nvalidation category\nblock/check ID\nactual condition\nexpected condition\ncorrective action\n```\n\nExample:\n\n```text\ndocs/quick-start.md\n[STALE_CURRENT_INSTALL]\nRecommended package is 13.0.0.\nPublic package is 14.0.0.\nRun ./scripts/update-docs.ps1\n```"
+    },
+    {
+      "id": "REQ-DIAG-002",
+      "title": "",
+      "requirement": "Exit 0:\n\n```text\nupdate succeeded\nor\ncheck found no violations\n```\n\nNon-zero:\n\n```text\ninvalid state\nmanifest error\nmarker error\ndrift\nstale current documentation\nCLI docs mismatch\ndeterministic link failure\ndocumentation-policy violation\n```"
+    },
+    {
+      "id": "REQ-ENCODING-001",
+      "title": "",
+      "requirement": "Generation must not depend on:\n\n```text\nclock\nlocale\nuser name\nmachine path\ndictionary iteration randomness\nnetwork result\n```"
+    },
+    {
+      "id": "REQ-ENCODING-002",
+      "title": "",
+      "requirement": "Preserve existing per-file line endings and encoding where practical."
+    },
+    {
+      "id": "REQ-ENCODING-003",
+      "title": "",
+      "requirement": "Do not rewrite unrelated bytes outside approved generated sections."
+    },
+    {
+      "id": "REQ-SAFE-001",
+      "title": "",
+      "requirement": "No runtime behavior changes."
+    },
+    {
+      "id": "REQ-SAFE-002",
+      "title": "",
+      "requirement": "No public API changes."
+    },
+    {
+      "id": "REQ-SAFE-003",
+      "title": "",
+      "requirement": "No DSL grammar changes."
+    },
+    {
+      "id": "REQ-SAFE-004",
+      "title": "",
+      "requirement": "No runtime dependency upgrades."
+    },
+    {
+      "id": "REQ-SAFE-005",
+      "title": "",
+      "requirement": "`experiments/SoundScript.Labs/` untouched."
+    },
+    {
+      "id": "REQ-SAFE-006",
+      "title": "",
+      "requirement": "No publication/deployment."
+    },
+    {
+      "id": "REQ-SAFE-007",
+      "title": "",
+      "requirement": "No unrelated formatting changes to production source."
+    },
+    {
+      "id": "REQ-TEST-STATE-001",
+      "title": "",
+      "requirement": "Test valid release state."
+    },
+    {
+      "id": "REQ-TEST-STATE-002",
+      "title": "",
+      "requirement": "Test unsupported schema version."
+    },
+    {
+      "id": "REQ-TEST-STATE-003",
+      "title": "",
+      "requirement": "Test invalid version."
+    },
+    {
+      "id": "REQ-TEST-STATE-004",
+      "title": "",
+      "requirement": "Test public version newer than development version."
+    },
+    {
+      "id": "REQ-TEST-STATE-005",
+      "title": "",
+      "requirement": "Test publication-channel contradictions."
+    },
+    {
+      "id": "REQ-TEST-MANIFEST-001",
+      "title": "",
+      "requirement": "Unclassified documentation fails."
+    },
+    {
+      "id": "REQ-TEST-MANIFEST-002",
+      "title": "",
+      "requirement": "Missing declared file fails."
+    },
+    {
+      "id": "REQ-TEST-MANIFEST-003",
+      "title": "",
+      "requirement": "Living/historical conflict fails."
+    },
+    {
+      "id": "REQ-TEST-MANIFEST-004",
+      "title": "",
+      "requirement": "Invalid exclusion fails."
+    },
+    {
+      "id": "REQ-TEST-GEN-001",
+      "title": "",
+      "requirement": "Test:\n\n```text\nmissing START\nmissing END\nduplicate START\nduplicate END\nmismatched identifiers\nnested block\nout-of-order markers\nundeclared marker\n```"
+    },
+    {
+      "id": "REQ-TEST-GEN-002",
+      "title": "",
+      "requirement": "Test idempotency."
+    },
+    {
+      "id": "REQ-TEST-GEN-003",
+      "title": "",
+      "requirement": "Test `-Check` does not mutate fixture bytes."
+    },
+    {
+      "id": "REQ-TEST-GEN-004",
+      "title": "",
+      "requirement": "Test deliberate drift is detected."
+    },
+    {
+      "id": "REQ-TEST-GEN-005",
+      "title": "",
+      "requirement": "Test development 15.0.0 + public 14.0.0 keeps 14.0.0 install command."
+    },
+    {
+      "id": "REQ-TEST-GEN-006",
+      "title": "",
+      "requirement": "Test future CLI NuGet publication generates global-tool command correctly."
+    },
+    {
+      "id": "REQ-TEST-HIST-001",
+      "title": "",
+      "requirement": "Historical candidate wording must remain valid."
+    },
+    {
+      "id": "REQ-TEST-HIST-002",
+      "title": "",
+      "requirement": "Historical old version numbers must not be rewritten."
+    },
+    {
+      "id": "REQ-TEST-HIST-003",
+      "title": "",
+      "requirement": "Current-state validation must not incorrectly treat historical evidence as stale."
+    },
+    {
+      "id": "REQ-TEST-HUB-001",
+      "title": "",
+      "requirement": "Verify `documentation.md` is the canonical current hub."
+    },
+    {
+      "id": "REQ-TEST-HUB-002",
+      "title": "",
+      "requirement": "Verify `doc.html` default loads the canonical hub."
+    },
+    {
+      "id": "REQ-TEST-HUB-003",
+      "title": "",
+      "requirement": "Verify current Docs navigation resolves to canonical hub."
+    },
+    {
+      "id": "REQ-TEST-HUB-004",
+      "title": "",
+      "requirement": "Verify `SoundScript.md` remains a valid compatibility destination and links to canonical hub."
+    },
+    {
+      "id": "REQ-TEST-HUB-005",
+      "title": "",
+      "requirement": "Verify canonical hub links resolve deterministically."
+    },
+    {
+      "id": "REQ-TEST-STYLE-001",
+      "title": "",
+      "requirement": "Verify language label appears for known fenced languages."
+    },
+    {
+      "id": "REQ-TEST-STYLE-002",
+      "title": "",
+      "requirement": "Verify Copy copies exact Markdown code content."
+    },
+    {
+      "id": "REQ-TEST-STYLE-003",
+      "title": "",
+      "requirement": "Verify visual terminal prompt is not copied unless it exists literally in source."
+    },
+    {
+      "id": "REQ-TEST-STYLE-004",
+      "title": "",
+      "requirement": "Verify several code blocks copy independently."
+    },
+    {
+      "id": "REQ-TEST-STYLE-005",
+      "title": "",
+      "requirement": "Verify code containing:\n\n```text\n< > & \" ' script img onclick\n```\n\nremains text and cannot inject HTML/script."
+    },
+    {
+      "id": "REQ-TEST-STYLE-006",
+      "title": "",
+      "requirement": "Verify keyboard access to Copy."
+    },
+    {
+      "id": "REQ-TEST-STYLE-007",
+      "title": "",
+      "requirement": "Verify Copy success state."
+    },
+    {
+      "id": "REQ-TEST-STYLE-008",
+      "title": "",
+      "requirement": "Verify failure handling does not corrupt code."
+    },
+    {
+      "id": "REQ-TEST-STYLE-009",
+      "title": "",
+      "requirement": "Verify terminal/output/source blocks receive appropriate classes/labels."
+    },
+    {
+      "id": "REQ-TEST-STYLE-010",
+      "title": "",
+      "requirement": "Verify no obvious narrow-screen overflow regression."
+    },
+    {
+      "id": "REQ-TEST-REG-001",
+      "title": "",
+      "requirement": "Run existing homepage release-history tests."
+    },
+    {
+      "id": "REQ-TEST-REG-002",
+      "title": "",
+      "requirement": "Run relevant documentation/Playground Node tests."
+    },
+    {
+      "id": "REQ-TEST-REG-003",
+      "title": "",
+      "requirement": "Run relevant .NET regression tests."
+    },
+    {
+      "id": "REQ-TEST-REG-004",
+      "title": "",
+      "requirement": "Run:\n\n```text\ngit diff --check\n```"
+    },
+    {
+      "id": "REQ-TEST-REG-005",
+      "title": "",
+      "requirement": "Inspect production/runtime diff and confirm documentation-focused scope."
+    },
+    {
+      "id": "REQ-ACCEPT-001",
+      "title": "",
+      "requirement": "Create an appropriate V15 acceptance/report artifact documenting implementation and validation.\n\nChoose a clear path consistent with existing repository conventions, for example:\n\n```text\ndocs/v15-documentation-reliability-report.md\n```"
+    },
+    {
+      "id": "REQ-ACCEPT-002",
+      "title": "",
+      "requirement": "The final requirement matrix must include **every requirement ID from this specification**.\n\nDo not provide only representative entries.\n\nColumns:\n\n| Requirement | Evidence | Validation/inspection | Status | Notes |\n| ----------- | -------- | --------------------- | ------ | ----- |\n\nStatuses:\n\n```text\nPASS\nFAIL\nN/A — explicit reason required\n```"
+    },
+    {
+      "id": "REQ-ACCEPT-003",
+      "title": "",
+      "requirement": "Generate or programmatically validate the requirement-ID inventory so IDs are not accidentally omitted from the final matrix.\n\nThe matrix evidence/status itself may remain manually reviewed."
+    }
+  ]
+}

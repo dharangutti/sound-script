@@ -183,7 +183,7 @@ parameters happens in the DSP mapping layer.
 `SoundCssDspMapper.Map(pronunciation, canonicalVoice)` turns a validated
 `SoundCssPronunciation` into a numeric `DspTransformPlan`:
 
-```
+```text
 DspTransformPlan {
     pitchSemitones, timeStretch, gainDb,
     eqBands[], formantShift, vibrato { rateHz, depthSemitones },

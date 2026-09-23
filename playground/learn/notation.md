@@ -6,7 +6,7 @@ Phase 2 introduces a canonical internal notation model. Every parsed note become
 
 ## Notation Model
 
-```
+```text
 Parser input          NotationParser           NotatedNote
 ─────────────         ──────────────           ───────────
 "C#4 q"        →      pitch + accidental  →    PitchClass: C
@@ -34,7 +34,7 @@ Parser input          NotationParser           NotatedNote
 
 ### MIDI conversion
 
-```
+```text
 midiNumber = (octave + 1) × 12 + pitchClass + accidentalOffset
 ```
 
@@ -47,7 +47,7 @@ midiNumber = (octave + 1) × 12 + pitchClass + accidentalOffset
 | Flat | `b`, `B`, `♭` | −1 |
 | Natural | `♮` | 0 (cancels spelling) |
 
-```
+```text
 C4      →  MIDI 60
 C#4     →  MIDI 61
 Db4     →  MIDI 61
@@ -92,7 +92,7 @@ Repeated single-letter aliases (`qq`, `ee`) are rejected.
 
 ## Ties
 
-```
+```soundscript
 melody {
     C5 q ~ C5 q
 }
@@ -107,7 +107,7 @@ melody {
 
 ## Diagram: Notation Model
 
-```
+```text
                     ┌─────────────────┐
                     │   NoteNode      │
                     │  (AST wrapper)  │
@@ -134,7 +134,7 @@ melody {
 
 ## Example
 
-```
+```soundscript
 melody {
     tempo 120
     C4 q

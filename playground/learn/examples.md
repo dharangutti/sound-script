@@ -151,7 +151,7 @@ Add `--stereo` for stereo WAV output:
 dotnet run --project src/SoundScript.Cli -- wave examples/wave-effects.ssw effects.wav --stereo
 ```
 
-→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v7)
+→ [wave-grammar.md](wave-grammar.md) · [whats-new-v7.md](whats-new-v7.md) · [cli.md](cli.md#wave--script-to-wav-v8)
 
 ### V8 offline vocal stems (CLI)
 
@@ -240,7 +240,7 @@ as human-editable `.ss` source, alongside the `.mid` file:
 dotnet run --project src/SoundScript.Cli -- compose "Twinkle twinkle little star" --emit-ss twinkle.ss
 ```
 
-```
+```soundscript
 tempo 96
 
 track phonemes {

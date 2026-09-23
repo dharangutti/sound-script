@@ -28,43 +28,49 @@
     <meta name="twitter:image:alt" content="SoundScript logo">
 
     <!-- Structured data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "WebSite",
-                "@id": "https://soundscript.net/#website",
-                "url": "https://soundscript.net/",
-                "name": "SoundScript",
-                "description": "An open-source, deterministic music programming language that compiles plain text into MIDI."
+    <!-- GENERATED:SITE_METADATA_START -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "WebSite",
+            "@id": "https://soundscript.net/#website",
+            "url": "https://soundscript.net/",
+            "name": "SoundScript",
+            "description": "An open-source, deterministic music programming language that compiles plain text into MIDI."
+        },
+        {
+            "@type": "SoftwareApplication",
+            "@id": "https://soundscript.net/#software",
+            "name": "SoundScript",
+            "url": "https://soundscript.net/",
+            "applicationCategory": "MultimediaApplication",
+            "applicationSubCategory": "Music programming language",
+            "operatingSystem": "Windows, macOS, Linux, Web",
+            "browserRequirements": "Any modern browser with WebAssembly and Web Audio (Chrome, Edge, Firefox, Safari)",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
             },
-            {
-                "@type": "SoftwareApplication",
-                "@id": "https://soundscript.net/#software",
-                "name": "SoundScript",
-                "url": "https://soundscript.net/",
-                "applicationCategory": "MultimediaApplication",
-                "applicationSubCategory": "Music programming language",
-                "operatingSystem": "Windows, macOS, Linux, Web",
-                "browserRequirements": "Any modern browser with WebAssembly and Web Audio (Chrome, Edge, Firefox, Safari)",
-                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-                "license": "https://opensource.org/licenses/MIT",
-                "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-                "softwareVersion": "14.0.0",
-                "programmingLanguage": "C#",
-                "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
-                "softwareHelp": "https://soundscript.net/SoundScript.md",
-                "codeRepository": "https://github.com/dharangutti/sound-script",
-                "author": {
-                    "@type": "Person",
-                    "name": "Anup Jayant Dharangutti",
-                    "url": "https://www.dharangutti.in"
-                }
+            "license": "https://opensource.org/licenses/MIT",
+            "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
+            "softwareVersion": "14.0.0",
+            "programmingLanguage": "C#",
+            "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
+            "softwareHelp": "https://soundscript.net/doc.html?p=documentation.md",
+            "codeRepository": "https://github.com/dharangutti/sound-script",
+            "author": {
+                "@type": "Person",
+                "name": "Anup Jayant Dharangutti",
+                "url": "https://www.dharangutti.in"
             }
-        ]
-    }
-    </script>
+        }
+    ]
+}
+</script>
+<!-- GENERATED:SITE_METADATA_END -->
     <style>
         :root {
             --bg: #0b0d12;
@@ -812,7 +818,9 @@
             <a class="brand-hero" href="/" aria-label="SoundScript home">
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
-            <div class="badge"><!--VERSION_BADGE-->Version: V14 — Programmable Media Runtime<!--/VERSION_BADGE--></div>
+            <div class="badge"><!-- GENERATED:PUBLIC_BADGE_START -->
+Version: V14 (14.0.0)
+<!-- GENERATED:PUBLIC_BADGE_END --></div>
             <h1>Write audio like <span>code</span> — edit it back</h1>
             <p class="lead">
                 SoundScript is a deterministic programming language and .NET toolkit for programmable audio and media. Write timed visuals,
@@ -832,7 +840,7 @@
                 <span class="trust-badge">Offline</span>
                 <span class="trust-badge">Cross Platform</span>
                 <span class="trust-badge">Open Source</span>
-                <span class="trust-badge"><!--METRIC_TESTS-->1,230<!--/METRIC_TESTS--> Tests</span>
+                <span class="trust-badge"><!--METRIC_TESTS-->1,232<!--/METRIC_TESTS--> Tests</span>
                 <span class="trust-badge">.NET 10</span>
                 <span class="trust-badge">Browser Playground</span>
                 <span class="trust-badge">Temporal A/V Export</span>
@@ -998,9 +1006,9 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <h2 id="benefits-title">Key Benefits</h2>
                 <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
                 <div class="metric-grid" aria-label="Repository engineering metrics">
-                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->377+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->380+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->28<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
-                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,230<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,232<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
                     <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
                     <div class="metric"><span class="metric-value">2 rails</span><span class="metric-label">MIDI and Wave</span></div>
                 </div>

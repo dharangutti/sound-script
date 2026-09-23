@@ -91,7 +91,7 @@ Swing formula for off-beat notes: `offset = duration × (1 − ratio) × 0.5`
 
 ## Pipeline Position
 
-```
+```text
 MusicalIntelligence
     ↓
 PhraseTimingShaper    ← V3 swing / push / pull

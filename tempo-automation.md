@@ -22,7 +22,7 @@ tempo 120 → 140 over 4 bars
 
 ## Tempo Map Diagram
 
-```
+```text
 BPM
 140 ┤                    ╭────────
     │                  ╱

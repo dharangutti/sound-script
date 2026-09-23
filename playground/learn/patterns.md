@@ -30,7 +30,7 @@ play arp Cmaj q
 
 ## Pattern Expansion Flow
 
-```
+```text
 play arp Cmaj q
     │
     ├─► Resolve chord → voicing → advanced voicing

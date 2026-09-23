@@ -4,7 +4,7 @@ End-to-end flow from SoundScript source to MIDI output.
 
 ## High-Level Pipeline
 
-```
+```text
 DSL script
     ↓
 ProgramLoader (imports)     ← V2
@@ -36,7 +36,7 @@ Tokenizer → Parser → ProgramNode (AST)
 
 ## Per-Note Pipeline (V2)
 
-```
+```text
 NoteNode
     │
     ├─► MusicalIntelligence (OctaveSmoother, MelodicContour, PhraseSmoother)
@@ -55,7 +55,7 @@ NoteNode
 
 ## Per-Chord Pipeline (V2)
 
-```
+```text
 ChordNode
     │
     ├─► ChordVoicing (Phase 1)
@@ -68,7 +68,7 @@ ChordNode
 
 ## Pattern Play Pipeline (V2)
 
-```
+```text
 play arp Cmaj q
     │
     ├─► PatternExpander.Expand(pattern, chord)
@@ -79,7 +79,7 @@ play arp Cmaj q
 
 ## Layer Pipeline (V2)
 
-```
+```text
 track with layers [piano, cello]
     │
     EmitNote(C4)
@@ -89,7 +89,7 @@ track with layers [piano, cello]
 
 ## Tempo Automation (V2)
 
-```
+```text
 tempo 120 → 140 over 4 bars
     │
     └─► TempoAutomationMap.AddRamp()
@@ -112,7 +112,7 @@ tempo 120 → 140 over 4 bars
 
 ## Playground Pipeline
 
-```
+```text
 Interpreter → MidiGenerator → Web Audio (local soundfont)
 ```
 

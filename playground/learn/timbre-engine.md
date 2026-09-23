@@ -23,7 +23,7 @@ timbre engine adds spectral colour on top without modifying MIDI generation.
 
 ## Pipeline
 
-```
+```text
 MIDI file
     ↓
 MidiToTimbreTimeline     extract notes, tempo, align phonemes, plan cycles
@@ -40,7 +40,7 @@ AudioWriter              WAV / OGG
 V4.0 applied one spectral snapshot per frame. V4.1 reconstructs **3–10 pitch
 cycles** inside each 8 ms frame:
 
-```
+```text
 cycle_length_ms = 1000 / pitch_hz
 cycle_count     = clamp(round(frame_ms / cycle_length_ms), 3, 10)
 ```

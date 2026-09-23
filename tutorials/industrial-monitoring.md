@@ -1,7 +1,7 @@
 # Turn telemetry changes into media
 
 You need the .NET 10 SDK and a checkout of the repository. The sample restores
-the published SoundScript 13.0.2 NuGet package. For video, optionally install
+the pinned SoundScript 13.0.2 compatibility baseline NuGet package. For video, optionally install
 FFmpeg with VP9 and Opus support; all other outputs work without it.
 
 ## 1. Run the three scenarios

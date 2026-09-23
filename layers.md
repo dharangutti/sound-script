@@ -22,7 +22,7 @@ track piano {
 
 ## Layer Pipeline
 
-```
+```text
 EmitNote / EmitChord
     │
     ├─► Layer 0 (piano)  → PlaybackShaper(piano)  → channel 0
