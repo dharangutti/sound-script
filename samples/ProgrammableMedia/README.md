@@ -3,6 +3,8 @@
 This console sample uses only the SoundScript NuGet package. The shared application-owned
 `MonitoringScenario` source builder has no web dependencies. No browser, FFmpeg, UI framework or CLI is used.
 
+From a [source checkout with submodules](../../README.md#try-it-in-60-seconds), run these commands at the repository root:
+
 ```powershell
 dotnet pack src/SoundScript -c Release -o artifacts/packages
 dotnet restore samples/ProgrammableMedia -p:RestoreAdditionalProjectSources=../../artifacts/packages --packages ./artifacts/sample-cache

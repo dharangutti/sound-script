@@ -112,7 +112,7 @@ identifier and each has a SHA-256 checksum.
 
 ## Pack and smoke-test the SoundScript library locally
 
-Pack the library to a local source and inspect it before any external release:
+From a [source checkout with submodules](../README.md#try-it-in-60-seconds), pack the library to a local source and inspect it before any external release:
 
 ```sh
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
