@@ -4,10 +4,10 @@
 Install the published library:
 
 ```bash
-dotnet add package SoundScript --version 14.0.0
+dotnet add package SoundScript --version 15.0.0
 ```
 
-[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+[SoundScript 15.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/15.0.0).
 <!-- GENERATED:LIBRARY_INSTALL_END -->
 
 The applications below pin SoundScript 13.0.2 as a compatibility baseline; use the

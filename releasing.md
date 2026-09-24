@@ -1,22 +1,92 @@
 # Release and package checklist
 
-This checklist prepares a release without publishing anything. Development identity
+Development identity
 comes from Directory.Build.props; public distribution comes from release-state.json.
 See [documentation maintenance](documentation-maintenance.md) for schema, ownership
 and the explicit publication-state update process.
+
+## Publish and promote the library
+
+1. On `main`, run **Publish SoundScript NuGet package** with `publish=true`.
+2. The publication workflow validates and pushes the library package.
+3. **Promote public release** checks the successful publication run and its actual
+   publish step. A successful validation-only run cannot promote a release.
+4. It reads the release identity from the publication commit, checks it against
+   current `main`, and polls NuGet.org every 30 seconds for at most 10 minutes.
+5. A fresh `net10.0` consumer with an empty package cache restores the exact public
+   package, builds, and executes deterministic WAV, MIDI and visual media APIs.
+6. The workflow generates a promotion PR updating public state, the exact release
+   heading and generated documentation. Review the verification summary, approve
+   generated PR workflow runs if requested, and merge after required checks pass.
+7. The existing **Deploy SoundScript Site** workflow runs on the merge to `main`.
+   Its staged homepage generator marks the public release as Current. A delayed
+   site deployment does not invalidate the already-published NuGet package.
+
+The promotion workflow never republishes a package, creates a CLI tag, or merges
+its own PR. CLI channel flags reset when the public version changes; flags already
+recorded for the same public version survive reruns.
+
+### Manual recovery and verification
+
+After the automation workflow is merged into `main`, open **Actions → Promote
+public release → Run workflow**, select `main`, and enter the successful NuGet
+publication run ID in `publication_run_id`. Equivalently:
+
+```sh
+gh workflow run promote-public-release.yml --ref main -f publication_run_id=PUBLICATION_RUN_ID
+```
+
+Use the run ID from the publication workflow URL, not a job ID. No additional NuGet
+publication is needed. To verify a package locally, run
+`pwsh -File scripts/verify-public-nuget.ps1 -Version VERSION`, replacing `VERSION`
+with the exact published version. This performs network verification without
+changing release state.
+
+- **Indexing or network delay:** availability or consumer verification fails before
+  any release-state edits. Rerun promotion with the same publication run ID later.
+- **Already promoted:** the public consumer and documentation checks run again;
+  clean state succeeds without a new branch or PR. Inconsistent existing state
+  fails clearly and requires an explicit repair.
+- **Existing PR:** the workflow reports the existing `automation/promote-VERSION`
+  PR without overwriting it. Review that PR, or close it and delete its branch
+  before regenerating. An orphan branch is reported without a force-push.
+- **Main advanced:** a different development version, label or codename fails the
+  publication identity check. A main-branch update during verification also stops
+  PR creation; rerun against the reviewed current state. Do not override the
+  publication version to force promotion.
+- **Failed PR creation after push:** inspect the deterministic branch and open its
+  PR manually, or delete the branch and rerun. No duplicate branch is force-pushed.
+
+### GitHub permissions and review
+
+In **Settings → Actions → General → Workflow permissions**, enable **Allow GitHub
+Actions to create and approve pull requests** for automatic PR creation (subject
+to organization policy). The workflow uses `GITHUB_TOKEN`; no PAT is required.
+The repository's default token can stay read-only. Only the PR job receives
+`contents: write` and `pull-requests: write`; only provenance resolution needs
+`actions: read`. Consumer build/run executes in a separate read-only job.
+
+GitHub may require a maintainer to approve workflow runs on a generated PR before
+checks execute. Approving those checks is distinct from reviewing or merging the
+PR. See [GitHub token behavior](https://docs.github.com/en/enterprise-cloud%40latest/actions/concepts/security/github_token).
+
+The exact promotion diff allowlist is maintained in `scripts/release-promotion.mjs`.
+It permits public state, release notes and current generated documentation,
+including package README and Playground HTML metadata. Changes to runtime code,
+workflows or the documentation manifest are rejected in generated promotion PRs.
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
 Development: **15.0.0 / V15 — Documentation Reliability & Developer Experience**. Development identity does not imply publication.
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
-Current public version: **14.0.0**. Publication channels are recorded in `docs/release-state.json`.
+Current public version: **15.0.0**. Publication channels are recorded in `docs/release-state.json`.
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
-`SoundScript.Cli` 14.0.0 is not published on nuget.org.
+`SoundScript.Cli` 15.0.0 is not published on nuget.org.
 
-Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+No CLI GitHub Release is published for this public version. Build from a source checkout.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 ## Verify from a clean checkout

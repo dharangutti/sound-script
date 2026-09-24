@@ -56,7 +56,7 @@
             },
             "license": "https://opensource.org/licenses/MIT",
             "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-            "softwareVersion": "14.0.0",
+            "softwareVersion": "15.0.0",
             "programmingLanguage": "C#",
             "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
             "softwareHelp": "https://soundscript.net/doc.html?p=documentation.md",
@@ -819,7 +819,7 @@
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
             <div class="badge"><!-- GENERATED:PUBLIC_BADGE_START -->
-Version: V14 (14.0.0)
+Version: V15 (15.0.0)
 <!-- GENERATED:PUBLIC_BADGE_END --></div>
             <h1>Write audio like <span>code</span> — edit it back</h1>
             <p class="lead">
@@ -1006,7 +1006,7 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <h2 id="benefits-title">Key Benefits</h2>
                 <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
                 <div class="metric-grid" aria-label="Repository engineering metrics">
-                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->380+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->387+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->28<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,232<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
                     <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
@@ -1285,7 +1285,8 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
                     <!--RELEASE_HISTORY_GENERATED_START-->
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V14</span><div><strong>Programmable Media Runtime</strong><span class="release-label">Current</span><br>Add <code>SoundScriptCompilation.CompileMedia()</code> with <code>RenderAudio()</code>, <code>Duration</code>, <code>Timeline</code> and <code>SceneAt(t)</code>.<br>Compose the existing parser, visual timeline, scene builder and deterministic Wave renderer; preserve host-controlled playback.<br>Add versioned <code>TemporalVisualJson</code> and safe <code>TemporalSvgRenderer</code> adapters over the typed scene.<br>Add package-backed console and ASP.NET/plain HTML samples with three typed scenarios and synchronized playback.<br>Preserve 13.0.2 APIs and existing WebM/Playground behavior. No migration required.<br>See <a href="doc.html?p=programmatic-media-runtime.md">contracts and limits</a> and <a href="doc.html?p=v14-acceptance-report.md">acceptance report</a>.</div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V15</span><div><strong>Documentation Reliability &amp; Developer Experience</strong><span class="release-label">Current</span><br>Establish one structured, goal-oriented documentation hub and retain the legacy URL as a compatibility gateway.<br>Separate development identity from explicit public release state and documented fact ownership.<br>Generate repeated current-state blocks safely and validate classification, links, CLI coverage and documentation drift in CI.<br>Improve developer documentation UX with labelled source, terminal and output blocks and accessible copy controls.<br>Preserve runtime behavior, public APIs, DSL grammar and audio/media output.</div></li>
+                    <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V14.0.0</span><div><strong>Programmable Media Runtime</strong><br>Add <code>SoundScriptCompilation.CompileMedia()</code> with <code>RenderAudio()</code>, <code>Duration</code>, <code>Timeline</code> and <code>SceneAt(t)</code>.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V13</span><div><strong>Media-to-SoundScript Transcription</strong><br>New <code>SoundScript.Transcription</code> subsystem with an evidence-bearing canonical musical model and extensible input, analysis and output boundaries.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><br><strong>.NET 10:</strong> all projects, CLI workflows, and supported developer paths now target the .NET 10 SDK.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V11</span><div><strong>Temporal Media Export</strong><br><strong>Media primitives extension:</strong> optional explicit rectangle, rounded rectangle, ellipse, circle, triangle, line, arrow, ring, and text presentations.</div></li>
