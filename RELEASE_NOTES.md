@@ -1,6 +1,6 @@
 # SoundScript Release Notes
 
-## 15.0.0 — Documentation Reliability & Developer Experience (unreleased)
+## 15.0.0 — Documentation Reliability & Developer Experience 
 
 - Establish one structured, goal-oriented documentation hub and retain the legacy URL as a compatibility gateway.
 - Separate development identity from explicit public release state and documented fact ownership.
