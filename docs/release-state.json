@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "publicVersion": "14.0.0",
+  "publicVersion": "15.0.0",
   "library": { "nugetPublished": true },
-  "cli": { "nugetPublished": false, "githubReleasePublished": true }
+  "cli": { "nugetPublished": false, "githubReleasePublished": false }
 }
