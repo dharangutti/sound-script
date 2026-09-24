@@ -22,7 +22,9 @@ dotnet add package SoundScript --version 15.0.0
 [SoundScript 15.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/15.0.0).
 <!-- GENERATED:LIBRARY_INSTALL_END -->
 
-For local development validation, pack and use a local source:
+For local development validation, start with a [source checkout with submodules](../README.md#try-it-in-60-seconds).
+If already cloned, run `git submodule update --init --recursive` from the repository
+root to obtain `wordbank/LICENSE` before packing. Then pack and use a local source:
 
 <!-- GENERATED:LOCAL_LIBRARY_INSTALL_START -->
 ```powershell

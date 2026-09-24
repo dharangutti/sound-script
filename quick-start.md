@@ -22,10 +22,13 @@ No CLI GitHub Release is published for this public version. Build from a source 
 Install the .NET 10 SDK, clone the repository, and build it:
 
 ~~~bash
-git clone https://github.com/dharangutti/sound-script.git
+git clone --recurse-submodules https://github.com/dharangutti/sound-script.git
 cd sound-script
 dotnet build SoundScript.sln
 ~~~
+
+If already cloned without submodules, run `git submodule update --init --recursive` from
+the repository root before building (see [checkout requirements](../README.md#try-it-in-60-seconds)).
 
 Render a MIDI file and a WAV file:
 
