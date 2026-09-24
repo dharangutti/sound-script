@@ -1,6 +1,10 @@
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
+const releaseState = JSON.parse(
+    fs.readFileSync(path.join(root, 'docs', 'release-state.json'), 'utf8')
+);
+const publicVersion = releaseState.publicVersion;
 const cases = [
     ['csharp', 'var x = "< > & \\" \' script img onclick";'],
     ['bash', 'dotnet build\nprintf "literal $ prompt"'],
@@ -70,7 +74,11 @@ async function main() {
         await page.screenshot({path:path.join(root,'artifacts/v15-docs/code-mobile.png'),fullPage:true});
         await page.setViewportSize({width:1280,height:900});await page.screenshot({path:path.join(root,'artifacts/v15-docs/code-desktop.png'),fullPage:true});
         await page.goto(base+'/doc.html');await page.waitForSelector('#content h1');assert.match(await page.locator('#content').textContent(),/canonical documentation index/);
-        const metadata=JSON.parse(await page.locator('#structured-data').textContent());assert.equal(metadata['@graph'].find(x=>x['@type']==='SoftwareApplication').softwareVersion,'14.0.0');
+        const metadata=JSON.parse(await page.locator('#structured-data').textContent());
+assert.equal(
+    metadata['@graph'].find(x=>x['@type']==='SoftwareApplication').softwareVersion,
+    publicVersion
+);
         await page.goto(base+'/doc.html?p=SoundScript.md');await page.waitForSelector('#content h1');assert.ok(await page.locator('#content a[href="doc.html?p=documentation.md"]').count());
         await page.goto(base+'/doc.html?p=cli.md#installation-and-automation');await page.waitForSelector('#installation-and-automation');
         assert.deepEqual(errors,[]);

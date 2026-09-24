@@ -185,19 +185,19 @@ dotnet run --project src/SoundScript.Cli -- --version
 ```
 
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
-`SoundScript.Cli` 14.0.0 is not published on nuget.org.
+`SoundScript.Cli` 15.0.0 is not published on nuget.org.
 
-Download a platform archive from [CLI 14.0.0](https://github.com/dharangutti/sound-script/releases/tag/v14.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+No CLI GitHub Release is published for this public version. Build from a source checkout.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 <!-- GENERATED:LIBRARY_INSTALL_START -->
 Install the published library:
 
 ```bash
-dotnet add package SoundScript --version 14.0.0
+dotnet add package SoundScript --version 15.0.0
 ```
 
-[SoundScript 14.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/14.0.0).
+[SoundScript 15.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/15.0.0).
 <!-- GENERATED:LIBRARY_INSTALL_END -->
 
 Local library packing and consumer validation are described in the [NuGet guide](docs/nuget.md).
@@ -205,7 +205,7 @@ See the [release checklist](docs/releasing.md) for package inspection and
 publishing safeguards.
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
-Current public version: **14.0.0**. Publication channels are recorded in `docs/release-state.json`.
+Current public version: **15.0.0**. Publication channels are recorded in `docs/release-state.json`.
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
