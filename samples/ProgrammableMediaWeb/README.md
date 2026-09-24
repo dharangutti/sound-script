@@ -2,6 +2,7 @@
 
 ASP.NET Core and plain JavaScript consume the SoundScript NuGet package. No project references or frontend framework.
 This sample follows the development version inherited from Directory.Build.props.
+Start with a [source checkout with submodules](../../README.md#try-it-in-60-seconds).
 From the repository root, pack that development snapshot and restore from its local feed:
 
 ```powershell

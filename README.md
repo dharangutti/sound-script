@@ -60,12 +60,21 @@ For the CLI, install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dot
 then run a deterministic WAV example from a checkout:
 
 ```bash
-git clone https://github.com/dharangutti/sound-script.git
+git clone --recurse-submodules https://github.com/dharangutti/sound-script.git
 cd sound-script
 dotnet run --project src/SoundScript.Cli -- wave examples/full-song-wave.ss --out song.wav
 ```
 
-That command writes a deterministic WAV file without a DAW, plugin, account,
+Already cloned without submodules? Run this from the repository root before building or packing:
+
+```bash
+git submodule update --init --recursive
+```
+
+This checks out the pinned `wordbank` submodule, including `wordbank/LICENSE`.
+Local packaging requires that file; omitting it causes NU5019 (file not found).
+
+The WAV command writes a deterministic WAV file without a DAW, plugin, account,
 or server. To inspect a source file before exporting it:
 
 ```bash
@@ -177,7 +186,7 @@ Use `video --check` to preflight an export without writing media.
 
 ## Installation
 
-The CLI is available from a source checkout:
+The CLI is available from a [source checkout with submodules](#try-it-in-60-seconds):
 
 ```bash
 dotnet build SoundScript.sln
