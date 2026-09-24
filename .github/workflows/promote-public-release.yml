@@ -1,0 +1,112 @@
+name: Promote public release
+
+on:
+  workflow_run:
+    workflows: ['Publish SoundScript NuGet package']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publication_run_id:
+        description: Successful NuGet publication run ID (publish=true, main)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Serialize all promotions, including different publication runs for the same version.
+concurrency:
+  group: public-release-promotion
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      publication_sha: ${{ steps.resolve.outputs.publication_sha }}
+      publication_url: ${{ steps.resolve.outputs.publication_url }}
+      base_sha: ${{ steps.resolve.outputs.base_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify publication provenance and resolve version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id || github.event.workflow_run.id }}
+        run: node scripts/promote-public-release.mjs resolve
+
+  verify:
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      changed: ${{ steps.prepare.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify public consumer and prepare guarded promotion
+        id: prepare
+        env:
+          RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
+          PUBLICATION_SHA: ${{ needs.resolve.outputs.publication_sha }}
+        run: node scripts/promote-public-release.mjs prepare
+      - uses: actions/upload-artifact@v4
+        if: steps.prepare.outputs.changed == 'true'
+        with:
+          name: public-release-promotion
+          path: artifacts/promotion/promotion.patch
+          if-no-files-found: error
+          retention-days: 7
+
+  pull-request:
+    needs: [resolve, verify]
+    if: needs.verify.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: public-release-promotion
+          path: ${{ runner.temp }}/promotion
+      - name: Recheck main and create one reviewable PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
+          PUBLICATION_SHA: ${{ needs.resolve.outputs.publication_sha }}
+          PUBLICATION_URL: ${{ needs.resolve.outputs.publication_url }}
+          BASE_SHA: ${{ needs.resolve.outputs.base_sha }}
+          PROMOTION_PATCH: ${{ runner.temp }}/promotion/promotion.patch
+        run: node scripts/promote-public-release.mjs pr

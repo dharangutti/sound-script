@@ -47,19 +47,19 @@ test('renderer preserves BOM, CRLF and surrounding bytes; idempotent', () => {
     assert.ok(out.startsWith('\ufeffBefore\r\n' + start)); assert.ok(out.endsWith(end + '\r\nAfter'));
     assert.ok(!/(?<!\r)\n/.test(out));
     assert.equal(generate(out, markerBlocks(out, ['LIBRARY_INSTALL'], 'a.md'), f), out);
-    assert.match(out, /--version 14\.0\.0/); assert.doesNotMatch(out, /15\.0\.0/);
+    assert.ok(out.includes(`--version ${f.state.publicVersion}`));
 });
 test('all publication channels control generation, including future CLI NuGet', () => {
     const next = structuredClone(f); next.state.cli.nugetPublished = true;
-    assert.match(render('CLI_DISTRIBUTION', next), /dotnet tool install --global SoundScript.Cli --version 14\.0\.0/);
+    assert.ok(render('CLI_DISTRIBUTION', next).includes(`dotnet tool install --global SoundScript.Cli --version ${next.state.publicVersion}`));
     next.state.cli.nugetPublished = false; next.state.cli.githubReleasePublished = false; next.state.library.nugetPublished = false;
     assert.doesNotMatch(render('CLI_DISTRIBUTION', next), /dotnet tool install|releases\/tag/);
     assert.doesNotMatch(render('LIBRARY_INSTALL', next), /dotnet add|nuget.org\/packages/);
 });
 test('current validation rejects stale installs, claims, links and distribution contradictions', () => {
     for (const source of ['dotnet add package SoundScript --version 13.0.0', 'dotnet tool install --global SoundScript.Cli',
-        'Current release is 13.0.0', 'The V14 candidate package is ready', 'https://github.com/dharangutti/sound-script/releases/tag/v13.0.0',
-        'dotnet add package SoundScript --version 14.0.0 --source https://api.nuget.org/v3/index.json']) {
+        'Current release is 13.0.0', `The V${f.state.publicVersion.split('.')[0]} candidate package is ready`, 'https://github.com/dharangutti/sound-script/releases/tag/v13.0.0',
+        `dotnet add package SoundScript --version ${f.state.publicVersion} --source https://api.nuget.org/v3/index.json`]) {
         const next = structuredClone(f); if (source.includes('api.nuget')) next.state.library.nugetPublished = false;
         assert.throws(() => validateCurrent(source, 'a.md', next), /CURRENT|DISTRIBUTION/);
     }
@@ -78,7 +78,7 @@ function fixture(t) {
     write('docs/SoundScript.md','# Compatibility\n[Hub](documentation.md)\n');
     write('docs/doc.html',"var DEFAULT_PAGE = 'documentation.md';");
     write('README.md','\ufeffBefore\r\n'+block.replaceAll('\n','\r\n')+'\r\nAfter');
-    write('RELEASE_NOTES.md','## 15.0.0 — Development\nV14 candidate; historical 13.0.0 installs.');
+    write('RELEASE_NOTES.md',`## ${f.development} — Development\nV14 candidate; historical 13.0.0 installs.`);
     write('docs/docs-manifest.json','{}');
     const m = manifest(); m.livingDocuments = inventory(root).filter(p => p !== 'RELEASE_NOTES.md'); m.historicalDocuments = ['RELEASE_NOTES.md']; m.generatedBlocks = {'README.md':['LIBRARY_INSTALL']};
     write('docs/docs-manifest.json',JSON.stringify(m));

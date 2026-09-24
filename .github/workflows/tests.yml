@@ -51,7 +51,7 @@ jobs:
 
       - name: Test documentation validation and homepage history
         run: |
-          node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs
+          node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs scripts/release-promotion.test.mjs
           node scripts/verify-v15-acceptance.mjs
 
       # eSpeak powers the wordbank auto-generation integration tests. When it is
