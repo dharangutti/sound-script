@@ -7,6 +7,35 @@ namespace SoundScript.Tests;
 public sealed class RuntimeMediaSessionTests
 {
     [Fact]
+    public void GeometryExampleBindsEverySupportedTargetAndResets()
+    {
+        var session = new RuntimeMediaSession();
+        session.Compile(RuntimeMediaSession.GeometrySource);
+        var runtime = session.Runtime!;
+        var audio = session.Audio.ToArray();
+        var svg = session.Svg;
+        Assert.Equal(7, runtime.Parameters.Count);
+        session.Apply(new Dictionary<string, string>
+        {
+            ["volume"] = "0.7", ["xpos"] = "800", ["ypos"] = "250",
+            ["width"] = "320", ["height"] = "180", ["angle"] = "45", ["opacity"] = "0.6"
+        });
+        Assert.NotEqual(audio, session.Audio);
+        Assert.NotEqual(svg, session.Svg);
+        var tile = Assert.Single(runtime.Bind().SceneAt(TimeSpan.FromSeconds(2)).Primitives);
+        Assert.Equal(45m, tile.RotationDegrees);
+        Assert.Equal(0.6m, tile.Opacity);
+        Assert.Equal(320m, tile.Width);
+        Assert.Equal(180m, tile.Height);
+        Assert.Equal(640m, tile.Left);
+        Assert.Equal(160m, tile.Top);
+        Assert.Equal(new RuntimeCompilationStatistics(1, 1, 1), runtime.Statistics);
+        session.Reset();
+        Assert.Equal(audio, session.Audio);
+        Assert.Equal(svg, session.Svg);
+    }
+
+    [Fact]
     public void CompileApplyAndResetRenderSnapshotsWithoutRecompiling()
     {
         var session = new RuntimeMediaSession();

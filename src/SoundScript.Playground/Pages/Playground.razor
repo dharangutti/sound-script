@@ -9,6 +9,8 @@
         <h1>SoundScript Playground</h1>
         <p class="lead">Write SoundScript, hear MIDI or Wave audio, or explore a deterministic visual timeline — fully client-side.</p>
         <nav class="learning-links" aria-label="Learn SoundScript">
+            <button type="button" class="btn btn-secondary" @onclick="() => SelectTab(PlaygroundTab.VisualTimeline)">Try V16 adaptive media</button>
+            <a href="learn/doc.html?p=runtime-parameters.md" target="_blank" rel="noopener noreferrer">V16 runtime parameters guide</a>
             <a href="learn/doc.html?p=tutorials/programmable-media.md" target="_blank" rel="noopener noreferrer">V14 hands-on tutorial</a>
             <a href="learn/doc.html?p=programmatic-media-runtime.md" target="_blank" rel="noopener noreferrer">Runtime API guide</a>
             <a href="learn/doc.html?p=articles/programmable-media-runtime-dotnet.md" target="_blank" rel="noopener noreferrer">Read the V14 article</a>
