@@ -82,6 +82,13 @@ async function waitForRevision(page, previous) {
     const corpusRequests = [];
     page.on('request', request => { if (/SoundScript\.Wordbank\.Corpus[^/]*\.wasm/.test(request.url())) corpusRequests.push(request.url()); });
     page.on('pageerror', error => pageErrors.push(error.message));
+    // Exercise re-entrant renders while the first interop module import is pending.
+    let releaseClockModule;
+    const clockModuleReady = new Promise(resolve => { releaseClockModule = resolve; });
+    await page.route('**/runtime-media.js', async route => {
+      await clockModuleReady;
+      await route.continue();
+    });
     await page.goto(baseUrl);
     await page.locator('#visual-workspace-tab').waitFor({ timeout: 90000 });
     await page.locator('#visual-workspace-tab').click();
@@ -90,6 +97,7 @@ async function waitForRevision(page, previous) {
     assert.equal(await page.getByTestId('runtime-normal').count(), 1, 'monitoring demo is ready without compiling manually');
     await page.getByTestId('runtime-example').click();
     await page.getByTestId('runtime-compile').click();
+    releaseClockModule();
     await page.getByTestId('runtime-status').waitFor({ timeout: 30000 });
     await page.getByTestId('runtime-audio').waitFor();
 
@@ -101,11 +109,30 @@ async function waitForRevision(page, previous) {
     const parseCount = await page.getByTestId('runtime-status').getAttribute('data-parse-count');
     assert.equal(parseCount, '1');
     const baseline = await snapshot(page);
+    assert.ok(!(await page.getByTestId('runtime-panel').innerText()).includes('does not animate'));
     assert.equal(baseline.opacity, 0.25);
     assert.equal(baseline.x, 200);
-    assert.equal(baseline.width, 100, 'indicator must render at its declared width');
+    assert.equal(baseline.width, 70, 'indicator must render at its declared width');
     await page.getByTestId('runtime-audio').evaluate(audio => audio.play());
-    await page.waitForFunction(() => document.querySelector('[data-testid="runtime-audio"]').currentTime > 0);
+    await page.waitForFunction(() => Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) > 0.3);
+    assert.ok((await snapshot(page)).width > baseline.width, 'indicator grows during playback');
+    await page.getByTestId('runtime-audio').evaluate(audio => audio.pause());
+    await page.waitForFunction(() => Math.abs(Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) -
+      document.querySelector('[data-testid="runtime-audio"]').currentTime) < 0.001);
+    const paused = await page.getByTestId('runtime-scene').innerHTML();
+    await page.waitForTimeout(200);
+    assert.equal(await page.getByTestId('runtime-scene').innerHTML(), paused, 'pause freezes the scene');
+    await page.getByTestId('runtime-audio').evaluate(audio => { audio.currentTime = 1; });
+    await page.waitForFunction(() => Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) === 1);
+    assert.equal((await snapshot(page)).width, 120, 'seek evaluates SceneAt(1)');
+    assert.equal((await snapshot(page)).x, 200, 'animation preserves runtime position');
+    await page.getByTestId('runtime-audio').evaluate(audio => audio.play());
+    await page.waitForFunction(() => Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) > 1.1);
+    await page.waitForFunction(() => document.querySelector('[data-testid="runtime-audio"]').ended);
+    await page.waitForFunction(() => Math.abs(Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) -
+      document.querySelector('[data-testid="runtime-audio"]').currentTime) < 0.001);
+    await page.getByTestId('runtime-audio').evaluate(audio => audio.play());
+    await page.waitForFunction(() => Number(document.querySelector('[data-testid="runtime-scene"]').dataset.time) < 0.5);
 
     await page.getByTestId('runtime-value-intensity').fill('0.9');
     await page.getByTestId('runtime-value-xpos').fill('900');
@@ -240,7 +267,8 @@ async function waitForRevision(page, previous) {
       parseCount,
       wavHashes: { normal: baseline.wavHash, critical: critical.wavHash, recompiled: recompiled.wavHash },
       visual: { normal: { x: baseline.x, width: baseline.width, opacity: baseline.opacity }, critical: { x: critical.x, width: critical.width, opacity: critical.opacity } },
-      assertions: ['ready-to-use demo', 'monitoring state presets', 'all visual parameter targets', 'playback resets on new WAV',
+      assertions: ['delayed clock module initialization', 'audio-clock animation', 'pause and seek synchronization', 'resume, end and replay',
+        'ready-to-use demo', 'monitoring state presets', 'all visual parameter targets', 'playback resets on new WAV',
         'parameter metadata', 'gain changes WAV', 'xpos and intensity update SVG', 'reset restores exact outputs',
         'invalid input preserves outputs and reports error', 'source edit clears and recompiles runtime'],
       pageErrors, corpusRequests, responsive

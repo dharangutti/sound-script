@@ -7,6 +7,39 @@ namespace SoundScript.Tests;
 public sealed class RuntimeMediaSessionTests
 {
     [Fact]
+    public void AnimatedSnapshotRetainsPositionAndRemainsIndependentOfLaterUpdates()
+    {
+        var session = new RuntimeMediaSession();
+        var other = new RuntimeMediaSession();
+        session.Compile(RuntimeMediaSession.MonitoringSource);
+        other.Compile(RuntimeMediaSession.MonitoringSource);
+        Assert.Equal(new[] { "intensity", "xpos" }, session.Runtime!.Parameters.Select(p => p.Name));
+        var original = session.Snapshot!;
+        Assert.Equal(TimeSpan.FromSeconds(4), session.VisualDuration);
+        var start = Assert.Single(original.SceneAt(TimeSpan.Zero).Primitives);
+        var later = Assert.Single(original.SceneAt(TimeSpan.FromSeconds(1)).Primitives);
+        Assert.True(later.Width > start.Width);
+        Assert.Equal(200m, start.Left + start.Width / 2);
+        Assert.Equal(200m, later.Left + later.Width / 2);
+        var originalSvg = session.SvgAt(1);
+        session.Apply(new Dictionary<string, string> { ["intensity"] = "0.9", ["xpos"] = "1080" });
+        foreach (var seconds in new[] { 0d, 1d, 2d, 3d })
+        {
+            var scene = Assert.Single(session.Snapshot!.SceneAt(TimeSpan.FromSeconds(seconds)).Primitives);
+            Assert.Equal(1080m, scene.Left + scene.Width / 2);
+        }
+        Assert.Equal(originalSvg, SoundScript.Media.TemporalSvgRenderer.Render(original.SceneAt(TimeSpan.FromSeconds(1))));
+        Assert.Equal(originalSvg, other.SvgAt(1));
+        Assert.Equal(0, other.Runtime!.Revision);
+        Assert.Equal(new RuntimeCompilationStatistics(1, 1, 1), session.Runtime.Statistics);
+        var active = session.Snapshot;
+        var svg = session.SvgAt(1);
+        Assert.ThrowsAny<ArgumentException>(() => session.Apply(new Dictionary<string, string> { ["intensity"] = "2" }));
+        Assert.Same(active, session.Snapshot);
+        Assert.Equal(svg, session.SvgAt(1));
+    }
+
+    [Fact]
     public void GeometryExampleBindsEverySupportedTargetAndResets()
     {
         var session = new RuntimeMediaSession();
@@ -46,7 +79,7 @@ public sealed class RuntimeMediaSessionTests
         var initialJson = session.Json;
         Assert.NotEmpty(initialAudio);
         Assert.Contains("indicator", initialSvg);
-        Assert.Contains("150", initialJson);
+        Assert.Contains("165", initialJson);
 
         session.Apply(new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -62,7 +95,7 @@ public sealed class RuntimeMediaSessionTests
         Assert.NotEqual(initialAudio, session.Audio);
         Assert.NotEqual(initialJson, session.Json);
         Assert.NotEqual(initialSvg, session.Svg);
-        Assert.Contains("850", session.Json);
+        Assert.Contains("865", session.Json);
         Assert.Contains("0.9", session.Json);
 
         session.Reset();
