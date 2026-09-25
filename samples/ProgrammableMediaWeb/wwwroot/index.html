@@ -18,5 +18,15 @@
 <p><output id="position">0.00 s</output></p>
 <img id="scene" alt="Animated equipment status">
 <p id="error" role="alert"></p>
+<hr>
+<h2>Adaptive runtime values</h2>
+<p>This separate monitor was compiled once. Change the typed values and apply a new complete render.</p>
+<label>Intensity <input id="runtime-intensity" type="number" min="0" max="1" step="0.01" value="0.25"></label>
+<label>Indicator x <input id="runtime-xpos" type="number" min="-12800" max="12800" step="1" value="200"></label>
+<button id="runtime-apply">Apply runtime values</button>
+<output id="runtime-status" role="status">Loading runtime parameter schema…</output>
+<audio id="runtime-audio" controls preload="none"></audio>
+<img id="runtime-scene" alt="Indicator scene rendered from a runtime snapshot">
+<p id="runtime-error" role="alert"></p>
 <script src="app.js"></script>
 </html>

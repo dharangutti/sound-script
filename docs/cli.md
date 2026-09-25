@@ -51,6 +51,34 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
 - `output.mid` defaults to `output.mid` in the current directory.
 - Compiler warnings print to stderr; they are informational and non-blocking.
 
+## Runtime parameter snapshots (candidate API)
+
+On the current feature branch, `run`, `wave`, and `inspect` accept opt-in
+runtime values. This capability is a V16 candidate under validation and does
+not change an invocation that omits `--runtime` and `--param`.
+
+```bash
+soundscript inspect samples/RuntimeParameters/monitor.ss --runtime --params \
+  --param intensity=0.9 --param xpos=900 --at 2 --json
+soundscript wave samples/RuntimeParameters/monitor.ss --runtime \
+  --param intensity=0.9 --param xpos=900 --out critical.wav
+soundscript run samples/RuntimeParameters/monitor.ss --runtime \
+  --param intensity=0.9 --out critical.mid
+```
+
+`inspect --params` lists the declarations, decimal defaults, supported bounds,
+and active values. Repeated `--param name=value` options override defaults
+using invariant decimal notation. Unknown, duplicate, malformed, or out-of-range
+assignments are usage/source errors. `wave` writes a complete ordinary WAV;
+`run` writes MIDI through the current interpreter. `inspect --at` returns the
+scene at an elapsed time. These are one-shot snapshots, not an interactive
+session or streaming renderer.
+
+Runtime files are parsed with the opt-in runtime dialect and do not resolve
+imports. Use the ordinary commands and `CompileFile` workflow for static
+import graphs. See the [runtime parameter guide](runtime-parameters.md) and
+[self-contained monitor example](../samples/RuntimeParameters/README.md).
+
 Output:
 
 ```console-output

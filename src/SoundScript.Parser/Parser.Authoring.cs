@@ -15,6 +15,7 @@ public sealed partial class Parser
     private void ParseConstantDeclaration(bool marker)
     {
         var name = Expect(TokenType.Identifier, "constant name (an unreserved identifier)");
+        if (_runtimeDeclarations.ContainsKey(name.Value)) throw Invalid(name, "A constant cannot reuse a runtime parameter name.");
         if (!name.Value.All(char.IsLetterOrDigit) || !char.IsLetter(name.Value[0]))
             throw Invalid(name, "Constant names must start with a letter and contain letters or digits.");
         if (_constants.ContainsKey(name.Value)) throw Invalid(name, $"Duplicate constant '{name.Value}'.");

@@ -76,7 +76,7 @@ including package README and Playground HTML metadata. Changes to runtime code,
 workflows or the documentation manifest are rejected in generated promotion PRs.
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
-Development: **15.0.0 / V15 — Documentation Reliability & Developer Experience**. Development identity does not imply publication.
+Development: **16.0.0 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->

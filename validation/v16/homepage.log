@@ -1,0 +1,17 @@
+✔ renders current bullets and compact older releases with safe markup and working site links (8346.4142ms)
+✔ accepts legacy major-only headings (5958.0283ms)
+✔ fails version mismatch (15.0.0) before changing the staged page (6159.1017ms)
+✔ fails version mismatch (14.0.1) before changing the staged page (4649.896ms)
+✔ fails version mismatch (14.0.0-rc.1) before changing the staged page (3136.3152ms)
+✔ rejects missing, duplicate, or reversed markers without rewriting the page (16764.2489ms)
+✔ fails missing release summaries and unsafe link schemes without rewriting the page (9290.4246ms)
+✔ real release notes generate public V8+ history and preserve all static history (3761.0552ms)
+✔ development V15 with public V14 cannot promote unreleased history (2845.3557ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61489.5378

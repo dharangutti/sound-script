@@ -1,0 +1,26 @@
+  Determining projects to restore...
+  Restored <repo>\experiments\SoundScript.RuntimeLab\SoundScript.RuntimeLab.csproj (in 664 ms).
+  Restored <repo>\experiments\SoundScript.RuntimeLab\Tests\SoundScript.RuntimeLab.Tests.csproj (in 664 ms).
+  15 of 17 projects are up-to-date for restore.
+  SoundScript.Wordbank.Corpus -> <repo>\src\SoundScript.Wordbank.Corpus\bin\Release\net10.0\SoundScript.Wordbank.Corpus.dll
+  SoundScript.Wordbank -> <repo>\src\SoundScript.Wordbank\bin\Release\net10.0\SoundScript.Wordbank.dll
+  SoundScript.Core -> <repo>\src\SoundScript.Core\bin\Release\net10.0\SoundScript.Core.dll
+  SoundScript.Voice -> <repo>\src\SoundScript.Voice\bin\Release\net10.0\SoundScript.Voice.dll
+  SoundScript.Visual -> <repo>\src\SoundScript.Visual\bin\Release\net10.0\SoundScript.Visual.dll
+  SoundScript.Wave -> <repo>\src\SoundScript.Wave\bin\Release\net10.0\SoundScript.Wave.dll
+  SoundScript.Parser -> <repo>\src\SoundScript.Parser\bin\Release\net10.0\SoundScript.Parser.dll
+  SoundScript.Midi -> <repo>\src\SoundScript.Midi\bin\Release\net10.0\SoundScript.Midi.dll
+  SoundScript.Media -> <repo>\src\SoundScript.Media\bin\Release\net10.0\SoundScript.Media.dll
+  SoundScript.Compose -> <repo>\src\SoundScript.Compose\bin\Release\net10.0\SoundScript.Compose.dll
+  SoundScript.Prosody -> <repo>\src\SoundScript.Prosody\bin\Release\net10.0\SoundScript.Prosody.dll
+  SoundScript.Timbre -> <repo>\src\SoundScript.Timbre\bin\Release\net10.0\SoundScript.Timbre.dll
+  SoundScript.Transcription -> <repo>\src\SoundScript.Transcription\bin\Release\net10.0\SoundScript.Transcription.dll
+  SoundScript.Vocal -> <repo>\src\SoundScript.Vocal\bin\Release\net10.0\SoundScript.Vocal.dll
+  SoundScript -> <repo>\src\SoundScript\bin\Release\net10.0\SoundScript.Api.dll
+  SoundScript.RuntimeLab -> <repo>\experiments\SoundScript.RuntimeLab\bin\Release\net10.0\SoundScript.RuntimeLab.dll
+  SoundScript.RuntimeLab.Tests -> <repo>\experiments\SoundScript.RuntimeLab\Tests\bin\Release\net10.0\SoundScript.RuntimeLab.Tests.dll
+Test run for <repo>\experiments\SoundScript.RuntimeLab\Tests\bin\Release\net10.0\SoundScript.RuntimeLab.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Results File: <repo>\artifacts\v16-tests\v16-final-lab.trx
+
+Passed!  - Failed:     0, Passed:    51, Skipped:     0, Total:    51, Duration: 2 s - SoundScript.RuntimeLab.Tests.dll (net10.0)

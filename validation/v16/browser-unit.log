@@ -1,0 +1,34 @@
+✔ explanatory placeholder never becomes a Commons URL (5.1186ms)
+✔ recognized Commons file is encoded as one title and remains declared (0.7748ms)
+✔ malformed URLs and pretend Commons titles are rejected (0.4622ms)
+✔ unresolved cannot also claim verification or URL (1.3786ms)
+✔ verified requires evidence, not just a license declaration (0.5004ms)
+✔ repository corpus includes five explicitly unresolved records without fabricated links (18.9218ms)
+✔ verifies embedded .NET 10 boot metadata and compressed variants (85.9565ms)
+✔ also verifies legacy JSON boot manifests (111.077ms)
+✔ fails when bytes differ, including line-ending transformation (24.7178ms)
+✔ fails missing referenced files (9.2566ms)
+✔ fails compressed variants from a different generation (42.4623ms)
+✔ fails stale framework files and obsolete boot manifests (30.7982ms)
+✔ fails closed on unknown boot format (21.5597ms)
+✔ verifies nested satellite resource paths (36.3272ms)
+✔ does not silently accept a WASM resource without integrity (28.3601ms)
+✔ transient 503 recovers with the same SRI and cache reload (10.8822ms)
+✔ SRI/network rejection is retried but never bypassed (4.3572ms)
+✔ permanent missing resource fails without repeated requests (1.8118ms)
+✔ JS modules and resources without integrity retain runtime loading (1.3957ms)
+✔ browser adapter returns raw bytes for IJSStreamReference and downmixes stereo (15.0849ms)
+✔ browser codec errors explain the supported fallback (8.6226ms)
+✔ decoded duration limit is enforced (1.9578ms)
+✔ codec overshoot is bounded before the canonical PCM boundary (1.5895ms)
+✔ oversized media exposes duration before analysis and accepts a selected excerpt (178.6499ms)
+✔ invalid, out-of-range and stale excerpts are rejected (2.0347ms)
+✔ selecting unsupported new media clears the previous decoded recording (2.1898ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 730.0469

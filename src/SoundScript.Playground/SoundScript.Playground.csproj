@@ -25,7 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <BlazorWebAssemblyLazyLoad Include="SoundScript.Wordbank.Corpus.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SoundScript.Core\SoundScript.Core.csproj" />
+    <ProjectReference Include="..\SoundScript\SoundScript.csproj" />
     <ProjectReference Include="..\SoundScript.Parser\SoundScript.Parser.csproj" />
     <ProjectReference Include="..\SoundScript.Midi\SoundScript.Midi.csproj" />
     <ProjectReference Include="..\SoundScript.Visual\SoundScript.Visual.csproj" />

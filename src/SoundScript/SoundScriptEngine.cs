@@ -12,6 +12,24 @@ namespace SoundScript;
 /// No CLI process is started. Use <see cref="CompileFile(string)"/> for filesystem imports.</remarks>
 public static class SoundScriptEngine
 {
+    /// <summary>Compile controlled decimal runtime parameters and fixed media structure once.</summary>
+    /// <remarks>The opt-in runtime dialect uses invariant numbers. Set and Bind never reparse source.
+    /// Imports and runtime timing/structural expressions are not supported.</remarks>
+    public static SoundScriptRuntimeProgram CompileRuntime(string source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        return new(source, new WaveRenderOptions());
+    }
+
+    /// <summary>Compile runtime source from a file, preserving relative sample paths and an optional asset root.</summary>
+    /// <remarks>Static imports remain available through CompileFile; runtime file compilation does not resolve imports.</remarks>
+    public static SoundScriptRuntimeProgram CompileRuntimeFile(string path, AllowedPathRoot? allowedRoot = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var fullPath = allowedRoot?.Validate(path) ?? Path.GetFullPath(path);
+        return new(File.ReadAllText(fullPath), new WaveRenderOptions { ScriptDirectory = Path.GetDirectoryName(fullPath), AllowedRoot = allowedRoot });
+    }
+
     /// <summary>Parses an in-memory script without resolving filesystem imports.</summary>
     /// <param name="source">SoundScript text, including .ss, .ssw or .ssv syntax.</param>
     /// <returns>A reusable compilation supporting WAV and MIDI rendering.</returns>

@@ -1,0 +1,2 @@
+PASS: runtime metadata, WAV adaptation/reset, invalid values, UI apply; hashes normal=faa98bc77125ccf385e04472a77d5002408144f8305e0b35b4929347783b4ae0 critical=70ea91ad0f8355b7ade1072601282944aebce775b15c104a7d56f43e88bfaa1a
+PASS: play, pause, resume, restart, seek, scene synchronization, 3 scenarios, responsive scaling, invalid input, after-end state

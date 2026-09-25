@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-25",
+  "phase": "RuntimeLab only",
+  "sourceBase": "09bb0b37dd0902c6c6ffcd8201e1f4547409550c",
+  "wip": "dec8a74",
+  "runs": [
+    {
+      "name": "initial-baseline",
+      "total": 1232,
+      "passed": 1227,
+      "failed": 5,
+      "notExecuted": 0,
+      "trxSha256": "D621A0ADB9661912DD03B1D04030DC1D0BA1CC430382B45DC1EED06E479EFCDD",
+      "path": "C:/Workspace/SoundScript/Lab.Runtime/baseline-results/runtime-lab-baseline.trx",
+      "started": "2026-09-25T04:55:06.0038422+05:30",
+      "finished": "2026-09-25T04:55:47.6083773+05:30"
+    },
+    {
+      "name": "baseline-after-submodule",
+      "total": 1232,
+      "passed": 1229,
+      "failed": 3,
+      "notExecuted": 0,
+      "trxSha256": "EE72BCB936DF71E45C2B40B08F33949CC0103F93EDA226DDC6DD66926FA852C3",
+      "path": "C:/Workspace/SoundScript/Lab.Runtime/baseline-results/runtime-lab-baseline-ready.trx",
+      "started": "2026-09-25T04:56:07.9893128+05:30",
+      "finished": "2026-09-25T04:57:15.8920211+05:30"
+    },
+    {
+      "name": "baseline-with-local-prerequisites",
+      "total": 1232,
+      "passed": 1232,
+      "failed": 0,
+      "notExecuted": 0,
+      "trxSha256": "C747E9E4B4C7D93625589F7EFF569C88EDE84B712759C46135071D09F5CB124E",
+      "path": "C:/Workspace/SoundScript/Lab.Runtime/baseline-results/runtime-lab-baseline-complete.trx",
+      "started": "2026-09-25T04:59:42.7508837+05:30",
+      "finished": "2026-09-25T05:00:29.3883542+05:30"
+    },
+    {
+      "name": "lab-final",
+      "total": 51,
+      "passed": 51,
+      "failed": 0,
+      "notExecuted": 0,
+      "trxSha256": "3680D39F0AF1C1414956A423AF44115AEEF5E9193408B9A839CCD3E393F1DFDF",
+      "path": "artifacts/runtime-lab-tests/runtime-lab.trx",
+      "started": "2026-09-25T06:43:05.7760806+05:30",
+      "finished": "2026-09-25T06:43:10.7023689+05:30"
+    },
+    {
+      "name": "production-final",
+      "total": 1232,
+      "passed": 1232,
+      "failed": 0,
+      "notExecuted": 0,
+      "trxSha256": "FE0AA5A97BB337DC398D8E7041E55E8A7AF9D5B24C8981BCEBE7E01DCDA4BF72",
+      "path": "artifacts/runtime-lab-production/runtime-lab-final.trx",
+      "started": "2026-09-25T06:43:44.1560370+05:30",
+      "finished": "2026-09-25T06:44:24.0011645+05:30"
+    }
+  ],
+  "browser": {
+    "passed": 26,
+    "failed": 0
+  },
+  "artifactHashesChecked": 9,
+  "productionFilesChanged": [],
+  "requirementsSha256": "B746C8A19C6678FA7EC3837049036F3CD9A8C6FF20E5F420474437B396984C39",
+  "note": "Initial failures were missing pinned submodule and local Playground build artifacts. A fresh concurrent build hit transient CS2012 output locking; serial rerun passed."
+}

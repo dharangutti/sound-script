@@ -12,15 +12,15 @@ public sealed class CliArguments
     public static readonly CommandDefinition[] Commands =
     [
         new("transcribe", "<media> --out <score.ss> [--mode monophonic|extract-melody|polyphonic|mixed|percussion] [--start seconds] [--duration seconds] [--tempo auto|bpm] [--instrument name] [--report file.json] [--preview file.wav]", "transcribe melody.mp4 --out melody.ss --report analysis.json --preview preview.wav", "out tempo instrument report preview ffmpeg start duration mode roles", "verbose"),
-        new("run", "<file.ss> [output.mid] [--out <file>]", "run song.ss --out song.mid", "out", "verbose", PositionalOutput: true),
+        new("run", "<file.ss> [output.mid] [--out <file>] [--runtime] [--param name=value]...", "run song.ss --out song.mid", "out param", "verbose runtime", PositionalOutput: true),
         new("compose", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "compose \"hello world\" --wave --out hello.wav", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
         new("prosody", "<text> [output] [--wave] [--stereo] [--append <file>] [--emit-ss <file>]", "prosody \"hello world\" --out hello.mid", "out append emit-ss wordbank-dir locale", "wave stereo verbose", PositionalOutput: true),
         new("render", "<file.mid> --css <style.ssc> [--out <file.wav|ogg>] [--text <text>]", "render song.mid --css style.ssc --out song.wav", "out css text", "verbose", PositionalOutput: true),
-        new("wave", "<file.ss|ssw> [output.wav] [--out <file>] [options]", "wave song.ss --out song.wav --stereo", "out vocal vocal-at vocal-gain tts-dir offline-tts-dir offline-tts-voice css wordbank-dir locale voice seed", "stereo continuous offline-tts verbose", PositionalOutput: true),
+        new("wave", "<file.ss|ssw> [output.wav] [--out <file>] [--runtime] [--param name=value]... [options]", "wave song.ss --out song.wav --stereo", "out param vocal vocal-at vocal-gain tts-dir offline-tts-dir offline-tts-voice css wordbank-dir locale voice seed", "stereo continuous offline-tts verbose runtime", PositionalOutput: true),
         new("visual", "<file.ss|ssv> [--at <seconds>]...", "visual scene.ssv --at 1.5", "at", "verbose"),
         new("video", "<file.ss|ssv> [output.webm] --out <file.webm> [--check] [options]", "video scene.ssv --out scene.webm --check", "out fps width height ffmpeg jobs", "check json verbose", PositionalOutput: true),
         new("validate", "<file.ss|ssw|ssv|ssc> [--json] [--target midi|wave|video] [options]", "validate scene.ssv --json", "target out fps width height ffmpeg", "json verbose"),
-        new("inspect", "<file.ss|ssw|ssv|ssc> [--json] [--at <seconds>]", "inspect scene.ssv --json --at 1.5", "at", "json verbose"),
+        new("inspect", "<file.ss|ssw|ssv|ssc> [--json] [--at <seconds>] [--params] [--param name=value]...", "inspect scene.ssv --json --at 1.5", "at param", "json verbose params runtime"),
         new("vocal generate", "<text> [--out <file.wav>] [options]", "vocal generate \"hello\" --out hello.wav --engine wordbank", "out wordbank-dir engine locale voice seed css", "continuous verbose"),
         new("vocal batch", "<file.ss|ssw> --out-dir <folder> [options]", "vocal batch song.ssw --out-dir stems", "out-dir wordbank-dir engine locale voice seed css", "continuous skip-existing verbose"),
         new("wordbank ensure", "<lemma> [--auto-generate-missing] [options]", "wordbank ensure hello --locale en", "locale wordbank-dir voice", "auto-generate-missing verbose"),
@@ -61,7 +61,7 @@ public sealed class CliArguments
             var parts = token.Split('=', 2);
             var key = parts[0].ToLowerInvariant() switch { "-o" or "--output" => "out", var name => name.StartsWith("--") ? name[2..] : name };
             if (!values.Contains(key) && !flags.Contains(key)) throw new CliUsageException($"Unknown option '{parts[0]}' for {result.Command}.");
-            if (result.Has(key) && !(result.Command == "visual" && key == "at")) throw new CliUsageException($"Option --{key} may only be supplied once (including aliases).");
+            if (result.Has(key) && !(result.Command == "visual" && key == "at") && key != "param") throw new CliUsageException($"Option --{key} may only be supplied once (including aliases).");
             string value = "true";
             if (values.Contains(key))
             {

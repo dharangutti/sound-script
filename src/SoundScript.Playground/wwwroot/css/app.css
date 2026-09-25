@@ -71,7 +71,7 @@ a:hover { text-decoration: underline; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .playground {
-    max-width: 1200px;
+    max-width: 1440px;
     margin: 0 auto;
     padding: 1.5rem 1.25rem 3rem;
 }
@@ -381,12 +381,13 @@ a:hover { text-decoration: underline; }
 
 .panes {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     gap: 1rem;
     min-height: 28rem;
 }
 
 .pane {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     background: var(--surface);
@@ -768,6 +769,29 @@ a:hover { text-decoration: underline; }
     font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
     font-size: 0.85rem;
     line-height: 1.5;
+}
+.pane-editor > .editor-mount.pge { min-height: clamp(24rem, 55vh, 42rem); }
+.runtime-panel { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.runtime-panel > summary { cursor: pointer; font-size: 1.1rem; }
+.runtime-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; }
+.runtime-grid > section { min-width: 0; }
+.runtime-toolbar { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .5rem 0; }
+.runtime-toolbar > label { font-weight: 600; }
+.runtime-toolbar > .hint { margin-left: auto; }
+.runtime-source { min-height: 24rem; height: 32vh; font-size: .95rem; tab-size: 4; white-space: pre; overflow: auto; }
+.runtime-values { min-width: 0; margin: 0; padding: .75rem; border: 1px solid var(--border); border-radius: .5rem; }
+.runtime-value { display: grid; grid-template-columns: minmax(0, 1fr) 8rem; align-items: center; gap: .25rem .75rem; margin-bottom: .65rem; }
+.runtime-value label { overflow-wrap: anywhere; }
+.runtime-value input { width: 100%; padding: .4rem; font: inherit; color: var(--text); background: var(--code-bg); border: 1px solid var(--border); border-radius: .3rem; }
+.runtime-value small { color: var(--muted); grid-column: 1 / -1; }
+.runtime-output audio { width: 100%; margin: .5rem 0; }
+.runtime-scene { width: 100%; margin-top: .75rem; background: #111827; }
+.runtime-scene svg { display: block; width: 100%; height: auto; }
+.runtime-error { color: var(--danger); overflow-wrap: anywhere; padding: .5rem; border-left: 3px solid var(--danger); }
+@media (max-width: 900px) {
+    .runtime-grid { grid-template-columns: minmax(0, 1fr); }
+    .runtime-source { min-height: 20rem; font-size: 1rem; }
+    .runtime-value { grid-template-columns: minmax(0, 1fr) 7rem; }
 }
 .pge[data-theme="light"] { background: #f8fafc; color: #1e293b; }
 
@@ -1491,7 +1515,8 @@ a:hover { text-decoration: underline; }
     .visual-card { padding: 0.8rem; }
     .visual-duration-summary { width: 100%; text-align: left; }
     .visual-code-input { min-height: 17rem; font-size: 16px; }
-    .visual-stage { min-height: 16rem; }
+    .visual-stage { min-height: 0; width: 100%; }
+    .visual-scrubber-controls input[type="range"] { min-width: 0; flex-basis: 8rem; }
     .visual-preview-product { left: 6%; bottom: 9%; }
     .visual-preview-circle { right: 4%; bottom: 4%; }
     .visual-timeline-lane { grid-template-columns: 1fr; gap: 0.25rem; }

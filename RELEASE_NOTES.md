@@ -1,5 +1,14 @@
 # SoundScript Release Notes
 
+## 16.0.0 — Adaptive Runtime Parameters (unpublished candidate)
+
+- Compile controlled decimal parameters once, then update state and bind stable audio/visual snapshots through the existing renderers.
+- Add atomic updates, independent runtime instances, typed discovery and actionable diagnostics without changing static grammar or renderer algorithms.
+- Add CLI parameter inspection/overrides, metadata-driven Playground controls, and monitoring console/web examples.
+- Own Wordbank corpus data inside library assemblies; preserve lazy browser audio delivery and remove consumer `contentFiles` injection.
+- Preserve static APIs and examples. Runtime imports, timing changes, arbitrary expressions and streaming remain outside scope.
+- See [candidate contracts and migration](docs/v16-candidate.md) and [DX review](docs/v16-dx-release-gate.md). This is a branch candidate, not a published release.
+
 ## 15.0.0 — Documentation Reliability & Developer Experience
 
 - Establish one structured, goal-oriented documentation hub and retain the legacy URL as a compatibility gateway.

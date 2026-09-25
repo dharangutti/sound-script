@@ -34,6 +34,7 @@ public sealed partial class Parser
 
         while (!Check(TokenType.EndOfFile))
         {
+            if (_runtimeMode && MatchContextualWord("param")) { ParseRuntimeDeclaration(); continue; }
             if (MatchContextualWord("let")) { ParseConstantDeclaration(false); continue; }
             if (MatchContextualWord("marker")) { ParseConstantDeclaration(true); continue; }
             if (MatchContextualWord("style")) { ParseStyleDeclaration(); continue; }
@@ -267,6 +268,12 @@ public sealed partial class Parser
         var property = ParseName("visual property");
         if (property.ToLowerInvariant() is not ("x" or "y" or "width" or "height" or "size" or "radius" or "rotation" or "opacity"))
             throw Invalid(propertyToken, "set supports x, y, width, height, size, radius, rotation, and opacity. Use appearance declarations for shape, colors, strokeWidth, and fontSize.");
+        if (TryRuntimeValue(property.ToLowerInvariant(), out var parameter, out var initial))
+        {
+            var bound = new VisualAutomationNode { Property = property, From = initial, To = initial, Duration = duration };
+            _runtimeVisuals.Add((bound, parameter));
+            return bound;
+        }
         var value = ParseNumericExpression();
         return new VisualAutomationNode { Property = property, From = value, To = value, Duration = duration };
     }
@@ -888,6 +895,12 @@ public sealed partial class Parser
 
     private GainNode ParseGainStatement()
     {
+        if (TryRuntimeValue("gain", out var parameter, out var initial))
+        {
+            var bound = new GainNode { Value = (double)initial };
+            _runtimeGains.Add((bound, parameter));
+            return bound;
+        }
         var token = Expect(TokenType.Number, "gain value");
         return new GainNode { Value = ParseUnitInterval(token, "Gain") };
     }

@@ -37,6 +37,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoundScript\SoundScript.csproj" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 

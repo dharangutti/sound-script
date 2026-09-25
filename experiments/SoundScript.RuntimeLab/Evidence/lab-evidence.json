@@ -1,0 +1,91 @@
+{
+  "Environment": {
+    "Framework": ".NET 10.0.11",
+    "OS": "Microsoft Windows 10.0.26200",
+    "ProcessorCount": 8
+  },
+  "ColdCompileMilliseconds": 174.4846,
+  "WarmCompile": {
+    "IterationsPerBatch": 500,
+    "Batches": 7,
+    "MedianMicroseconds": 221.51239999999999,
+    "MinMicroseconds": 201.6472,
+    "MaxMicroseconds": 301.0124,
+    "MedianAllocatedBytes": 22672.096
+  },
+  "Set": {
+    "IterationsPerBatch": 20000,
+    "Batches": 7,
+    "MedianMicroseconds": 0.083255,
+    "MinMicroseconds": 0.07622999999999999,
+    "MaxMicroseconds": 0.796845,
+    "MedianAllocatedBytes": 0
+  },
+  "SetTwoAndBind": {
+    "IterationsPerBatch": 10000,
+    "Batches": 7,
+    "MedianMicroseconds": 5.94875,
+    "MinMicroseconds": 4.31607,
+    "MaxMicroseconds": 6.905010000000001,
+    "MedianAllocatedBytes": 1080
+  },
+  "RenderAudio": {
+    "IterationsPerBatch": 8,
+    "Batches": 7,
+    "MedianMicroseconds": 10928.1875,
+    "MinMicroseconds": 9147.4,
+    "MaxMicroseconds": 14235.875,
+    "MedianAllocatedBytes": 3889830
+  },
+  "SceneAt": {
+    "IterationsPerBatch": 2000,
+    "Batches": 7,
+    "MedianMicroseconds": 105.31205,
+    "MinMicroseconds": 80.06160000000001,
+    "MaxMicroseconds": 286.45840000000004,
+    "MedianAllocatedBytes": 108000
+  },
+  "CompileToBindRatio": 37.2367976465644,
+  "Counters": {
+    "Tokenizations": 1,
+    "Parses": 1,
+    "TimelineCompilations": 1
+  },
+  "Revision": 281060,
+  "BindCount": 71059,
+  "States": [
+    {
+      "Name": "normal",
+      "Intensity": 0.25,
+      "X": 200,
+      "SceneCenterX": 200,
+      "Opacity": 0.25,
+      "Rms": 0.03516321995945644,
+      "WavSha256": "FAA98BC77125CCF385E04472A77D5002408144F8305E0B35B4929347783B4AE0",
+      "JsonSha256": "7D342F5D5ED59542A949BCDEB979B2621CC22B850E1CC25E8F7C888B06082D28",
+      "SvgSha256": "2717585771D66A4F8983408A6B9267FE72A54B0EBCF8902D5333FD80FB5A0092"
+    },
+    {
+      "Name": "warning",
+      "Intensity": 0.55,
+      "X": 550,
+      "SceneCenterX": 550,
+      "Opacity": 0.55,
+      "Rms": 0.07735908327835293,
+      "WavSha256": "32C527132C0776B281FB2CD7B854280F1E36253F44C520F8F184335C5F56030B",
+      "JsonSha256": "FF7CA901EAEB32C275BD247BA88F13D71A1348E6956B1343207DD3E33BD572F4",
+      "SvgSha256": "35EE75ABC92B87D9CBCB759D05130899741BB8F0FE73A197BA31D6F0B5867D5B"
+    },
+    {
+      "Name": "critical",
+      "Intensity": 0.90,
+      "X": 900,
+      "SceneCenterX": 900,
+      "Opacity": 0.90,
+      "Rms": 0.12658758786310853,
+      "WavSha256": "70EA91AD0F8355B7ADE1072601282944AEBCE775B15C104A7D56F43E88BFAA1A",
+      "JsonSha256": "3483FED24ED643159640F6012C9A05057EA1C001270A974FCF8F9026A207F938",
+      "SvgSha256": "D924E755AD128695730DEA4865F887DA9549C5346ABD235BA00F64C743057E63"
+    }
+  ]
+}
