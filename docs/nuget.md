@@ -38,13 +38,28 @@ root to obtain `wordbank/LICENSE` before packing. Then pack and use a local sour
 ```powershell
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
 dotnet new console -n PackageConsumer -f net10.0
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 16.0.0-preview.1 --source artifacts/nuget
-dotnet run --project PackageConsumer/PackageConsumer.csproj
+$candidateFeed = [System.Security.SecurityElement]::Escape((Resolve-Path artifacts/nuget).Path)
+@"
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="candidate" value="$candidateFeed" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+  <packageSourceMapping><clear /></packageSourceMapping>
+</configuration>
+"@ | Set-Content PackageConsumer/NuGet.Config
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 16.0.0-preview.1 --source artifacts/nuget --no-restore
+dotnet restore PackageConsumer/PackageConsumer.csproj --configfile PackageConsumer/NuGet.Config
+dotnet run --project PackageConsumer/PackageConsumer.csproj --no-restore
 ```
 <!-- GENERATED:LOCAL_LIBRARY_INSTALL_END -->
 
 Run the consumer outside the repository solution when checking package
 contents. A local package source verifies the nupkg without publishing it.
+Restore uses both the local candidate feed and nuget.org for its dependencies.
+The add step's `--no-restore` advisory is expected: the explicit restore immediately
+after it performs dependency resolution and framework compatibility checks.
 
 ## First use
 
