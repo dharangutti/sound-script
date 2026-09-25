@@ -35,6 +35,7 @@ public static partial class CommandHandlers
             }
         if (args.Value("emit-ss") is { } emitted && args.Value("out") is { } output && PathEquals(emitted, output))
             throw new CliUsageException("--out and --emit-ss must name different files.");
+        if (args.Has("runtime") || args.Has("param") || args.Has("params")) return Runtime(args);
         return args.Command switch
         {
             "transcribe" => Transcribe(args),

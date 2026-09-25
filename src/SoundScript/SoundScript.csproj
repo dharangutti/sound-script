@@ -45,7 +45,6 @@
     <None Include="../../LICENSE" Pack="true" PackagePath="/LICENSE" />
     <None Include="../../wordbank/LICENSE" Pack="true" PackagePath="/licenses/Wordbank-CC0.txt" />
     <None Include="../SoundScript.Media/Fonts/LICENSE.txt" Pack="true" PackagePath="/licenses/Fonts.txt" />
-    <Content Include="../SoundScript.Wordbank/Data/corpus/**/*" Pack="true" PackagePath="contentFiles/any/any/Data/corpus/%(RecursiveDir)%(Filename)%(Extension)" PackageCopyToOutput="true" BuildAction="None" />
   </ItemGroup>
   <Target Name="IncludeSoundScriptLibraries" DependsOnTargets="ResolveReferences">
     <ItemGroup>

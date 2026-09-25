@@ -59,6 +59,30 @@ and `TemporalAudioRenderer` over the existing parser/AST. The AST stays private 
 There is no second parser, timeline, scene graph, interpolation engine or playback clock.
 The concrete compiled object is sufficient; no `IMediaRuntime` or generic `Template<T>` is introduced.
 
+## Runtime parameters (V16 candidate)
+
+The current feature branch adds `SoundScriptEngine.CompileRuntime` for opt-in
+runtime values while preserving the static `Compile` and `CompileFile`
+contracts. A runtime program parses its source and builds the visual timeline
+once. Its decimal `Parameters` metadata declares each value's default and
+allowed range; `Get`, `Set`, atomic `SetMany`, and `Reset` manage typed host
+state without converting values to source text. `Statistics` reports the
+actual initial tokenization, parse, and timeline compilation counts.
+
+`Bind()` captures a stable `SoundScriptRuntimeSnapshot`. Later changes leave
+that snapshot intact. Its `RenderAudio`, `RenderWave`, `RenderMidi`, and
+`SceneAt(time)` use the existing renderers and timing model. Runtime support is
+limited to direct track gain and constant visual x/y/opacity/rotation/width/
+height values. Structure, notes, imports, tempo, and media timing do not change
+at runtime. Unsupported references and invalid values fail before updating
+state. Static imports remain available through `CompileFile`; runtime source
+does not resolve an import graph.
+
+This is a V16 candidate under validation, not a package or release validation
+claim. See the [runtime parameter guide](runtime-parameters.md), the
+[monitoring host sample](../samples/RuntimeParameters/README.md), and the
+[Playground's adaptive panel](PLAYGROUND.md#adaptive-media-runtime-parameters-candidate).
+
 ## Time and audio
 
 `SceneAt(t)` is a pure seekable projection: Scene = F(time). It does not depend on previous queries or FPS.
@@ -183,6 +207,14 @@ an OS sandbox. Missing required audio assets throw `FileNotFoundException` inste
 Parser/semantic failures retain their existing meaningful .NET exceptions and source locations. Invalid
 time throws `ArgumentOutOfRangeException`. HTTP example endpoints translate invalid time/scenario to 400.
 There are no CLI exit codes or console-scraping requirements in the public API.
+
+The bundled Wordbank corpus is embedded in the package assembly; the package
+does not rely on corpus `contentFiles` beside the application. Playback can
+read embedded audio bytes directly. APIs that explicitly request filesystem
+paths materialize the corpus into a versioned, assembly-scoped directory under
+the user's local application data area on supported desktop systems; browser
+hosts continue to use in-memory resources. Avoid treating that cache path as a
+general-purpose application data directory.
 
 ## Determinism, compatibility and validation
 

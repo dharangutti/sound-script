@@ -1,0 +1,56 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Components
+
+<details class="card" data-testid="runtime-panel" open>
+    <summary><strong>Adaptive media — runtime parameters</strong></summary>
+    <p>Compile a monitoring cue, then update its state. Apply renders a new audio clip and scene; press Play to listen.</p>
+    <button type="button" @onclick="LoadExample" data-testid="runtime-example">Load monitoring example</button>
+    <label for="runtime-source">Runtime source</label>
+    <textarea id="runtime-source" data-testid="runtime-source" rows="12" style="width:100%;font-family:monospace" value="@source" @oninput="SourceChanged"></textarea>
+    <button type="button" @onclick="Compile" data-testid="runtime-compile">Compile</button>
+    @if (session.Runtime is { } runtime)
+    {
+        <fieldset data-testid="runtime-controls">
+            <legend>Parameter values</legend>
+            @foreach (var parameter in runtime.Parameters)
+            {
+                <label for="runtime-@parameter.Name">@parameter.Name (@parameter.Minimum.ToString(CultureInfo.InvariantCulture) to @parameter.Maximum.ToString(CultureInfo.InvariantCulture))</label>
+                <input id="runtime-@parameter.Name" data-testid="runtime-value-@parameter.Name" inputmode="decimal" value="@inputs[parameter.Name]" @oninput="e => inputs[parameter.Name] = e.Value?.ToString() ?? string.Empty" />
+            }
+            <button type="button" @onclick="Apply" data-testid="runtime-apply">Apply state</button>
+            <button type="button" @onclick="Reset" data-testid="runtime-reset">Reset values</button>
+        </fieldset>
+        <p role="status" data-testid="runtime-status" data-parse-count="@runtime.Statistics.Parses">Rendered snapshot @runtime.Revision. Source edits require Compile.</p>
+    }
+    @if (error is not null) { <p role="alert" data-testid="runtime-error">@error</p> }
+    @if (session.Audio.Length > 0)
+    {
+        <audio controls data-testid="runtime-audio" src="@audioUrl"></audio>
+        <a href="@audioUrl" download="runtime.wav">Download WAV</a>
+        <div data-testid="runtime-scene" style="max-width:900px;background:#111827">@((MarkupString)session.Svg)</div>
+    }
+</details>
+
+@code {
+    private readonly RuntimeMediaSession session = new();
+    private readonly Dictionary<string, string> inputs = new(StringComparer.Ordinal);
+    private string source = RuntimeMediaSession.MonitoringSource;
+    private string? error;
+    private string audioUrl = "";
+    private void SourceChanged(ChangeEventArgs e) { source = e.Value?.ToString() ?? ""; Clear(); }
+    private void Clear() { session.Clear(); inputs.Clear(); audioUrl = ""; error = null; }
+    private void LoadExample() { source = RuntimeMediaSession.MonitoringSource; Clear(); }
+    private void Compile() => Act(() => { session.Compile(source); RefreshInputs(); });
+    private void Apply() => Act(() => session.Apply(inputs));
+    private void Reset() => Act(() => { session.Reset(); RefreshInputs(); });
+    private void RefreshInputs()
+    {
+        inputs.Clear();
+        foreach (var p in session.Runtime!.Parameters) inputs[p.Name] = session.Runtime.Get(p.Name).ToString(CultureInfo.InvariantCulture);
+    }
+    private void Act(Action action)
+    {
+        try { error = null; action(); audioUrl = "data:audio/wav;base64," + Convert.ToBase64String(session.Audio); }
+        catch (Exception ex) { error = ex.Message; if (session.Runtime is null) { inputs.Clear(); audioUrl = ""; } }
+    }
+}

@@ -183,9 +183,9 @@ try {
     }
     $licenseEntries = @($entryNames | Where-Object { $_ -match '(?i)^licenses/.+' })
     if ($licenseEntries.Count -eq 0) { Fail 'Package has no bundled third-party/license notices.' }
-    if (-not (@($entryNames | Where-Object { $_ -match '(?i)^contentFiles/.+/Data/corpus/' }).Count -gt 0)) {
-        Fail 'Package does not contain the reusable corpus under contentFiles/*/*/Data/corpus.'
-    }
+    $injectedEntries = @($entryNames | Where-Object { $_ -match '(?i)^(contentFiles|build|buildTransitive|analyzers|tools)/' })
+    if ($injectedEntries.Count -gt 0) { Fail "Unexpected consumer content/imports: $($injectedEntries -join ', ')" }
+    else { Pass 'No contentFiles, build, buildTransitive, analyzers, or tools injected into consumers' }
 
     $libEntries = @($entries | Where-Object { $_.FullName -match '(?i)^lib/[^/]+/SoundScript[^/]*\.dll$' })
     $tfms = @($libEntries | ForEach-Object { $_.FullName -split '/' | Select-Object -Index 1 } | Sort-Object -Unique)
@@ -313,6 +313,8 @@ using System.Security.Cryptography;
 using SoundScript;
 using SoundScript.Transcription;
 using SoundScript.Wave;
+using SoundScript.Wordbank;
+using SoundScript.Vocal;
 
 const string source = "tempo 120 track cue { instrument piano mf C4 e E4 e G4 q }";
 var compilation = SoundScriptEngine.Compile(source);
@@ -335,9 +337,24 @@ Console.WriteLine($"WAV_SHA256={Convert.ToHexString(SHA256.HashData(wav))}");
 Console.WriteLine($"MIDI_BYTES={midi.Length}");
 Console.WriteLine($"MIDI_SHA256={Convert.ToHexString(SHA256.HashData(midi))}");
 Console.WriteLine($"TRANSCRIPTION_NOTES={transcription.Score.Tracks.Sum(track => track.Notes.Count)}");
+var runtime = SoundScriptEngine.CompileRuntime("param intensity = 0.25 perform expressive track cue { gain intensity C4 q } visual \"cue\" for 4s { shape circle set opacity intensity }");
+var first = runtime.Bind();
+runtime.Set("intensity", 0.8m);
+var changed = runtime.Bind();
+if (first.RenderAudio().SequenceEqual(changed.RenderAudio())) throw new Exception("Runtime audio did not adapt.");
+if (!changed.RenderAudio().SequenceEqual(runtime.RenderAudio())) throw new Exception("Runtime audio is not deterministic.");
+if (runtime.Statistics.Parses != 1) throw new Exception("Runtime source reparsed.");
+Console.WriteLine($"RUNTIME_SCENE={changed.SceneAt(TimeSpan.FromSeconds(2)).Primitives.Count}");
+WordbankCatalog.ResetToEmbedded();
+CorpusCatalog.Reset();
+if (!CorpusCatalog.TryLoadEmbedded() || !CorpusCatalog.TryGetLemma("en", "hello", out var lemma)) throw new Exception("Embedded corpus metadata missing.");
+if (!CorpusCatalog.TryGetAudioBytes(lemma, out var corpusWav) || !corpusWav.AsSpan(0, 4).SequenceEqual("RIFF"u8)) throw new Exception("Embedded corpus audio missing.");
+var vocal = new WordbankVocalEngine().SynthesizeToWavBytes("hello welcome", new VocalEngineOptions { Locale = "en" });
+if (vocal.Length <= 44 || CorpusCatalog.LoadedRoot is not null) throw new Exception("Resource-only vocal playback failed.");
+Console.WriteLine($"VOCAL_BYTES={vocal.Length}");
 '@
     Set-Content -LiteralPath (Join-Path $consumerRoot 'Program.cs') -Value $consumerProgram -Encoding UTF8
-    Invoke-DotNet @('add', $consumerProject, 'package', $packageId, '--version', $nuspecVersion, '--no-restore') | Out-Null
+    Invoke-DotNet @('add', $consumerProject, 'package', $packageId, '--version', $nuspecVersion) | Out-Null
     Invoke-DotNet @('restore', $consumerProject, '--configfile', $configPath, '--packages', $nugetCache) | Out-Null
     Invoke-DotNet @('build', $consumerProject, '--no-restore', '-c', 'Release') | Out-Null
     Push-Location $consumerRoot
@@ -371,8 +388,8 @@ Console.WriteLine($"TRANSCRIPTION_NOTES={transcription.Score.Tracks.Sum(track =>
         $corpusFiles = @(Get-ChildItem -LiteralPath $consumerBin -Recurse -File -ErrorAction SilentlyContinue |
             Where-Object { $_.FullName -match '(?i)[\\/]Data[\\/]corpus[\\/]' })
     }
-    if ($corpusFiles.Count -gt 0) { Pass "Consumer output copied $($corpusFiles.Count) corpus files under Data/corpus" }
-    else { Fail 'Consumer output did not copy package corpus content under Data/corpus.' }
+    if ($corpusFiles.Count -eq 0) { Pass 'Consumer output has no copied corpus content; runtime binding and embedded vocal playback succeeded' }
+    else { Fail "Consumer output unexpectedly copied $($corpusFiles.Count) corpus files." }
 }
 catch {
     Fail $_.Exception.Message

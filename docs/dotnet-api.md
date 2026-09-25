@@ -130,3 +130,29 @@ single package.
 Use CompileMedia() for synchronized audio, duration and SceneAt(t), followed by versioned JSON or safe SVG.
 
 See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).
+
+## Runtime parameters (V16 candidate)
+
+The current source branch adds the opt-in `CompileRuntime` API for a fixed
+media structure with typed decimal values. It is a candidate under validation;
+these docs do not assert release or package validation.
+
+```csharp
+using SoundScript;
+
+var runtime = SoundScriptEngine.CompileRuntime(File.ReadAllText("monitor.ss"));
+runtime.SetMany(new Dictionary<string, decimal>
+{
+    ["intensity"] = .90m,
+    ["xpos"] = 900m
+});
+var snapshot = runtime.Bind();
+File.WriteAllBytes("monitor.wav", snapshot.RenderAudio());
+var scene = snapshot.SceneAt(TimeSpan.FromSeconds(2));
+```
+
+Use `runtime.Parameters` and `runtime.Get(name)` to discover declarations and
+current values. `SetMany` validates a complete update before applying it;
+`Reset` restores defaults. Each changed state binds a stable audio/visual
+snapshot through the existing renderers. See [runtime-parameters.md](runtime-parameters.md)
+and the [project-reference sample](../samples/RuntimeParameters/README.md).

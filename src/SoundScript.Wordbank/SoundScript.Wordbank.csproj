@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\**\*.json" />
+    <EmbeddedResource Include="Data\**\*.json" Exclude="Data\corpus\**\*" />
+    <EmbeddedResource Include="Data\corpus\**\*.json;Data\corpus\**\*.wav" LogicalName="Corpus/%(RecursiveDir)%(Filename)%(Extension)" />
     <Content Include="Data\corpus\**\*" CopyToOutputDirectory="PreserveNewest" Link="Data\corpus\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 

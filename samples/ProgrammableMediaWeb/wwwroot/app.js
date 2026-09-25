@@ -56,3 +56,47 @@ document.querySelector('#pause').addEventListener('click', () => audio.pause());
 document.querySelector('#restart').addEventListener('click', () => { audio.currentTime = 0; refresh(); void play(); });
 scenario.addEventListener('change', changeScenario);
 changeScenario();
+
+const runtimeIntensity = document.querySelector('#runtime-intensity');
+const runtimeXpos = document.querySelector('#runtime-xpos');
+const runtimeApply = document.querySelector('#runtime-apply');
+const runtimeStatus = document.querySelector('#runtime-status');
+const runtimeError = document.querySelector('#runtime-error');
+const runtimeAudio = document.querySelector('#runtime-audio');
+const runtimeScene = document.querySelector('#runtime-scene');
+let runtimeGeneration = 0;
+async function loadRuntimeInfo() {
+    try {
+        const response = await fetch('/api/runtime/info');
+        if (!response.ok) throw new Error('Runtime schema request failed');
+        const info = await response.json();
+        runtimeStatus.value = `Compiled once · tokenize ${info.statistics.tokenizations}, parse ${info.statistics.parses}, timeline ${info.statistics.timelineCompilations}`;
+        await applyRuntimeValues();
+    } catch (e) { runtimeError.textContent = e.message; }
+}
+async function applyRuntimeValues() {
+    const intensity = Number(runtimeIntensity.value), xpos = Number(runtimeXpos.value);
+    if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1 || !Number.isInteger(xpos) || xpos < -12800 || xpos > 12800) {
+        runtimeError.textContent = 'Enter intensity from 0 to 1 and an integer x position from -12800 to 12800.';
+        return;
+    }
+    const generation = ++runtimeGeneration;
+    runtimeError.textContent = '';
+    const params = new URLSearchParams({ intensity: String(intensity), xpos: String(xpos) });
+    runtimeAudio.src = `/api/runtime/audio?${params}`;
+    runtimeAudio.load();
+    try {
+        const response = await fetch(`/api/runtime/scene.svg?${params}&t=2`);
+        if (!response.ok) throw new Error(await response.text());
+        const blob = await response.blob();
+        if (generation !== runtimeGeneration) return;
+        if (runtimeScene.dataset.url) URL.revokeObjectURL(runtimeScene.dataset.url);
+        const url = URL.createObjectURL(blob);
+        runtimeScene.dataset.url = url;
+        runtimeScene.src = url;
+        runtimeStatus.value = `Applied intensity ${intensity} and x ${xpos}. Audio is a complete offline render.`;
+    } catch (e) { if (generation === runtimeGeneration) runtimeError.textContent = e.message; }
+}
+runtimeApply.addEventListener('click', () => { void applyRuntimeValues(); });
+runtimeAudio.addEventListener('error', () => { runtimeError.textContent = 'Runtime audio request failed.'; });
+void loadRuntimeInfo();

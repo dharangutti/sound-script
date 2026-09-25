@@ -67,6 +67,34 @@ anchor used by playback.
 - [ ] The audio lane spans the 12-second visual timeline and uses the shared deterministic SoundScript.Wave rail used by browser and CLI export
 - [ ] Introduce invalid visual syntax and choose **Evaluate timeline**; a local error appears without affecting the music workspace
 
+## Adaptive media runtime parameters (candidate)
+
+The Audio/Visual workspace also contains a separate **Adaptive media — runtime
+parameters** panel. It demonstrates the opt-in `SoundScriptEngine.CompileRuntime`
+API and leaves the established visual timeline editor and preset examples on
+their existing static compile path.
+
+Use **Load monitoring example** to restore the sample, then **Compile**. The
+panel discovers parameter names and bounds from the compiled runtime program.
+For the sample, `intensity` controls direct cue gain and indicator opacity;
+`xpos` controls the indicator's x position. Edit the decimal values and choose
+**Apply state** to call `SetMany`, bind a new snapshot, and render both WAV and
+scene SVG. The audio control and **Download WAV** use that generated output.
+Choose **Reset values** to restore the source defaults. Editing the source
+requires another explicit **Compile**; malformed source and invalid parameter
+updates are shown as local errors.
+
+The sample uses complete offline WAV rendering. It does not claim live or
+streaming audio. This is a source-branch V16 candidate under validation, not a
+release-readiness statement.
+
+- [ ] Load, compile, and see controls for both declared parameters
+- [ ] Apply intensity `0.90` and xpos `900`; indicator opacity/position and generated audio change
+- [ ] Apply an out-of-range or invalid decimal; show an error without partially applying the batch
+- [ ] Reset values and confirm the sample returns to its defaults
+- [ ] Edit invalid source and compile; show an error and clear stale controls/output
+- [ ] Run existing Visual Timeline checks above unchanged
+
 ## Text-to-Melody (V3.1)
 
 The playground has a **Text-to-Melody** row above the editor:

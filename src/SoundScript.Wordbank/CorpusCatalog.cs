@@ -6,7 +6,7 @@ namespace SoundScript.Wordbank;
 /// Loads curated per-word pronunciation metadata and audio paths from
 /// <c>corpus/vYYYY.MM/</c> inside a wordbank checkout or embedded data.
 /// </summary>
-public static class CorpusCatalog
+public static partial class CorpusCatalog
 {
     private const string DefaultCorpusId = "2026.07";
 
@@ -53,18 +53,19 @@ public static class CorpusCatalog
     {
         var assembly = typeof(CorpusCatalog).Assembly;
         var baseDir = Path.GetDirectoryName(assembly.Location);
-        if (string.IsNullOrEmpty(baseDir))
-            return false;
-
-        var corpusRoot = Path.Combine(baseDir, "Data", "corpus", $"v{corpusId}");
-        return TryLoadFromCorpusRoot(corpusRoot, corpusId, error: out _);
+        if (!string.IsNullOrEmpty(baseDir))
+        {
+            var corpusRoot = Path.Combine(baseDir, "Data", "corpus", $"v{corpusId}");
+            if (TryLoadFromCorpusRoot(corpusRoot, corpusId, error: out _)) return true;
+        }
+        return TryLoadAssemblyResources(corpusId);
     }
 
     /// <summary>Re-reads corpus metadata from the currently loaded root (picks up on-disk edits).</summary>
     public static bool Reload()
     {
         if (_loadedRoot is null)
-            return false;
+            return _usingResources && TryLoadAssemblyResources(_corpusId);
 
         return TryLoadFromCorpusRoot(_loadedRoot, _corpusId, out _);
     }
@@ -76,6 +77,7 @@ public static class CorpusCatalog
     public static string? ResolveLemmaFilePath(string localeCode)
     {
         EnsureLoaded();
+        EnsureWritableCorpus();
         if (_loadedRoot is null || _manifest is null)
             return null;
 
@@ -121,6 +123,7 @@ public static class CorpusCatalog
             _lemmaIndex = null;
             _inMemoryAudio = null;
             _corpusId = DefaultCorpusId;
+            _usingResources = false;
         }
     }
 
@@ -191,6 +194,16 @@ public static class CorpusCatalog
             }
         }
 
+        EnsureLoaded();
+        if (_usingResources && _loadedRoot is null)
+        {
+            using var resource = OpenCorpusResource(_corpusId, entry.Audio);
+            if (resource is null) return false;
+            using var output = new MemoryStream();
+            resource.CopyTo(output);
+            bytes = output.ToArray();
+            return true;
+        }
         var path = ResolveAudioPath(entry);
         if (path is null)
             return false;
@@ -209,6 +222,8 @@ public static class CorpusCatalog
     /// <summary>Resolves the on-disk WAV path for a lemma entry, or null when unavailable.</summary>
     public static string? ResolveAudioPath(CorpusLemmaEntry entry)
     {
+        EnsureLoaded();
+        EnsureWritableCorpus();
         if (string.IsNullOrWhiteSpace(entry.Audio) || _loadedRoot is null)
             return null;
 
@@ -224,6 +239,7 @@ public static class CorpusCatalog
     public static string? ResolveNormalizedAudioPath(string localeCode, string lemma)
     {
         EnsureLoaded();
+        EnsureWritableCorpus();
         if (_loadedRoot is null || string.IsNullOrWhiteSpace(localeCode) || string.IsNullOrWhiteSpace(lemma))
             return null;
 
@@ -289,6 +305,7 @@ public static class CorpusCatalog
                 _corpusId = corpusId;
                 _manifest = manifest;
                 _lemmaIndex = index;
+                _usingResources = false;
             }
 
             return true;
