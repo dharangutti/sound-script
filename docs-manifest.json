@@ -145,14 +145,14 @@
     "src/SoundScript.Wordbank/SoundScript.Wordbank.csproj",
     "src/SoundScript/SoundScript.csproj",
     "docs/runtime-parameters.md",
-    "docs/v16-candidate.md",
     "samples/RuntimeParameters/README.md",
     "scripts/runtime-media-browser.cjs",
-    "src/SoundScript.Wordbank.Corpus/SoundScript.Wordbank.Corpus.csproj",
-    "docs/v16-dx-release-gate.md",
-    "docs/v16-acceptance-report.md"
+    "src/SoundScript.Wordbank.Corpus/SoundScript.Wordbank.Corpus.csproj"
   ],
   "historicalDocuments": [
+    "docs/v16-candidate.md",
+    "docs/v16-dx-release-gate.md",
+    "docs/v16-acceptance-report.md",
     "RELEASE_NOTES.md",
     "TRANSCRIPTION_STATUS.md",
     "docs/SoundScript_Transcription_Master_Prompt.md",

@@ -53,8 +53,8 @@ dotnet run --project src/SoundScript.Cli -- run examples/vocal-song.ss vocal-son
 
 ## Runtime parameter snapshots (candidate API)
 
-On the current feature branch, `run`, `wave`, and `inspect` accept opt-in
-runtime values. This capability is a V16 candidate under validation and does
+In V16, `run`, `wave`, and `inspect` accept opt-in
+runtime values. This capability does
 not change an invocation that omits `--runtime` and `--param`.
 
 ```bash

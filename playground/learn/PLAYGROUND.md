@@ -85,8 +85,7 @@ requires another explicit **Compile**; malformed source and invalid parameter
 updates are shown as local errors.
 
 The sample uses complete offline WAV rendering. It does not claim live or
-streaming audio. This is a source-branch V16 candidate under validation, not a
-release-readiness statement.
+streaming audio. The panel uses the V16 runtime parameter API.
 
 - [ ] Load, compile, and see controls for both declared parameters
 - [ ] Apply intensity `0.90` and xpos `900`; indicator opacity/position and generated audio change
@@ -349,7 +348,7 @@ Audio unlock flow: compile synchronously → `startPlayback` is the first `await
 
 - [ ] Network tab shows no CDN or API requests after initial load
 - [ ] Soundfont loads from `/playground/soundfont/samples/*.wav` only
-## V16 candidate workspace
+## V16 runtime workspace
 
 Use **Try V16 adaptive media** in the header to open the ready-to-use monitoring demo. **Normal**, **Warning**, and **Critical** apply different gain, position, and opacity values to the compiled source. Press Play after changing state to compare the audio. The visual preview is a still snapshot, not a playback animation. **Explore all visual parameters** loads a rectangle example covering gain, x/y position, width, height, rotation, and opacity. The [V16 guide](runtime-parameters.md) explains the supported bindings and lifecycle.
 

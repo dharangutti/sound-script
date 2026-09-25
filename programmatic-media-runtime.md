@@ -59,7 +59,7 @@ and `TemporalAudioRenderer` over the existing parser/AST. The AST stays private 
 There is no second parser, timeline, scene graph, interpolation engine or playback clock.
 The concrete compiled object is sufficient; no `IMediaRuntime` or generic `Template<T>` is introduced.
 
-## Runtime parameters (V16 candidate)
+## Runtime parameters (V16)
 
 The current feature branch adds `SoundScriptEngine.CompileRuntime` for opt-in
 runtime values while preserving the static `Compile` and `CompileFile`
@@ -78,8 +78,7 @@ at runtime. Unsupported references and invalid values fail before updating
 state. Static imports remain available through `CompileFile`; runtime source
 does not resolve an import graph.
 
-This is a V16 candidate under validation, not a package or release validation
-claim. See the [runtime parameter guide](runtime-parameters.md), the
+See the [runtime parameter guide](runtime-parameters.md), the
 [monitoring host sample](../samples/RuntimeParameters/README.md), and the
 [Playground's adaptive panel](PLAYGROUND.md#adaptive-media-runtime-parameters-candidate).
 

@@ -8,12 +8,12 @@ The [programmable media runtime](programmatic-media-runtime.md) provides synchro
 
 ## Install
 
-The V16 source candidate stores corpus metadata and audio in SoundScript-owned
+V16 stores corpus metadata and audio in SoundScript-owned
 assemblies, including a separate audio-resource assembly. It adds no library
 `contentFiles`, build targets or analyzers to a consumer. Playback needs no
 repository path or Git submodule. Explicit editable corpus-path APIs materialize
 data under the user's local application data; browser audio stays on demand.
-The published V15 package still uses copied corpus content. See
+V15 packages used copied corpus content. See
 [candidate migration notes](v16-candidate.md).
 
 <!-- GENERATED:DOTNET_REQUIREMENT_START -->
