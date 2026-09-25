@@ -56,7 +56,7 @@
             },
             "license": "https://opensource.org/licenses/MIT",
             "description": "SoundScript is a deterministic music DSL: describe notes, chords, dynamics, phrases, patterns, and orchestration in plain text, and the engine compiles it to a standard MIDI file. The same script always produces the same MIDI, on every platform.",
-            "softwareVersion": "15.0.0",
+            "softwareVersion": "16.0.0",
             "programmingLanguage": "C#",
             "featureList": "Text-to-MIDI compilation, deterministic output, temporal visual programs, browser WebM audio-visual export, phrases and patterns, instrument layers, tempo automation, orchestration helpers, direct Wave synthesis to WAV, browser playground, cross-platform CLI",
             "softwareHelp": "https://soundscript.net/doc.html?p=documentation.md",
@@ -819,7 +819,7 @@
                 <img src="/assets/soundscript-logo.png" alt="SoundScript">
             </a>
             <div class="badge"><!-- GENERATED:PUBLIC_BADGE_START -->
-Version: V15 (15.0.0)
+Version: V16 (16.0.0)
 <!-- GENERATED:PUBLIC_BADGE_END --></div>
             <h1>Write audio like <span>code</span> — edit it back</h1>
             <p class="lead">
@@ -1006,7 +1006,7 @@ speak "Oh what fun it is" seed=9 gain=1.0</pre>
                 <h2 id="benefits-title">Key Benefits</h2>
                 <p class="section-intro">The engineering surface is deliberately small: plain text in, standard files out, with repeatability enforced by tests.</p>
                 <div class="metric-grid" aria-label="Repository engineering metrics">
-                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->401+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
+                    <div class="metric"><span class="metric-value"><!--METRIC_COMMITS-->403+<!--/METRIC_COMMITS--></span><span class="metric-label">repository commits</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_PROJECTS-->32<!--/METRIC_PROJECTS--></span><span class="metric-label">.NET projects</span></div>
                     <div class="metric"><span class="metric-value"><!--METRIC_TESTS-->1,295<!--/METRIC_TESTS--></span><span class="metric-label">automated tests</span></div>
                     <div class="metric"><span class="metric-value">3 OS</span><span class="metric-label">CI matrix</span></div>
@@ -1285,7 +1285,8 @@ tempo 120 → 140 over 4 bars</pre><p><a href="doc.html?p=orchestration.md">Orch
                 <h2 id="version-title">Version History</h2>
                 <ul class="steps">
                     <!--RELEASE_HISTORY_GENERATED_START-->
-                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V15</span><div><strong>Documentation Reliability &amp; Developer Experience</strong><span class="release-label">Current</span><br>Establish one structured, goal-oriented documentation hub and retain the legacy URL as a compatibility gateway.<br>Separate development identity from explicit public release state and documented fact ownership.<br>Generate repeated current-state blocks safely and validate classification, links, CLI coverage and documentation drift in CI.<br>Improve developer documentation UX with labelled source, terminal and output blocks and accessible copy controls.<br>Preserve runtime behavior, public APIs, DSL grammar and audio/media output.</div></li>
+                    <li class="release-current"><span class="step-num" style="width:auto;padding:0 0.6rem;background:rgba(110,231,183,0.2);color:var(--accent);">V16</span><div><strong>Adaptive Runtime Parameters</strong><span class="release-label">Current</span><br>Compile controlled decimal parameters once, then update state and bind stable audio/visual snapshots through the existing renderers.<br>Add atomic updates, independent runtime instances, typed discovery and actionable diagnostics without changing static grammar or renderer algorithms.<br>Add CLI parameter inspection/overrides, metadata-driven Playground controls, and monitoring console/web examples.<br>Own Wordbank corpus data inside library assemblies; preserve lazy browser audio delivery and remove consumer <code>contentFiles</code> injection.<br>Preserve static APIs and examples. Runtime imports, timing changes, arbitrary expressions and streaming remain outside scope.<br>See <a href="doc.html?p=v16-candidate.md">candidate contracts and migration</a> and <a href="doc.html?p=v16-dx-release-gate.md">DX review</a> for the pre-publication design and validation history.</div></li>
+                    <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V15.0.0</span><div><strong>Documentation Reliability &amp; Developer Experience</strong><br>Establish one structured, goal-oriented documentation hub and retain the legacy URL as a compatibility gateway.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V14.0.0</span><div><strong>Programmable Media Runtime</strong><br>Add <code>SoundScriptCompilation.CompileMedia()</code> with <code>RenderAudio()</code>, <code>Duration</code>, <code>Timeline</code> and <code>SceneAt(t)</code>.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V13</span><div><strong>Media-to-SoundScript Transcription</strong><br>New <code>SoundScript.Transcription</code> subsystem with an evidence-bearing canonical musical model and extensible input, analysis and output boundaries.</div></li>
                     <li class="release-previous"><span class="step-num" style="width:auto;padding:0 0.6rem;">V12</span><div><strong>Musical Completeness &amp; .NET 10</strong><br><strong>.NET 10:</strong> all projects, CLI workflows, and supported developer paths now target the .NET 10 SDK.</div></li>

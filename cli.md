@@ -418,7 +418,7 @@ dotnet run --project src/SoundScript.Cli -- vocal batch song.ssw \
 ## Installation and automation
 
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
-`SoundScript.Cli` 15.0.0 is not published on nuget.org.
+`SoundScript.Cli` 16.0.0 is not published on nuget.org.
 
 No CLI GitHub Release is published for this public version. Build from a source checkout.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->

@@ -24,10 +24,10 @@ Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for reposi
 Install the published library:
 
 ```bash
-dotnet add package SoundScript --version 15.0.0
+dotnet add package SoundScript --version 16.0.0
 ```
 
-[SoundScript 15.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/15.0.0).
+[SoundScript 16.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/16.0.0).
 <!-- GENERATED:LIBRARY_INSTALL_END -->
 
 For local development validation, start with a [source checkout with submodules](../README.md#try-it-in-60-seconds).
