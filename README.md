@@ -16,9 +16,8 @@ temporal media.
 
 [Try the Playground](https://soundscript.net/playground/) · [Quick start](docs/quick-start.md) · [NuGet guide](docs/nuget.md) · [CLI reference](docs/cli.md) · [Contributing](CONTRIBUTING.md)
 
-The current feature branch also contains an opt-in runtime parameter API for
-fixed media structure and typed numeric updates. It is a V16 candidate under
-validation; it is not part of a validated package release. See the
+V16 introduces an opt-in runtime parameter API for
+fixed media structure and typed numeric updates. See the
 [runtime parameter guide](docs/runtime-parameters.md) and [basic .NET host
 sample](samples/RuntimeParameters/README.md).
 
@@ -159,7 +158,7 @@ transposition work.
 | `video` | Export a synchronized WebM through FFmpeg |
 | `vocal` | Generate or batch offline vocal stems |
 
-`run`, `wave`, and `inspect` also accept runtime snapshots on this candidate
+`run`, `wave`, and `inspect` also accept runtime snapshots in V16
 branch using `--runtime` and repeated `--param name=value` values. Details are
 in the [CLI runtime section](docs/cli.md#runtime-parameter-snapshots-candidate-api).
 

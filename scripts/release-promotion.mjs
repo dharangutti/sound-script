@@ -34,7 +34,8 @@ export async function waitForNuget(version, {
         const response = await fetch('https://api.nuget.org/v3-flatcontainer/soundscript/index.json', { signal: AbortSignal.timeout(Math.max(1, Math.min(15000, remaining))), cache: 'no-store' });
         if (!response.ok) throw new Error(`NuGet HTTP ${response.status}`);
         return response.json();
-    }, sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), now = Date.now, timeout = 600000,
+    }, sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), now = Date.now, timeout = 3600000,
+    report = console.log,
 } = {}) {
     if (!semver(version) || version.includes('+')) throw new Error('Invalid or unsupported NuGet version; build metadata must not be silently normalized.');
     const deadline = now() + timeout;
@@ -43,9 +44,11 @@ export async function waitForNuget(version, {
         try {
             const result = await fetchIndex(Math.max(1, deadline - now()));
             if (Array.isArray(result.versions) && result.versions.includes(version.toLowerCase())) return;
+            detail = 'exact version not listed';
         } catch (error) { detail = error.message; }
         const remaining = deadline - now();
         if (remaining <= 0) break;
+        report(`Waiting for SoundScript ${version} on NuGet: ${detail}; ${Math.ceil(remaining / 60000)} minute(s) remaining.`);
         await sleep(Math.min(30000, remaining));
     } while (now() < deadline);
     throw new Error(`SoundScript ${version} public availability not verified: ${detail}. Publication may have succeeded; rerun promotion after NuGet indexing.`);
@@ -58,8 +61,8 @@ export function promote(state, notes, published, current) {
     const headings = notes.match(/^## [^\r\n]+/gm) ?? [];
     const matching = headings.filter(heading => heading.split(/\s+/)[1] === published.version);
     const expected = `## ${published.version} — ${published.codename}`;
-    if (matching.length !== 1 || ![expected, `${expected} (unreleased)`].includes(matching[0]))
-        throw new Error('Release heading missing, duplicated, or structurally inconsistent.');
+    if (matching.length !== 1 || ![expected, `${expected} (unreleased)`, `${expected} (unpublished candidate)`].includes(matching[0]))
+        throw new Error(`Release heading missing, duplicated, or structurally inconsistent. Expected "${expected}" with an optional (unreleased) or (unpublished candidate) suffix; found ${JSON.stringify(matching)}.`);
     const next = structuredClone(state);
     if (state.publicVersion !== published.version) next.cli = { nugetPublished: false, githubReleasePublished: false };
     next.publicVersion = published.version;

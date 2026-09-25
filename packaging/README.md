@@ -99,8 +99,8 @@ corpus, without CLI or Playground binaries.
 Engine: MIT. Included wordbank corpus licensing and provenance are recorded per entry
 in the corpus metadata bundled with the library and
 [`SOURCES.md`](https://github.com/dharangutti/sound-script/blob/main/src/SoundScript.Wordbank/Data/corpus/v2026.07/en/SOURCES.md)
-(bundled under `licenses/corpus/v2026.07/en/SOURCES.md` in the V16 candidate;
-V15 packages placed it alongside `contentFiles` corpus data). The V16 candidate
+(bundled under `licenses/corpus/v2026.07/en/SOURCES.md` in V16;
+V15 packages placed it alongside `contentFiles` corpus data). V16
 owns corpus JSON/audio inside assemblies, with no consumer `contentFiles`.
 Declared licenses include CC0-1.0 and
 CC-BY-4.0; these historical declarations are not verified licensing or provenance.

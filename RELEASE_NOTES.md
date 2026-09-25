@@ -7,7 +7,7 @@
 - Add CLI parameter inspection/overrides, metadata-driven Playground controls, and monitoring console/web examples.
 - Own Wordbank corpus data inside library assemblies; preserve lazy browser audio delivery and remove consumer `contentFiles` injection.
 - Preserve static APIs and examples. Runtime imports, timing changes, arbitrary expressions and streaming remain outside scope.
-- See [candidate contracts and migration](docs/v16-candidate.md) and [DX review](docs/v16-dx-release-gate.md). This is a branch candidate, not a published release.
+- See [candidate contracts and migration](docs/v16-candidate.md) and [DX review](docs/v16-dx-release-gate.md) for the pre-publication design and validation history.
 
 ## 15.0.0 — Documentation Reliability & Developer Experience
 

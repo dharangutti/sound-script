@@ -54,7 +54,7 @@ jobs:
   verify:
     needs: resolve
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 75
     outputs:
       changed: ${{ steps.prepare.outputs.changed }}
     steps:

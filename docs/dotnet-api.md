@@ -131,11 +131,10 @@ Use CompileMedia() for synchronized audio, duration and SceneAt(t), followed by 
 
 See [the runtime guide](programmatic-media-runtime.md) and [acceptance evidence](v14-acceptance-report.md).
 
-## Runtime parameters (V16 candidate)
+## Runtime parameters (V16)
 
 The current source branch adds the opt-in `CompileRuntime` API for a fixed
-media structure with typed decimal values. It is a candidate under validation;
-these docs do not assert release or package validation.
+media structure with typed decimal values. The API was introduced in V16.
 
 ```csharp
 using SoundScript;
