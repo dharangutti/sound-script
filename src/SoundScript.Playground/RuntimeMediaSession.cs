@@ -17,8 +17,7 @@ public sealed class RuntimeMediaSession
             fill "#ef4444"
             set x xpos
             set y 300
-            set width 100
-            set height 100
+            animate radius 35 -> 110 over 3s
             set opacity intensity
         }
         """;
@@ -48,7 +47,12 @@ public sealed class RuntimeMediaSession
     public byte[] Audio { get; private set; } = [];
     public string Svg { get; private set; } = "";
     public string Json { get; private set; } = "";
-    public void Clear() { Runtime = null; Audio = []; Svg = ""; Json = ""; }
+    internal SoundScriptRuntimeSnapshot? Snapshot { get; private set; }
+    internal TimeSpan VisualDuration => Snapshot?.VisualDuration ?? TimeSpan.Zero;
+    internal string SvgAt(double seconds) => TemporalSvgRenderer.Render(
+        (Snapshot ?? throw new InvalidOperationException("Compile the source first."))
+        .SceneAt(TimeSpan.FromSeconds(Math.Clamp(seconds, 0, VisualDuration.TotalSeconds))));
+    public void Clear() { Runtime = null; Snapshot = null; Audio = []; Svg = ""; Json = ""; }
     public void Compile(string source)
     {
         Clear();
@@ -75,10 +79,10 @@ public sealed class RuntimeMediaSession
     private void Render(SoundScriptRuntimeProgram runtime)
     {
         var snapshot = runtime.Bind();
-        var scene = snapshot.SceneAt(snapshot.VisualDuration > TimeSpan.FromSeconds(2) ? TimeSpan.FromSeconds(2) : TimeSpan.Zero);
+        var scene = snapshot.SceneAt(TimeSpan.Zero);
         var audio = snapshot.RenderAudio();
         var svg = TemporalSvgRenderer.Render(scene);
         var json = TemporalVisualJson.Serialize(scene);
-        Audio = audio; Svg = svg; Json = json;
+        Snapshot = snapshot; Audio = audio; Svg = svg; Json = json;
     }
 }
