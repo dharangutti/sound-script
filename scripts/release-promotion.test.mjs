@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { identity, validatePublication, matchIdentity, waitForNuget, promote, allowedFiles, guardChanges, existingPromotion } from './release-promotion.mjs';
 import { facts, render, validateCurrent, inventory, run, repo } from './docs-state.mjs';
 
@@ -35,6 +36,49 @@ test('identity parses canonical properties and rejects invalid identity', () => 
     assert.equal(identity(xml).codename, 'A & B');
     for (const bad of [xml.replace('16.0.0', '16.0'), xml.replace('V16', 'V15'), xml.replace('<PropertyGroup>', '<PropertyGroup Condition="x">'), xml.replace('</Version>', '</Version><Version>16.0.0</Version>')]) assert.throws(() => identity(bad));
 });
+
+test('repository release notes can promote the current publication identity', () => {
+    const r = identity(fs.readFileSync(path.join(repo, 'Directory.Build.props'), 'utf8'));
+    const s = JSON.parse(fs.readFileSync(path.join(repo, 'docs/release-state.json'), 'utf8'));
+    const text = fs.readFileSync(path.join(repo, 'RELEASE_NOTES.md'), 'utf8');
+    const result = promote(s, text, r, r);
+    assert.ok(result.notes.includes(`## ${r.version} — ${r.codename}\n`) || result.notes.includes(`## ${r.version} — ${r.codename}\r\n`));
+    assert.deepEqual(promote(result.state, result.notes, r, r), result);
+});
+
+test('current repository promotion passes real documentation generation and staged homepage', t => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'soundscript-current-promotion-'));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const files = execFileSync('git', ['ls-files', '-z'], { cwd: repo, encoding: 'utf8' }).split('\0').filter(Boolean);
+    for (const file of files) {
+        const source = path.join(repo, file), destination = path.join(root, file);
+        if (!fs.statSync(source).isFile()) continue;
+        fs.mkdirSync(path.dirname(destination), { recursive: true });
+        fs.copyFileSync(source, destination);
+    }
+    const read = p => fs.readFileSync(path.join(root, p), 'utf8').replace(/^\ufeff/, '');
+    const r = identity(read('Directory.Build.props'));
+    const result = promote(JSON.parse(read('docs/release-state.json')), read('RELEASE_NOTES.md'), r, r);
+    fs.writeFileSync(path.join(root, 'docs/release-state.json'), JSON.stringify(result.state, null, 2) + '\n');
+    fs.writeFileSync(path.join(root, 'RELEASE_NOTES.md'), result.notes);
+    guardChanges(run(root).changed);
+    assert.deepEqual(run(root, true).changed, []);
+    assert.deepEqual(run(root).changed, []);
+    execFileSync('pwsh', ['-NoProfile', '-File', path.join(root, 'scripts/update-homepage-release.ps1'), '-IndexPath', path.join(root, 'docs/index.html')], { cwd: root });
+    assert.ok(read('docs/index.html').includes(`>${r.label}</span>`));
+});
+
+test('candidate heading promotion preserves historical notes and line endings', () => {
+    const r = release('16.0.0');
+    for (const newline of ['\n', '\r\n']) {
+        const text = notes(r).replace('Release testing (unreleased)', 'Release testing (unpublished candidate)').replaceAll('\n', newline);
+        const result = promote(state('15.0.0'), text, r, r);
+        assert.equal(result.notes, text.replace('Release testing (unpublished candidate)', 'Release testing'));
+        assert.deepEqual(promote(result.state, result.notes, r, r), result);
+        assert.throws(() => promote(state('15.0.0'), text.replace('(unpublished candidate)', '(unknown)'), r, r), /heading/);
+        assert.throws(() => promote(state('15.0.0'), text + text, r, r), /heading/);
+    }
+});
 test('release headings and publication/current mismatch fail before mutation', () => {
     const r = release('15.0.0'), s = state('14.0.0'), original = structuredClone(s);
     for (const text of ['', notes(r) + notes(r), notes(r).replace('Release testing', 'Wrong title')]) assert.throws(() => promote(s, text, r, r), /heading/);
@@ -56,13 +100,23 @@ test('publication requires correct repository, workflow, branch, result and actu
 });
 test('NuGet polling retries and stops within a bounded interval without networking', async () => {
     let clock = 0, attempts = 0;
-    const options = { now: () => clock, sleep: async ms => { clock += ms; }, timeout: 60000 };
+    const options = { now: () => clock, sleep: async ms => { clock += ms; }, timeout: 60000, report: () => {} };
     await waitForNuget('16.0.0', { ...options, fetchIndex: async () => ({ versions: ++attempts === 2 ? ['16.0.0'] : ['15.0.0'] }) });
     assert.equal(attempts, 2); assert.equal(clock, 30000);
     clock = 0; attempts = 0;
     await assert.rejects(waitForNuget('16.0.0', { ...options, fetchIndex: async () => { attempts++; throw new Error('unavailable'); } }), /rerun promotion after NuGet indexing/);
     assert.equal(clock, 60000); assert.equal(attempts, 2);
     await assert.rejects(waitForNuget('bad', options), /Invalid/);
+});
+
+test('default NuGet polling tolerates indexing beyond ten minutes and stops at one hour', async () => {
+    let clock = 0;
+    const options = { now: () => clock, sleep: async ms => { clock += ms; }, report: () => {} };
+    await waitForNuget('16.0.0', { ...options, fetchIndex: async () => ({ versions: clock >= 900000 ? ['16.0.0'] : [] }) });
+    assert.equal(clock, 900000);
+    clock = 0;
+    await assert.rejects(waitForNuget('16.0.0', { ...options, fetchIndex: async () => ({ versions: ['15.0.0'] }) }), /exact version not listed/);
+    assert.equal(clock, 3600000);
 });
 test('exact diff allowlist and duplicate PR prevention', () => {
     assert.deepEqual(guardChanges(['README.md', 'packaging/README.md']), ['README.md', 'packaging/README.md']);

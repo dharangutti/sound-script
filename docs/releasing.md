@@ -8,11 +8,14 @@ and the explicit publication-state update process.
 ## Publish and promote the library
 
 1. On `main`, run **Publish SoundScript NuGet package** with `publish=true`.
-2. The publication workflow validates and pushes the library package.
+2. The publication workflow validates and pushes the library package, then waits
+   for the exact public version and verifies it with a fresh consumer before
+   reporting success. With `publish=false`, green means validation only; the run
+   summary explicitly says no upload occurred.
 3. **Promote public release** checks the successful publication run and its actual
    publish step. A successful validation-only run cannot promote a release.
 4. It reads the release identity from the publication commit, checks it against
-   current `main`, and polls NuGet.org every 30 seconds for at most 10 minutes.
+   current `main`, and polls NuGet.org every 30 seconds for at most 60 minutes.
 5. A fresh `net10.0` consumer with an empty package cache restores the exact public
    package, builds, and executes deterministic WAV, MIDI and visual media APIs.
 6. The workflow generates a promotion PR updating public state, the exact release
@@ -25,6 +28,19 @@ and the explicit publication-state update process.
 The promotion workflow never republishes a package, creates a CLI tag, or merges
 its own PR. CLI channel flags reset when the public version changes; flags already
 recorded for the same public version survive reruns.
+
+Publishing uses the NuGet V3 service index. Its advertised upload resource still
+uses `/api/v2/package`; seeing that URL in push logs is expected, not an obsolete
+feed configuration. Upload acceptance precedes NuGet validation and indexing.
+Public verification checks exact-version availability and restore; gallery/search
+visibility can lag. Duplicate uploads remain safe to retry with `--skip-duplicate`,
+but still require public consumer verification. See the
+[NuGet publishing documentation](https://learn.microsoft.com/en-us/nuget/nuget-org/publish-a-package).
+
+Release-note headings must match the version and codename in `Directory.Build.props`.
+Promotion removes either `(unreleased)` or `(unpublished candidate)` from that
+exact heading, preserving historical releases. The publication workflow tests
+this contract before uploading.
 
 ### Manual recovery and verification
 
