@@ -4,7 +4,7 @@ SoundScript turns editable source into deterministic audio and queryable media.
 Choose a path by what you want to build. This is the canonical documentation index.
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
-Current public version: **15.0.0**. Publication channels are recorded in `docs/release-state.json`.
+Current public version: **16.0.0**. Publication channels are recorded in `docs/release-state.json`.
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 ## Start here

@@ -1,6 +1,6 @@
 # SoundScript Release Notes
 
-## 16.0.0 — Adaptive Runtime Parameters (unpublished candidate)
+## 16.0.0 — Adaptive Runtime Parameters
 
 - Compile controlled decimal parameters once, then update state and bind stable audio/visual snapshots through the existing renderers.
 - Add atomic updates, independent runtime instances, typed discovery and actionable diagnostics without changing static grammar or renderer algorithms.
