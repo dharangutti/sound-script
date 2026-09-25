@@ -66,4 +66,19 @@ public sealed class CorpusResourceTests : IDisposable
         Assert.Equal(new byte[] { 1, 2, 3 }, bytes);
         Assert.Null(CorpusCatalog.LoadedRoot);
     }
+
+    [Fact]
+    public void RegisteredAndReturnedAudioAreOwnedCopies()
+    {
+        Assert.True(CorpusCatalog.TryLoadAssemblyResources());
+        Assert.True(CorpusCatalog.TryGetLemma("en", "hello", out var entry));
+        byte[] caller = [1, 2, 3];
+        CorpusCatalog.RegisterAudio(entry.Audio!, caller);
+        caller[0] = 99;
+        Assert.True(CorpusCatalog.TryGetAudioBytes(entry, out var first));
+        Assert.Equal(new byte[] { 1, 2, 3 }, first);
+        first[1] = 99;
+        Assert.True(CorpusCatalog.TryGetAudioBytes(entry, out var second));
+        Assert.Equal(new byte[] { 1, 2, 3 }, second);
+    }
 }

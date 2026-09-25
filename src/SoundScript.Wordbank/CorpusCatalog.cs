@@ -164,7 +164,7 @@ public static partial class CorpusCatalog
         lock (LoadLock)
         {
             _inMemoryAudio ??= new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
-            _inMemoryAudio[audioRelativePath] = wavBytes;
+            _inMemoryAudio[audioRelativePath] = wavBytes.ToArray();
         }
     }
 
@@ -189,7 +189,7 @@ public static partial class CorpusCatalog
         {
             if (_inMemoryAudio is not null && _inMemoryAudio.TryGetValue(entry.Audio, out var mem))
             {
-                bytes = mem;
+                bytes = mem.ToArray();
                 return true;
             }
         }

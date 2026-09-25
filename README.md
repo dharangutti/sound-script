@@ -22,6 +22,23 @@ validation; it is not part of a validated package release. See the
 [runtime parameter guide](docs/runtime-parameters.md) and [basic .NET host
 sample](samples/RuntimeParameters/README.md).
 
+```csharp
+var runtime = SoundScript.SoundScriptEngine.CompileRuntime("""
+    param intensity = 0.25
+    perform expressive
+    track cue { gain intensity C4 q }
+    visual "indicator" for 2s { shape circle set opacity intensity }
+    """);
+File.WriteAllBytes("normal.wav", runtime.RenderAudio());
+runtime.Set("intensity", 0.9m);
+File.WriteAllBytes("critical.wav", runtime.RenderAudio());
+var scene = runtime.SceneAt(TimeSpan.FromSeconds(1));
+```
+
+The update changes typed state; source parsing happens once. Each render still
+uses the existing deterministic media pipeline. See [candidate migration and
+release notes](docs/v16-candidate.md).
+
 ## See it work
 
 ### Transcribe a melody
@@ -228,7 +245,7 @@ Current public version: **15.0.0**. Publication channels are recorded in `docs/r
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
-Development: **15.0.0 / V15 — Documentation Reliability & Developer Experience**. Development identity does not imply publication.
+Development: **16.0.0-preview.1 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 Release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).

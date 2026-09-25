@@ -15,7 +15,8 @@ public sealed record SoundScriptRuntimeParameter(string Name, decimal Default, d
     internal void Validate(decimal value)
     {
         if (value < Minimum || value > Maximum)
-            throw new ArgumentOutOfRangeException(Name, value, $"Expected {Minimum} through {Maximum}.");
+            throw new ArgumentOutOfRangeException(Name, value,
+                FormattableString.Invariant($"Parameter '{Name}' received {value}. Expected decimal {Minimum} through {Maximum}."));
     }
 }
 
@@ -48,9 +49,23 @@ public sealed class SoundScriptRuntimeProgram
         values = Parameters.ToDictionary(p => p.Name, p => p.Default, StringComparer.Ordinal);
     }
 
+    private SoundScriptRuntimeProgram(SoundScriptRuntimeProgram compiled)
+    {
+        template = compiled.template; timeline = compiled.timeline; options = compiled.options;
+        Parameters = compiled.Parameters; definitions = compiled.definitions;
+        values = Parameters.ToDictionary(p => p.Name, p => p.Default, StringComparer.Ordinal);
+        tokenizationCount = compiled.tokenizationCount; parseCount = compiled.parseCount;
+        timelineCompilationCount = compiled.timelineCompilationCount;
+    }
+
+    /// <summary>Create independent default parameter state over the same compiled structure, without parsing.</summary>
+    /// <remarks>The new instance starts at revision zero. Neither current values nor snapshots are shared.
+    /// Instances own managed memory only and do not require disposal.</remarks>
+    public SoundScriptRuntimeProgram CreateInstance() => new(this);
+
     /// <summary>Read-only decimal parameter metadata in declaration order.</summary>
     public IReadOnlyList<SoundScriptRuntimeParameter> Parameters { get; }
-    /// <summary>Structural compile counts for this instance.</summary>
+    /// <summary>Structural compile counts for the owned or shared compiled structure.</summary>
     public RuntimeCompilationStatistics Statistics => new(tokenizationCount, parseCount, timelineCompilationCount);
     /// <summary>The state revision; no-op or rejected updates do not advance it.</summary>
     public long Revision { get { lock (gate) return revision; } }
@@ -71,7 +86,9 @@ public sealed class SoundScriptRuntimeProgram
     /// <summary>Accept external data only when it is decimal; strings are never evaluated or coerced.</summary>
     public void Set(string name, object? value)
     {
-        if (value is not decimal number) throw new ArgumentException("Runtime values must be System.Decimal.", nameof(value));
+        _ = Definition(name);
+        if (value is not decimal number)
+            throw new ArgumentException($"Parameter '{name}' requires System.Decimal; received {value?.GetType().Name ?? "null"}. Supply a decimal value such as 0.5m.", nameof(value));
         Set(name, number);
     }
 
@@ -123,8 +140,20 @@ public sealed class SoundScriptRuntimeProgram
     public byte[] RenderAudio() => Bind().RenderAudio();
     /// <summary>Project the current state at the existing media clock's time.</summary>
     public TemporalVisualScene SceneAt(TimeSpan time) => Bind().SceneAt(time);
-    private SoundScriptRuntimeParameter Definition(string name) => definitions.TryGetValue(name, out var p)
-        ? p : throw new ArgumentException($"Unknown runtime parameter '{name}'.", nameof(name));
+    private SoundScriptRuntimeParameter Definition(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Supply a non-empty, case-sensitive runtime parameter name from Parameters.", nameof(name));
+        return definitions.TryGetValue(name, out var p) ? p : throw new ArgumentException(
+            $"Unknown runtime parameter '{name}'. Names are case-sensitive. " +
+            (Parameters.Count == 0 ? "This program declares no runtime parameters." : "Available: " + string.Join(", ", Parameters.Select(d => d.Name)) + "."), nameof(name));
+    }
+
+    /// <summary>Compact parameter-state inspection without exposing compiled internals or media payloads.</summary>
+    public override string ToString()
+    {
+        lock (gate) return $"Runtime revision {revision}: " + (values.Count == 0 ? "no parameters" :
+            string.Join(", ", values.Select(p => FormattableString.Invariant($"{p.Key}={p.Value}"))));
+    }
 
     // Count actual calls at the sole structural-compilation boundary. Updates have
     // neither a source string nor a parser, and cannot invalidate this structure.

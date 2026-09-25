@@ -1,0 +1,6 @@
+Rendered runtime snapshot to artifacts/v16-cli-canonical/normal.mid.
+normal: MIDI matches API 0473A3B5DDE731AC6AF74EE04B9D9B4B87A5BC16CB7216759EE8B602BC2A3F89
+Rendered runtime snapshot to artifacts/v16-cli-canonical/warning.mid.
+warning: MIDI matches API AE04A8F32AB9F3CC3CBC4D5D5970AABEB176B0A03639C565828991B8737EF69F
+Rendered runtime snapshot to artifacts/v16-cli-canonical/critical.mid.
+critical: MIDI matches API 89F4BB23EB2F8E2C999689A8D3CB78ACF82CE1402C8B2197069B0E8B6737A6D3

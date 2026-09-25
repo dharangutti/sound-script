@@ -1,0 +1,3 @@
+PASS browser startup: normal, target requests: 1
+PASS browser startup: 503, target requests: 2
+PASS browser startup: corrupt, target requests: 3

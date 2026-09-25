@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/SoundScript/SoundScript.csproj" />
+    <ProjectReference Include="../../src/SoundScript.Media/SoundScript.Media.csproj" />
     <None Update="monitor.ss" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

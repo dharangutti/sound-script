@@ -9,8 +9,12 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data\**\*.json" Exclude="Data\corpus\**\*" />
-    <EmbeddedResource Include="Data\corpus\**\*.json;Data\corpus\**\*.wav" LogicalName="Corpus/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Data\corpus\**\*.json" LogicalName="Corpus/%(RecursiveDir)%(Filename)%(Extension)" />
     <Content Include="Data\corpus\**\*" CopyToOutputDirectory="PreserveNewest" Link="Data\corpus\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundScript.Wordbank.Corpus\SoundScript.Wordbank.Corpus.csproj" />
   </ItemGroup>
 
   <ItemGroup>

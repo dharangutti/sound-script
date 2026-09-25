@@ -183,6 +183,7 @@ try {
     }
     $licenseEntries = @($entryNames | Where-Object { $_ -match '(?i)^licenses/.+' })
     if ($licenseEntries.Count -eq 0) { Fail 'Package has no bundled third-party/license notices.' }
+    if ($entryNames -notcontains 'licenses/corpus/v2026.07/en/SOURCES.md') { Fail 'Corpus provenance notice missing from package licenses.' }
     $injectedEntries = @($entryNames | Where-Object { $_ -match '(?i)^(contentFiles|build|buildTransitive|analyzers|tools)/' })
     if ($injectedEntries.Count -gt 0) { Fail "Unexpected consumer content/imports: $($injectedEntries -join ', ')" }
     else { Pass 'No contentFiles, build, buildTransitive, analyzers, or tools injected into consumers' }
@@ -345,6 +346,17 @@ if (first.RenderAudio().SequenceEqual(changed.RenderAudio())) throw new Exceptio
 if (!changed.RenderAudio().SequenceEqual(runtime.RenderAudio())) throw new Exception("Runtime audio is not deterministic.");
 if (runtime.Statistics.Parses != 1) throw new Exception("Runtime source reparsed.");
 Console.WriteLine($"RUNTIME_SCENE={changed.SceneAt(TimeSpan.FromSeconds(2)).Primitives.Count}");
+var independent = runtime.CreateInstance();
+if (independent.Get("intensity") != 0.25m || independent.Revision != 0) throw new Exception("Independent runtime did not start from defaults.");
+try { runtime.Set("intensity", 2m); throw new Exception("Invalid value was accepted."); }
+catch (ArgumentOutOfRangeException ex)
+{
+    if (!ex.Message.Contains("intensity") || !ex.Message.Contains("0 through 1")) throw new Exception("Unhelpful constraint diagnostic.");
+    Console.WriteLine($"EXPECTED_DIAGNOSTIC={ex.Message}");
+}
+if (runtime.Get("intensity") != 0.8m) throw new Exception("Rejected update changed state.");
+runtime.Reset();
+if (!first.RenderAudio().SequenceEqual(runtime.RenderAudio())) throw new Exception("Runtime reset changed defaults.");
 WordbankCatalog.ResetToEmbedded();
 CorpusCatalog.Reset();
 if (!CorpusCatalog.TryLoadEmbedded() || !CorpusCatalog.TryGetLemma("en", "hello", out var lemma)) throw new Exception("Embedded corpus metadata missing.");
@@ -354,7 +366,9 @@ if (vocal.Length <= 44 || CorpusCatalog.LoadedRoot is not null) throw new Except
 Console.WriteLine($"VOCAL_BYTES={vocal.Length}");
 '@
     Set-Content -LiteralPath (Join-Path $consumerRoot 'Program.cs') -Value $consumerProgram -Encoding UTF8
-    Invoke-DotNet @('add', $consumerProject, 'package', $packageId, '--version', $nuspecVersion) | Out-Null
+    # Add only the reference, then perform a full explicit restore with the
+    # isolated config/cache below. The CLI's no-restore advisory is retained.
+    Invoke-DotNet @('add', $consumerProject, 'package', $packageId, '--version', $nuspecVersion, '--no-restore') | Out-Null
     Invoke-DotNet @('restore', $consumerProject, '--configfile', $configPath, '--packages', $nugetCache) | Out-Null
     Invoke-DotNet @('build', $consumerProject, '--no-restore', '-c', 'Release') | Out-Null
     Push-Location $consumerRoot

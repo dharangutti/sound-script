@@ -1,0 +1,52 @@
+{
+  "url": "http://127.0.0.1:51519/",
+  "browser": "Chromium / Blazor WebAssembly",
+  "parseCount": "1",
+  "wavHashes": {
+    "normal": "faa98bc77125ccf385e04472a77d5002408144f8305e0b35b4929347783b4ae0",
+    "critical": "70ea91ad0f8355b7ade1072601282944aebce775b15c104a7d56f43e88bfaa1a",
+    "recompiled": "c71280abf4dc0e331aff7092d73d7510a3f28c5013af66d269f841c31cb494fb"
+  },
+  "visual": {
+    "normal": {
+      "x": 200,
+      "width": 100,
+      "opacity": 0.25
+    },
+    "critical": {
+      "x": 900,
+      "width": 100,
+      "opacity": 0.9
+    }
+  },
+  "assertions": [
+    "parameter metadata",
+    "gain changes WAV",
+    "xpos and intensity update SVG",
+    "reset restores exact outputs",
+    "invalid input preserves outputs and reports error",
+    "source edit clears and recompiles runtime"
+  ],
+  "pageErrors": [],
+  "corpusRequests": [],
+  "responsive": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "editorWidth": 673,
+      "editorHeight": 384
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "editorWidth": 465,
+      "editorHeight": 384
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "editorWidth": 328.8125,
+      "editorHeight": 320
+    }
+  ]
+}

@@ -65,19 +65,27 @@ const runtimeError = document.querySelector('#runtime-error');
 const runtimeAudio = document.querySelector('#runtime-audio');
 const runtimeScene = document.querySelector('#runtime-scene');
 let runtimeGeneration = 0;
+let runtimeParameters = [];
 async function loadRuntimeInfo() {
     try {
         const response = await fetch('/api/runtime/info');
         if (!response.ok) throw new Error('Runtime schema request failed');
         const info = await response.json();
+        runtimeParameters = info.parameters;
+        for (const [name, control] of [['intensity', runtimeIntensity], ['xpos', runtimeXpos]]) {
+            const parameter = runtimeParameters.find(p => p.name === name);
+            control.min = parameter.minimum; control.max = parameter.maximum; control.step = 'any';
+        }
         runtimeStatus.value = `Compiled once · tokenize ${info.statistics.tokenizations}, parse ${info.statistics.parses}, timeline ${info.statistics.timelineCompilations}`;
         await applyRuntimeValues();
     } catch (e) { runtimeError.textContent = e.message; }
 }
 async function applyRuntimeValues() {
     const intensity = Number(runtimeIntensity.value), xpos = Number(runtimeXpos.value);
-    if (!Number.isFinite(intensity) || intensity < 0 || intensity > 1 || !Number.isInteger(xpos) || xpos < -12800 || xpos > 12800) {
-        runtimeError.textContent = 'Enter intensity from 0 to 1 and an integer x position from -12800 to 12800.';
+    const values = { intensity, xpos };
+    const invalid = runtimeParameters.find(p => !Number.isFinite(values[p.name]) || values[p.name] < p.minimum || values[p.name] > p.maximum);
+    if (invalid || runtimeIntensity.value.trim() === '' || runtimeXpos.value.trim() === '') {
+        runtimeError.textContent = invalid ? `${invalid.name} requires a decimal from ${invalid.minimum} to ${invalid.maximum}.` : 'Enter a decimal value for each parameter.';
         return;
     }
     const generation = ++runtimeGeneration;

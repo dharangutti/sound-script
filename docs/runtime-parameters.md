@@ -54,14 +54,22 @@ For a trusted source file, `CompileRuntimeFile(path, allowedRoot)` retains the f
 
 See the self-contained [C# monitoring host sample](../samples/RuntimeParameters/README.md), the existing [programmable media guide](programmatic-media-runtime.md), and the [CLI reference](cli.md#runtime-parameter-snapshots-candidate-api).
 
+## State ownership and lifetime
+
+`runtime.CreateInstance()` reuses the compiled structure with independent default values and revision zero. It performs no parsing. Use it for separate game entities or application sessions; updates and reset on one instance cannot change another. Instances hold managed memory and need no disposal. Release host references when finished; retained snapshots stay usable. `runtime.ToString()` provides a compact revision/value summary.
+
+Names are case-sensitive ASCII letters/digits beginning with a letter. Defaults are mandatory; there is no unresolved required-value state. Passing strings, integers, doubles (including NaN/infinity) or null to `Set` is rejected; use decimal literals such as `0.8m`. A program without parameters is valid and has an empty schema. `SetMany` validates before committing and preserves the last valid state after a rejected batch. Do not mutate the caller's batch dictionary while passing it to `SetMany`.
+
+State operations are synchronized. Bind once for matching audio and scene output; separate convenience calls may capture different revisions when another thread updates between calls. Independent snapshots can render concurrently. Returned media buffers and scene projections do not expose the compiled AST; keep external sample assets stable while rendering.
+
 ## CLI
 
 The CLI accepts a single snapshot from a runtime source file:
 
 ```bash
-soundscript inspect examples/monitor.ss --runtime --params --param intensity=0.9 --param xpos=900 --at 2 --json
-soundscript wave examples/monitor.ss --runtime --param intensity=0.9 --param xpos=900 --out critical.wav
-soundscript run examples/monitor.ss --runtime --param intensity=0.9 --out critical.mid
+soundscript inspect samples/RuntimeParameters/monitor.ss --runtime --params --param intensity=0.9 --param xpos=900 --at 2 --json
+soundscript wave samples/RuntimeParameters/monitor.ss --runtime --param intensity=0.9 --param xpos=900 --out critical.wav
+soundscript run samples/RuntimeParameters/monitor.ss --runtime --param intensity=0.9 --out critical.mid
 ```
 
 `inspect --params` lists each declared parameter's decimal default, bounds, and current value. Repeated `--param name=value` options override defaults using invariant decimal notation. The `run` and `wave` commands render one MIDI or ordinary Wave snapshot, respectively; they do not start an interactive session. See [CLI runtime snapshots](cli.md#runtime-parameter-snapshots-candidate-api).
@@ -70,4 +78,4 @@ soundscript run examples/monitor.ss --runtime --param intensity=0.9 --out critic
 
 The **Adaptive media — runtime parameters** panel is a separate demonstration in the Audio/Visual workspace. Load or edit the monitoring source, choose **Compile**, then update the discovered controls and choose **Apply state**. It uses `SoundScriptEngine.CompileRuntime`, applies `SetMany`, binds a snapshot, and renders the changed audio and scene. **Reset values** restores declared defaults. Editing source requires another explicit compile. The existing static visual examples and their timeline authoring/playback path remain available alongside it. Playback is an offline complete WAV through browser audio controls, not streaming synthesis.
 
-This source-branch feature is a candidate under validation. Its documentation and samples describe the candidate implementation; they do not claim that a package release or release process has validated it.
+This is an unpublished candidate. Local acceptance and external-package checks are recorded in the [V16 acceptance report](v16-acceptance-report.md) and [developer-experience gate](v16-dx-release-gate.md); publication remains a separate human decision.

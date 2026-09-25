@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored <temp>/soundscript-media-consumer-3ff50b92d07e4a42987dc9221c7a3144\Consumer.csproj (in 17.03 sec).
+  Consumer -> <temp>/soundscript-media-consumer-3ff50b92d07e4a42987dc9221c7a3144\bin\Release\net10.0\Consumer.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:08.77
+Healthy: 4.000s; 2 primitives
+Warning: 4.000s; 2 primitives
+Critical: 4.000s; 2 primitives
+Artifacts and SHA-256 inventory: <temp>/soundscript-media-consumer-3ff50b92d07e4a42987dc9221c7a3144\first
+Healthy: 4.000s; 2 primitives
+Warning: 4.000s; 2 primitives
+Critical: 4.000s; 2 primitives
+Artifacts and SHA-256 inventory: <temp>/soundscript-media-consumer-3ff50b92d07e4a42987dc9221c7a3144\second
+PASS: compiled and ran documentation example: docs/programmatic-media-runtime.md
+PASS: compiled and ran documentation example: docs/articles/programmable-media-runtime-dotnet.md
+00:00:04
+PASS: compiled and ran documentation example: docs/tutorials/programmable-media.md
+PASS: isolated package-only consumer; two independent runs; 22 matching hashes; three distinct media scenarios; parsed security SVG.
+Workspace retained: <temp>/soundscript-media-consumer-3ff50b92d07e4a42987dc9221c7a3144

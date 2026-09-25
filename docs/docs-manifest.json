@@ -143,7 +143,14 @@
     "src/SoundScript.Wave/SoundScript.Wave.csproj",
     "src/SoundScript.Web/SoundScript.Web.csproj",
     "src/SoundScript.Wordbank/SoundScript.Wordbank.csproj",
-    "src/SoundScript/SoundScript.csproj"
+    "src/SoundScript/SoundScript.csproj",
+    "docs/runtime-parameters.md",
+    "docs/v16-candidate.md",
+    "samples/RuntimeParameters/README.md",
+    "scripts/runtime-media-browser.cjs",
+    "src/SoundScript.Wordbank.Corpus/SoundScript.Wordbank.Corpus.csproj",
+    "docs/v16-dx-release-gate.md",
+    "docs/v16-acceptance-report.md"
   ],
   "historicalDocuments": [
     "RELEASE_NOTES.md",

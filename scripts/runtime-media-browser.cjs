@@ -1,6 +1,6 @@
-// Serve and exercise the real local Blazor WebAssembly publish:
-//   node scripts/runtime-media-browser.cjs artifacts/playground
-// Set PLAYWRIGHT_MODULE or CHROMIUM_PATH when Playwright/browser lives elsewhere.
+// Serve and exercise a local Blazor WebAssembly publish:
+//   node scripts/runtime-media-browser.cjs <publish-directory>
+// Defaults to artifacts/playground. Set PLAYWRIGHT_MODULE or CHROMIUM_PATH when needed.
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -29,18 +29,33 @@ async function snapshot(page) {
     const svg = document.querySelector('[data-testid="runtime-scene"] svg');
     const indicator = svg?.querySelector('g[data-name="indicator"]');
     if (!indicator) throw new Error('Rendered indicator is missing from the runtime SVG.');
-    const shape = indicator.querySelector('ellipse, rect');
+    const shape = indicator.querySelector('ellipse, rect, path');
+    if (!shape) throw new Error('Rendered indicator geometry is missing from the runtime SVG.');
+    let x, width;
+    if (shape.localName === 'path') {
+      const bounds = shape.getBBox();
+      x = bounds.x + bounds.width / 2;
+      width = bounds.width;
+    } else if (shape.localName === 'ellipse') {
+      x = Number(shape.getAttribute('cx'));
+      width = Number(shape.getAttribute('rx')) * 2;
+    } else {
+      width = Number(shape.getAttribute('width'));
+      x = Number(shape.getAttribute('x')) + width / 2;
+    }
     return {
       wavBase64: audio.src.slice(prefix.length),
       svg: svg.outerHTML,
       opacity: Number(indicator.getAttribute('opacity')),
-      x: Number(shape.getAttribute(shape.localName === 'ellipse' ? 'cx' : 'x'))
+      x,
+      width
     };
   }).then(value => ({
     wavHash: digest(Buffer.from(value.wavBase64, 'base64')),
     svg: value.svg,
     opacity: value.opacity,
-    x: value.x
+    x: value.x,
+    width: value.width
   }));
 }
 
@@ -64,6 +79,8 @@ async function waitForRevision(page, previous) {
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
     const pageErrors = [];
+    const corpusRequests = [];
+    page.on('request', request => { if (/SoundScript\.Wordbank\.Corpus[^/]*\.wasm/.test(request.url())) corpusRequests.push(request.url()); });
     page.on('pageerror', error => pageErrors.push(error.message));
     await page.goto(baseUrl);
     await page.locator('#visual-workspace-tab').waitFor({ timeout: 90000 });
@@ -84,14 +101,15 @@ async function waitForRevision(page, previous) {
     const baseline = await snapshot(page);
     assert.equal(baseline.opacity, 0.25);
     assert.equal(baseline.x, 200);
+    assert.equal(baseline.width, 100, 'indicator must render at its declared width');
 
-    await page.getByTestId('runtime-value-intensity').fill('0.8');
+    await page.getByTestId('runtime-value-intensity').fill('0.9');
     await page.getByTestId('runtime-value-xpos').fill('900');
     await page.getByTestId('runtime-apply').click();
     await waitForRevision(page, 0);
     const critical = await snapshot(page);
     assert.notEqual(critical.wavHash, baseline.wavHash, 'changing gain must change rendered WAV bytes');
-    assert.equal(critical.opacity, 0.8, 'intensity must update SVG opacity');
+    assert.equal(critical.opacity, 0.9, 'intensity must update SVG opacity');
     assert.equal(critical.x, 900, 'xpos must move the indicator center');
     assert.equal(await page.getByTestId('runtime-status').getAttribute('data-parse-count'), parseCount,
       'parameter updates must reuse the compiled runtime');
@@ -120,17 +138,63 @@ async function waitForRevision(page, previous) {
     const recompiled = await snapshot(page);
     assert.notEqual(recompiled.wavHash, reset.wavHash, 'compiling edited source must replace prior output');
     assert.equal(await page.getByTestId('runtime-status').getAttribute('data-parse-count'), '1');
+    const responsive = [];
+    fs.mkdirSync('artifacts/v16-dx-browser', { recursive: true });
+    for (const [width, height] of [[1440, 1000], [1024, 768], [390, 844]]) {
+      await page.setViewportSize({ width, height });
+      const sourceBox = await page.getByTestId('runtime-source').boundingBox();
+      assert.ok(sourceBox.width > 200 && sourceBox.height >= 300, 'source remains a usable editor');
+      assert.ok(sourceBox.x >= 0 && sourceBox.x + sourceBox.width <= width + 1, 'editor fits viewport');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'workspace must not scroll sideways');
+      await page.getByTestId('runtime-apply').scrollIntoViewIfNeeded();
+      const button = await page.getByTestId('runtime-apply').boundingBox();
+      assert.ok(button.x >= 0 && button.x + button.width <= width, 'Apply remains reachable');
+      await page.getByTestId('runtime-value-intensity').focus();
+      assert.equal(await page.getByTestId('runtime-value-intensity').evaluate(e => e === document.activeElement), true);
+      await page.screenshot({ path: `artifacts/v16-dx-browser/runtime-${width}.png`, fullPage: true });
+      responsive.push({ width, height, editorWidth: sourceBox.width, editorHeight: sourceBox.height });
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByTestId('runtime-source').fill('track cue { C4 q }');
+    await page.getByTestId('runtime-compile').click();
+    await page.getByTestId('runtime-empty').waitFor();
+    assert.equal(await page.getByTestId('runtime-controls').count(), 0, 'static programs must not show empty parameter controls');
+    assert.equal(await page.getByTestId('runtime-audio').count(), 1);
+    await page.locator('#music-workspace-tab').click();
+    await page.getByLabel('Enable In-Browser Vocal Engine').check();
+    await page.locator('.vocal-toggle-status.vocal-on').waitFor({ timeout: 30000 });
+    assert.ok(await page.locator('#main-example-select option').count() > 15, 'existing examples remain available');
+    await page.selectOption('#main-example-select', 'core-melody');
+    await page.getByRole('button', { name: 'Run', exact: true }).first().click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.status')].some(e => e.textContent.startsWith('Playing')), null, { timeout: 30000 });
+    const midiDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Download MIDI', exact: true }).click();
+    await (await midiDownload).saveAs('artifacts/v16-dx-browser/music.mid');
+    assert.equal(fs.readFileSync('artifacts/v16-dx-browser/music.mid').subarray(0, 4).toString(), 'MThd');
+    await page.getByRole('button', { name: 'Stop', exact: true }).first().click();
+    await page.selectOption('#wave-example-select', 'wave-speak');
+    await page.locator('.studio').getByRole('button', { name: '▶ Play', exact: true }).click();
+    const waveButton = page.locator('.studio').getByRole('button', { name: 'Download WAV', exact: true });
+    await page.waitForFunction(() => [...document.querySelectorAll('.studio button')].some(e => e.textContent.includes('Download WAV') && !e.disabled), null, { timeout: 60000 });
+    const waveDownload = page.waitForEvent('download');
+    await waveButton.click();
+    await (await waveDownload).saveAs('artifacts/v16-dx-browser/vocal.wav');
+    assert.equal(fs.readFileSync('artifacts/v16-dx-browser/vocal.wav').subarray(0, 4).toString(), 'RIFF');
+    await page.locator('.studio').getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.locator('#visual-workspace-tab').click();
+    assert.equal(await page.locator('#visual-timeline-source').count(), 1, 'existing temporal editor remains available');
     assert.deepEqual(pageErrors, [], 'Blazor page must not report browser exceptions');
+    assert.deepEqual(corpusRequests, [], 'Corpus WAV assembly must remain lazy during ordinary/runtime startup');
 
     console.log(JSON.stringify({
       url: baseUrl,
       browser: 'Chromium / Blazor WebAssembly',
       parseCount,
       wavHashes: { normal: baseline.wavHash, critical: critical.wavHash, recompiled: recompiled.wavHash },
-      visual: { normal: { x: baseline.x, opacity: baseline.opacity }, critical: { x: critical.x, opacity: critical.opacity } },
+      visual: { normal: { x: baseline.x, width: baseline.width, opacity: baseline.opacity }, critical: { x: critical.x, width: critical.width, opacity: critical.opacity } },
       assertions: ['parameter metadata', 'gain changes WAV', 'xpos and intensity update SVG', 'reset restores exact outputs',
         'invalid input preserves outputs and reports error', 'source edit clears and recompiles runtime'],
-      pageErrors
+      pageErrors, corpusRequests, responsive
     }, null, 2));
   } finally {
     await browser.close();

@@ -1,18 +1,45 @@
 using SoundScript.Wordbank.Models;
+using SoundScript.Wordbank.Corpus;
+using System.Runtime.CompilerServices;
 
 namespace SoundScript.Wordbank;
 
 public static partial class CorpusCatalog
 {
     private static bool _usingResources;
-    private static readonly Lazy<IReadOnlyDictionary<string, string>> CorpusResources = new(() =>
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> CorpusMetadataResources = new(() =>
         typeof(CorpusCatalog).Assembly.GetManifestResourceNames()
             .Where(n => n.StartsWith("Corpus/", StringComparison.Ordinal))
+            .Where(n => n.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
             .ToDictionary(n => n.Replace('\\', '/'), n => n, StringComparer.Ordinal));
 
-    private static Stream? OpenCorpusResource(string corpusId, string relativePath) =>
-        CorpusResources.Value.TryGetValue($"Corpus/v{corpusId}/{relativePath.Replace('\\', '/')}", out var name)
-            ? typeof(CorpusCatalog).Assembly.GetManifestResourceStream(name) : null;
+    // Keep the audio assembly reference behind the browser check. Blazor marks this
+    // assembly as lazy-loaded, while browser playback fetches each WAV over HTTP.
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> CorpusAudioResources = new(() =>
+        GetAudioResourceAssembly().GetManifestResourceNames()
+            .Where(n => n.StartsWith("Corpus/", StringComparison.Ordinal))
+            .Where(n => n.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(n => n.Replace('\\', '/'), n => n, StringComparer.Ordinal));
+
+    private static Stream? OpenCorpusResource(string corpusId, string relativePath)
+    {
+        var key = $"Corpus/v{corpusId}/{relativePath.Replace('\\', '/')}";
+        if (relativePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+        {
+            if (OperatingSystem.IsBrowser()) return null;
+            var audioAssembly = GetAudioResourceAssembly();
+            return CorpusAudioResources.Value.TryGetValue(key, out var audioName)
+                ? audioAssembly.GetManifestResourceStream(audioName) : null;
+        }
+
+        var metadataAssembly = typeof(CorpusCatalog).Assembly;
+        return CorpusMetadataResources.Value.TryGetValue(key, out var metadataName)
+            ? metadataAssembly.GetManifestResourceStream(metadataName) : null;
+    }
+
+    // Keep the lazy-loaded assembly reference out of methods that run in the browser.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static System.Reflection.Assembly GetAudioResourceAssembly() => typeof(CorpusResourceMarker).Assembly;
 
     // Internal entry point also lets regression tests exercise installed-package behavior
     // when the source checkout has its traditional Data/corpus output tree.
@@ -51,11 +78,17 @@ public static partial class CorpusCatalog
         {
             if (!_usingResources || _loadedRoot is not null) return;
             if (OperatingSystem.IsBrowser()) return;
-            var assembly = typeof(CorpusCatalog).Assembly;
+            var metadataAssembly = typeof(CorpusCatalog).Assembly;
+            var audioAssembly = GetAudioResourceAssembly();
+            var assemblyVersionKey = $"{metadataAssembly.ManifestModule.ModuleVersionId:N}-{audioAssembly.ManifestModule.ModuleVersionId:N}";
             var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SoundScript", "corpus", assembly.ManifestModule.ModuleVersionId.ToString("N"), $"v{_corpusId}");
+                "SoundScript", "corpus", assemblyVersionKey, $"v{_corpusId}");
             var prefix = $"Corpus/v{_corpusId}/";
-            foreach (var (logicalName, resourceName) in CorpusResources.Value)
+            var resources = CorpusMetadataResources.Value
+                .Select(pair => (pair.Key, pair.Value, Assembly: metadataAssembly))
+                .Concat(CorpusAudioResources.Value
+                    .Select(pair => (pair.Key, pair.Value, Assembly: audioAssembly)));
+            foreach (var (logicalName, resourceName, assembly) in resources)
             {
                 if (!logicalName.StartsWith(prefix, StringComparison.Ordinal)) continue;
                 var path = Path.GetFullPath(Path.Combine(root, logicalName[prefix.Length..].Replace('/', Path.DirectorySeparatorChar)));

@@ -30,6 +30,7 @@ public static partial class CommandHandlers
             if (args.Has("json")) Diagnostics.WriteResult(args.Command, args.Input, [], results: new { parameters, scene });
             else
             {
+                if (parameters.Length == 0) Console.WriteLine("This program declares no runtime parameters.");
                 foreach (var p in parameters) Console.WriteLine(FormattableString.Invariant($"{p.Name}: decimal = {p.Value} (default {p.Default}, range {p.Minimum}..{p.Maximum})"));
                 if (scene is not null) Console.WriteLine(TemporalVisualJson.Serialize(scene));
             }

@@ -7,9 +7,9 @@
     public documentation reads its independent state from docs/release-state.json.
   -->
   <PropertyGroup>
-    <Version>15.0.0</Version>
-    <SoundScriptVersionLabel>V15</SoundScriptVersionLabel>
-    <SoundScriptCodename>Documentation Reliability &amp; Developer Experience</SoundScriptCodename>
+    <Version>16.0.0-preview.1</Version>
+    <SoundScriptVersionLabel>V16</SoundScriptVersionLabel>
+    <SoundScriptCodename>Adaptive Runtime Parameters</SoundScriptCodename>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

@@ -1,0 +1,25 @@
+  SoundScript.Wordbank.Corpus -> <repo>\src\SoundScript.Wordbank.Corpus\bin\Debug\net10.0\SoundScript.Wordbank.Corpus.dll
+  SoundScript.Wordbank -> <repo>\src\SoundScript.Wordbank\bin\Release\net10.0\SoundScript.Wordbank.dll
+  SoundScript.Core -> <repo>\src\SoundScript.Core\bin\Release\net10.0\SoundScript.Core.dll
+  SoundScript.Wave -> <repo>\src\SoundScript.Wave\bin\Release\net10.0\SoundScript.Wave.dll
+  SoundScript.Parser -> <repo>\src\SoundScript.Parser\bin\Release\net10.0\SoundScript.Parser.dll
+  SoundScript.Voice -> <repo>\src\SoundScript.Voice\bin\Release\net10.0\SoundScript.Voice.dll
+  SoundScript.Visual -> <repo>\src\SoundScript.Visual\bin\Release\net10.0\SoundScript.Visual.dll
+  SoundScript.Media -> <repo>\src\SoundScript.Media\bin\Release\net10.0\SoundScript.Media.dll
+  SoundScript.Midi -> <repo>\src\SoundScript.Midi\bin\Release\net10.0\SoundScript.Midi.dll
+  SoundScript.Transcription -> <repo>\src\SoundScript.Transcription\bin\Release\net10.0\SoundScript.Transcription.dll
+  SoundScript.Compose -> <repo>\src\SoundScript.Compose\bin\Release\net10.0\SoundScript.Compose.dll
+  SoundScript.Timbre -> <repo>\src\SoundScript.Timbre\bin\Release\net10.0\SoundScript.Timbre.dll
+  SoundScript.Prosody -> <repo>\src\SoundScript.Prosody\bin\Release\net10.0\SoundScript.Prosody.dll
+  SoundScript.Vocal -> <repo>\src\SoundScript.Vocal\bin\Release\net10.0\SoundScript.Vocal.dll
+  SoundScript -> <repo>\src\SoundScript\bin\Release\net10.0\SoundScript.Api.dll
+  SoundScript.Cli -> <repo>\src\SoundScript.Cli\bin\Release\net10.0\soundscript.dll
+  SoundScript.Playground -> <repo>\src\SoundScript.Playground\bin\Release\net10.0\SoundScript.Playground.dll
+  SoundScript.Playground (Blazor output) -> <repo>\src\SoundScript.Playground\bin\Release\net10.0\wwwroot
+  SoundScript.Cli.TestFfmpeg -> <repo>\src\SoundScript.Cli.TestFfmpeg\bin\Release\net10.0\SoundScript.Cli.TestFfmpeg.dll
+  SoundScript.Tests -> <repo>\src\SoundScript.Tests\bin\Release\net10.0\SoundScript.Tests.dll
+Test run for <repo>\src\SoundScript.Tests\bin\Release\net10.0\SoundScript.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Results File: <repo>\artifacts\v16-tests\v16-final.trx
+
+Passed!  - Failed:     0, Passed:  1294, Skipped:     0, Total:  1294, Duration: 32 s - SoundScript.Tests.dll (net10.0)

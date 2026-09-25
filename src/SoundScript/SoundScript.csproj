@@ -44,6 +44,7 @@
     <None Include="../../docs/assets/soundscript-logo.png" Pack="true" PackagePath="/icon.png" />
     <None Include="../../LICENSE" Pack="true" PackagePath="/LICENSE" />
     <None Include="../../wordbank/LICENSE" Pack="true" PackagePath="/licenses/Wordbank-CC0.txt" />
+    <None Include="../SoundScript.Wordbank/Data/corpus/**/SOURCES.md" Pack="true" PackagePath="licenses/corpus/%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="../SoundScript.Media/Fonts/LICENSE.txt" Pack="true" PackagePath="/licenses/Fonts.txt" />
   </ItemGroup>
   <Target Name="IncludeSoundScriptLibraries" DependsOnTargets="ResolveReferences">

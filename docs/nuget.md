@@ -8,6 +8,14 @@ The [programmable media runtime](programmatic-media-runtime.md) provides synchro
 
 ## Install
 
+The V16 source candidate stores corpus metadata and audio in SoundScript-owned
+assemblies, including a separate audio-resource assembly. It adds no library
+`contentFiles`, build targets or analyzers to a consumer. Playback needs no
+repository path or Git submodule. Explicit editable corpus-path APIs materialize
+data under the user's local application data; browser audio stays on demand.
+The published V15 package still uses copied corpus content. See
+[candidate migration notes](v16-candidate.md).
+
 <!-- GENERATED:DOTNET_REQUIREMENT_START -->
 Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for repository development.
 <!-- GENERATED:DOTNET_REQUIREMENT_END -->
@@ -30,7 +38,7 @@ root to obtain `wordbank/LICENSE` before packing. Then pack and use a local sour
 ```powershell
 dotnet pack src/SoundScript/SoundScript.csproj -c Release --output artifacts/nuget
 dotnet new console -n PackageConsumer -f net10.0
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 15.0.0 --source artifacts/nuget
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 16.0.0-preview.1 --source artifacts/nuget
 dotnet run --project PackageConsumer/PackageConsumer.csproj
 ```
 <!-- GENERATED:LOCAL_LIBRARY_INSTALL_END -->

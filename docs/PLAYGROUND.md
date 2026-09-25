@@ -349,7 +349,13 @@ Audio unlock flow: compile synchronously → `startPlayback` is the first `await
 
 - [ ] Network tab shows no CDN or API requests after initial load
 - [ ] Soundfont loads from `/playground/soundfont/samples/*.wav` only
-# V14 learning resources
+## V16 candidate workspace
+
+The runtime editor and discovered controls sit beside the audio/scene preview on larger screens and stack on narrow screens. Parameter labels, defaults and constraints come from the compiled program. Fixed programs show a clear no-parameters message. Source edits clear the preview until compiled again; rejected value batches preserve the last valid output. The source editor is resizable, disables spelling corrections and reports line count. Existing authoring, Studio, visual timeline, transcription and export workflows remain available.
+
+The main editor has more usable vertical space. The page uses wider desktop space, and the visual stage retains its aspect ratio without overflowing a narrow viewport. Keyboard focus remains visible. Runtime updates produce complete offline renders; press the audio player's Play control to hear them.
+
+## V14 learning resources
 
 The Playground header links to the [hands-on programmable-media tutorial](tutorials/programmable-media.md),
 [runtime API guide](programmatic-media-runtime.md) and [article draft](articles/programmable-media-runtime-dotnet.md).

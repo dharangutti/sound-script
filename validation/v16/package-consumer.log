@@ -1,0 +1,44 @@
+{
+  "files": 211,
+  "changed": [],
+  "publicVersion": "15.0.0",
+  "developmentVersion": "16.0.0-preview.1"
+}
+Validating package: <repo>\artifacts\v16-final-feed\SoundScript.16.0.0-preview.1.nupkg
+Diagnostic workspace retained at: <temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6
+[PASS] Package identity is SoundScript 16.0.0-preview.1
+[PASS] Packaged README matches validated public documentation independently of development package version.
+[PASS] No contentFiles, build, buildTransitive, analyzers, or tools injected into consumers
+[PASS] Discovered 15 SoundScript assemblies for net10.0
+[PASS] Nuspec dependency versions align with 15-project component graph
+[PASS] Checked XML documentation for every bundled assembly
+[PASS] Checked portable symbols in the companion .snupkg for every bundled assembly
+The template "Console App" was created successfully.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'SoundScript' into project '<temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6\consumer\Consumer.csproj'.
+warn : --no-restore|-n flag was used. No compatibility check will be done and the added package reference will be unconditional.
+info : PackageReference for package 'SoundScript' version '16.0.0-preview.1' added to file '<temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6\consumer\Consumer.csproj'.
+Determining projects to restore...
+  Restored <temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6\consumer\Consumer.csproj (in 17.54 sec).
+Consumer -> <temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6\consumer\bin\Release\net10.0\Consumer.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.94
+WAV_BYTES=97064
+WAV_SHA256=4F8B4D4714BD2C3844035DCDE8FEBD9CC5CCA7BC61F0E19DBA0DA13925063999
+MIDI_BYTES=75
+MIDI_SHA256=C03D3166E8A993F192DCD3F70676031EC63CC56DD471126C1D990C8B6BD5565E
+TRANSCRIPTION_NOTES=3
+RUNTIME_SCENE=1
+EXPECTED_DIAGNOSTIC=Parameter 'intensity' received 2. Expected decimal 0 through 1. (Parameter 'intensity')
+Actual value was 2.
+VOCAL_BYTES=160358
+[PASS] Fresh consumer compiled, ran WAV/MIDI rendering, and completed transcription
+[PASS] Fresh consumer package cache contains facade XML documentation
+[PASS] Consumer output has no copied corpus content; runtime binding and embedded vocal playback succeeded
+Validation workspace retained at: <temp>/soundscript-nuget-validation-d6b9964be3aa4684be77914cfb1192d6
+NuGet validation completed successfully.

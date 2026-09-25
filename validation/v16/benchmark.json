@@ -1,0 +1,55 @@
+{
+  "note": "Seven-batch medians; observational timings, not latency guarantees. Set includes Get to alternate state.",
+  "coldCompileMilliseconds": 692.5272,
+  "measurements": {
+    "warmCompile": {
+      "medianMicroseconds": 80.593,
+      "minimumMicroseconds": 67.0535,
+      "maximumMicroseconds": 112.988,
+      "medianAllocatedBytes": 15666.12,
+      "iterationsPerBatch": 200
+    },
+    "set": {
+      "medianMicroseconds": 0.27731,
+      "minimumMicroseconds": 0.26155,
+      "maximumMicroseconds": 1.56534,
+      "medianAllocatedBytes": 0,
+      "iterationsPerBatch": 10000
+    },
+    "setAndBind": {
+      "medianMicroseconds": 3.45131,
+      "minimumMicroseconds": 2.77136,
+      "maximumMicroseconds": 3.8895199999999996,
+      "medianAllocatedBytes": 1040,
+      "iterationsPerBatch": 10000
+    },
+    "cachedBind": {
+      "medianMicroseconds": 0.05756,
+      "minimumMicroseconds": 0.04426,
+      "maximumMicroseconds": 0.09437000000000001,
+      "medianAllocatedBytes": 0,
+      "iterationsPerBatch": 10000
+    },
+    "sceneAt": {
+      "medianMicroseconds": 22.419,
+      "minimumMicroseconds": 17.348599999999998,
+      "maximumMicroseconds": 31.0258,
+      "medianAllocatedBytes": 10824,
+      "iterationsPerBatch": 500
+    },
+    "renderAudio": {
+      "medianMicroseconds": 5503.5,
+      "minimumMicroseconds": 4993.175,
+      "maximumMicroseconds": 5798.525,
+      "medianAllocatedBytes": 3892409,
+      "iterationsPerBatch": 8
+    }
+  },
+  "Statistics": {
+    "Tokenizations": 1,
+    "Parses": 1,
+    "TimelineCompilations": 1
+  },
+  "Revision": 140042,
+  "framework": ".NET 10.0.11"
+}

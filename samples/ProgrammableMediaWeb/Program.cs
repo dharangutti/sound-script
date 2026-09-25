@@ -17,9 +17,9 @@ var runtime = SoundScriptEngine.CompileRuntime("""
         shape circle
         fill "#ef4444"
         set x xpos
-        set y 360
-        set width 120
-        set height 120
+        set y 300
+        set width 100
+        set height 100
         set opacity intensity
     }
     """);
