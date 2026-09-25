@@ -3,7 +3,8 @@
 
 <details class="runtime-panel" data-testid="runtime-panel" open>
     <summary><strong>Adaptive media — runtime parameters</strong></summary>
-    <p class="hint">Compile once, apply values, then press Play to hear the new clip. Each render produces a complete audio clip and scene.</p>
+    <p>Try <strong>Normal → Warning → Critical</strong>: the indicator moves and brightens while the same melody becomes louder. Each state updates the preview immediately; press Play below to hear it.</p>
+    <p class="hint">This demo renders a complete WAV and a still scene for each state. The circle does not animate during playback. Edit the source and compile to create your own controls.</p>
     <div class="runtime-grid">
     <section class="runtime-authoring" aria-label="Runtime authoring">
         <div class="runtime-toolbar">
@@ -15,11 +16,20 @@
         <div class="runtime-toolbar">
             <button type="button" class="btn btn-primary" @onclick="Compile" data-testid="runtime-compile">Compile</button>
             <button type="button" class="btn btn-secondary" @onclick="LoadExample" data-testid="runtime-example">Load monitoring example</button>
+            <button type="button" class="btn btn-secondary" @onclick="LoadGeometry" data-testid="runtime-geometry">Explore all visual parameters</button>
         </div>
     </section>
     <section class="runtime-output" aria-label="Runtime values and preview">
     @if (session.Runtime is { } runtime)
     {
+        @if (source == RuntimeMediaSession.MonitoringSource)
+        {
+            <div class="runtime-presets" role="group" aria-label="Monitoring states">
+                <button type="button" class="btn btn-secondary" data-testid="runtime-normal" aria-pressed="@MonitoringSelected(0.25m, 200m)" @onclick="() => ApplyMonitoring(0.25m, 200m)">Normal · quiet / left</button>
+                <button type="button" class="btn btn-secondary" data-testid="runtime-warning" aria-pressed="@MonitoringSelected(0.55m, 640m)" @onclick="() => ApplyMonitoring(0.55m, 640m)">Warning · medium / center</button>
+                <button type="button" class="btn btn-secondary" data-testid="runtime-critical" aria-pressed="@MonitoringSelected(0.9m, 1080m)" @onclick="() => ApplyMonitoring(0.9m, 1080m)">Critical · loud / right</button>
+            </div>
+        }
         @if (runtime.Parameters.Count > 0)
         {
         <fieldset class="runtime-values" data-testid="runtime-controls">
@@ -39,12 +49,13 @@
         </fieldset>
         }
         else { <p data-testid="runtime-empty">No runtime parameters declared. This preview uses fixed source values.</p> }
-        <p role="status" data-testid="runtime-status" data-parse-count="@runtime.Statistics.Parses">Rendered snapshot @runtime.Revision. Source edits require Compile.</p>
+        <p role="status" data-testid="runtime-status" data-parse-count="@runtime.Statistics.Parses">Rendered snapshot @runtime.Revision · Compiled @runtime.Statistics.Parses time(s). @feedback</p>
+        <p class="hint" data-testid="runtime-applied">Applied: @string.Join(" · ", runtime.Parameters.Select(p => $"{p.Name} = {runtime.Get(p.Name).ToString(CultureInfo.InvariantCulture)}"))</p>
     }
     @if (error is not null) { <p class="runtime-error" role="alert" data-testid="runtime-error">@error</p> }
     @if (session.Audio.Length > 0)
     {
-        <audio controls aria-label="Rendered runtime audio" data-testid="runtime-audio" src="@audioUrl"></audio>
+        <audio @key="audioUrl" controls aria-label="Rendered runtime audio" data-testid="runtime-audio" src="@audioUrl"></audio>
         <a href="@audioUrl" download="runtime.wav">Download WAV</a>
         <div class="runtime-scene" data-testid="runtime-scene" aria-label="Rendered runtime scene">@((MarkupString)session.Svg)</div>
     }
@@ -59,12 +70,26 @@
     private string source = RuntimeMediaSession.MonitoringSource;
     private string? error;
     private string audioUrl = "";
+    private string feedback = "";
+    protected override void OnInitialized() => Compile();
     private void SourceChanged(ChangeEventArgs e) { source = e.Value?.ToString() ?? ""; Clear(); }
     private void Clear() { session.Clear(); inputs.Clear(); audioUrl = ""; error = null; }
-    private void LoadExample() { source = RuntimeMediaSession.MonitoringSource; Clear(); }
-    private void Compile() => Act(() => { session.Compile(source); RefreshInputs(); });
-    private void Apply() => Act(() => session.Apply(inputs));
-    private void Reset() => Act(() => { session.Reset(); RefreshInputs(); });
+    private void LoadExample() { source = RuntimeMediaSession.MonitoringSource; Compile(); }
+    private void LoadGeometry() { source = RuntimeMediaSession.GeometrySource; Compile(); }
+    private void Compile() => Act(() => { session.Compile(source); RefreshInputs(); feedback = "Defaults rendered. Change values and apply, then press Play."; });
+    private void Apply() => Act(() => { var revision = session.Runtime!.Revision; session.Apply(inputs); feedback = session.Runtime.Revision == revision ? "Values unchanged." : "State updated without recompiling. Press Play to hear this snapshot."; });
+    private void Reset() => Act(() => { session.Reset(); RefreshInputs(); feedback = "Defaults restored. Press Play to compare."; });
+    private string MonitoringSelected(decimal intensity, decimal xpos) => session.Runtime!.Get("intensity") == intensity && session.Runtime.Get("xpos") == xpos ? "true" : "false";
+    private void ApplyMonitoring(decimal intensity, decimal xpos) => Act(() =>
+    {
+        session.Apply(new Dictionary<string, string>
+        {
+            ["intensity"] = intensity.ToString(CultureInfo.InvariantCulture),
+            ["xpos"] = xpos.ToString(CultureInfo.InvariantCulture)
+        });
+        RefreshInputs();
+        feedback = "Monitoring state applied. Press Play to compare the volume.";
+    });
     private void RefreshInputs()
     {
         inputs.Clear();

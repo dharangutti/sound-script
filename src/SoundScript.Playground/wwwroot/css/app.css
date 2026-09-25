@@ -777,6 +777,9 @@ a:hover { text-decoration: underline; }
 .runtime-grid > section { min-width: 0; }
 .runtime-toolbar { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .5rem 0; }
 .runtime-toolbar > label { font-weight: 600; }
+.runtime-presets { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+.runtime-presets .btn { flex: 1 1 9rem; white-space: normal; }
+.runtime-presets .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .runtime-toolbar > .hint { margin-left: auto; }
 .runtime-source { min-height: 24rem; height: 32vh; font-size: .95rem; tab-size: 4; white-space: pre; overflow: auto; }
 .runtime-values { min-width: 0; margin: 0; padding: .75rem; border: 1px solid var(--border); border-radius: .5rem; }

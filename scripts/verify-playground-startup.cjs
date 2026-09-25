@@ -49,7 +49,10 @@ const server = http.createServer((request, response) => {
                 if (scenario === '503') assert.ok(hits >= 2, '503 must actually exercise retry');
                 assert.equal(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length), 0);
                 const learning = page.getByRole('navigation', {name:'Learn SoundScript'});
-                assert.equal(await learning.getByRole('link').count(), 3);
+                assert.equal(await learning.getByRole('link').count(), 4);
+                await learning.getByRole('button', {name:'Try V16 adaptive media'}).click();
+                await page.getByTestId('runtime-normal').waitFor();
+                assert.equal(await page.locator('#visual-workspace-tab').getAttribute('aria-selected'), 'true');
                 for (const link of await learning.getByRole('link').all()) {
                     const href = await link.getAttribute('href');
                     const reader = await context.newPage();

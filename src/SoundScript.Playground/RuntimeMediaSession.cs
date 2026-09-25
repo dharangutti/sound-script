@@ -22,6 +22,28 @@ public sealed class RuntimeMediaSession
             set opacity intensity
         }
         """;
+    public const string GeometrySource = """
+        param volume = 0.4
+        param xpos = 640
+        param ypos = 360
+        param width = 240
+        param height = 120
+        param angle = 0
+        param opacity = 0.8
+        perform expressive
+        tempo 120
+        track cue { gain volume C4 q E4 q G4 h }
+        visual "tile" for 4s {
+            shape rectangle
+            fill "#38bdf8"
+            set x xpos
+            set y ypos
+            set width width
+            set height height
+            set rotation angle
+            set opacity opacity
+        }
+        """;
     public SoundScriptRuntimeProgram? Runtime { get; private set; }
     public byte[] Audio { get; private set; } = [];
     public string Svg { get; private set; } = "";

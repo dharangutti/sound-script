@@ -52,6 +52,7 @@ jobs:
           npm ci --prefix scripts
           npx --prefix scripts playwright install --with-deps chromium
           node scripts/verify-playground-startup.cjs artifacts/site/playground
+          node scripts/runtime-media-browser.cjs artifacts/site/playground
 
       - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4

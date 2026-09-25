@@ -101,6 +101,10 @@ jobs:
         if: runner.os == 'Linux'
         run: node scripts/verify-docs-code.cjs
 
+      - name: Verify V16 runtime parameters and existing media workflows
+        if: runner.os == 'Linux'
+        run: node scripts/runtime-media-browser.cjs artifacts/playground
+
       - name: Run tests
         env:
           SOUNDSCRIPT_PLAYGROUND_PUBLISH_DIR: ${{ github.workspace }}/artifacts/playground

@@ -86,6 +86,8 @@ async function waitForRevision(page, previous) {
     await page.locator('#visual-workspace-tab').waitFor({ timeout: 90000 });
     await page.locator('#visual-workspace-tab').click();
     await page.locator('[data-testid="runtime-source"]').waitFor({ timeout: 30000 });
+    await page.getByTestId('runtime-audio').waitFor({ timeout: 30000 });
+    assert.equal(await page.getByTestId('runtime-normal').count(), 1, 'monitoring demo is ready without compiling manually');
     await page.getByTestId('runtime-example').click();
     await page.getByTestId('runtime-compile').click();
     await page.getByTestId('runtime-status').waitFor({ timeout: 30000 });
@@ -102,12 +104,16 @@ async function waitForRevision(page, previous) {
     assert.equal(baseline.opacity, 0.25);
     assert.equal(baseline.x, 200);
     assert.equal(baseline.width, 100, 'indicator must render at its declared width');
+    await page.getByTestId('runtime-audio').evaluate(audio => audio.play());
+    await page.waitForFunction(() => document.querySelector('[data-testid="runtime-audio"]').currentTime > 0);
 
     await page.getByTestId('runtime-value-intensity').fill('0.9');
     await page.getByTestId('runtime-value-xpos').fill('900');
     await page.getByTestId('runtime-apply').click();
     await waitForRevision(page, 0);
     const critical = await snapshot(page);
+    assert.equal(await page.getByTestId('runtime-audio').evaluate(audio => audio.paused), true,
+      'applying a new snapshot stops old playback and waits for Play');
     assert.notEqual(critical.wavHash, baseline.wavHash, 'changing gain must change rendered WAV bytes');
     assert.equal(critical.opacity, 0.9, 'intensity must update SVG opacity');
     assert.equal(critical.x, 900, 'xpos must move the indicator center');
@@ -119,6 +125,23 @@ async function waitForRevision(page, previous) {
     const reset = await snapshot(page);
     assert.equal(reset.wavHash, baseline.wavHash, 'reset must restore byte-identical WAV output');
     assert.equal(reset.svg, baseline.svg, 'reset must restore byte-identical SVG output');
+
+    await page.getByTestId('runtime-warning').click();
+    await waitForRevision(page, 2);
+    const warning = await snapshot(page);
+    assert.equal(warning.x, 640);
+    assert.equal(warning.opacity, 0.55);
+    await page.getByTestId('runtime-critical').click();
+    await waitForRevision(page, 3);
+    const presetCritical = await snapshot(page);
+    assert.equal(presetCritical.x, 1080);
+    assert.equal(presetCritical.opacity, 0.9);
+    assert.notEqual(presetCritical.wavHash, warning.wavHash);
+    assert.equal(await page.getByTestId('runtime-value-intensity').inputValue(), '0.9');
+    assert.equal(await page.getByTestId('runtime-status').getAttribute('data-parse-count'), '1');
+    await page.getByTestId('runtime-normal').click();
+    await waitForRevision(page, 4);
+    assert.deepEqual(await snapshot(page), reset, 'Normal restores the original scene and WAV');
 
     await page.getByTestId('runtime-value-intensity').fill('1.1');
     await page.getByTestId('runtime-apply').click();
@@ -155,6 +178,31 @@ async function waitForRevision(page, previous) {
       responsive.push({ width, height, editorWidth: sourceBox.width, editorHeight: sourceBox.height });
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByTestId('runtime-geometry').click();
+    await page.getByTestId('runtime-value-angle').waitFor();
+    assert.equal(await page.getByTestId('runtime-controls').locator('input').count(), 7);
+    assert.equal(await page.getByTestId('runtime-critical').count(), 0, 'monitoring presets must not apply to other source');
+    const geometryBefore = await page.getByTestId('runtime-scene').innerHTML();
+    for (const [name, value] of Object.entries({ volume: '0.7', xpos: '800', ypos: '250', width: '320', height: '180', angle: '45', opacity: '0.6' })) {
+      await page.getByTestId(`runtime-value-${name}`).fill(value);
+    }
+    await page.getByTestId('runtime-apply').click();
+    await waitForRevision(page, 0);
+    const geometryAfter = await page.getByTestId('runtime-scene').innerHTML();
+    assert.notEqual(geometryBefore, geometryAfter);
+    const tile = await page.getByTestId('runtime-scene').locator('g[data-name="tile"]').evaluate(group => {
+      const box = group.getBBox();
+      return { opacity: Number(group.getAttribute('opacity')), x: box.x + box.width / 2, y: box.y + box.height / 2,
+        width: box.width, height: box.height };
+    });
+    assert.equal(tile.opacity, 0.6);
+    assert.ok(Math.abs(tile.x - 800) < 0.01 && Math.abs(tile.y - 250) < 0.01);
+    assert.ok(Math.abs(tile.width - 500 / Math.sqrt(2)) < 0.01 && Math.abs(tile.height - tile.width) < 0.01,
+      'rectangle dimensions must be rotated 45 degrees');
+    assert.equal(await page.getByTestId('runtime-status').getAttribute('data-parse-count'), '1');
+    await page.getByTestId('runtime-reset').click();
+    await waitForRevision(page, 1);
+    assert.equal(await page.getByTestId('runtime-scene').innerHTML(), geometryBefore);
     await page.getByTestId('runtime-source').fill('track cue { C4 q }');
     await page.getByTestId('runtime-compile').click();
     await page.getByTestId('runtime-empty').waitFor();
@@ -192,7 +240,8 @@ async function waitForRevision(page, previous) {
       parseCount,
       wavHashes: { normal: baseline.wavHash, critical: critical.wavHash, recompiled: recompiled.wavHash },
       visual: { normal: { x: baseline.x, width: baseline.width, opacity: baseline.opacity }, critical: { x: critical.x, width: critical.width, opacity: critical.opacity } },
-      assertions: ['parameter metadata', 'gain changes WAV', 'xpos and intensity update SVG', 'reset restores exact outputs',
+      assertions: ['ready-to-use demo', 'monitoring state presets', 'all visual parameter targets', 'playback resets on new WAV',
+        'parameter metadata', 'gain changes WAV', 'xpos and intensity update SVG', 'reset restores exact outputs',
         'invalid input preserves outputs and reports error', 'source edit clears and recompiles runtime'],
       pageErrors, corpusRequests, responsive
     }, null, 2));
