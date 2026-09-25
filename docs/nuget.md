@@ -49,7 +49,7 @@ $candidateFeed = [System.Security.SecurityElement]::Escape((Resolve-Path artifac
   <packageSourceMapping><clear /></packageSourceMapping>
 </configuration>
 "@ | Set-Content PackageConsumer/NuGet.Config
-dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 16.0.0-preview.1 --source artifacts/nuget --no-restore
+dotnet add PackageConsumer/PackageConsumer.csproj package SoundScript --version 16.0.0 --source artifacts/nuget --no-restore
 dotnet restore PackageConsumer/PackageConsumer.csproj --configfile PackageConsumer/NuGet.Config
 dotnet run --project PackageConsumer/PackageConsumer.csproj --no-restore
 ```
