@@ -67,6 +67,34 @@ anchor used by playback.
 - [ ] The audio lane spans the 12-second visual timeline and uses the shared deterministic SoundScript.Wave rail used by browser and CLI export
 - [ ] Introduce invalid visual syntax and choose **Evaluate timeline**; a local error appears without affecting the music workspace
 
+## Adaptive media runtime parameters (candidate)
+
+The Audio/Visual workspace also contains a separate **Adaptive media — runtime
+parameters** panel. It demonstrates the opt-in `SoundScriptEngine.CompileRuntime`
+API and leaves the established visual timeline editor and preset examples on
+their existing static compile path.
+
+Use **Load monitoring example** to restore the sample, then **Compile**. The
+panel discovers parameter names and bounds from the compiled runtime program.
+For the sample, `intensity` controls direct cue gain and indicator opacity;
+`xpos` controls the indicator's x position. Edit the decimal values and choose
+**Apply state** to call `SetMany`, bind a new snapshot, and render both WAV and
+scene SVG. The audio control and **Download WAV** use that generated output.
+Choose **Reset values** to restore the source defaults. Editing the source
+requires another explicit **Compile**; malformed source and invalid parameter
+updates are shown as local errors.
+
+The sample uses complete offline WAV rendering. It does not claim live or
+streaming audio. This is a source-branch V16 candidate under validation, not a
+release-readiness statement.
+
+- [ ] Load, compile, and see controls for both declared parameters
+- [ ] Apply intensity `0.90` and xpos `900`; indicator opacity/position and generated audio change
+- [ ] Apply an out-of-range or invalid decimal; show an error without partially applying the batch
+- [ ] Reset values and confirm the sample returns to its defaults
+- [ ] Edit invalid source and compile; show an error and clear stale controls/output
+- [ ] Run existing Visual Timeline checks above unchanged
+
 ## Text-to-Melody (V3.1)
 
 The playground has a **Text-to-Melody** row above the editor:
@@ -321,7 +349,13 @@ Audio unlock flow: compile synchronously → `startPlayback` is the first `await
 
 - [ ] Network tab shows no CDN or API requests after initial load
 - [ ] Soundfont loads from `/playground/soundfont/samples/*.wav` only
-# V14 learning resources
+## V16 candidate workspace
+
+The runtime editor and discovered controls sit beside the audio/scene preview on larger screens and stack on narrow screens. Parameter labels, defaults and constraints come from the compiled program. Fixed programs show a clear no-parameters message. Source edits clear the preview until compiled again; rejected value batches preserve the last valid output. The source editor is resizable, disables spelling corrections and reports line count. Existing authoring, Studio, visual timeline, transcription and export workflows remain available.
+
+The main editor has more usable vertical space. The page uses wider desktop space, and the visual stage retains its aspect ratio without overflowing a narrow viewport. Keyboard focus remains visible. Runtime updates produce complete offline renders; press the audio player's Play control to hear them.
+
+## V14 learning resources
 
 The Playground header links to the [hands-on programmable-media tutorial](tutorials/programmable-media.md),
 [runtime API guide](programmatic-media-runtime.md) and [article draft](articles/programmable-media-runtime-dotnet.md).
