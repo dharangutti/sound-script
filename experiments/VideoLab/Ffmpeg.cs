@@ -5,13 +5,15 @@ using System.Text.Json;
 
 namespace VideoLab;
 
-public sealed record RenderPlan(string FilterGraph, string[] Arguments, string[] Inputs);
+public sealed record OutputSettings(int Width, int Height, int Fps, int Frames, int SampleRate, string Container);
+public sealed record RenderPlan(string FilterGraph, string[] Arguments, string[] Inputs, OutputSettings Expected);
 
 public static class Ffmpeg
 {
     internal static string Number(decimal value) => value.ToString("0.#########", CultureInfo.InvariantCulture);
     public static RenderPlan Plan(Snapshot snapshot, string output)
     {
+        if (snapshot.Composition.Programmable) return ProgrammableBackend.Plan(snapshot, output);
         var c = snapshot.Composition; var s = c.Script;
         string T(int frames) => Number((decimal)frames / s.Fps);
         string Asset(string path) => Path.GetFullPath(path, c.AssetDirectory);
@@ -28,9 +30,9 @@ public static class Ffmpeg
         }
         for (int i = 0; i < s.Shapes.Length; i++)
         {
-            var o = s.Shapes[i]; var x = snapshot.Values[o.X];
+            var o = s.Shapes[i]; var x = snapshot.Values[o.X!];
             graph.Add($"color=c=0x{o.Color}:s={o.Width}x{o.Height}:r={s.Fps}:d={T(s.Frames)},format=rgba[shape{i}]");
-            graph.Add($"[{current}][shape{i}]overlay=x='{Number(x)}+({Number(o.ToX - x)})*clip((t-{T(o.At)})/{T(Math.Max(1, o.Frames - 1))},0,1)':y={o.Y}:eval=frame:eof_action=pass:enable='gte(t,{T(o.At)})*lt(t,{T(o.At + o.Frames)})'[shapeLayer{i}]");
+            graph.Add($"[{current}][shape{i}]overlay=x='{Number(x)}+({Number(o.ToX!.Value - x)})*clip((t-{T(o.At)})/{T(Math.Max(1, o.Frames - 1))},0,1)':y={o.Y}:eval=frame:eof_action=pass:enable='gte(t,{T(o.At)})*lt(t,{T(o.At + o.Frames)})'[shapeLayer{i}]");
             current = $"shapeLayer{i}";
         }
         graph.Add($"[{current}]trim=end_frame={s.Frames},setpts=PTS-STARTPTS,format=yuv420p[vout]");
@@ -39,10 +41,14 @@ public static class Ffmpeg
         for (int i = 0; i < s.Audio.Length; i++)
         {
             var a = s.Audio[i];
-            graph.Add($"[{c.Clips.Length + i}:a:0]asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,atrim=start_sample={(long)a.Trim * 48000 / s.Fps}:end_sample={((long)a.Trim + a.Frames) * 48000 / s.Fps},asetpts=PTS-STARTPTS,volume={Number(snapshot.Values[a.Gain])},adelay={((long)a.At * 48000 / s.Fps)}S:all=1[a{i}]");
+            graph.Add($"[{c.Clips.Length + i}:a:0]asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,atrim=start_sample={(long)a.Trim * 48000 / s.Fps}:end_sample={((long)a.Trim + a.Frames) * 48000 / s.Fps},asetpts=PTS-STARTPTS,volume={Number(snapshot.Values[a.Gain.GetString()!])},adelay={((long)a.At * 48000 / s.Fps)}S:all=1[a{i}]");
             audioLabels += $"[a{i}]";
         }
         graph.Add($"{audioLabels}amix=inputs={s.Audio.Length + 1}:duration=first:normalize=0:dropout_transition=0,alimiter=limit=0.95:level=0:latency=1,atrim=end_sample={(long)s.Frames * 48000 / s.Fps}[aout]");
+        return Assemble(s, output, inputs, graph);
+    }
+    internal static RenderPlan Assemble(Script s, string output, string[] inputs, List<string> graph)
+    {
         var args = new List<string> { "-hide_banner", "-loglevel", "error", "-xerror", "-nostdin", "-y", "-filter_complex_threads", "1", "-fflags", "+bitexact" };
         foreach (var input in inputs) args.AddRange(["-threads", "1", "-i", input]);
         args.AddRange(["-filter_complex", string.Join(";", graph), "-map", "[vout]", "-map", "[aout]", "-map_metadata", "-1", "-map_chapters", "-1", "-threads", "1", "-flags:v", "+bitexact", "-flags:a", "+bitexact"]);
@@ -52,8 +58,8 @@ public static class Ffmpeg
             case ".webm": args.AddRange(["-c:v", "libvpx-vp9", "-crf", "32", "-b:v", "0", "-row-mt", "0", "-c:a", "libopus", "-b:a", "128k", "-fflags", "+bitexact"]); break;
             default: throw new ArgumentException("Output must be .mp4 or .webm.");
         }
-        args.AddRange(["-t", T(s.Frames), output]);
-        return new(string.Join(";\n", graph), args.ToArray(), inputs);
+        args.AddRange(["-t", Number((decimal)s.Frames / s.Fps), output]);
+        return new(string.Join(";\n", graph), args.ToArray(), inputs, new(s.Width, s.Height, s.Fps, s.Frames, 48000, Path.GetExtension(output).ToLowerInvariant()));
     }
 
     public static async Task<string> Run(string executable, IEnumerable<string> args)
@@ -90,12 +96,20 @@ public static class Ffmpeg
         }
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         var temporary = Path.Combine(Path.GetDirectoryName(output)!, $".videolab-{Guid.NewGuid():N}{Path.GetExtension(output)}");
+        var graphFile = temporary + ".filters";
         try
         {
-            await Run("ffmpeg", Plan(snapshot, temporary).Arguments);
+            // Long bounded frame plans exceed Windows' command-line limit. The public plan
+            // still contains the complete graph; only transport is moved to a temporary file.
+            var render = Plan(snapshot, temporary);
+            var arguments = render.Arguments.ToArray();
+            int index = Array.IndexOf(arguments, "-filter_complex");
+            await File.WriteAllTextAsync(graphFile, render.FilterGraph);
+            arguments[index] = "-/filter_complex"; arguments[index + 1] = graphFile;
+            await Run("ffmpeg", arguments);
             File.Move(temporary, output, true);
         }
-        finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        finally { if (File.Exists(temporary)) File.Delete(temporary); if (File.Exists(graphFile)) File.Delete(graphFile); }
     }
     public static string Hash(string path) { using var stream = File.OpenRead(path); return Convert.ToHexString(SHA256.HashData(stream)); }
 }
