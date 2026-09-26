@@ -6,6 +6,10 @@ VideoLab owns composition semantics; FFmpeg is a lowering/rendering backend. The
 
 ## Run
 
+The [browser explorer](web/README.md) presents real rendered MVP snapshots and exact
+timeline inspection. It is a static proof interface; custom media composition remains
+in this CLI. Regenerate its versioned distribution with `dotnet run -c Release -- webproof`.
+
 Requires .NET 10 and FFmpeg/ffprobe on PATH, including libx264/AAC and libvpx-vp9/libopus. Validation was performed with FFmpeg 9.0.1. Rendering requires the `-/filter_complex` option-file syntax; older builds lacking it are unsupported. The expanded synthetic suite also uses libx265 for an SDR HEVC compatibility fixture.
 
 ```powershell

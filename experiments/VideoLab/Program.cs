@@ -4,6 +4,11 @@ using VideoLab;
 
 try
 {
+    if (args.Length == 1 && args[0] == "webproof")
+    {
+        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run();
+        WebProof.Publish(); return 0;
+    }
     if (args.Length > 0 && args[0] == "realtest")
     {
         if (args.Length != 2) { Console.Error.WriteLine("VideoLab: realtest <optional-manifest.json>"); return 2; }

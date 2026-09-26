@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "mvp": "pass",
+  "artifactSha256": "3127fb4d0895cdf95acc285bd3af04d8896fc8abf598b4124ad49edd5154e014",
+  "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_shared; Windows x64; Playwright 1.63.0 Chromium",
+  "checks": {
+    "build": {
+      "result": "pass",
+      "command": "dotnet run -c Release -- webproof"
+    },
+    "tests": {
+      "result": "pass",
+      "command": "dotnet run -c Release -- webproof",
+      "count": 143
+    },
+    "determinism": {
+      "result": "pass",
+      "command": "dotnet run -c Release -- webproof",
+      "detail": "A/B MP4/WebM rendered twice; byte comparison and decoded frame/audio assertions passed"
+    },
+    "browser": {
+      "result": "pass",
+      "command": "node web/smoke.cjs",
+      "detail": "subpath, both codecs, playback, snapshot controls, scene inspection, downloads, mobile overflow and missing-data handling"
+    }
+  },
+  "limits": "Static synthetic MVP explorer; two pre-rendered bindings. Arbitrary uploads and rendering require the CLI. Same-environment determinism only."
+}
