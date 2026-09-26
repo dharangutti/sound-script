@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "labs": [
+    {
+      "id": "videolab",
+      "name": "VideoLab",
+      "description": "Deterministic video composition with runtime bindings, animation and audio mixing.",
+      "status": "mvp",
+      "mvp": true,
+      "publish": true,
+      "branch": "experiments/videolab",
+      "commit": "53ddf3d3ef71e81b559acbc6a5a30d392a2f5c04",
+      "milestone": "labs-videolab-mvp-web-v0.2.0",
+      "reason": "MVP browser explorer: two validated pre-rendered snapshots, timeline inspection and MP4/WebM downloads. Custom rendering uses the CLI.",
+      "artifact": {
+        "directory": "experiments/VideoLab/web/site",
+        "sha256": "3127fb4d0895cdf95acc285bd3af04d8896fc8abf598b4124ad49edd5154e014",
+        "evidence": "experiments/VideoLab/web/publication-evidence.json",
+        "evidenceSha256": "100f74649078fad3c8fc8a22013857ea9447025714cc990b5f53aff298d1fd2b"
+      }
+    },
+    {
+      "id": "signal",
+      "name": "Signal Lab",
+      "description": "SoundScript.Labs explores signal generation, simulation and numerical analysis.",
+      "status": "poc",
+      "mvp": false,
+      "publish": false,
+      "branch": "codex/soundscript-labs-poc",
+      "commit": "36640eefadd36d2a1f3d7785e43a16d40c3829b3",
+      "milestone": "labs-signal-poc-v0.1.0",
+      "reason": "Preserved command-line POC; MVP not reached and no browser app approved.",
+      "artifact": null
+    },
+    {
+      "id": "runtime-binding",
+      "name": "Runtime Binding Lab",
+      "description": "Compile-once programs and immutable runtime bindings for generated media.",
+      "status": "preserved",
+      "mvp": false,
+      "publish": false,
+      "branch": "codex/runtime-binding-lab",
+      "commit": "de848e2c61d992658a5ed3e4a15644d3cfd2a427",
+      "milestone": "de848e2c61d992658a5ed3e4a15644d3cfd2a427",
+      "reason": "Preserved research prototype with offline evidence; no live publication approved.",
+      "artifact": null
+    }
+  ]
+}
