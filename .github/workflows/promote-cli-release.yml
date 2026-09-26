@@ -283,31 +283,38 @@ jobs:
           git diff --check
           if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed.' }
 
-          node <<'NODE'
-          const { execFileSync } = require('child_process');
-          const allowed = new Set([
+          $allowed = @(
             'docs/release-state.json', 'README.md', 'docs/404.html', 'docs/cli.md',
             'docs/contact/index.html', 'docs/doc.html', 'docs/documentation.md', 'docs/index.html',
             'docs/industrial/index.html', 'docs/nuget-end-to-end.md', 'docs/nuget.md', 'docs/quick-start.md',
-            'docs/releasing.md', 'packaging/README.md', 'src/SoundScript.Playground/wwwroot/index.html',
-          ]);
+            'docs/releasing.md', 'packaging/README.md', 'src/SoundScript.Playground/wwwroot/index.html'
+          )
 
-          const out = execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim();
-          const lines = out ? out.split(/\r?\n/) : [];
-          const files = lines.map(line => {
-            if (!/^ M /.test(line)) throw new Error(`Unexpected CLI promotion status: ${line}`);
-            return line.slice(3);
-          });
+          $files = @()
+          $statusLines = @(git status --porcelain=v1)
+          if ($LASTEXITCODE -ne 0) { throw 'git status failed.' }
 
-          for (const file of files) {
-            if (!allowed.has(file)) throw new Error(`Unexpected CLI promotion change: ${file}`);
+          foreach ($line in $statusLines) {
+            if ([string]::IsNullOrWhiteSpace($line)) { continue }
+            if ($line -notmatch '^ M (.+)$') {
+              throw "Unexpected CLI promotion status: $line"
+            }
+
+            $file = $Matches[1]
+            if ($allowed -notcontains $file) {
+              throw "Unexpected CLI promotion change: $file"
+            }
+            $files += $file
           }
-          if (!files.includes('docs/release-state.json')) {
-            throw new Error('Expected docs/release-state.json to change.');
+
+          if ($files -notcontains 'docs/release-state.json') {
+            throw 'Expected docs/release-state.json to change.'
           }
 
-          console.log('CLI promotion changed:\n' + files.map(f => `  ${f}`).join('\n'));
-          NODE
+          Write-Host 'CLI promotion changed:'
+          foreach ($file in $files) {
+            Write-Host "  $file"
+          }
 
           New-Item -ItemType Directory -Force artifacts/cli-promotion | Out-Null
           git diff --binary --no-ext-diff | Set-Content -Encoding utf8NoBOM artifacts/cli-promotion/promotion.patch
