@@ -76,7 +76,7 @@ soundscript run samples/RuntimeParameters/monitor.ss --runtime --param intensity
 
 ## Playground
 
-Choose **Try V16 adaptive media** or open the Audio/Visual workspace. The **Adaptive media — runtime parameters** panel starts with a compiled monitoring example. Choose **Normal**, **Warning**, or **Critical** to move and brighten the indicator and change the melody's volume, then press Play to hear the new WAV. The preview is a still scene for the applied state; it does not animate during playback.
+Choose **Try V16 adaptive media** or open the Audio/Visual workspace. The **Adaptive media — runtime parameters** panel starts with a compiled monitoring example. Choose **Normal**, **Warning**, or **Critical** to move and brighten the indicator and change the melody's volume, then press Play to hear the new WAV. The browser audio playback clock drives `SceneAt(t)` on the same stable snapshot that supplies the WAV, using existing temporal rendering. Pause, resume, seek, and replay keep the preview synchronized; runtime parameter semantics are unchanged.
 
 Choose **Explore all visual parameters** for an editable rectangle with gain, x, y, width, height, rotation, and opacity controls. Update the discovered controls and choose **Apply state**; the applied values and snapshot revision identify the rendered output. **Reset values** restores declared defaults. Editing source clears the preview and requires **Compile** again. Both examples use `SoundScriptEngine.CompileRuntime`, `SetMany`, and a bound snapshot without recompiling on state changes. The existing static visual examples and their timeline authoring/playback path remain available alongside it. Playback is an offline complete WAV through browser audio controls, not streaming synthesis.
 
