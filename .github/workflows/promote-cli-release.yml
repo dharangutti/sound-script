@@ -1,0 +1,430 @@
+name: Promote CLI release
+
+on:
+  workflow_run:
+    workflows: ['CLI release']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      cli_release_run_id:
+        description: Successful CLI release run ID (tag push)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Serialize CLI promotions so two release runs cannot update public state at once.
+concurrency:
+  group: public-cli-release-promotion
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+      release_sha: ${{ steps.resolve.outputs.release_sha }}
+      release_url: ${{ steps.resolve.outputs.release_url }}
+      base_sha: ${{ steps.resolve.outputs.base_sha }}
+      run_id: ${{ steps.resolve.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify CLI release provenance and resolve version
+        id: resolve
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CLI_RUN_ID: ${{ inputs.cli_release_run_id || github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${CLI_RUN_ID:-}" =~ ^[0-9]+$ ]]; then
+            echo "A numeric cli_release_run_id is required." >&2
+            exit 1
+          fi
+
+          gh api "repos/${REPOSITORY}/actions/runs/${CLI_RUN_ID}" > "$RUNNER_TEMP/cli-run.json"
+
+          node <<'NODE'
+          const fs = require('fs');
+          const run = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cli-run.json', 'utf8'));
+          const repo = process.env.REPOSITORY;
+
+          const fail = message => {
+            console.error(message);
+            process.exit(1);
+          };
+
+          if (run.repository?.full_name !== repo ||
+              run.head_repository?.full_name !== repo ||
+              run.path !== '.github/workflows/release-cli.yml' ||
+              run.event !== 'push' ||
+              run.conclusion !== 'success' ||
+              !/^[a-f0-9]{40}$/.test(run.head_sha ?? '')) {
+            fail('CLI publication must be a successful tag-push run of .github/workflows/release-cli.yml from this repository.');
+          }
+
+          if (!/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(run.head_branch ?? '')) {
+            fail(`CLI release run must be associated with a version tag; found head_branch=${JSON.stringify(run.head_branch)}.`);
+          }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `tag=${run.head_branch}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `release_sha=${run.head_sha}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `run_id=${run.id}\n`);
+          NODE
+
+          TAG="$(node -p "JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP + '/cli-run.json','utf8')).head_branch")"
+          RELEASE_SHA="$(node -p "JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP + '/cli-run.json','utf8')).head_sha")"
+          VERSION="${TAG#v}"
+
+          # Verify the version declared by the exact CLI release commit.
+          gh api \
+            -H "Accept: application/vnd.github.raw+json" \
+            "repos/${REPOSITORY}/contents/Directory.Build.props?ref=${RELEASE_SHA}" \
+            > "$RUNNER_TEMP/Directory.Build.props"
+
+          RELEASE_VERSION="$(node - <<'NODE'
+          const fs = require('fs');
+          const xml = fs.readFileSync(process.env.RUNNER_TEMP + '/Directory.Build.props', 'utf8')
+            .replace(/<!--[\s\S]*?-->/g, '');
+          const matches = [...xml.matchAll(/<Version>([^<]+)<\/Version>/g)];
+          if (matches.length !== 1) {
+            console.error('Directory.Build.props must contain exactly one unambiguous <Version>.');
+            process.exit(1);
+          }
+          process.stdout.write(matches[0][1].trim());
+          NODE
+          )"
+
+          if [[ "$RELEASE_VERSION" != "$VERSION" ]]; then
+            echo "CLI release tag ${TAG} does not match release commit version ${RELEASE_VERSION}." >&2
+            exit 1
+          fi
+
+          # Public docs must promote the same version, never a different release.
+          CURRENT_PUBLIC="$(node -p "JSON.parse(require('fs').readFileSync('docs/release-state.json','utf8')).publicVersion")"
+          if [[ "$CURRENT_PUBLIC" != "$VERSION" ]]; then
+            echo "docs/release-state.json publicVersion=${CURRENT_PUBLIC}; CLI release is ${VERSION}. Promote the library/public version first." >&2
+            exit 1
+          fi
+
+          BASE_SHA="$(git rev-parse HEAD)"
+          RUN_URL="https://github.com/${REPOSITORY}/actions/runs/${CLI_RUN_ID}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "release_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+          echo "CLI release: $TAG"
+          echo "Release commit: $RELEASE_SHA"
+          echo "Current main: $BASE_SHA"
+
+  verify:
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.prepare.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Verify GitHub CLI release assets and checksums
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          RELEASE_SHA: ${{ needs.resolve.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+          TAG_SHA="$(git rev-list -n 1 "$TAG")"
+          if [[ "$TAG_SHA" != "$RELEASE_SHA" ]]; then
+            echo "Tag $TAG resolves to $TAG_SHA, but CLI release ran from $RELEASE_SHA." >&2
+            exit 1
+          fi
+
+          gh api "repos/${REPOSITORY}/releases/tags/${TAG}" > "$RUNNER_TEMP/cli-release.json"
+
+          mkdir -p "$RUNNER_TEMP/cli-checksums"
+          gh release download "$TAG" \
+            --repo "$REPOSITORY" \
+            --pattern '*.sha256' \
+            --dir "$RUNNER_TEMP/cli-checksums"
+
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const release = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cli-release.json', 'utf8'));
+          const version = process.env.VERSION;
+          const tag = process.env.TAG;
+          const expected = [
+            `soundscript-${tag}-win-x64.zip`,
+            `soundscript-${tag}-linux-x64.zip`,
+            `soundscript-${tag}-osx-x64.zip`,
+            `soundscript-${tag}-osx-arm64.zip`,
+          ];
+
+          if (release.draft || release.prerelease) {
+            throw new Error(`Release ${tag} must be a published stable GitHub Release.`);
+          }
+          if (release.tag_name !== tag) {
+            throw new Error(`Release tag mismatch: expected ${tag}, got ${release.tag_name}.`);
+          }
+
+          const assets = new Map((release.assets ?? []).map(a => [a.name, a]));
+          const checksumDir = path.join(process.env.RUNNER_TEMP, 'cli-checksums');
+
+          for (const zip of expected) {
+            const checksumName = `${zip}.sha256`;
+            const asset = assets.get(zip);
+            const checksumAsset = assets.get(checksumName);
+
+            if (!asset) throw new Error(`Missing required CLI asset: ${zip}`);
+            if (!checksumAsset) throw new Error(`Missing required checksum asset: ${checksumName}`);
+            if (!/^sha256:[0-9a-f]{64}$/i.test(asset.digest ?? '')) {
+              throw new Error(`GitHub did not report a SHA-256 digest for ${zip}.`);
+            }
+
+            const checksumPath = path.join(checksumDir, checksumName);
+            if (!fs.existsSync(checksumPath)) throw new Error(`Downloaded checksum missing: ${checksumName}`);
+
+            const text = fs.readFileSync(checksumPath, 'utf8').trim();
+            const match = text.match(/^([0-9a-f]{64})\s+\*?(.+)$/i);
+            if (!match) throw new Error(`Invalid checksum format in ${checksumName}.`);
+
+            const [, declaredHash, declaredName] = match;
+            if (declaredName !== zip) {
+              throw new Error(`${checksumName} names ${declaredName}; expected ${zip}.`);
+            }
+
+            const githubHash = asset.digest.slice('sha256:'.length);
+            if (declaredHash.toLowerCase() !== githubHash.toLowerCase()) {
+              throw new Error(`Checksum mismatch for ${zip}: checksum file and GitHub asset digest differ.`);
+            }
+          }
+
+          console.log(`PASS: ${expected.length} platform CLI archives and checksums verified for ${tag}.`);
+          NODE
+
+      - name: Prepare guarded CLI documentation promotion
+        id: prepare
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $statePath = 'docs/release-state.json'
+          $state = Get-Content -Raw $statePath | ConvertFrom-Json
+
+          if ($state.publicVersion -ne $env:VERSION) {
+            throw "Public version '$($state.publicVersion)' does not match CLI release '$env:VERSION'."
+          }
+
+          if ($state.cli.nugetPublished -ne $false) {
+            Write-Host 'CLI NuGet publication is already true; this workflow does not alter that channel.'
+          }
+
+          if ($state.cli.githubReleasePublished -eq $true) {
+            Write-Host "CLI GitHub release for $env:VERSION is already promoted."
+            ./scripts/update-docs.ps1 -Check
+            node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs scripts/release-promotion.test.mjs
+            if ($LASTEXITCODE -ne 0) { throw 'Documentation validation failed.' }
+            "changed=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          $state.cli.githubReleasePublished = $true
+          $state | ConvertTo-Json -Depth 10 | Set-Content -Encoding utf8NoBOM $statePath
+
+          ./scripts/update-docs.ps1
+          ./scripts/update-docs.ps1 -Check
+          node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs scripts/release-promotion.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Documentation validation failed.' }
+
+          git diff --check
+          if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed.' }
+
+          node <<'NODE'
+          const { execFileSync } = require('child_process');
+          const allowed = new Set([
+            'docs/release-state.json', 'README.md', 'docs/404.html', 'docs/cli.md',
+            'docs/contact/index.html', 'docs/doc.html', 'docs/documentation.md', 'docs/index.html',
+            'docs/industrial/index.html', 'docs/nuget-end-to-end.md', 'docs/nuget.md', 'docs/quick-start.md',
+            'docs/releasing.md', 'packaging/README.md', 'src/SoundScript.Playground/wwwroot/index.html',
+          ]);
+
+          const out = execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim();
+          const lines = out ? out.split(/\r?\n/) : [];
+          const files = lines.map(line => {
+            if (!/^ M /.test(line)) throw new Error(`Unexpected CLI promotion status: ${line}`);
+            return line.slice(3);
+          });
+
+          for (const file of files) {
+            if (!allowed.has(file)) throw new Error(`Unexpected CLI promotion change: ${file}`);
+          }
+          if (!files.includes('docs/release-state.json')) {
+            throw new Error('Expected docs/release-state.json to change.');
+          }
+
+          console.log('CLI promotion changed:\n' + files.map(f => `  ${f}`).join('\n'));
+          NODE
+
+          New-Item -ItemType Directory -Force artifacts/cli-promotion | Out-Null
+          git diff --binary --no-ext-diff | Set-Content -Encoding utf8NoBOM artifacts/cli-promotion/promotion.patch
+          "changed=true" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        if: steps.prepare.outputs.changed == 'true'
+        with:
+          name: public-cli-release-promotion
+          path: artifacts/cli-promotion/promotion.patch
+          if-no-files-found: error
+          retention-days: 7
+
+  pull-request:
+    needs: [resolve, verify]
+    if: needs.verify.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: public-cli-release-promotion
+          path: ${{ runner.temp }}/cli-promotion
+
+      - name: Recheck main and create reviewable CLI promotion PR
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          RELEASE_SHA: ${{ needs.resolve.outputs.release_sha }}
+          RELEASE_URL: ${{ needs.resolve.outputs.release_url }}
+          BASE_SHA: ${{ needs.resolve.outputs.base_sha }}
+          PROMOTION_PATCH: ${{ runner.temp }}/cli-promotion/promotion.patch
+        run: |
+          set -euo pipefail
+
+          if [[ "$(git rev-parse HEAD)" != "$BASE_SHA" ]]; then
+            echo "Main changed during CLI promotion verification. Rerun against current main." >&2
+            exit 1
+          fi
+
+          BRANCH="automation/promote-cli-${VERSION}"
+
+          EXISTING="$(gh pr list \
+            --repo "$REPOSITORY" \
+            --head "$BRANCH" \
+            --base main \
+            --state open \
+            --json url \
+            --jq '.[0].url // empty')"
+
+          if [[ -n "$EXISTING" ]]; then
+            echo "CLI promotion PR already exists: $EXISTING"
+            exit 0
+          fi
+
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "Branch $BRANCH already exists without an open PR; inspect/remove it before retrying." >&2
+            exit 1
+          fi
+
+          git apply --check "$PROMOTION_PATCH"
+          git apply "$PROMOTION_PATCH"
+
+          if git diff --quiet; then
+            echo "No CLI promotion changes; no PR needed."
+            exit 0
+          fi
+
+          git switch -c "$BRANCH"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/release-state.json README.md docs packaging src/SoundScript.Playground/wwwroot/index.html
+          git commit -m "Promote SoundScript ${VERSION} CLI release"
+
+          REMOTE_MAIN="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [[ "$REMOTE_MAIN" != "$BASE_SHA" ]]; then
+            echo "Main advanced before PR creation. Rerun CLI promotion." >&2
+            exit 1
+          fi
+
+          git push origin "$BRANCH"
+
+          BODY="$RUNNER_TEMP/cli-promotion-body.md"
+          cat > "$BODY" <<EOF
+          Promotes the verified SoundScript ${VERSION} GitHub CLI release through the existing documentation generator.
+
+          CLI release workflow: ${RELEASE_URL}
+          CLI release commit: ${RELEASE_SHA}
+
+          - Successful CLI release provenance: PASS
+          - Version tag / release commit match: PASS
+          - Windows x64 archive + checksum: PASS
+          - Linux x64 archive + checksum: PASS
+          - macOS x64 archive + checksum: PASS
+          - macOS ARM64 archive + checksum: PASS
+          - GitHub asset digests vs checksum files: PASS
+          - Public-version match: PASS
+          - cli.githubReleasePublished update: PASS
+          - Documentation generation: PASS
+          - Documentation drift/tests: PASS
+          - Changed-file guard: PASS
+
+          This PR does not rebuild or republish the CLI and does not mark the CLI as published on nuget.org.
+          EOF
+
+          gh pr create \
+            --repo "$REPOSITORY" \
+            --base main \
+            --head "$BRANCH" \
+            --title "Promote SoundScript ${VERSION} CLI release" \
+            --body-file "$BODY"
