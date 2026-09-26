@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VideoLab · SoundScript Labs</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body><main><nav aria-label="Primary"><a href="../">← SoundScript Labs</a><span>Experimental · MVP explorer</span></nav>
+<h1>VideoLab</h1><p class="intro">One script. Two frozen snapshots. Deterministic composed video.</p>
+<p>Explore actual .NET/FFmpeg output from two video clips, mixed audio, a crossfade and an animated shape. These are pre-rendered synthetic scenarios, not an in-browser editor. Uploads and arbitrary rendering use the local CLI.</p>
+<p id="status" role="status">Loading validated snapshots…</p><p id="error" role="alert" hidden></p>
+<section id="workspace" hidden><div class="controls"><label>Parameter snapshot <select id="snapshot"><option value="0">A · quiet / left</option><option value="1">B · louder / right</option></select></label>
+<label>Playback format <select id="format"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label></div>
+<div class="grid"><section><h2>Rendered output</h2><video id="video" controls playsinline preload="metadata" aria-label="Composed video"></video>
+<p><a id="download" download>Download composed video</a> · <a href="proof.json" download>Download timeline data</a></p>
+<p class="muted">Playback is user-initiated. Frame inspection below is exact engine state; browser seeking may land near the requested frame.</p></section>
+<section><h2>Frozen parameters</h2><pre id="parameters"></pre><h2>Frame inspection</h2><label for="frame">Frame <output id="frame-label">0 / 179</output></label>
+<input id="frame" type="range" min="0" max="179" value="0" step="1"><div class="controls"><button id="transition" type="button">Inspect crossfade · frame 98</button></div>
+<p id="summary"></p><pre id="scene" tabindex="0" aria-label="Exact scene state"></pre></section></div>
+<details><summary>Declarative source script</summary><pre id="script" tabindex="0"></pre></details></section>
+<section><h2>What this proves</h2><p>The same compiled composition is bound to two parameter snapshots. Music gain and the animated shape’s starting position change; clip timing remains fixed. Every inspected frame comes from <code>Snapshot.SceneAt</code>, and both download formats come from the existing renderer.</p>
+<h2>Limits and reproducibility</h2><p>Six seconds, 180 frames at 30 fps, 640 × 360. Source clips here are generated color and tone fixtures. Exact repeated bytes are verified only with the same code, media, FFmpeg version and machine environment. This is experimental software, not a stable SoundScript API.</p>
+<p>No local files are uploaded. The hosted page does not compile scripts or run FFmpeg. To compose your own assets, use the <a href="https://github.com/dharangutti/sound-script/tree/experiments/videolab/experiments/VideoLab">VideoLab CLI and documentation</a>. <a href="checksums.json">Artifact checksums</a> · <a href="publication.json">Publication provenance</a></p></section>
+</main></body></html>

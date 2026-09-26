@@ -1,0 +1,7 @@
+{
+  "id": "videolab",
+  "branch": "experiments/videolab",
+  "commit": "53ddf3d3ef71e81b559acbc6a5a30d392a2f5c04",
+  "milestone": "labs-videolab-mvp-web-v0.2.0",
+  "artifactSha256": "3127fb4d0895cdf95acc285bd3af04d8896fc8abf598b4124ad49edd5154e014"
+}
