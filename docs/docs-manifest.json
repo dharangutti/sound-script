@@ -3,6 +3,7 @@
   "livingDocuments": [
     ".github/workflows/deploy-pages.yml",
     ".github/workflows/publish-nuget.yml",
+    ".github/workflows/promote-cli-release.yml",
     ".github/workflows/promote-public-release.yml",
     ".github/workflows/release-cli.yml",
     ".github/workflows/tests.yml",
