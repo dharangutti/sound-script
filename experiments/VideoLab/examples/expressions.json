@@ -1,0 +1,8 @@
+{
+  "width": 160, "height": 96, "fps": 30, "frames": 30,
+  "parameters": { "offset": { "default": 0, "min": 0, "max": 20 } },
+  "videos": [], "audio": [],
+  "shapes": [{ "at": 0, "frames": 30, "width": 16, "height": 16, "color": "FFCC33",
+    "transform": { "x": "offset + progress * (canvasWidth - 40)", "y": "canvasHeight / 2", "rotation": "frame * 3", "opacity": "clamp(progress * 2, 0, 1)" }
+  }]
+}

@@ -4,14 +4,21 @@ using VideoLab;
 
 try
 {
-    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); return 0; }
-    if (args.Length < 3 || !new[] { "inspect", "render" }.Contains(args[0]))
+    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); return 0; }
+    if (args.Length < 3 || !new[] { "inspect", "render", "plan", "batch" }.Contains(args[0]))
     {
-        Console.Error.WriteLine("VideoLab: inspect <script.json> <frame> [name=value ...]\n          render <script.json> <output.mp4|webm> [name=value ...]\n          selftest (generates fixtures and reproducibility proof in artifacts/)");
+        Console.Error.WriteLine("VideoLab: inspect <script.json> <frame> [name=value ...]\n          render <script.json> <output.mp4|webm> [name=value ...]\n          plan <script.json> <output.mp4|webm> [name=value ...]\n          batch <script.json> <batch.json>\n          selftest (generates fixtures and reproducibility proof in artifacts/)");
         return 2;
     }
     var path = Path.GetFullPath(args[1]);
     var composition = Composition.Compile(File.ReadAllText(path), Path.GetDirectoryName(path)!);
+    if (args[0] == "batch")
+    {
+        Composition.Require(args.Length == 3, "batch takes exactly a script and batch file.");
+        var batchPath = Path.GetFullPath(args[2]);
+        await Batches.Render(composition, File.ReadAllText(batchPath), Path.GetDirectoryName(batchPath)!, [path, batchPath]);
+        return 0;
+    }
     var runtime = composition.CreateRuntime();
     var changes = new Dictionary<string, decimal>();
     foreach (var arg in args.Skip(3))
@@ -22,6 +29,7 @@ try
     }
     runtime.SetMany(changes); var snapshot = runtime.Bind();
     if (args[0] == "inspect") Console.WriteLine(JsonSerializer.Serialize(snapshot.SceneAt(int.Parse(args[2], CultureInfo.InvariantCulture)), new JsonSerializerOptions { WriteIndented = true }));
+    else if (args[0] == "plan") Console.WriteLine(JsonSerializer.Serialize(Ffmpeg.Plan(snapshot, args[2]), new JsonSerializerOptions { WriteIndented = true }));
     else
     {
         Composition.Require(!string.Equals(path, Path.GetFullPath(args[2]), StringComparison.OrdinalIgnoreCase), "Output cannot replace the script.");

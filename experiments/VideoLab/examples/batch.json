@@ -1,0 +1,4 @@
+[
+  { "output": "../artifacts/batch-left.mp4", "parameters": { "offset": 0 } },
+  { "output": "../artifacts/batch-right.webm", "parameters": { "offset": 20 } }
+]

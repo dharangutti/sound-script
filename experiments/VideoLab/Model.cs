@@ -69,7 +69,7 @@ public sealed class Composition
         {
             Require(s.Parameters.TryGetValue(name, out var p) && p.Min >= min && p.Max <= max, $"Parameter '{name}' must be declared within [{min}, {max}].");
         }
-        void Span(int at, int frames, int trim = 0) => Require(at >= 0 && frames > 0 && trim >= 0 && (long)at + frames <= s.Frames, "Span outside timeline.");
+        void Span(int at, int frames, int trim = 0) => Require(at >= 0 && frames > 0 && trim >= 0 && (long)trim + frames <= int.MaxValue && (long)at + frames <= s.Frames, "Span outside timeline or source-frame range.");
         var clips = ImmutableArray.CreateBuilder<Clip>();
         int end = 0;
         foreach (var v in s.Videos)
@@ -117,7 +117,7 @@ public sealed class Composition
             foreach (var layer in snapshot.SceneAt(frame).Layers)
             {
                 var raster = layer.Transform.Raster();
-                pixels += (long)raster.Width * raster.Height;
+                pixels += (long)raster.RotatedWidth * raster.RotatedHeight;
                 Require(pixels <= 100_000_000, "Transform work exceeds 100 million layer pixels.");
             }
     }

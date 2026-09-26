@@ -1,0 +1,16 @@
+{
+  "width": 160, "height": 96, "fps": 30, "frames": 30,
+  "parameters": {}, "videos": [], "audio": [],
+  "effects": {
+    "zoom": { "parameters": { "amount": 2 }, "transform": { "scale": { "keys": [{ "frame": 0, "value": 1, "easing": "ease-out" }, { "frame": 29, "value": "$amount" }] } } },
+    "fade": { "parameters": {}, "transform": { "opacity": "progress" } },
+    "slide": { "parameters": { "distance": 80 }, "transform": { "x": "10 + progress * distance" } },
+    "pulse": { "parameters": { "amount": 1.8 }, "transform": { "scale": { "keys": [{ "frame": 0, "value": 1 }, { "frame": 15, "value": "amount" }, { "frame": 29, "value": 1 }] } } }
+  },
+  "shapes": [
+    { "at": 0, "frames": 30, "width": 12, "height": 12, "color": "FF0000", "effects": [{ "name": "zoom", "arguments": { "amount": 2.5 } }], "transform": { "x": 20, "y": 10 } },
+    { "at": 0, "frames": 30, "width": 12, "height": 12, "color": "00FF00", "effects": [{ "name": "fade" }], "transform": { "x": 70, "y": 10 } },
+    { "at": 0, "frames": 30, "width": 12, "height": 12, "color": "FFFF00", "effects": [{ "name": "slide", "arguments": { "distance": 100 } }], "transform": { "y": 55 } },
+    { "at": 0, "frames": 30, "width": 12, "height": 12, "color": "0088FF", "effects": [{ "name": "pulse" }], "transform": { "x": 125, "y": 10 } }
+  ]
+}

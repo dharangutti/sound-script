@@ -1,0 +1,9 @@
+{
+  "width": 160, "height": 96, "fps": 30, "frames": 30,
+  "parameters": { "score": { "default": 80, "min": 0, "max": 100 } },
+  "videos": [], "audio": [],
+  "shapes": [
+    { "at": 0, "frames": 30, "width": 40, "height": 20, "color": "00FF00", "when": "score > 70", "transform": { "x": 10, "y": 10 } },
+    { "at": 0, "frames": 30, "width": 40, "height": 20, "color": "FFCC33", "when": "progress > 0.5", "transform": { "x": 80, "y": 60 } }
+  ]
+}

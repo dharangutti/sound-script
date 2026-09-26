@@ -1,0 +1,19 @@
+{
+  "width": 160, "height": 96, "fps": 30, "frames": 30,
+  "parameters": { "startX": { "default": 20, "min": 10, "max": 60 } },
+  "videos": [],
+  "audio": [{ "asset": "../artifacts/assets/music.wav", "trim": 0, "frames": 30, "at": 0,
+    "gain": { "keys": [ { "frame": 0, "value": 0.2, "easing": "step" }, { "frame": 15, "value": 0.6 } ] } }],
+  "shapes": [{ "at": 0, "frames": 30, "width": 20, "height": 12, "color": "00FF00",
+    "transform": {
+      "x": { "keys": [{ "frame": 0, "value": "startX", "easing": "ease-in-out" }, { "frame": 29, "value": 120 }] },
+      "y": { "keys": [{ "frame": 0, "value": 30 }, { "frame": 29, "value": 60 }] },
+      "width": { "keys": [{ "frame": 0, "value": 20 }, { "frame": 29, "value": 30 }] },
+      "height": { "keys": [{ "frame": 0, "value": 12 }, { "frame": 29, "value": 16 }] },
+      "scale": { "keys": [{ "frame": 0, "value": 1 }, { "frame": 29, "value": 1.5 }] },
+      "rotation": { "keys": [{ "frame": 0, "value": 0 }, { "frame": 29, "value": 90 }] },
+      "opacity": { "keys": [{ "frame": 0, "value": 1 }, { "frame": 29, "value": 0.5 }] },
+      "anchorX": 0.5, "anchorY": 0.5, "cropX": 0.25, "cropY": 0, "cropWidth": 0.5, "cropHeight": 1
+    }
+  }]
+}
