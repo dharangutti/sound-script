@@ -21,6 +21,9 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'docs') -Force |
 & (Join-Path $PSScriptRoot 'update-homepage-release.ps1') -IndexPath (Join-Path $site 'index.html') -ReleaseStatePath (Join-Path $repo 'docs/release-state.json')
 
 Move-Item -LiteralPath $publish -Destination (Join-Path $site 'playground')
+# Only pinned, validated static Lab artifacts may contribute beneath /labs/.
+node (Join-Path $PSScriptRoot 'labs.cjs') stage $site
+if ($LASTEXITCODE -ne 0) { throw 'Labs publication validation failed; existing site artifact untouched.' }
 # GitHub Pages must serve _framework verbatim. Never apply Git text conversion.
 [IO.File]::WriteAllText((Join-Path $site '.nojekyll'), '')
 [IO.File]::WriteAllText((Join-Path $site '.gitattributes'), "* -text`n")
