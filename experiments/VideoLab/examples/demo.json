@@ -1,0 +1,19 @@
+{
+  "width": 640, "height": 360, "fps": 30, "frames": 180,
+  "parameters": {
+    "musicGain": { "default": 0.2, "min": 0, "max": 1 },
+    "clipGain": { "default": 0.1, "min": 0, "max": 1 },
+    "accentX": { "default": 24, "min": 0, "max": 540 }
+  },
+  "videos": [
+    { "asset": "../artifacts/assets/first.mp4", "trim": 15, "frames": 105, "at": 0 },
+    { "asset": "../artifacts/assets/second.mp4", "trim": 0, "frames": 90, "fade": 15 }
+  ],
+  "audio": [
+    { "asset": "../artifacts/assets/music.wav", "trim": 0, "frames": 180, "at": 0, "gain": "musicGain" },
+    { "asset": "../artifacts/assets/first.mp4", "trim": 15, "frames": 105, "at": 0, "gain": "clipGain" }
+  ],
+  "shapes": [
+    { "at": 15, "frames": 150, "width": 100, "height": 24, "color": "FFCC33", "x": "accentX", "toX": 540, "y": 308 }
+  ]
+}
