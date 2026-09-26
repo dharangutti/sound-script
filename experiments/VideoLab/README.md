@@ -1,70 +1,73 @@
-# VideoLab — isolated composition experiment
+# VideoLab v0.2 — isolated programmable composition
 
-An independent .NET 10 proof of concept: declarative JSON + local media → immutable frame timeline → runtime bindings → FFmpeg → MP4 or WebM. This is **not a SoundScript language extension or production feature**. There are no package or production project references, solution entries, shared version properties, or production changes. The local `Directory.Build.props` deliberately stops inheritance from SoundScript. Copy this directory to extract the experiment later; extraction is not part of this milestone.
+VideoLab owns composition semantics; FFmpeg is a lowering/rendering backend. The experiment is a dependency-free .NET 10 executable under this directory, with no production references, solution entries, packaging changes or shared version imports. It is not a SoundScript language extension. The frozen `labs-videolab-poc-v0.1.0` tag remains unchanged.
 
-## Run the proof
+`JSON → immutable Composition → runtime bindings → immutable Snapshot → SceneAt(frame) → FFmpeg → MP4/WebM`
 
-Requires .NET 10 SDK and `ffmpeg` / `ffprobe` on PATH, with libx264/AAC and libvpx-vp9/libopus encoders. No NuGet dependencies. From the repository root:
+## Run
+
+Requires .NET 10 and FFmpeg/ffprobe on PATH, including libx264/AAC and libvpx-vp9/libopus. Validation was performed with FFmpeg 9.0.1. Rendering requires the `-/filter_complex` option-file syntax; older builds lacking it are unsupported. The expanded synthetic suite also uses libx265 for an SDR HEVC compatibility fixture.
 
 ```powershell
 cd experiments/VideoLab
+dotnet build
 dotnet run -- selftest
-dotnet run -- inspect examples/demo.json 98
-dotnet run -- render examples/demo.json artifacts/custom.mp4 musicGain=0.45 accentX=100
-dotnet run -- render examples/demo.json artifacts/custom.webm
+dotnet run -- inspect examples/transforms.json 15
+dotnet run -- plan examples/transforms.json artifacts/test.mp4
+dotnet run -- render examples/transforms.json artifacts/test.mp4 startX=60
+dotnet run -- render examples/transforms.json artifacts/test.webm
+dotnet run -- batch examples/expressions.json examples/batch.json
+dotnet run -- realtest real-media/manifest.json
 ```
 
-`selftest` generates two synthetic video assets and a music WAV. It renders six-second snapshots A and B twice in **each** container, compares complete file SHA-256 hashes, decodes all frames, inspects transition and overlay pixels, measures audio gain and verifies both input frequencies are mixed. Additional checks exercise rejection, snapshot isolation, animation, explicit placement and black gaps. Outputs, exact FFmpeg version, source hashes, filter graph and `proof.json` remain under ignored `artifacts/`. The demo needs those generated assets; replace their paths to use your own media. Source paths resolve relative to the script, while output paths resolve relative to the working directory. Quote paths containing spaces.
+`selftest` generates synthetic assets, runs all original 95 checks plus v0.2 checks, and writes ignored artifacts. It never reads the optional real-media manifest. `realtest` returns a successful skip if the manifest is missing. Exit codes: 0 success/optional skip, 1 validation/dependency/render failure, 2 CLI usage. Asset paths are relative to the script; ordinary output paths are relative to the working directory; batch destinations are relative to the batch file. Numeric values use invariant culture.
 
-The CLI returns 0 on success, 1 on script/dependency/render failure, and 2 for usage. Exports atomically replace the named output after FFmpeg succeeds. Missing streams, unknown durations and sources too short for the requested trim are rejected before export. Inputs cannot be the output path. FFmpeg runs through an argument list, never a shell command.
+## Supported authoring
 
-## Script semantics
-
-See [`examples/demo.json`](examples/demo.json) for the complete small declarative script. Unknown JSON members are rejected. All time fields are **integer frames**, with spans `[at, at + frames)`. Supported constant frame rates: 24, 25, 30, 50, 60. Canvas and shape dimensions must be positive even integers; canvas is limited to 4096 in each dimension. Timeline is capped at 216,000 frames.
-
-| Field | Meaning |
+| Example | Purpose |
 | --- | --- |
-| `width`, `height`, `fps`, `frames` | Output canvas, rate and total duration |
-| `parameters` | Named decimal values with `default`, `min`, `max` |
-| `videos[].asset` | Local video file; first video stream |
-| `videos[].trim`, `frames` | Source in-point and duration after frame-rate normalization |
-| `videos[].at` | Explicit placement; omission sequences after previous clip, minus fade |
-| `videos[].fade` | Incoming alpha crossfade in frames, default 0 |
-| `audio[]` | Explicit source audio spans; first audio stream; `gain` names a parameter |
-| `shapes[]` | Solid rectangle with six-digit hex `color`, lifetime and linear X animation |
-| `shapes[].x`, `toX`, `y` | Parameter name for initial X, fixed final X, fixed Y |
+| [demo.json](examples/demo.json) | Unchanged original two clips, crossfade, animated shape, music and clip audio |
+| [transforms.json](examples/transforms.json) | Position, size, scale, rotation, opacity, crop, pivot and animated gain |
+| [expressions.json](examples/expressions.json) | Frame/progress-driven motion and runtime parameter |
+| [effects.json](examples/effects.json) | Reusable zoom, fade, slide and pulse |
+| [conditional.json](examples/conditional.json) | Parameter and progress conditions |
+| [data-sequence.json](examples/data-sequence.json) | Structured data generates ordered video spans |
+| [batch.json](examples/batch.json) | Multiple parameter bindings over the same compiled expression composition |
 
-Video clips must appear in timeline order. Cuts and gaps are supported; gaps are black. Only the incoming crossfade may overlap the previous clip; it must end exactly when that previous clip ends, and transitions cannot overlap each other. Clips are fit and letterboxed to the canvas, with square pixels and yuv420p output. Source video audio is **explicit**: reference that same asset in `audio[]` to include it, as the demo does. Music and clip audio are resampled to 48 kHz stereo, trimmed at corresponding sample boundaries, multiplied by gain, delayed and mixed without automatic normalization. A fixed limiter prevents overload; silence fills uncovered timeline portions. Multiple audio spans can share an asset or parameter. Gain declarations must stay in [0,4].
+Properties accept numbers, expression strings or integer-frame keyframes. Expressions compile into a typed immutable AST with arithmetic `+ - * /`, unary minus, parentheses, numeric comparisons, and `min`, `max`, `clamp`, `abs`. Built-ins are local `frame`, local `progress`, `fps`, `canvasWidth`, `canvasHeight`. Animations support linear, quadratic ease-in/out/in-out and step. Conditions must return boolean. No host calls or raw FFmpeg expressions are accepted.
 
-Shapes are rendered in declaration order above videos. X interpolates from its bound value at the first frame to `toX` at the final included frame. A one-frame shape stays at its starting X. Pixel coordinates are quantized by FFmpeg; `SceneAt` returns the decimal position before rasterization. The fade opacity is `(frame - at) / fade`, clamped at 1. `SceneAt` returns ordered layers and their source frame/opacity, not precomposited pixels.
+Clips/shapes support x/y, width/height, scale/scaleX/scaleY, degrees of rotation, opacity, normalized crop and anchor. Audio gain uses the same expression/animation model. Effects are immutable transform templates with validated arguments; nested effects are forbidden. Bounded data records generate sequences. See [SEMANTICS.md](SEMANTICS.md) for exact author-facing meaning and coordinate spaces, and [ARCHITECTURE.md](ARCHITECTURE.md) for implementation and centralized resource limits.
 
-## Architecture and API
-
-`Model.cs` owns parsing, validation, immutable structural compilation, parameter state and evaluation. `Ffmpeg.cs` only consumes a bound snapshot and handles lowering, probing and export. `Program.cs` is the CLI host; `Proof.cs` is the executable acceptance suite. JSON is the intentionally small DSL for this first milestone; a custom parser can be added independently if authoring demonstrates a need.
+## API and inspection
 
 ```csharp
 var composition = Composition.Compile(source, assetDirectory);
 var runtime = composition.CreateRuntime();
 var snapshotA = runtime.Bind();
-runtime.SetMany(new Dictionary<string, decimal> {
-    ["musicGain"] = 0.6m, ["accentX"] = 180m
-});
+runtime.SetMany(new Dictionary<string, decimal> { ["startX"] = 60 });
 var snapshotB = runtime.Bind();
-
-// ReferenceEquals(snapshotA.Composition, snapshotB.Composition) == true
-var scene = snapshotA.SceneAt(98); // Pure random-access evaluation.
+var scene = snapshotA.SceneAt(15);
+var plan = Ffmpeg.Plan(snapshotB, "B.mp4"); // No process or media I/O.
 await Ffmpeg.Render(snapshotA, "A.mp4");
 await Ffmpeg.Render(snapshotB, "B.mp4");
 ```
 
-`SetMany` validates the entire batch before publishing it under a lock. `Bind` captures an immutable value map: later runtime writes cannot change existing snapshots. Runtime parameters affect gain and initial shape X; structural timing is compiled once. No wall clock, random state, interactive playback engine or expression evaluator is involved. `Ffmpeg.Plan(snapshot, output)` returns the exact argument vector, inputs and graph without launching processes.
+`SetMany` validates the entire candidate state before publishing; failure changes nothing. `Bind()` freezes parameters while sharing composition structure. `SceneAt` is pure random access: ordered layers expose source, normalized source frame, inclusion, z-order, transform/crop and evaluated values; audio exposes source position, inclusion and gain. Legacy `Clips`/`Shapes` projections remain. `Plan` returns complete graph/arguments, inputs and expected output settings.
 
-## Determinism and boundaries
+`Batches.Bind` shares structure and isolates each binding. Output destinations are unique and cannot replace inputs; the CLI also protects script/batch files. Replacement is atomic per output, not globally transactional: earlier successful batch outputs remain if a later render fails.
 
-The guarantee is repeated renders with identical script, bindings and asset bytes on the **same FFmpeg build, encoders and machine environment**. Software codecs, single-threaded decode/filter/encode, explicit formats, fixed timing, stripped metadata and bitexact flags are used. Both MP4 and WebM are tested by complete-file hash, not just perceptual comparison. Different codec builds, CPUs and operating systems are not promised byte-equivalent. Asset paths are captured by the composition, but file contents are read at render time: keep files immutable between renders. The proof records their hashes.
+## Source policy and validation
 
-Duration preflight depends on container/stream metadata and is intentionally conservative. This is not an untrusted-media service or a general editor. No HDR/color-management guarantees, rotation/crop controls, speed ramps, subtitles/text/fonts, live rebinding during an export, arbitrary layer stacks or plugin filters. A shape overlay satisfies the first milestone without font dependencies. Streams with unreliable timing, malformed media, or unusual edit lists need further investigation before wider use. There is no production packaging, deployment or automatic extraction.
+Output FPS remains integer 24/25/30/50/60. Validated CFR source rates include fractional 24000/1001, 30000/1001 and 60000/1001 through explicitly rounded timestamp normalization; these are not fractional output-rate support. `SourceFrame` always means the index after normalization, never the raw encoded frame index. Display-rotation metadata is explicitly ignored; encoded pixels define the source plane. Non-square sample aspect ratio, detected VFR/discontinuities, interlaced and signaled HDR/wide-gamut/high-bit-depth video are rejected. Sources must have trustworthy duration/stream metadata. See the detailed limits of prefix timing validation in [SEMANTICS.md](SEMANTICS.md).
 
-## Architecture decision
+`AssetProbe` identifies missing files/streams, unknown duration, short spans, unsupported timing/geometry/color and malformed metadata with concise codes, paths and requested frame spans. An optional `AssetFingerprint.Read` returns path, byte size and SHA-256. Ordinary rendering does not hash assets. Snapshot immutability applies to the composition and bound parameters, **not external file bytes**.
 
-The experiment adds an inspectable timeline, pure scene evaluation and isolated parameter snapshots above FFmpeg, rather than exposing FFmpeg expressions to scripts. The first proof establishes the technical path. Keep it here until review with real input media confirms the timeline semantics, authoring ergonomics, media compatibility and maintenance cost. A later independent repository is a separate decision; do not merge this into the production product.
+For local footage, copy [real-media-manifest.example.json](examples/real-media-manifest.example.json) to `real-media/manifest.json` and adjust paths/expectations. The harness renders both formats twice, compares hashes, fully decodes, checks frame count/canvas/48 kHz stereo and confirms source bytes did not change. Rejection expectations are explicit. Local manifests, media, hashes and derived outputs stay under ignored `real-media/`; nothing proprietary is required by selftest. [REAL_MEDIA_VALIDATION.md](REAL_MEDIA_VALIDATION.md) separates actual recordings from generated equivalents.
+
+## Boundaries
+
+The frame-oriented programmable renderer remains a correctness-first **reference backend**, capped at 600 frames and 4096 element-frames, with pixel-work limits. It is a semantic oracle for a future optimized backend, not a long-form editor. The original efficient legacy route remains unchanged in meaning. No optimized backend is implemented.
+
+Repeated output bytes are guaranteed only for identical script, bindings, asset bytes, VideoLab code, FFmpeg/encoders and machine environment. Software codecs, fixed timing/formats, single-threaded work, bitexact flags and stripped metadata are used. No cross-machine/version equality claim is made. See [VALIDATION.md](VALIDATION.md) for measured results.
+
+Unsupported: text/subtitles/font discovery, masks/blur/grading, HDR/wide-gamut/Dolby Vision preservation, general scripting/plugins, arbitrary overlapping video tracks, negative scale, speed ramps, nested effects, audio-envelope analysis, GPU rendering, interactive preview, production packaging or automatic extraction. Parameterized batches provide procedural generation. Inputs are local trusted media: FFmpeg is not sandboxed for hostile uploads. Processes use argument lists, no shell and `-nostdin`; ordinary failure cleans temporary graph/output files before any destination replacement.
