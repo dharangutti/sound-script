@@ -13,6 +13,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  labs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate pinned Labs independently of production builds
+        run: |
+          node --test scripts/labs.test.cjs
+          mkdir -p artifacts/labs-ci
+          node scripts/labs.cjs stage artifacts/labs-ci
+          npm ci --prefix scripts
+          npx --prefix scripts playwright install --with-deps chromium
+          node scripts/verify-labs-browser.cjs artifacts/labs-ci
   test:
     # Multi-OS matrix: SoundScript.Wave's determinism suite claims
     # byte-identical WAV checksums "across machines/OS/CPU" — this is that
@@ -51,6 +68,8 @@ jobs:
 
       - name: Test documentation validation and homepage history
         run: |
+          node --test scripts/labs.test.cjs
+          node scripts/labs.cjs check
           node --test scripts/docs-state.test.mjs scripts/homepage-release.test.cjs scripts/release-promotion.test.mjs
           node scripts/verify-v15-acceptance.mjs
 

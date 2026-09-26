@@ -14,6 +14,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Manual dispatch from an experiment must never replace the production site.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +35,7 @@ jobs:
           node-version: '22'
 
       - name: Test integrity verifier
-        run: node --test scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs
+        run: node --test scripts/playground-integrity.test.cjs scripts/playground-startup.test.cjs scripts/labs.test.cjs
 
       - name: Check public documentation state
         shell: pwsh
@@ -53,6 +55,7 @@ jobs:
           npx --prefix scripts playwright install --with-deps chromium
           node scripts/verify-playground-startup.cjs artifacts/site/playground
           node scripts/runtime-media-browser.cjs artifacts/site/playground
+          node scripts/verify-labs-browser.cjs artifacts/site
 
       - name: Publish site to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
