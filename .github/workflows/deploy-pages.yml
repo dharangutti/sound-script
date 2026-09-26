@@ -14,6 +14,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Experimental branch dispatches must never replace the production website.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
