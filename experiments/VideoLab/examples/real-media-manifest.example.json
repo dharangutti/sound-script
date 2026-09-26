@@ -1,0 +1,8 @@
+{
+  "cases": [
+    { "name": "portrait", "asset": "portrait.mp4", "expected": { "hasVideo": true, "hasAudio": false }, "trim": 0, "frames": 15, "width": 96, "height": 160 },
+    { "name": "clip-audio", "asset": "landscape.mp4", "expected": { "hasVideo": true, "hasAudio": true }, "trim": 15, "frames": 15, "repeat": true },
+    { "name": "music", "asset": "music.wav", "expected": { "hasVideo": false, "hasAudio": true }, "frames": 15 },
+    { "name": "vfr", "asset": "vfr.mp4", "expected": { "hasVideo": true, "hasAudio": true, "rejection": "UNSUPPORTED_TIMING" }, "frames": 15 }
+  ]
+}

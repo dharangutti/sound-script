@@ -53,7 +53,9 @@ public static class AssetProbe
             if (sar is not ("" or "N/A" or "1:1")) throw Error("UNSUPPORTED_GEOMETRY", "non-square sample aspect ratio is not validated.");
             if (Text(stream, "field_order") is not ("" or "unknown" or "progressive")) throw Error("UNSUPPORTED_INTERLACE", "interlaced video is outside v0.2 support.");
             var primaries = Text(stream, "color_primaries"); var transfer = Text(stream, "color_transfer"); var color = Text(stream, "color_space");
-            if (primaries is not ("" or "unknown" or "bt709" or "bt470m" or "bt470bg" or "smpte170m" or "smpte240m") || color.Contains("2020", StringComparison.Ordinal) || transfer is "smpte2084" or "arib-std-b67" || Text(stream, "pix_fmt").Contains("10", StringComparison.Ordinal) || Text(stream, "pix_fmt").Contains("12", StringComparison.Ordinal))
+            var pixelFormat = Text(stream, "pix_fmt");
+            bool eightBit = new[] { "yuv420p", "yuvj420p", "yuv422p", "yuvj422p", "yuv444p", "yuvj444p", "nv12", "nv21", "gray", "rgb24", "bgr24", "rgba", "bgra", "gbrp" }.Contains(pixelFormat, StringComparer.Ordinal);
+            if (!eightBit || primaries is not ("" or "unknown" or "bt709" or "bt470m" or "bt470bg" or "smpte170m" or "smpte240m") || color.Contains("2020", StringComparison.Ordinal) || transfer is "smpte2084" or "arib-std-b67")
                 throw Error("UNSUPPORTED_COLOR", "HDR, wide-gamut and high-bit-depth inputs are outside the SDR validation boundary.");
             sourceRate = Ratio(Text(stream, "avg_frame_rate")) ?? 0;
             decimal nominal = Ratio(Text(stream, "r_frame_rate")) ?? 0, tick = Ratio(Text(stream, "time_base")) ?? 0;
