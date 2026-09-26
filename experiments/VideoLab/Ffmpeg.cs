@@ -24,7 +24,7 @@ public static class Ffmpeg
         {
             var v = c.Clips[i];
             var fade = v.Fade == 0 ? "" : $",fade=t=in:st=0:d={T(v.Fade)}:alpha=1";
-            graph.Add($"[{i}:v:0]setpts=PTS-STARTPTS,fps={s.Fps},trim=start_frame={v.Trim}:end_frame={(long)v.Trim + v.Frames},setpts=PTS-STARTPTS,scale={s.Width}:{s.Height}:force_original_aspect_ratio=decrease,pad={s.Width}:{s.Height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=rgba{fade},setpts=PTS+{T(v.At)}/TB[v{i}]");
+            graph.Add($"[{i}:v:0]setpts=PTS-STARTPTS,fps=fps={s.Fps}:start_time=0:round=near:eof_action=round,trim=start_frame={v.Trim}:end_frame={(long)v.Trim + v.Frames},setpts=PTS-STARTPTS,scale={s.Width}:{s.Height}:force_original_aspect_ratio=decrease,pad={s.Width}:{s.Height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=rgba{fade},setpts=PTS+{T(v.At)}/TB[v{i}]");
             graph.Add($"[{current}][v{i}]overlay=eof_action=pass:repeatlast=0:enable='gte(t,{T(v.At)})*lt(t,{T(v.At + v.Frames)})'[layer{i}]");
             current = $"layer{i}";
         }
@@ -50,7 +50,7 @@ public static class Ffmpeg
     internal static RenderPlan Assemble(Script s, string output, string[] inputs, List<string> graph)
     {
         var args = new List<string> { "-hide_banner", "-loglevel", "error", "-xerror", "-nostdin", "-y", "-filter_complex_threads", "1", "-fflags", "+bitexact" };
-        foreach (var input in inputs) args.AddRange(["-threads", "1", "-i", input]);
+        foreach (var input in inputs) args.AddRange(["-threads", "1", "-noautorotate", "-i", input]);
         args.AddRange(["-filter_complex", string.Join(";", graph), "-map", "[vout]", "-map", "[aout]", "-map_metadata", "-1", "-map_chapters", "-1", "-threads", "1", "-flags:v", "+bitexact", "-flags:a", "+bitexact"]);
         switch (Path.GetExtension(output).ToLowerInvariant())
         {
@@ -70,7 +70,7 @@ public static class Ffmpeg
         var stdout = process.StandardOutput.ReadToEndAsync(); var stderr = process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
         var text = await stdout; var error = await stderr;
-        if (process.ExitCode != 0) throw new InvalidOperationException($"{executable} exited {process.ExitCode}: {error}");
+        if (process.ExitCode != 0) throw new InvalidOperationException($"{executable} exited {process.ExitCode}: {error[..Math.Min(error.Length, 1600)]}");
         return text;
     }
 
@@ -79,20 +79,14 @@ public static class Ffmpeg
         output = Path.GetFullPath(output);
         var plan = Plan(snapshot, output);
         Composition.Require(!plan.Inputs.Contains(output, StringComparer.OrdinalIgnoreCase), "Output cannot replace an input asset.");
-        // Probe every selected stream before starting an expensive export. No implicit source looping.
-        for (int i = 0; i < plan.Inputs.Length; i++)
+        // Repeated references are probed once per stream, covering the furthest requested end.
+        var c = snapshot.Composition;
+        var requests = c.Clips.Select(v => (Path: Path.GetFullPath(v.Asset, c.AssetDirectory), Kind: "video", v.Trim, v.Frames))
+            .Concat(c.Script.Audio.Select(a => (Path: Path.GetFullPath(a.Asset, c.AssetDirectory), Kind: "audio", a.Trim, a.Frames)));
+        foreach (var group in requests.GroupBy(r => (r.Path, r.Kind)))
         {
-            Composition.Require(File.Exists(plan.Inputs[i]), $"Missing asset: {plan.Inputs[i]}");
-            bool video = i < snapshot.Composition.Clips.Length;
-            var info = await Run("ffprobe", ["-v", "error", "-select_streams", video ? "v:0" : "a:0", "-show_entries", "stream=duration:format=duration", "-of", "json", plan.Inputs[i]]);
-            using var doc = JsonDocument.Parse(info);
-            var streams = doc.RootElement.GetProperty("streams");
-            Composition.Require(streams.GetArrayLength() > 0, $"Required {(video ? "video" : "audio")} stream missing: {plan.Inputs[i]}");
-            var stream = streams[0];
-            string? duration = stream.TryGetProperty("duration", out var d) ? d.GetString() : null;
-            if (duration == null || duration == "N/A") duration = doc.RootElement.GetProperty("format").TryGetProperty("duration", out d) ? d.GetString() : null;
-            var needed = video ? (long)snapshot.Composition.Clips[i].Trim + snapshot.Composition.Clips[i].Frames : (long)snapshot.Composition.Script.Audio[i - snapshot.Composition.Clips.Length].Trim + snapshot.Composition.Script.Audio[i - snapshot.Composition.Clips.Length].Frames;
-            Composition.Require(decimal.TryParse(duration, NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds) && seconds * snapshot.Composition.Script.Fps + 0.01m >= needed, $"Asset is too short or duration is unknown: {plan.Inputs[i]}");
+            var request = group.MaxBy(r => (long)r.Trim + r.Frames);
+            await AssetProbe.Validate(request.Path, request.Kind, request.Trim, request.Frames, c.Script.Fps);
         }
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         var temporary = Path.Combine(Path.GetDirectoryName(output)!, $".videolab-{Guid.NewGuid():N}{Path.GetExtension(output)}");

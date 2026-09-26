@@ -15,7 +15,7 @@ internal static class ProgrammableBackend
         for (int i = 0; i < c.Clips.Length; i++)
         {
             var frames = scenes.SelectMany((scene, frame) => scene.Layers.Where(l => l.Id == $"video[{i}]" && l.Included).Select(_ => frame)).ToArray();
-            string normalize = $"[{i}:v:0]setpts=PTS-STARTPTS,fps={s.Fps},scale={s.Width}:{s.Height}:force_original_aspect_ratio=decrease,pad={s.Width}:{s.Height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=rgba";
+            string normalize = $"[{i}:v:0]setpts=PTS-STARTPTS,fps=fps={s.Fps}:start_time=0:round=near:eof_action=round,scale={s.Width}:{s.Height}:force_original_aspect_ratio=decrease,pad={s.Width}:{s.Height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=rgba";
             graph.Add(frames.Length == 0 ? normalize + ",nullsink" : normalize + $",split={frames.Length}" + string.Concat(frames.Select(f => $"[source{i}_{f}]")));
         }
         for (int frame = 0; frame < s.Frames; frame++)
