@@ -102,7 +102,7 @@ Current public version: **16.0.0**. Publication channels are recorded in `docs/r
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
 `SoundScript.Cli` 16.0.0 is not published on nuget.org.
 
-No CLI GitHub Release is published for this public version. Build from a source checkout.
+Download a platform archive from [CLI 16.0.0](https://github.com/dharangutti/sound-script/releases/tag/v16.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 ## Verify from a clean checkout

@@ -6,6 +6,6 @@
   },
   "cli": {
     "nugetPublished": false,
-    "githubReleasePublished": false
+    "githubReleasePublished": true
   }
 }
