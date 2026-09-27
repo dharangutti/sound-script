@@ -115,15 +115,22 @@ work does not introduce or move them. Signal and VideoLab implementation remains
 outside main. VideoLab's original `labs-videolab-poc-v0.1.0` remains preserved.
 Its MVP evidence includes 143 automated checks, repeated MP4/WebM byte comparisons,
 decoded transition/animation/audio assertions and 17 private real-media cases
-(16 successful renders, one expected VFR rejection). The public explorer ships only
-synthetic proof media. The v0.2.2 gallery adds transforms/easing/gain, expressions,
-reusable effects, conditional layers and data-driven sequences alongside the original
-composition demo: six scenarios, ten fixed snapshots and twenty media outputs.
-All 143 core checks pass, and 16 additional format/binding pairs are repeat-rendered,
-byte-compared and fully decoded. Browser checks cover every demo, binding and format,
-exact scene data, conditions, audio gain, keyboard inspection and immediate seeks.
-It does not upload
-assets, compile scripts or run FFmpeg in the browser.
+(16 successful renders, one expected VFR rejection). The v0.3.0 workbench features
+a real-footage composition, read-only timeline, parameter defaults/current values,
+source inspector, seven demo cards and MP4/WebM exports. Sample swaps in the showcase
+produce 18 verified bindings and 36 outputs across seven demos. Its small public
+samples include an adapted Pixabay composition with credits; private original
+downloads are not packaged. All 143 core checks and 32 additional repeat/decode pairs
+pass. The experimental x264 configuration pins CPU-independent decisions after an
+observed repeat mismatch; older milestone tags remain unchanged.
 
-No production runtime/API/media behavior changes. The homepage gains a Labs link;
+The public page remains static. My Files explains how to start the optional private
+loopback workbench on the experiment branch. That adapter uses the same compiler and
+FFmpeg for arbitrary supported parameter values and selected MP4/WebM/WAV/MP3 files.
+Files stay in temporary storage on the user's own computer, with explicit reset and
+shutdown cleanup. No upload endpoint, native executable or new production service is
+deployed to SoundScript.net. See the branch's web/README.md for limits and operation.
+
+No production runtime/API/media behavior changes. The homepage gains a compact
+VideoLab callout and the Labs catalog features the published MVP;
 the existing Playground build and integrity/browser checks remain in place.
