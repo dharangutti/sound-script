@@ -4,19 +4,19 @@
     {
       "id": "videolab",
       "name": "VideoLab",
-      "description": "Deterministic video composition with runtime bindings, animation and audio mixing.",
+      "description": "Deterministic video editing, audience variants and structured review annotations.",
       "status": "mvp",
       "mvp": true,
       "publish": true,
       "branch": "experiments/videolab",
-      "commit": "db9ebebb778fd823f490cc3a886ab8ea0f4dab77",
-      "milestone": "labs-videolab-mvp-web-v0.3.0",
-      "reason": "Seven demos, real-footage showcase, sample swaps, timeline and 36 MP4/WebM outputs. My Files and free parameters use the private local workbench.",
+      "commit": "e5ec72604c1dcb23c859f2674824dbcc7a834990",
+      "milestone": "labs-videolab-mvp-web-v0.4.0",
+      "reason": "Ten demos with titles, callouts, audience variants and external annotation datasets; 52 MP4/WebM outputs. Personal media and arbitrary bindings use the private local workbench.",
       "artifact": {
         "directory": "experiments/VideoLab/web/site",
-        "sha256": "24c9ae42feb38e98871ff5c6c2f90795f109447dc2c92bbad7ba33bf002280e9",
+        "sha256": "5dfec0a84685e0bc22b035fbdabf73c859cdd0f17068d020f219aa94e7a4eb45",
         "evidence": "experiments/VideoLab/web/publication-evidence.json",
-        "evidenceSha256": "5c2c942a73f22dde569bd56e0b781eb98a5f9958e067cb52b056d04148f48e11"
+        "evidenceSha256": "e763eb4dbc2de54173540c57fc52b43575625052904f5bd0ea295f69dce31940"
       }
     },
     {
