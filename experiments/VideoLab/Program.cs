@@ -4,6 +4,7 @@ using VideoLab;
 
 try
 {
+    if (args.Length == 1 && args[0] == "annotationtest") { await AnnotationProof.Run(); return 0; }
     if (args.Length == 1 && args[0] == "audiencetest") { await AudienceProof.Run(); return 0; }
     if (args.Length == 1 && args[0] == "editingtest") { await EditingProof.Run(); return 0; }
     if (args.Length is 1 or 2 && args[0] == "serve")
@@ -12,7 +13,7 @@ try
     }
     if (args.Length == 1 && args[0] == "webproof")
     {
-        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run();
+        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run(); await AnnotationProof.Run();
         await WebProof.Publish(); return 0;
     }
     if (args.Length > 0 && args[0] == "realtest")
@@ -20,14 +21,25 @@ try
         if (args.Length != 2) { Console.Error.WriteLine("VideoLab: realtest <optional-manifest.json>"); return 2; }
         return await RealMediaTests.Run(args[1]);
     }
-    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run(); return 0; }
+    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run(); await AnnotationProof.Run(); return 0; }
     if (args.Length < 3 || !new[] { "inspect", "render", "plan", "batch" }.Contains(args[0]))
     {
         Console.Error.WriteLine("VideoLab: inspect <script.json> <frame> [name=value ...]\n          render <script.json> <output.mp4|webm> [name=value ...]\n          plan <script.json> <output.mp4|webm> [name=value ...]\n          batch <script.json> <batch.json>\n          serve [port] (private local browser workbench)\n          webproof (rebuild static gallery)\n          realtest <optional-manifest.json>\n          selftest (generates fixtures and reproducibility proof in artifacts/)");
         return 2;
     }
     var path = Path.GetFullPath(args[1]);
-    var composition = Composition.Compile(File.ReadAllText(path), Path.GetDirectoryName(path)!);
+    var source = File.ReadAllText(path);
+    string? annotationPath = null;
+    var assignments = args.Skip(3).ToList();
+    var annotationFlag = assignments.IndexOf("--annotations");
+    if (annotationFlag >= 0)
+    {
+        Composition.Require(args[0] != "batch" && annotationFlag + 1 < assignments.Count, "Use per-record annotations in batches; --annotations requires a file.");
+        annotationPath = Path.GetFullPath(assignments[annotationFlag + 1]);
+        source = Annotations.Expand(source, Annotations.ReadFile(annotationPath), Path.GetDirectoryName(path)!);
+        assignments.RemoveRange(annotationFlag, 2);
+    }
+    var composition = Composition.Compile(source, Path.GetDirectoryName(path)!);
     if (args[0] == "batch")
     {
         Composition.Require(args.Length == 3, "batch takes exactly a script and batch file.");
@@ -37,7 +49,7 @@ try
     }
     var runtime = composition.CreateRuntime();
     var changes = new Dictionary<string, JsonElement>();
-    foreach (var arg in args.Skip(3))
+    foreach (var arg in assignments)
     {
         var pair = arg.Split('=', 2);
         if (pair.Length != 2) throw new ArgumentException($"Invalid assignment: {arg}");
@@ -56,6 +68,7 @@ try
     else
     {
         Composition.Require(!string.Equals(path, Path.GetFullPath(args[2]), StringComparison.OrdinalIgnoreCase), "Output cannot replace the script.");
+        Composition.Require(annotationPath == null || !string.Equals(annotationPath, Path.GetFullPath(args[2]), StringComparison.OrdinalIgnoreCase), "Output cannot replace annotation input.");
         await Ffmpeg.Render(snapshot, args[2]);
         Console.WriteLine($"{Path.GetFullPath(args[2])}\nSHA256 {Ffmpeg.Hash(args[2])}");
     }

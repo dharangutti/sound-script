@@ -24,6 +24,10 @@ async function upload(kind, filename, bytes) { return api('upload?kind='+kind+'&
         const audienceBound=await api('bind',audienceState);assert.equal(audienceBound.status,200);assert.equal(audienceBound.data.parameters.audience,'qa');
         assert.equal((await api('bind',{...audienceState,parameters:{audience:'unknown'}})).status,400);
         assert.equal((await api('bind',{...audienceState,parameters:{showSafety:'true'}})).status,400);
+        const annotationState={...audienceState,demo:'annotations',annotationSet:'qa'};
+        const annotationBound=await api('bind',annotationState);assert.equal(annotationBound.status,200);
+        assert.equal(annotationBound.data.annotationData.annotations[0].id,'qa_note');assert.equal(annotationBound.data.baseScript.texts.length,1);
+        assert.equal((await api('bind',{...annotationState,annotationSet:'../../secret'})).status,400);
         const bound = await api('bind'); assert.equal(bound.status,200);assert.equal(bound.data.parameters.accentX,80);
         assert.equal((await api('bind',{...state,parameters:{accentX:99999}})).status,400);
         assert.deepEqual((await api('bind')).data.scenes,bound.data.scenes);
@@ -94,6 +98,16 @@ async function upload(kind, filename, bytes) { return api('upload?kind='+kind+'&
         await page.locator('#reset-parameters').click();
         await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).audience==='shopfloor');
         assert.equal(await page.locator('#parameter-showSafety').inputValue(),'true');
+        assert.deepEqual(errors,[]);
+        await page.locator('.card[data-id="annotations"] button').click();await page.selectOption('#snapshot','1');
+        await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).audience==='qa');
+        assert.equal(JSON.parse(await page.locator('#annotations-json').textContent()).annotations[0].id,'qa_note');
+        assert.equal(JSON.parse(await page.locator('#script').textContent()).texts.length,1);
+        await page.locator('#render').click();await page.waitForFunction(()=>document.getElementById('render-state').textContent==='Current composition rendered',null,{timeout:120000});
+        await page.waitForFunction(()=>document.getElementById('video').readyState>=2);await page.locator('#transition').click();await page.waitForFunction(()=>!document.getElementById('video').seeking);
+        await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(lab,'artifacts/phase3-local.png')});
+        await page.selectOption('#snapshot','2');await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).audience==='engineering');
+        assert.equal(JSON.parse(await page.locator('#annotations-json').textContent()).annotations[0].id,'engineering_note');
         assert.deepEqual(errors,[]);
         await browser.close();browser=null;
         await api('stop');assert.equal(await exited,0,log);

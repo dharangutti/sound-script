@@ -1,7 +1,7 @@
 # VideoLab browser workbench
 
 Experimental programmable composition in .NET, separate from the supported
-SoundScript NuGet package and CLI. Nine development cards cover real video/audio,
+SoundScript NuGet package and CLI. Ten development cards cover real video/audio,
 multiple clips, crossfade, titles, callouts, graphics, motion, expressions, effects,
 conditions and sequences. Preview, read-only clip/text/callout/transition/audio tracks,
 parameters and collapsible source
@@ -10,8 +10,8 @@ video seeking is approximate. Export is MP4/H.264/AAC or WebM/VP9/Opus.
 
 ## Development and public gallery
 
-This branch includes Phase 2 development ahead of the public v0.3.0 pin. Development
-has nine demos, 23 snapshots and 46 exports; the currently approved baseline has
+This branch includes Phase 3 development ahead of the public v0.3.0 pin. Development
+has ten demos, 26 snapshots and 52 exports; the currently approved baseline has
 seven demos, 18 snapshots and 36 exports. Building this directory does not update
 the website. See roadmap/PROGRESS.md and public publication.json for exact status.
 
@@ -124,3 +124,8 @@ Public-style gallery bindings stay fixed; local mode enables enum/boolean
 selectors, numeric gain and native rendering. Reset restores all parameter types.
 This private development gallery has 23 snapshots / 46 exports. Existing release
 v0.3.0 remains pinned independently; none of these changes deploy automatically.
+
+Phase 3 adds the review-annotation card: choose one of three curated external
+datasets and inspect base JSON, annotation data and generated primitives. The
+public gallery stays static. The local workbench can bind/render these datasets
+with its native engine; arbitrary annotation file import is a CLI feature.

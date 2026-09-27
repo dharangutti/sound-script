@@ -132,3 +132,45 @@ audio. Group membership does not change stable z-order. Excluded members still
 validate resource/transform bounds. A batch mixes numeric, enum and boolean JSON
 bindings over one compiled composition. CLI enum assignments use audience=qa;
 boolean assignments use showSafety=false.
+
+
+## External annotations (Phase 3)
+
+Annotations.Expand(baseSource, annotationSource, directory) is pure lowering. It
+validates the base, parses a strict schemaVersion 1 document, appends ordinary
+primitives/groups, and validates the expanded composition. The base string and
+input data are unchanged. There is no annotation-specific renderer or interpreter.
+Composition.Source retains its authored input for batch expansion.
+
+Documents contain annotations (0–24 records) and optional audienceParameter naming
+an existing enum. Records require id, text, startFrame, endFrame, x, y, width and
+height. IDs are unique ASCII identifiers up to 48 characters. Time is half-open
+[startFrame,endFrame). Even-sized planes must fit inside the canvas and be at least
+24 by 36. Literal text uses the existing printable ASCII/160-character/font rules.
+
+Optional category is instruction/information/warning/inspection/revision/comment
+(default comment). Severity is normal/warning/critical (default normal). A fixed
+palette maps these to colors. Style is text/callout/highlight (default text).
+Font size is fixed at 20 for this first bounded schema. Callouts require targetX
+and targetY in their local plane under the existing pointer bounds. Other styles
+reject targets. Highlight generates four two-pixel outline shapes plus a title;
+all styles use existing deterministic text layout. No arbitrary style dictionaries.
+
+An optional audiences array contains unique enum members; absent/empty means all
+audiences. A generated annotation_<id> group combines audience comparisons, with
+no host code. IDs remain inspectable through group membership. Input array order
+and existing layer-kind z-order are preserved. Existing group, element, frame,
+expression and pixel limits apply after expansion; a valid individual record may
+still cause an aggregate limit rejection.
+
+CLI --annotations explicitly loads a JSON file. Batch records may include an
+annotations path relative to the batch file; equal dataset contents reuse one
+compiled composition while different datasets recompile the same base source.
+Adapters bound files to 400,000 bytes and documents to 100,000 characters. All
+records/datasets validate before rendering. Outputs cannot overwrite any dataset,
+base script, batch or media input. Replacement is atomic per output, not across
+the entire batch. Annotation datasets are data, never instructions or host scripts.
+
+The local browser only selects the three bundled dataset identifiers; it has no
+arbitrary annotation-path endpoint. Its source inspector shows the base source,
+selected annotation JSON and generated composition independently.

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "audienceParameter": "audience",
+  "annotations": [
+    {
+      "id": "qa_note",
+      "text": "QA-017 | Inspect contact edge",
+      "startFrame": 0,
+      "endFrame": 60,
+      "audiences": [
+        "qa"
+      ],
+      "category": "inspection",
+      "severity": "normal",
+      "style": "text",
+      "x": 12,
+      "y": 62,
+      "width": 456,
+      "height": 40
+    },
+    {
+      "id": "qa_detail",
+      "text": "Inspect bearing for visible gap",
+      "startFrame": 6,
+      "endFrame": 60,
+      "audiences": [
+        "qa"
+      ],
+      "category": "inspection",
+      "severity": "normal",
+      "style": "callout",
+      "x": 32,
+      "y": 118,
+      "width": 372,
+      "height": 110,
+      "targetX": 280,
+      "targetY": 90
+    },
+    {
+      "id": "qa_marker",
+      "text": "CHECK",
+      "startFrame": 24,
+      "endFrame": 60,
+      "audiences": [
+        "qa"
+      ],
+      "category": "inspection",
+      "severity": "normal",
+      "style": "highlight",
+      "x": 112,
+      "y": 176,
+      "width": 160,
+      "height": 68
+    }
+  ]
+}

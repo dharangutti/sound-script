@@ -1,0 +1,23 @@
+[
+  {
+    "output": "../artifacts/annotations-shopfloor.mp4",
+    "annotations": "annotations/shopfloor-instructions.json",
+    "parameters": {
+      "audience": "shopfloor"
+    }
+  },
+  {
+    "output": "../artifacts/annotations-qa.mp4",
+    "annotations": "annotations/qa-comments.json",
+    "parameters": {
+      "audience": "qa"
+    }
+  },
+  {
+    "output": "../artifacts/annotations-engineering.mp4",
+    "annotations": "annotations/engineering-review.json",
+    "parameters": {
+      "audience": "engineering"
+    }
+  }
+]

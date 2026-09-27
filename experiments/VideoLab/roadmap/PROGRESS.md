@@ -114,3 +114,25 @@ Fresh phase2-resume-bin build and full webproof passed; 239 native checks and
 42 gallery pairs. Both browser suites, typed CLI and encoder tests passed.
 All Phase 1 media bytes preserved. See PHASE_2_REPORT.md and phase2-evidence.json.
 Phase 3 may now proceed under the user's explicit authorization.
+
+### Phase 3 active work — 2026-09-28
+
+Annotations.cs now provides strict bounded data-to-primitives expansion. Native
+CLI supports --annotations; batch records select external datasets and protect
+all dataset/media inputs. One examples/annotations.json base plus three files
+under examples/annotations supplies the acceptance scenario. Initial build passes;
+focused/full validation and browser integration are pending.
+
+User additionally authorized a deployment PR after Phase 3. Once its gate passes,
+prepare the isolated Labs artifact/pin/evidence promotion PR (no experimental
+implementation merged into production). Stop for user testing after that PR;
+Phases 4+ remain unauthorized. Earlier blanket no-deployment notes are superseded
+only for this explicitly requested Phase 3 publication PR.
+
+Phase 3 focused native gate: 55 checks PASS, six outputs each repeated/decoded,
+three acceptance images visually reviewed. Full build now running from
+artifacts/phase3-final-bin, log artifacts/roadmap-phase3-final.log. New browser
+suite expects ten cards and separately inspects annotation/base/generated JSON.
+Next: full/browser gates, publication evidence/tag, then promotion PR from clean
+main checkout at C:/Users/dhara/.codex/worktrees/labs-hosting/VideoLabs on
+codex/videolab-phase3-publication. Production base is origin/main 83ed217.

@@ -11,13 +11,13 @@ namespace VideoLab;
 internal sealed class LocalWorkbench
 {
     private const long MaxFile = 50 * 1024 * 1024;
-    private static readonly string[] Demos = ["showcase", "editing", "audience", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
+    private static readonly string[] Demos = ["showcase", "editing", "audience", "annotations", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
     private readonly string lab = Path.GetFullPath(".");
     private readonly string root = Path.Combine(Path.GetTempPath(), "videolab-session-" + Guid.NewGuid().ToString("N"));
     private readonly string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
     private readonly SemaphoreSlim gate = new(1);
     private readonly Dictionary<string, (string File, string Name)> uploads = new();
-    private readonly Dictionary<string, (Composition Composition, Runtime Runtime, string Source)> cache = new();
+    private readonly Dictionary<string, (Composition Composition, Runtime Runtime, string Source, string? BaseSource, string? AnnotationData)> cache = new();
     private CancellationTokenSource? job;
     private string origin = "";
     private DateTime activity = DateTime.UtcNow;
@@ -120,10 +120,10 @@ internal sealed class LocalWorkbench
                 Composition.Require(request.ContentLength64 is > 0 and <= 16384, "Request must be a small JSON document.");
                 using var reader = new StreamReader(request.InputStream, Encoding.UTF8);
                 var body = JsonNode.Parse(await reader.ReadToEndAsync())?.AsObject() ?? throw new ArgumentException("JSON object required.");
-                var snapshot = Bind(body, out var source);
+                var snapshot = Bind(body, out var source, out var baseSource, out var annotationData);
                 if (route == "/api/bind")
                 {
-                    await Json(response, new { parameters = snapshot.Bindings, scenes = Enumerable.Range(0, snapshot.Composition.Script.Frames).Select(snapshot.SceneAt), tracks = WebProof.Tracks(snapshot.Composition), script = JsonNode.Parse(source) }); return;
+                    await Json(response, new { parameters = snapshot.Bindings, scenes = Enumerable.Range(0, snapshot.Composition.Script.Frames).Select(snapshot.SceneAt), tracks = WebProof.Tracks(snapshot.Composition), script = JsonNode.Parse(source), baseScript = baseSource == null ? null : JsonNode.Parse(baseSource), annotationData = annotationData == null ? null : JsonNode.Parse(annotationData) }); return;
                 }
                 if (route == "/api/render")
                 {
@@ -207,13 +207,15 @@ internal sealed class LocalWorkbench
         finally { if (!accepted && File.Exists(target)) File.Delete(target); }
     }
 
-    private Snapshot Bind(JsonObject body, out string source)
+    private Snapshot Bind(JsonObject body, out string source, out string? baseSource, out string? annotationData)
     {
         var demo = body["demo"]?.GetValue<string>() ?? "showcase"; Composition.Require(Demos.Contains(demo), "Unknown demo.");
         var media = body["media"]?.GetValue<string>() ?? "samples"; Composition.Require(media is "samples" or "personal", "Unknown media source.");
         var video = body["video"]?.GetValue<string>() ?? "original"; var audio = body["audio"]?.GetValue<string>() ?? "original";
         Composition.Require(new[] { "original", "montage", "pattern" }.Contains(video) && new[] { "original", "calm", "pulse" }.Contains(audio), "Unknown sample.");
-        var key = $"{demo}|{media}|{video}|{audio}";
+        var annotationSet = body["annotationSet"]?.GetValue<string>() ?? "shopfloor";
+        var annotationFile = demo == "annotations" ? Annotations.ExampleFile(annotationSet) : null;
+        var key = $"{demo}|{media}|{video}|{audio}|{annotationFile}";
         if (!cache.TryGetValue(key, out var item))
         {
             var script = JsonNode.Parse(File.ReadAllText(Path.Combine(lab, $"examples/{demo}.json")))!;
@@ -227,10 +229,14 @@ internal sealed class LocalWorkbench
             foreach (var clip in script["videos"]!.AsArray()) clip!["asset"] = Asset(clip["asset"]!.GetValue<string>(), "video");
             for (int i = 0; i < script["audio"]!.AsArray().Count; i++) { var clip = script["audio"]![i]!; clip["asset"] = Asset(clip["asset"]!.GetValue<string>(), "audio", i == 0); }
             if (script["data"] is JsonObject data) foreach (var list in data) foreach (var clip in list.Value!.AsArray()) clip!["asset"] = Asset(clip["asset"]!.GetValue<string>(), "video");
-            source = script.ToJsonString(); var composition = Composition.Compile(source, root);
-            if (cache.Count >= 8) cache.Clear(); item = (composition, composition.CreateRuntime(), source); cache[key] = item;
+            source = script.ToJsonString();
+            baseSource = annotationFile == null ? null : source;
+            annotationData = annotationFile == null ? null : Annotations.ReadFile(Path.Combine(lab, "examples", "annotations", annotationFile));
+            if (annotationData != null) source = Annotations.Expand(source, annotationData, root);
+            var composition = Composition.Compile(source, root);
+            if (cache.Count >= 8) cache.Clear(); item = (composition, composition.CreateRuntime(), source, baseSource, annotationData); cache[key] = item;
         }
-        source = item.Source;
+        source = item.Source; baseSource = item.BaseSource; annotationData = item.AnnotationData;
         var values = body["parameters"]?.Deserialize<Dictionary<string, JsonElement>>() ?? new();
         var changes = item.Composition.CreateRuntime().Bind().Bindings.ToDictionary();
         foreach (var pair in values) changes[pair.Key] = pair.Value;

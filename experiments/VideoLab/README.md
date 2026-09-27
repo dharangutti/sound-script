@@ -102,3 +102,20 @@ See SEMANTICS.md for bounds and atomic binding behavior. The browser's audience
 card offers three verified variants; the local workbench exposes typed selectors.
 The synthetic schematic and instructional text are illustrative, not validated
 assembly, safety or inspection instructions for a real product.
+
+
+### External review annotations (Phase 3)
+
+One base project can consume independent review datasets:
+
+~~~powershell
+dotnet run -c Release -- render examples/annotations.json artifacts/qa-notes.mp4 --annotations examples/annotations/qa-comments.json audience=qa
+dotnet run -c Release -- batch examples/annotations.json examples/annotations-batch.json
+dotnet run -c Release -- annotationtest
+~~~
+
+The same base is used with shopfloor-instructions.json, qa-comments.json and
+engineering-review.json. Bounded data produces titles, callouts and highlight
+outlines through ordinary primitives. Categories and severities select predefined
+colors. Use the “Review notes become video” browser card to compare all three and
+inspect both the unchanged base and dataset. See SEMANTICS.md for exact bounds.

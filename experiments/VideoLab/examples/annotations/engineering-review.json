@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "audienceParameter": "audience",
+  "annotations": [
+    {
+      "id": "engineering_note",
+      "text": "REV B | Relief reduces edge stress",
+      "startFrame": 0,
+      "endFrame": 60,
+      "audiences": [
+        "engineering"
+      ],
+      "category": "revision",
+      "severity": "normal",
+      "style": "text",
+      "x": 12,
+      "y": 62,
+      "width": 456,
+      "height": 40
+    },
+    {
+      "id": "engineering_detail",
+      "text": "Confirm bearing clearance",
+      "startFrame": 6,
+      "endFrame": 60,
+      "audiences": [
+        "engineering"
+      ],
+      "category": "revision",
+      "severity": "normal",
+      "style": "callout",
+      "x": 32,
+      "y": 118,
+      "width": 372,
+      "height": 110,
+      "targetX": 280,
+      "targetY": 90
+    },
+    {
+      "id": "engineering_marker",
+      "text": "REV B",
+      "startFrame": 24,
+      "endFrame": 60,
+      "audiences": [
+        "engineering"
+      ],
+      "category": "revision",
+      "severity": "normal",
+      "style": "highlight",
+      "x": 112,
+      "y": 176,
+      "width": 160,
+      "height": 68
+    }
+  ]
+}

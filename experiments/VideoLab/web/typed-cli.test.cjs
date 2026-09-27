@@ -13,3 +13,8 @@ for(const assignments of [['audience=other'],['showSafety=1'],['musicGain=qa'],[
     assert.equal(result.status,1,result.stderr);assert.match(result.stderr,/VideoLab:/);
 }
 console.log('PASS: CLI enum/boolean/decimal parsing, audience isolation and invalid/duplicate assignments.');
+
+const annotated=JSON.parse(execFileSync('dotnet',[dll,'inspect','examples/annotations.json','30','--annotations','examples/annotations/qa-comments.json','audience=qa'],{cwd,encoding:'utf8'}));
+assert.ok(annotated.Layers.some(l=>l.Group==='annotation_qa_detail'&&l.Included));
+const missing=spawnSync('dotnet',[dll,'inspect','examples/annotations.json','30','--annotations'],{cwd,encoding:'utf8'});assert.equal(missing.status,1);
+console.log('PASS: explicit CLI annotation file loading and missing argument rejection.');

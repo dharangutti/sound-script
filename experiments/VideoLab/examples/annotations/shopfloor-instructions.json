@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "audienceParameter": "audience",
+  "annotations": [
+    {
+      "id": "shopfloor_note",
+      "text": "Seat bearing before securing cover",
+      "startFrame": 0,
+      "endFrame": 60,
+      "audiences": [
+        "shopfloor"
+      ],
+      "category": "instruction",
+      "severity": "normal",
+      "style": "text",
+      "x": 12,
+      "y": 62,
+      "width": 456,
+      "height": 40
+    },
+    {
+      "id": "shopfloor_detail",
+      "text": "Align tool with bearing",
+      "startFrame": 6,
+      "endFrame": 60,
+      "audiences": [
+        "shopfloor"
+      ],
+      "category": "instruction",
+      "severity": "warning",
+      "style": "callout",
+      "x": 32,
+      "y": 118,
+      "width": 372,
+      "height": 110,
+      "targetX": 280,
+      "targetY": 90
+    },
+    {
+      "id": "shopfloor_marker",
+      "text": "TOOL",
+      "startFrame": 24,
+      "endFrame": 60,
+      "audiences": [
+        "shopfloor"
+      ],
+      "category": "instruction",
+      "severity": "warning",
+      "style": "highlight",
+      "x": 112,
+      "y": 176,
+      "width": 160,
+      "height": 68
+    }
+  ]
+}

@@ -7,7 +7,7 @@ let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = fals
 const video = byId('video');
 const option = (text,value) => { const item=document.createElement('option');item.textContent=text;item.value=value;return item; };
 const publicFile = format => `${snapshot.stem}.${format}`;
-function state() {return {demo:demo.id,media:sourceMode,video:byId('sample-video').value,audio:byId('sample-audio').value,parameters:values};}
+function state() {return {demo:demo.id,media:sourceMode,video:byId('sample-video').value,audio:byId('sample-audio').value,parameters:values,annotationSet:snapshot?.annotationSet};}
 async function api(action,body={},file) {
     // Media selection can immediately follow a binding change. Serialize native
     // operations so the workbench's single-operation gate cannot reject that UI
@@ -78,9 +78,15 @@ function inspect(seek){
     for(const head of document.querySelectorAll('.playhead'))head.style.left=`${100*frame/demo.frames}%`;
     if(seek){video.pause();pendingFrame=frame;if(video.readyState){video.currentTime=frame/demo.fps;pendingFrame=null;}}
 }
+function showSource(){
+    byId('script').textContent=JSON.stringify(snapshot.baseScript||snapshot.script||demo.script,null,2);
+    byId('annotation-source').hidden=!snapshot.annotationData;
+    byId('annotations-json').textContent=snapshot.annotationData?JSON.stringify(snapshot.annotationData,null,2):'';
+    byId('generated-script').textContent=snapshot.annotationData?JSON.stringify(snapshot.script,null,2):'';
+}
 function showSnapshot(){
     values={...snapshot.parameters};parameters();timeline();byId('frame').value=0;
-    byId('script').textContent=JSON.stringify(snapshot.script||demo.script,null,2);inspect(false);
+    showSource();inspect(false);
 }
 function selectBinding(){
     clearError();snapshot=candidates[Number(byId('snapshot').value)||0];showSnapshot();
@@ -97,6 +103,7 @@ function selectMedia(){
 function selectDemo(){
     demo=proof.demos.find(d=>d.id===byId('demo').value);revision++;
     byId('sample-video').value=demo.id==='showcase'?'montage':'original';byId('sample-audio').value=demo.id==='showcase'?'calm':'original';
+    byId('binding-label').textContent=demo.id==='annotations'?'Annotation dataset':'Validated binding';
     byId('demo-title').textContent=demo.title;byId('description').textContent=demo.description;
     byId('dimensions').textContent=`${demo.width} × ${demo.height} · ${demo.frames} frames · ${demo.fps} fps`;
     video.style.aspectRatio=`${demo.width} / ${demo.height}`;byId('frame').max=demo.frames-1;
@@ -113,7 +120,7 @@ function bindLocal(markDirty=true){
     bindQueue=bindQueue.catch(()=>{}).then(async()=>{
         if(current!==revision)return;
         const result=await api('bind',body);if(current!==revision)return;
-        snapshot={...snapshot,...result};byId('parameters').textContent=JSON.stringify(result.parameters,null,2);byId('script').textContent=JSON.stringify(result.script,null,2);timeline();inspect(false);
+        snapshot={...snapshot,...result};byId('parameters').textContent=JSON.stringify(result.parameters,null,2);showSource();timeline();inspect(false);
     }).catch(e=>fail(e.message));return bindQueue;
 }
 const disabled=new Map();
@@ -148,7 +155,7 @@ async function upload(kind,file){
 (async()=>{
     try{
         const response=await fetch('proof.json');if(!response.ok)throw new Error(`Timeline request failed (${response.status}).`);proof=await response.json();
-        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==9||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
+        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==10||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
         for(const d of proof.demos){
             byId('demo').append(option(d.title,d.id));
             const card=document.createElement('article');card.className='card';card.dataset.id=d.id;

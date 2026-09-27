@@ -29,7 +29,7 @@ const server = http.createServer((req,res) => {
         const url=`http://127.0.0.1:${server.address().port}/labs/videolab/`;
         await page.goto(url);await page.locator('#workspace').waitFor({state:'visible'});
         await page.waitForFunction(()=>document.getElementById('video').readyState>=2);
-        assert.equal(await page.locator('.card').count(),9);
+        assert.equal(await page.locator('.card').count(),10);
         assert.match(await page.locator('#demo-title').innerText(),/Video \+ audio/);
         assert.equal(await page.locator('.track-row').count(),4);
         assert.match(await page.locator('#timeline').textContent(),/Crossfade/);
@@ -47,7 +47,13 @@ const server = http.createServer((req,res) => {
                     assert.equal((await page.request.get(new URL(file,url).href)).status(),200);
                 }
                 await page.locator('#transition').click();assert.deepEqual(JSON.parse(await page.locator('#scene').textContent()),snap.scenes[demo.inspectFrame]);
-                assert.deepEqual(JSON.parse(await page.locator('#script').textContent()),snap.script);
+                assert.deepEqual(JSON.parse(await page.locator('#script').textContent()),snap.baseScript||snap.script);
+                if(demo.id==='annotations'){
+                    assert.equal(await page.locator('#binding-label').textContent(),'Annotation dataset');
+                    assert.deepEqual(JSON.parse(await page.locator('#annotations-json').textContent()),snap.annotationData);
+                    assert.deepEqual(JSON.parse(await page.locator('#generated-script').textContent()),snap.script);
+                    assert.deepEqual(snap.baseScript,demo.script);
+                }
                 if(demo.id==='audience'){
                     assert.equal(await page.locator('#parameter-audience').inputValue(),snap.name);
                     assert.equal(await page.locator('#parameter-audience').isDisabled(),true);
@@ -75,6 +81,6 @@ const server = http.createServer((req,res) => {
         assert.deepEqual(errors,[]);
         broken=true;await page.reload();await page.locator('#error').waitFor({state:'visible'});assert.match(await page.locator('#error').innerText(),/Reload to retry/);
         // All prior assertions remain, with the eighth demo and richer track set.
-        console.log('PASS: nine demo cards, all sample/binding/format combinations, native playback, exact scenes, text/callout/transition lanes, editing properties, source sync, public-mode boundaries, reset, keyboard seek, 3 responsive widths and missing-data errors.');
+        console.log('PASS: ten demo cards, all sample/binding/format combinations, native playback, exact scenes, text/callout/transition lanes, editing properties, source sync, public-mode boundaries, reset, keyboard seek, 3 responsive widths and missing-data errors.');
     }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

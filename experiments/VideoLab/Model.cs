@@ -36,15 +36,16 @@ public sealed record Scene(ImmutableArray<VisibleClip> Clips, ImmutableArray<Vis
 public sealed class Composition
 {
     public Script Script { get; }
+    public string Source { get; }
     public ImmutableArray<Clip> Clips { get; }
     public string AssetDirectory { get; }
     public ImmutableArray<VisualProgram> Visuals { get; }
     public ImmutableArray<AudioProgram> AudioPrograms { get; }
     public ImmutableDictionary<string, EffectTemplate> Effects { get; }
     public bool Programmable { get; }
-    private Composition(Script script, ImmutableArray<Clip> clips, string directory)
+    private Composition(Script script, ImmutableArray<Clip> clips, string directory, string source)
     {
-        (Script, Clips, AssetDirectory) = (script, clips, directory);
+        (Script, Clips, AssetDirectory, Source) = (script, clips, directory, source);
         (Visuals, AudioPrograms, Effects, Programmable) = Programming.Compile(script, clips);
     }
 
@@ -123,7 +124,7 @@ public sealed class Composition
             Require(callout.TargetX >= 0 && callout.TargetX < callout.Width && callout.TargetY >= callout.FontSize + 20 && callout.TargetY < callout.Height,
                 "Callout target must lie inside its plane, below the label (fontSize + 20).");
         }
-        var result = new Composition(s, clips.ToImmutable(), Path.GetFullPath(directory));
+        var result = new Composition(s, clips.ToImmutable(), Path.GetFullPath(directory), source);
         result.ValidateValues(s.Parameters.ToImmutableDictionary(p => p.Key, p => p.Value.Default));
         return result;
     }
