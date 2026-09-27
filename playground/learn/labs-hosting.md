@@ -134,3 +134,19 @@ deployed to SoundScript.net. See the branch's web/README.md for limits and opera
 No production runtime/API/media behavior changes. The homepage gains a compact
 VideoLab callout and the Labs catalog features the published MVP;
 the existing Playground build and integrity/browser checks remain in place.
+
+## VideoLab v0.4 publication
+
+The v0.4.0 artifact adds familiar editing with controlled-font titles and callouts,
+three audience views over one synthetic source, and three external annotation
+datasets over one base composition. The browser presents ten demos, 26 verified
+bindings and 52 MP4/WebM exports. Base, annotation and generated source remain
+inspectable. Numeric, enum and boolean edits use the optional local workbench.
+
+The experimental gate passed 294 native checks and 48 additional gallery
+repeat/decode pairs, both browser suites, CLI/batch checks and local shutdown
+regressions. Earlier output bytes are preserved. Annotation data is bounded and
+lowers to existing primitives; no new production service or runtime is introduced.
+The manifest pins the immutable labs-videolab-mvp-web-v0.4.0 tag and exact artifact
+and evidence hashes. Native implementation stays on experiments/videolab. Signal
+Lab remains POC and unpublished; other Labs are unchanged.
