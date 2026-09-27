@@ -116,7 +116,13 @@ outside main. VideoLab's original `labs-videolab-poc-v0.1.0` remains preserved.
 Its MVP evidence includes 143 automated checks, repeated MP4/WebM byte comparisons,
 decoded transition/animation/audio assertions and 17 private real-media cases
 (16 successful renders, one expected VFR rejection). The public explorer ships only
-synthetic proof media and supports two fixed parameter snapshots; it does not upload
+synthetic proof media. The v0.2.1 gallery adds transforms/easing/gain, expressions,
+reusable effects, conditional layers and data-driven sequences alongside the original
+composition demo: six scenarios, ten fixed snapshots and twenty media outputs.
+All 143 core checks pass, and 16 additional format/binding pairs are repeat-rendered,
+byte-compared and fully decoded. Browser checks cover every demo, binding and format,
+exact scene data, conditions, audio gain, keyboard inspection and immediate seeks.
+It does not upload
 assets, compile scripts or run FFmpeg in the browser.
 
 No production runtime/API/media behavior changes. The homepage gains a Labs link;
