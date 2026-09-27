@@ -5,6 +5,11 @@ const {validate,validateFiles,treeHash,stage,index,hash} = require('./labs.cjs')
 const lab = () => ({id:'sample',name:'Sample',description:'Experiment',reason:'Not yet hosted',branch:'experiments/sample',commit:'a'.repeat(40),milestone:'sample-v1',status:'poc',mvp:false,publish:false,artifact:null});
 const manifest = () => ({schemaVersion:1,labs:[lab()]});
 test('catalog supports zero live Labs and escapes metadata',()=>{const m=manifest();m.labs[0].name='<unsafe>';validate(m);assert.match(index(m),/&lt;unsafe&gt;/);assert.ok(!index(m).includes('href="sample/"'));});
+test('featured VideoLab respects publication gate and homepage links stay discoverable',()=>{
+    const m=manifest();m.labs[0].id='videolab';assert.ok(!index(m).includes('id="featured-videolab"'));
+    m.labs[0].publish=true;assert.match(index(m),/id="featured-videolab"/);assert.match(index(m),/href="videolab\/">Explore VideoLab/);
+    const home=fs.readFileSync(path.join(__dirname,'../docs/index.html'),'utf8');assert.match(home,/href="labs\/videolab\/"/);assert.match(home,/href="labs\/"/);assert.match(home,/Separate from the supported SoundScript NuGet package and CLI/);
+});
 for(const [name,mutate] of Object.entries({duplicate:m=>m.labs.push(lab()),status:m=>m.labs[0].status='ready',branch:m=>m.labs[0].branch='--upload-pack=bad',commit:m=>m.labs[0].commit='HEAD',route:m=>m.labs[0].id='../playground',gate:m=>m.labs[0].publish=true,flag:m=>m.labs[0].publish='false',hiddenArtifact:m=>m.labs[0].artifact={directory:'site'}}))
     test(`rejects ${name}`,()=>{const m=manifest();mutate(m);assert.throws(()=>validate(m));});
 test('static resource checks reject escaping, missing and root assets',()=>{

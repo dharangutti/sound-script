@@ -16,7 +16,13 @@ const server = http.createServer((req,res) => {
         const base = `http://127.0.0.1:${server.address().port}`, page = await browser.newPage();
         const errors = []; page.on('pageerror', e => errors.push(e.message));
         page.on('response', r => {if(r.status() >= 400) errors.push(`${r.status()} ${r.url()}`);});
+        if (fs.existsSync(path.join(root,'index.html'))) {
+            await page.goto(base+'/');
+            assert.equal(await page.locator('#featured-labs a[href="labs/videolab/"]').count(),1);
+            assert.equal(await page.locator('#featured-labs a[href="labs/"]').count(),1);
+        }
         await page.goto(base + '/labs/');
+        if(manifest.labs.some(l=>l.id==='videolab'&&l.publish)) assert.equal(await page.locator('#featured-videolab a[href="videolab/"]').count(),1);
         assert.equal(await page.locator('article').count(),manifest.labs.length);
         for(const lab of manifest.labs) {
             const route = `/labs/${lab.id}/`;
