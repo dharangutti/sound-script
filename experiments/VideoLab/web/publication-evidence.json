@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "mvp": "pass",
-  "artifactSha256": "241b9a8270a258eafd7043a25abeb687b50f8fd15c550697b86db9eb7baea234",
+  "artifactSha256": "24c9ae42feb38e98871ff5c6c2f90795f109447dc2c92bbad7ba33bf002280e9",
   "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_shared; Windows x64; Playwright 1.63.0 Chromium",
   "checks": {
     "build": {
@@ -12,19 +12,19 @@
       "result": "pass",
       "command": "dotnet run -c Release -- webproof",
       "count": 143,
-      "galleryRepeatAndDecodePairs": 16
+      "galleryRepeatAndDecodePairs": 32
     },
     "determinism": {
       "result": "pass",
-      "command": "dotnet run -c Release -- webproof",
-      "detail": "Original MVP plus every additional gallery binding exported twice in MP4/WebM, byte-compared and fully decoded; 16 additional format/binding pairs passed.",
-      "packaging": "A fresh second webproof build reproduced every media, script, stylesheet and scene-data byte; generated checksum formatting normalized."
+      "command": "dotnet run -c Release -- webproof; node web/encoder.test.cjs",
+      "detail": "All core assertions and 32 gallery format/binding repeat/decode pairs passed. Twelve independent data-sequence MP4 renders matched.",
+      "packaging": "Two fresh builds reproduced every media, thumbnail and scene-data byte. Final frontend change only stacked overlapping timeline spans; checksums regenerated."
     },
     "browser": {
       "result": "pass",
-      "command": "node web/smoke.cjs",
-      "detail": "Six demos, ten bindings, twenty media URLs/codecs, exact engine scene equality, conditional inclusion, audio step gain, keyboard frames, mobile layout, playback and missing-data error. Immediate demo-switch seek verified with byte-range media responses."
+      "command": "node web/smoke.cjs; node web/local.test.cjs",
+      "detail": "Seven demos, 18 bindings, 36 exports, sample switching, exact scenes/source, timeline, keyboard seeking, playback, three responsive widths and errors. Local MP4/WebM/WAV/MP3 selection, parameter updates, invalid/oversized/short inputs, repeated export, cancellation, reset and shutdown cleanup."
     }
   },
-  "limits": "Six synthetic pre-rendered demos, ten predefined snapshots. No browser uploads, arbitrary parameter input or compilation. Custom rendering remains in the CLI; determinism is same-environment only."
+  "limits": "Static public gallery; arbitrary parameters and personal media require the optional loopback workbench. 50 MiB per file; generated session paths. No production API/CLI integration. Same-environment repeatability; x264 cpu-independent mode changes some older Lab MP4 bytes. See web/README.md and web/VALIDATION.md."
 }

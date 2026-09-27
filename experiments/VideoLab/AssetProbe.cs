@@ -21,7 +21,7 @@ public static class AssetProbe
         var pair = value.Split('/');
         return pair.Length == 2 && Numeric(pair[0]) is decimal n && Numeric(pair[1]) is decimal d && d > 0 ? n / d : null;
     }
-    public static async Task<SourceInfo> Validate(string path, string kind, int trim, int frames, int fps)
+    public static async Task<SourceInfo> Validate(string path, string kind, int trim, int frames, int fps, CancellationToken cancellationToken = default)
     {
         Composition.Require(kind is "video" or "audio" && trim >= 0 && frames > 0 && new[] { 24, 25, 30, 50, 60 }.Contains(fps), "Invalid probe span or stream kind.");
         path = System.IO.Path.GetFullPath(path);
@@ -30,7 +30,7 @@ public static class AssetProbe
         MediaDiagnostic Error(string code, string detail, Exception? cause = null) => new(code, $"{span}: {detail}", cause);
         if (!File.Exists(path)) throw Error("ASSET_NOT_FOUND", "asset not found.");
         string json;
-        try { json = await Ffmpeg.Run("ffprobe", ["-v", "error", "-select_streams", kind == "video" ? "v:0" : "a:0", "-show_streams", "-show_format", "-of", "json", path]); }
+        try { json = await Ffmpeg.Run("ffprobe", ["-v", "error", "-select_streams", kind == "video" ? "v:0" : "a:0", "-show_streams", "-show_format", "-of", "json", path], cancellationToken); }
         catch (InvalidOperationException e) { throw Error("INVALID_STREAM_METADATA", "container cannot be probed.", e); }
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -68,7 +68,7 @@ public static class AssetProbe
 
             // Validate the consumed prefix, not just a nominal fps label. Packet PTS are
             // sorted to account for B-frame decode order; timestamp gaps reveal common VFR.
-            var packets = await Packets(path, "v:0", requested + 1);
+            var packets = await Packets(path, "v:0", requested + 1, cancellationToken);
             var stamps = packets.Where(p => p.Pts != null).Select(p => p.Pts!.Value).Order().ToArray();
             if (stamps.Length == 0 || stamps.Length != packets.Length)
                 throw Error("UNSUPPORTED_TIMING", "video packet presentation timestamps are missing.");
@@ -87,7 +87,7 @@ public static class AssetProbe
                 throw Error("INVALID_STREAM_METADATA", "only mono/stereo audio at 8–192 kHz is validated.");
             if (Numeric(Text(stream, "duration")) == null)
             {
-                var packets = await Packets(path, "a:0", requested + 0.1m);
+                var packets = await Packets(path, "a:0", requested + 0.1m, cancellationToken);
                 var valid = packets.Where(p => p.Pts != null && p.Duration > 0).ToArray();
                 if (valid.Length == 0) throw Error("DURATION_UNKNOWN", "audio stream duration cannot be established from packets.");
                 decimal available = valid.Max(p => p.Pts!.Value + p.Duration) - Math.Max(0, valid.Min(p => p.Pts!.Value));
@@ -97,9 +97,9 @@ public static class AssetProbe
         return new(path, kind, Text(stream, "codec_name"), duration.Value, width, height, sourceRate, channels, sampleRate, rotation);
     }
     private sealed record Packet(decimal? Pts, decimal Duration);
-    private static async Task<Packet[]> Packets(string path, string selector, decimal duration)
+    private static async Task<Packet[]> Packets(string path, string selector, decimal duration, CancellationToken cancellationToken)
     {
-        var json = await Ffmpeg.Run("ffprobe", ["-v", "error", "-select_streams", selector, "-read_intervals", $"%+{Ffmpeg.Number(duration)}", "-show_packets", "-show_entries", "packet=pts_time,duration_time", "-of", "json", path]);
+        var json = await Ffmpeg.Run("ffprobe", ["-v", "error", "-select_streams", selector, "-read_intervals", $"%+{Ffmpeg.Number(duration)}", "-show_packets", "-show_entries", "packet=pts_time,duration_time", "-of", "json", path], cancellationToken);
         using var doc = JsonDocument.Parse(json);
         return doc.RootElement.GetProperty("packets").EnumerateArray().Select(p => new Packet(Numeric(Text(p, "pts_time")), Numeric(Text(p, "duration_time")) ?? 0)).ToArray();
     }

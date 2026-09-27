@@ -1,0 +1,3 @@
+# Samples and generated distributions retain exact media bytes.
+*.mp4 -text
+*.wav -text

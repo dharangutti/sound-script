@@ -1,44 +1,92 @@
-# VideoLab browser explorer
+# VideoLab browser workbench
 
-This is a static interface to the completed CLI MVP, not an in-browser editor or
-FFmpeg port. Six demos expose composition, transforms/easing/audio gain, expressions,
-reusable effects, conditional layers and data-driven sequences. Ten real parameter
-snapshots support exact scene inspection, playback and twenty MP4/WebM downloads.
-It never uploads user files.
+Experimental programmable composition in .NET, separate from the supported
+SoundScript NuGet package and CLI. Seven cards cover real video/audio, multiple
+clips, crossfade, graphics, motion, expressions, effects, conditions and sequences.
+Preview, read-only video/audio/graphics timeline, parameters and collapsible source
+update together. Exact frame values come from native Snapshot.SceneAt; browser
+video seeking is approximate. Export is MP4/H.264/AAC or WebM/VP9/Opus.
 
-From `experiments/VideoLab`, regenerate the site with:
+## Public gallery
+
+The first composition combines coast/dog footage, animated graphics and mixed
+synthetic audio. Sample Library offers two videos and two audio tracks in this
+showcase, each with default and alternate bindings. Across seven demos there are
+18 snapshots and 36 exports. Focused examples retain their validated media.
+Choose a binding to change current runtime values; source defaults are shown beside
+the numeric controls. Arbitrary values and personal media require local mode.
+The static site cannot execute native .NET/FFmpeg and never uploads personal files.
+
+## Private local mode
+
+Install .NET 10 and FFmpeg/ffprobe on PATH (9.0.1 validated; see parent README for
+codec/filter requirements). Check out experiments/videolab, then:
+
+```powershell
+cd experiments/VideoLab
+dotnet run -c Release -- serve
+```
+
+Open http://127.0.0.1:8745/labs/videolab/ or My Files → Open local workbench from the
+public page. Optional port: `serve 18745`. Bundled samples and the versioned site
+work without private downloads. This command belongs only to the Lab executable.
+
+1. Load Video + audio showcase and choose Sample Library or My Files.
+2. Choose video/audio. One chosen video replaces both timed video spans; audio
+   replaces the main music track while preserving the secondary mix track.
+3. Change accentX or a gain. Parameter bindings reuse the compiled composition;
+   only changing source media/demo compiles again. Reset defaults restores values.
+4. Inspect a frame, then Render current composition to update the video. Until
+   rendering finishes, the old preview is clearly labeled and export is disabled.
+5. Play and export in the chosen MP4/WebM format. Download before resetting or
+   rendering another output. Sample Library removes personal selections/results;
+   End local session stops the process and deletes its temporary directory.
+
+Validated input selections: MP4/WebM video and WAV/MP3 audio, 1 byte–50 MiB per file.
+The entire span needed by the current composition must exist (six seconds for the
+showcase music). Malformed or too-short replacements preserve a valid selection.
+The native source policy still rejects detected VFR, interlace, non-square SAR,
+HDR/wide-gamut/high-bit-depth video. An allowed extension does not guarantee that
+all streams are supported. Source-normalization limits remain unchanged.
+
+Files are copied into a generated temporary session on your own computer, never
+to SoundScript.net. Only filenames/metadata and relative generated paths are shown.
+No accounts, cloud storage or saved projects. Reset, normal shutdown or 30 minutes
+of API inactivity removes private session files. Tab closing attempts reset; use
+End local session for explicit cleanup. A crash/forced termination may leave an
+OS-temp videolab-session-* directory; after stopping that process, remove its
+session directory if necessary.
+
+The adapter listens only on 127.0.0.1, checks Host/Origin and requires a random
+per-process mutation token (CSRF protection, not user authentication). Only approved
+examples, bounded bindings and generated paths are accepted. One operation runs
+at a time. Uploads time out after 30 seconds, renders after three minutes; Cancel
+kills the FFmpeg process tree. Trusted local media only: FFmpeg is not a sandbox.
+Commands use the existing argument-list API, never shell interpolation.
+
+## Rebuild and verify
 
 ```powershell
 dotnet run -c Release -- webproof
 node web/smoke.cjs
+node web/local.test.cjs
+node web/encoder.test.cjs
 ```
 
-The first command runs all 143 core checks, including repeated renders and decoded
-media assertions, then renders every additional gallery binding twice in both formats
-and fully decodes each output (16 additional format/binding checks). It packages all
-180 baseline scenes and all 30 frames of each focused example directly from the engine.
-JSON object keys and source text line endings are normalized for stable packaging.
-It builds into a fresh temporary artifact folder and replaces the distribution only
-after successful rendering. FFmpeg/ffprobe must meet the parent README requirements. Browser
-verification uses Playwright (the repository's pinned `scripts/package.json`);
-set `PLAYWRIGHT_MODULE` to that installation when it is outside this checkout.
+webproof runs all 143 existing checks plus 32 gallery repeat/decode pairs. It stages
+a fresh distribution, canonicalizes JSON/text and writes checksums. Browser tests
+use pinned Playwright from scripts/package.json; set PLAYWRIGHT_MODULE to its
+installation when outside this checkout. Local tests own port 18745 and verify
+uploads, native bindings, exports, cancellation, reset and shutdown cleanup.
+Encoder regression compares 12 data-sequence MP4 renders in independent processes.
 
-`site/` is a deliberately versioned, reproducible static distribution. Only synthetic
-fixtures are published. No manual-download or real-media validation input is used.
-The public artifact has no dependencies on production assemblies or client scripts.
-`publication.json` is supplied by the production staging process with the exact
-approved branch, commit, milestone and artifact digest. It is not a source file.
+The x264 cpu-independent=1 setting fixes an observed repeat mismatch despite
+identical raw frames. Some MP4 bytes differ from earlier milestones; old tags stay
+immutable. Repeatability remains limited to identical inputs/tools/environment.
 
-After regeneration and browser tests, update `publication-evidence.json`, commit
-all Lab changes on `experiments/videolab`, preserve a new milestone tag, and promote
-that exact commit and evidence digest in the production Labs manifest. Never retag
-the original POC milestone. Production owns final deployment; this branch cannot
-deploy the entire website.
-
-The browser is a finite feature explorer: it offers predefined snapshots, not
-arbitrary parameter values. The expression variants demonstrate batch-style shared
-composition bindings, but the browser does not execute the CLI batch command.
-Scene data comes from `Snapshot.SceneAt`; browser video
-seeking is approximate. Native CLI authoring, source policy and determinism limits
-remain as documented in the parent README. Missing data and unsupported playback
-produce user-visible errors; the other codec and local downloads remain available.
+site/ is versioned. Four small samples include an adapted composed work from
+user-supplied Pixabay downloads; see [credits](samples/CREDITS.md). Original
+sources/private validation files are not packaged. After validation, update
+publication-evidence.json, commit on experiments/videolab, tag a new milestone and
+promote its exact artifact/evidence digests in the main Labs manifest. Production
+staging injects publication.json. This branch cannot deploy the entire site.

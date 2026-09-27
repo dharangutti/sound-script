@@ -1,4 +1,4 @@
-# VideoLab v0.2 — isolated programmable composition
+# VideoLab — isolated programmable composition
 
 VideoLab owns composition semantics; FFmpeg is a lowering/rendering backend. The experiment is a dependency-free .NET 10 executable under this directory, with no production references, solution entries, packaging changes or shared version imports. It is not a SoundScript language extension. The frozen `labs-videolab-poc-v0.1.0` tag remains unchanged.
 
@@ -6,9 +6,11 @@ VideoLab owns composition semantics; FFmpeg is a lowering/rendering backend. The
 
 ## Run
 
-The [browser explorer](web/README.md) presents real rendered MVP snapshots and exact
-timeline inspection. It is a static proof interface; custom media composition remains
-in this CLI. Regenerate its versioned distribution with `dotnet run -c Release -- webproof`.
+The [browser workbench](web/README.md) presents seven rendered demos, sample media,
+a read-only timeline and exact frame inspection. The public site serves verified
+snapshots; `dotnet run -c Release -- serve` opens the same interface privately for
+personal files, arbitrary runtime values and native rendering. Regenerate its
+versioned distribution with `dotnet run -c Release -- webproof`.
 
 Requires .NET 10 and FFmpeg/ffprobe on PATH, including libx264/AAC and libvpx-vp9/libopus. Validation was performed with FFmpeg 9.0.1. Rendering requires the `-/filter_complex` option-file syntax; older builds lacking it are unsupported. The expanded synthetic suite also uses libx265 for an SDR HEVC compatibility fixture.
 

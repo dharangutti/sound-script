@@ -1,20 +1,32 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VideoLab · SoundScript Labs</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
-<body><main><nav aria-label="Primary"><a href="../">← SoundScript Labs</a><span>Experimental · MVP explorer</span></nav>
-<h1>VideoLab</h1><p class="intro">Explore programmable video, one frame at a time.</p>
-<p>Six working examples demonstrate composition, transforms, expressions, reusable effects, conditions and data-driven sequences. These are real .NET/FFmpeg renders of synthetic scenarios. Custom assets and arbitrary rendering use the local CLI.</p>
-<p id="status" role="status">Loading validated snapshots…</p><p id="error" role="alert" hidden></p>
-<section id="workspace" hidden><label>Feature demo <select id="demo"></select></label><p id="description"></p><p id="dimensions" class="muted"></p><div class="controls"><label>Parameter snapshot <select id="snapshot"></select></label>
-<label>Playback format <select id="format"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label></div>
-<div class="grid"><section><h2>Rendered output</h2><video id="video" controls playsinline preload="metadata" aria-label="Composed video"></video>
-<p><a id="download" download>Download composed video</a> · <a href="proof.json" download>Download timeline data</a></p>
-<p class="muted">Playback is user-initiated. Frame inspection below is exact engine state; browser seeking may land near the requested frame.</p></section>
-<section><h2>Frozen parameters</h2><pre id="parameters"></pre><h2>Frame inspection</h2><label for="frame">Frame <output id="frame-label">0 / 179</output></label>
-<input id="frame" type="range" min="0" max="179" value="0" step="1"><div class="controls"><button id="transition" type="button">Inspect crossfade · frame 98</button></div>
-<p id="summary"></p><pre id="scene" tabindex="0" aria-label="Exact scene state"></pre></section></div>
-<details><summary>Declarative source script</summary><pre id="script" tabindex="0"></pre></details></section>
-<section><h2>What this proves</h2><p>Each demo uses its existing declarative example and the same VideoLab compiler, bindings and renderer as the CLI. Every inspected frame comes from <code>Snapshot.SceneAt</code>. Parameterized demos compare frozen bindings; effect and data demos have one default binding. MP4 and WebM downloads are actual composed outputs, with repeat-render hashes verified before publication.</p>
-<h2>Limits and reproducibility</h2><p>The composition demo lasts six seconds; focused examples last one second at 30 fps. Pause and inspect frames to study the changes. Source clips are generated color and tone fixtures. Exact repeated bytes are verified only with the same code, media, FFmpeg version and machine environment. This is experimental software, not a stable SoundScript API.</p>
-<p>No local files are uploaded. The hosted page does not compile scripts or run FFmpeg. To compose your own assets, use the <a href="https://github.com/dharangutti/sound-script/tree/experiments/videolab/experiments/VideoLab">VideoLab CLI and documentation</a>. <a href="checksums.json">Artifact checksums</a> · <a href="publication.json">Publication provenance</a></p></section>
+<title>VideoLab · Programmable video composition in .NET</title><meta name="description" content="Explore experimental programmable video, audio and graphics with exact frame inspection and MP4/WebM export.">
+<link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body><main>
+<nav aria-label="Primary"><a href="https://soundscript.net/labs/">← SoundScript Labs</a><span class="badge">Experimental Lab · MVP</span></nav>
+<header class="intro"><p class="eyebrow">VideoLab</p><h1>Programmable video<br>composition in .NET.</h1><p>Combine video, audio and graphics. Inspect any frame, explore runtime bindings, and export standard media.</p><p id="mode" class="muted">Public gallery · verified sample renders</p></header>
+<p id="status" role="status">Loading compositions…</p><p id="error" role="alert" hidden></p>
+<section id="workspace" hidden aria-label="Composition workspace">
+<div class="hero-grid"><section class="preview-panel"><div class="heading-row"><h2 id="demo-title">Video + audio showcase</h2><span id="dimensions" class="muted"></span></div>
+<video id="video" controls playsinline preload="metadata" poster="showcase.jpg" aria-label="Composed video preview"></video>
+<div class="heading-row"><span id="playback-time">0.00 / 6.00 s</span><span id="render-state" class="muted">Verified render</span></div>
+<div class="export-row"><strong>Export</strong><a id="export-mp4" class="button primary" download>MP4</a><a id="export-webm" class="button" download>WebM</a><span id="render-actions" hidden><button id="render" type="button">Render current composition</button><button id="cancel" type="button" disabled>Cancel</button></span></div>
+<p id="export-note" class="muted">Download the selected verified output. No browser re-encoding.</p>
+<label class="small-control">Playback format <select id="format"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
+</section><aside class="control-panel"><h2>Runtime parameters</h2><p id="parameter-help" class="muted"></p>
+<label>Validated binding <select id="snapshot"></select></label><div id="parameter-controls"></div><button id="reset-parameters" type="button">Reset defaults</button>
+<details><summary>Current parameter values</summary><pre id="parameters"></pre></details>
+<h2>Media source</h2><div class="segmented" role="group" aria-label="Media source"><button id="sample-mode" type="button" aria-pressed="true">Sample Library</button><button id="personal-mode" type="button" aria-pressed="false">My Files</button></div>
+<div id="sample-panel"><label>Video <select id="sample-video"><option value="montage">Coast & companion montage</option><option value="pattern">Motion test pattern</option></select></label><label>Audio <select id="sample-audio"><option value="calm">Soft chord</option><option value="pulse">Clear tone</option></select></label><p id="media-help" class="muted"></p></div>
+<div id="personal-panel" hidden><div id="local-launch"><p>Personal files and free parameter changes use the private local workbench. Nothing is sent to SoundScript.net.</p><p>With .NET 10 and FFmpeg/ffprobe installed, run from <code>experiments/VideoLab</code>:</p><pre>dotnet run -c Release -- serve</pre><button id="open-local" type="button">Open local workbench</button><p class="muted">The workbench must be running on this computer. The same UI opens locally.</p></div>
+<div id="file-controls" hidden><label>Choose Video <input id="video-file" type="file" accept=".mp4,.webm,video/mp4,video/webm"></label><p id="video-file-info" class="muted">No personal video selected.</p><label>Choose Audio <input id="audio-file" type="file" accept=".wav,.mp3,audio/wav,audio/mpeg"></label><p id="audio-file-info" class="muted">No personal audio selected.</p><p class="muted">50 MiB per file. Files are copied only to this computer's temporary session. Returning to Sample Library, 30 minutes idle, or End local session removes them. Forced termination may leave temporary files.</p><button id="end-session" type="button">End local session</button></div></div>
+</aside></div>
+<section class="timeline-panel"><div class="heading-row"><h2>Composition timeline</h2><span class="muted">Read-only · video / audio / graphics</span></div><div id="timeline"></div>
+<label for="frame">Inspect exact frame <output id="frame-label">0 / 179</output></label><input id="frame" type="range" min="0" max="179" value="0" step="1"><div class="heading-row"><p id="summary"></p><button id="transition" type="button">Inspect key moment</button></div>
+<p class="muted">Frame values come from VideoLab's engine. Browser video seeking may land near the requested frame.</p>
+<details><summary>Frame details</summary><pre id="scene" tabindex="0"></pre></details></section>
+<details class="composition"><summary>View Composition → Result</summary><p id="description"></p><pre id="script" tabindex="0"></pre></details>
+</section>
+<section aria-labelledby="demos-title"><h2 id="demos-title">Explore working compositions</h2><p class="muted">Load a demo to update the preview, timeline, parameters and source together.</p><div id="demo-cards" class="cards"></div><label class="sr-only">Feature demo <select id="demo"></select></label></section>
+<footer><h2>A focused experiment</h2><p>VideoLab is separate from the supported SoundScript NuGet package and CLI. This is a small programmable-composition Lab, not a nonlinear video editor.</p><p>Public mode offers verified sample combinations and frozen bindings. The optional local workbench uses the same native compiler and FFmpeg renderer for personal media and arbitrary supported parameter values. Exact repeated bytes require identical inputs, tools and machine environment.</p><p><a href="https://github.com/dharangutti/sound-script/tree/experiments/videolab/experiments/VideoLab/web">Usage and limits</a> · <a href="https://github.com/dharangutti/sound-script/blob/experiments/videolab/experiments/VideoLab/web/samples/CREDITS.md">Sample credits</a> · <a href="proof.json" download>Timeline data</a> · <a href="checksums.json">Checksums</a> · <a href="publication.json">Publication provenance</a></p></footer>
 </main></body></html>

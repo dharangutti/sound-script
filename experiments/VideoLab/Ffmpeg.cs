@@ -54,7 +54,9 @@ public static class Ffmpeg
         args.AddRange(["-filter_complex", string.Join(";", graph), "-map", "[vout]", "-map", "[aout]", "-map_metadata", "-1", "-map_chapters", "-1", "-threads", "1", "-flags:v", "+bitexact", "-flags:a", "+bitexact"]);
         switch (Path.GetExtension(output).ToLowerInvariant())
         {
-            case ".mp4": args.AddRange(["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart"]); break;
+            // Pin x264's canonical CPU decisions: its optimized path produced two
+            // different encodes of identical raw frames in repeated local tests.
+            case ".mp4": args.AddRange(["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-x264-params", "cpu-independent=1", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart"]); break;
             case ".webm": args.AddRange(["-c:v", "libvpx-vp9", "-crf", "32", "-b:v", "0", "-row-mt", "0", "-c:a", "libopus", "-b:a", "128k", "-fflags", "+bitexact"]); break;
             default: throw new ArgumentException("Output must be .mp4 or .webm.");
         }
@@ -62,19 +64,26 @@ public static class Ffmpeg
         return new(string.Join(";\n", graph), args.ToArray(), inputs, new(s.Width, s.Height, s.Fps, s.Frames, 48000, Path.GetExtension(output).ToLowerInvariant()));
     }
 
-    public static async Task<string> Run(string executable, IEnumerable<string> args)
+    public static async Task<string> Run(string executable, IEnumerable<string> args, CancellationToken cancellationToken = default)
     {
         var start = new ProcessStartInfo(executable) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
         foreach (var arg in args) start.ArgumentList.Add(arg);
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Cannot start {executable}.");
         var stdout = process.StandardOutput.ReadToEndAsync(); var stderr = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
+        try { await process.WaitForExitAsync(cancellationToken); }
+        catch (OperationCanceledException)
+        {
+            if (!process.HasExited) process.Kill(entireProcessTree: true);
+            await process.WaitForExitAsync();
+            await Task.WhenAll(stdout, stderr);
+            throw;
+        }
         var text = await stdout; var error = await stderr;
         if (process.ExitCode != 0) throw new InvalidOperationException($"{executable} exited {process.ExitCode}: {error[..Math.Min(error.Length, 1600)]}");
         return text;
     }
 
-    public static async Task Render(Snapshot snapshot, string output)
+    public static async Task Render(Snapshot snapshot, string output, CancellationToken cancellationToken = default)
     {
         output = Path.GetFullPath(output);
         var plan = Plan(snapshot, output);
@@ -86,7 +95,7 @@ public static class Ffmpeg
         foreach (var group in requests.GroupBy(r => (r.Path, r.Kind)))
         {
             var request = group.MaxBy(r => (long)r.Trim + r.Frames);
-            await AssetProbe.Validate(request.Path, request.Kind, request.Trim, request.Frames, c.Script.Fps);
+            await AssetProbe.Validate(request.Path, request.Kind, request.Trim, request.Frames, c.Script.Fps, cancellationToken);
         }
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         var temporary = Path.Combine(Path.GetDirectoryName(output)!, $".videolab-{Guid.NewGuid():N}{Path.GetExtension(output)}");
@@ -100,7 +109,7 @@ public static class Ffmpeg
             int index = Array.IndexOf(arguments, "-filter_complex");
             await File.WriteAllTextAsync(graphFile, render.FilterGraph);
             arguments[index] = "-/filter_complex"; arguments[index + 1] = graphFile;
-            await Run("ffmpeg", arguments);
+            await Run("ffmpeg", arguments, cancellationToken);
             File.Move(temporary, output, true);
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); if (File.Exists(graphFile)) File.Delete(graphFile); }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace VideoLab;
 
@@ -13,6 +14,7 @@ internal static class WebProof
         int repeatChecks = 0;
         var cases = new[]
         {
+            (Id: "showcase", Title: "Video + audio showcase", Description: "Real coast and companion footage, two trimmed clips, a crossfade, a moving graphic and mixed audio. Switch the sample video or audio below.", Frame: 98, Parameter: "accentX", Value: 180m),
             (Id: "demo", Title: "Composition MVP", Description: "Two clips, a crossfade, animated overlay and mixed audio. Compare quieter/left and louder/right bindings.", Frame: 98, Parameter: "accentX", Value: 180m),
             (Id: "transforms", Title: "Transforms, easing and gain", Description: "Position, size, scale, rotation, opacity, crop and pivot with eased keyframes. Audio gain steps at frame 15; compare startX bindings.", Frame: 15, Parameter: "startX", Value: 60m),
             (Id: "expressions", Title: "Expressions and parameter variants", Description: "Frame and progress drive motion, rotation and opacity. Two frozen offset bindings demonstrate the shared-composition pattern used by batch exports.", Frame: 15, Parameter: "offset", Value: 20m),
@@ -22,50 +24,71 @@ internal static class WebProof
         };
         foreach (var item in cases)
         {
-            var source = File.ReadAllText($"examples/{item.Id}.json");
-            var composition = Composition.Compile(source, Path.GetFullPath("examples"));
-            var runtime = composition.CreateRuntime();
-            var snapshots = new List<object>();
-            foreach (var name in item.Parameter == "" ? new[] { "A" } : new[] { "A", "B" })
+            var original = File.ReadAllText($"examples/{item.Id}.json");
+            var originalComposition = Composition.Compile(original, Path.GetFullPath("examples"));
+            var snapshots = new List<object>(); string? firstStem = null;
+            var variants = item.Id == "showcase"
+                ? new[] { (Video: "montage", Audio: "calm"), (Video: "pattern", Audio: "calm"), (Video: "montage", Audio: "pulse"), (Video: "pattern", Audio: "pulse") }
+                : new[] { (Video: "original", Audio: "original") };
+            foreach (var variant in variants)
             {
-                if (name == "B")
+                var node = JsonNode.Parse(original)!;
+                if (item.Id == "showcase")
                 {
-                    var changes = new Dictionary<string, decimal> { [item.Parameter] = item.Value };
-                    if (item.Id == "demo") changes["musicGain"] = 0.6m;
-                    runtime.SetMany(changes);
+                    foreach (var clip in node["videos"]!.AsArray()) clip!["asset"] = $"../web/samples/{variant.Video}.mp4";
+                    node["audio"]![0]!["asset"] = $"../web/samples/{variant.Audio}.wav";
                 }
-                var snapshot = runtime.Bind();
-                var stem = item.Id == "demo" ? name : $"{item.Id}-{name}";
-                snapshots.Add(new { name, stem, parameters = snapshot.Values,
-                    scenes = Enumerable.Range(0, composition.Script.Frames).Select(snapshot.SceneAt).ToArray() });
-                foreach (var extension in new[] { "mp4", "webm" })
+                var source = node.ToJsonString();
+                var composition = Composition.Compile(source, Path.GetFullPath("examples"));
+                var runtime = composition.CreateRuntime();
+                foreach (var name in item.Parameter == "" ? new[] { "A" } : new[] { "A", "B" })
                 {
-                    var rendered = $"artifacts/{stem}.{extension}";
-                    if (item.Id != "demo")
+                    if (name == "B")
                     {
-                        Console.WriteLine($"Gallery: rendering {stem}.{extension} twice...");
-                        var repeat = $"artifacts/{stem}-repeat.{extension}";
-                        await Ffmpeg.Render(snapshot, rendered); await Ffmpeg.Render(snapshot, repeat);
-                        Composition.Require(Ffmpeg.Hash(rendered) == Ffmpeg.Hash(repeat), $"Gallery repeat mismatch: {stem}.{extension}");
-                        await Ffmpeg.Run("ffmpeg", ["-v", "error", "-xerror", "-i", rendered, "-f", "null", "-"]);
-                        repeatChecks++;
+                        var changes = new Dictionary<string, decimal> { [item.Parameter] = item.Value };
+                        if (item.Id is "demo" or "showcase") changes["musicGain"] = 0.6m;
+                        runtime.SetMany(changes);
                     }
-                    File.Copy(rendered, Path.Combine(output, $"{stem}.{extension}"), true);
+                    var snapshot = runtime.Bind();
+                    var stem = item.Id == "demo" ? name : item.Id == "showcase" ? $"showcase-{variant.Video}-{variant.Audio}-{name}" : $"{item.Id}-{name}";
+                    firstStem ??= stem;
+                    snapshots.Add(new { name, stem, video = variant.Video, audio = variant.Audio, parameters = snapshot.Values,
+                        script = JsonSerializer.Deserialize<JsonElement>(source), tracks = Tracks(composition),
+                        scenes = Enumerable.Range(0, composition.Script.Frames).Select(snapshot.SceneAt).ToArray() });
+                    foreach (var extension in new[] { "mp4", "webm" })
+                    {
+                        var rendered = $"artifacts/{stem}.{extension}";
+                        if (item.Id != "demo")
+                        {
+                            Console.WriteLine($"Gallery: rendering {stem}.{extension} twice...");
+                            var repeat = $"artifacts/{stem}-repeat.{extension}";
+                            await Ffmpeg.Render(snapshot, rendered); await Ffmpeg.Render(snapshot, repeat);
+                            Composition.Require(Ffmpeg.Hash(rendered) == Ffmpeg.Hash(repeat), $"Gallery repeat mismatch: {stem}.{extension}");
+                            await Ffmpeg.Run("ffmpeg", ["-v", "error", "-xerror", "-i", rendered, "-f", "null", "-"]);
+                            repeatChecks++;
+                        }
+                        File.Copy(rendered, Path.Combine(output, $"{stem}.{extension}"), true);
+                    }
                 }
             }
-            demos.Add(new { id = item.Id, title = item.Title, description = item.Description, inspectFrame = item.Frame,
-                fps = composition.Script.Fps, frames = composition.Script.Frames,
-                width = composition.Script.Width, height = composition.Script.Height,
-                script = JsonSerializer.Deserialize<JsonElement>(source), snapshots });
+            var thumb = item.Id + ".jpg";
+            await Ffmpeg.Run("ffmpeg", ["-v", "error", "-y", "-i", $"artifacts/{firstStem}.mp4", "-ss", "0.5", "-frames:v", "1", "-vf", "scale=480:-2", Path.Combine(output, thumb)]);
+            demos.Add(new { id = item.Id, title = item.Title, description = item.Description, inspectFrame = item.Frame, thumbnail = thumb,
+                fps = originalComposition.Script.Fps, frames = originalComposition.Script.Frames,
+                width = originalComposition.Script.Width, height = originalComposition.Script.Height,
+                script = JsonSerializer.Deserialize<JsonElement>(original), snapshots });
         }
+        Directory.CreateDirectory(Path.Combine(output, "samples"));
+        foreach (var file in Directory.GetFiles("web/samples").Where(p => Path.GetExtension(p) is ".mp4" or ".wav"))
+            File.Copy(file, Path.Combine(output, "samples", Path.GetFileName(file)));
         // Sort all JSON object keys so immutable dictionary enumeration order cannot
         // make the packaged timeline depend on a process's randomized string hashes.
         WriteJson(Path.Combine(output, "proof.json"), new { schemaVersion = 2, demos });
         foreach (var file in Directory.GetFiles("web", "*", SearchOption.TopDirectoryOnly)
             .Where(p => new[] { ".html", ".css", ".js" }.Contains(Path.GetExtension(p))))
             File.WriteAllText(Path.Combine(output, Path.GetFileName(file)), File.ReadAllText(file).Replace("\r\n", "\n"));
-        var hashes = Directory.GetFiles(output).Where(p => Path.GetFileName(p) != "checksums.json")
-            .ToDictionary(p => Path.GetFileName(p)!, Ffmpeg.Hash);
+        var hashes = Directory.GetFiles(output, "*", SearchOption.AllDirectories).Where(p => Path.GetFileName(p) != "checksums.json")
+            .ToDictionary(p => Path.GetRelativePath(output, p).Replace('\\', '/'), Ffmpeg.Hash);
         WriteJson(Path.Combine(output, "checksums.json"), hashes);
         var destination = Path.GetFullPath("web/site");
         var previous = Path.GetFullPath(Path.Combine("artifacts", "web-previous-" + Guid.NewGuid().ToString("N")));
@@ -74,6 +97,10 @@ internal static class WebProof
         catch { if (Directory.Exists(previous)) Directory.Move(previous, destination); throw; }
         Console.WriteLine($"PASS: {repeatChecks} gallery format/binding pairs repeated byte-identically and fully decoded. Published {cases.Length} demos.");
     }
+
+    internal static object[] Tracks(Composition c) => c.Clips.Select((v, i) => (object)new { kind = "video", label = $"Video {i + 1}", at = v.At, frames = v.Frames })
+        .Concat(c.Script.Audio.Select((a, i) => (object)new { kind = "audio", label = $"Audio {i + 1}", at = a.At, frames = a.Frames }))
+        .Concat(c.Script.Shapes.Select((o, i) => (object)new { kind = "overlay", label = $"Overlay {i + 1}", at = o.At, frames = o.Frames })).ToArray();
 
     private static void WriteJson(string path, object value)
     {
