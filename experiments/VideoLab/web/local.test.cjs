@@ -105,7 +105,11 @@ async function upload(kind, filename, bytes) { return api('upload?kind='+kind+'&
         assert.equal(JSON.parse(await page.locator('#script').textContent()).texts.length,1);
         await page.locator('#render').click();await page.waitForFunction(()=>document.getElementById('render-state').textContent==='Current composition rendered',null,{timeout:120000});
         await page.waitForFunction(()=>document.getElementById('video').readyState>=2);await page.locator('#transition').click();await page.waitForFunction(()=>!document.getElementById('video').seeking);
-        await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(lab,'artifacts/phase3-local.png')});
+        // Let a decoded frame reach the compositor before capturing the preview.
+        await page.evaluate(()=>document.getElementById('video').play());
+        await page.waitForFunction(()=>document.getElementById('video').currentTime>1.1);
+        await page.evaluate(()=>{document.getElementById('video').pause();scrollTo(0,0);});
+        await page.screenshot({path:path.join(lab,'artifacts/phase3-local.png')});
         await page.selectOption('#snapshot','2');await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).audience==='engineering');
         assert.equal(JSON.parse(await page.locator('#annotations-json').textContent()).annotations[0].id,'engineering_note');
         assert.deepEqual(errors,[]);
