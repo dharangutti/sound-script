@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "mvp": "pass",
-  "artifactSha256": "3a84742543e5238aabe5d23814c71b105640e562dcc1ecdac04aeb5753a0969b",
+  "artifactSha256": "241b9a8270a258eafd7043a25abeb687b50f8fd15c550697b86db9eb7baea234",
   "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_shared; Windows x64; Playwright 1.63.0 Chromium",
   "checks": {
     "build": {
@@ -17,7 +17,8 @@
     "determinism": {
       "result": "pass",
       "command": "dotnet run -c Release -- webproof",
-      "detail": "Original MVP plus every additional gallery binding exported twice in MP4/WebM, byte-compared and fully decoded; 16 additional format/binding pairs passed."
+      "detail": "Original MVP plus every additional gallery binding exported twice in MP4/WebM, byte-compared and fully decoded; 16 additional format/binding pairs passed.",
+      "packaging": "A fresh second webproof build reproduced every media, script, stylesheet and scene-data byte; generated checksum formatting normalized."
     },
     "browser": {
       "result": "pass",
