@@ -48,6 +48,7 @@ internal static class AudienceProof
         Check(br.Bind().SceneAt(0).Layers.Any(l => l.Group == "qa" && l.Included), "Typed logical precedence and parentheses");
         var groupedAudio = Compile(Change(n => n["audio"]![0]!["group"] = "qa"));
         Check(!groupedAudio.CreateRuntime().Bind().SceneAt(0).Audio[0].Included, "Groups control audio too");
+        Reject(() => Compile(Change(n => n["effects"] = JsonNode.Parse("{\"shadow\":{\"parameters\":{\"audience\":1},\"transform\":{\"x\":\"audience\"}}}"))), "Effect locals cannot shadow typed globals");
         var batch = Batches.Bind(c, File.ReadAllText("examples/audience-batch.json"), directory);
         Check(batch.Length == 3 && batch.All(r => ReferenceEquals(r.Snapshot.Composition, c)), "Audience batch shares one compilation");
         var root = Path.GetFullPath("artifacts/audience-proof"); Directory.CreateDirectory(root);

@@ -11,7 +11,7 @@ namespace VideoLab;
 internal sealed class LocalWorkbench
 {
     private const long MaxFile = 50 * 1024 * 1024;
-    private static readonly string[] Demos = ["showcase", "editing", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
+    private static readonly string[] Demos = ["showcase", "editing", "audience", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
     private readonly string lab = Path.GetFullPath(".");
     private readonly string root = Path.Combine(Path.GetTempPath(), "videolab-session-" + Guid.NewGuid().ToString("N"));
     private readonly string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
@@ -123,7 +123,7 @@ internal sealed class LocalWorkbench
                 var snapshot = Bind(body, out var source);
                 if (route == "/api/bind")
                 {
-                    await Json(response, new { parameters = snapshot.Values, scenes = Enumerable.Range(0, snapshot.Composition.Script.Frames).Select(snapshot.SceneAt), tracks = WebProof.Tracks(snapshot.Composition), script = JsonNode.Parse(source) }); return;
+                    await Json(response, new { parameters = snapshot.Bindings, scenes = Enumerable.Range(0, snapshot.Composition.Script.Frames).Select(snapshot.SceneAt), tracks = WebProof.Tracks(snapshot.Composition), script = JsonNode.Parse(source) }); return;
                 }
                 if (route == "/api/render")
                 {
@@ -231,10 +231,10 @@ internal sealed class LocalWorkbench
             if (cache.Count >= 8) cache.Clear(); item = (composition, composition.CreateRuntime(), source); cache[key] = item;
         }
         source = item.Source;
-        var values = body["parameters"]?.Deserialize<Dictionary<string, decimal>>() ?? new();
-        var changes = item.Composition.Script.Parameters.ToDictionary(p => p.Key, p => p.Value.Default);
+        var values = body["parameters"]?.Deserialize<Dictionary<string, JsonElement>>() ?? new();
+        var changes = item.Composition.CreateRuntime().Bind().Bindings.ToDictionary();
         foreach (var pair in values) changes[pair.Key] = pair.Value;
-        item.Runtime.SetMany(changes); return item.Runtime.Bind();
+        item.Runtime.SetBindings(changes); return item.Runtime.Bind();
     }
 
     private static async Task ServeFile(HttpListenerRequest request, HttpListenerResponse response, string file)

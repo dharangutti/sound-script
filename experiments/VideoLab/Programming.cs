@@ -112,7 +112,7 @@ internal static class Programming
             {
                 Composition.Require(definition != null && definition.Parameters != null && definition.Transform != null && definition.Parameters.Count <= 16, "Invalid effect definition or more than 16 arguments.");
                 foreach (var local in definition!.Parameters.Keys)
-                    Composition.Require(System.Text.RegularExpressions.Regex.IsMatch(local, "^[A-Za-z_][A-Za-z0-9_]*$") && !Expressions.Builtins.Contains(local) && !s.Parameters.ContainsKey(local), "Effect locals cannot shadow globals or built-ins.");
+                    Composition.Require(System.Text.RegularExpressions.Regex.IsMatch(local, "^[A-Za-z_][A-Za-z0-9_]*$") && !Expressions.Builtins.Contains(local) && !s.Parameters.ContainsKey(local) && !(s.TypedParameters?.ContainsKey(local) ?? false), "Effect locals cannot shadow globals or built-ins.");
                 var values = ImmutableDictionary.CreateBuilder<string, Scalar>(StringComparer.Ordinal);
                 foreach (var (property, value) in definition.Transform.OrderBy(p => p.Key, StringComparer.Ordinal))
                 {

@@ -116,3 +116,11 @@ sources/private validation files are not packaged. After validation, update
 publication-evidence.json, commit on experiments/videolab, tag a new milestone and
 promote its exact artifact/evidence digests in the main Labs manifest. Production
 staging injects publication.json. This branch cannot deploy the entire site.
+
+
+Phase 2 development adds a ninth card: one composition, three audiences. The
+assembly source is synthetic and identical across shopfloor/qa/engineering.
+Public-style gallery bindings stay fixed; local mode enables enum/boolean
+selectors, numeric gain and native rendering. Reset restores all parameter types.
+This private development gallery has 23 snapshots / 46 exports. Existing release
+v0.3.0 remains pinned independently; none of these changes deploy automatically.

@@ -1,6 +1,6 @@
 # VideoLab roadmap — durable restart record
 
-Last updated: 2026-09-27. Branch: `experiments/videolab`.
+Last updated: 2026-09-28. Branch: `experiments/videolab`.
 Baseline: `db9ebebb778fd823f490cc3a886ab8ea0f4dab77`, tag
 `labs-videolab-mvp-web-v0.3.0`. PR 146 was merged by the user; live provenance
 currently matches this baseline. Do not retag it or update public hosting during
@@ -18,7 +18,7 @@ or deploying; the user will decide when to merge.
 | --- | --- | --- | --- | --- |
 | 0 — baseline audit | Complete | PASS; exact baseline artifact reproduced | Audit only | Baseline v0.3.0 already live |
 | 1 — text/callouts/editing foundation | Complete | PASS; see PHASE_1_REPORT.md | Yes, bounded Lab scope | No |
-| 2 — typed audience variants | Core implemented; browser gate running | 52 focused checks PASS | Pending full gate | No |
+| 2 — typed audience variants | Core implemented; browser gate running | 53 focused checks PASS | Pending full gate | No |
 | 3 — structured annotations | Authorized after Phase 2 gate | Pending | Pending | No |
 | 4 — ranked editor improvements | Not authorized | No | No | No |
 | 5 — explicit variant generation | Not authorized | No | No | No |
@@ -81,12 +81,28 @@ local/encoder tests when using that isolated output. Public pins remain unchange
 TypedParameters.cs adds bounded enum/boolean declarations; legacy decimal API is
 retained. SetBindings publishes mixed values atomically. Group predicates compile
 into typed ASTs and appear in SceneAt. One audience.json and audience-batch.json
-produce three synthetic views; 52 focused checks including six repeated/decoded
+produce three synthetic views; 53 focused checks including six repeated/decoded
 outputs passed. Full native/gallery run uses artifacts/phase2-final-bin and log
 artifacts/roadmap-phase2-final.log. Browser suites still pending. Do not start
 Phase 3 until this gate/report is complete.
 
 Final focused Phase 2 binary: artifacts/phase2-verified-bin/VideoLab.dll;
-52/52 checks PASS on the synthetic assembly fixture. Full gallery run uses the
+53/53 checks PASS on the synthetic assembly fixture. Full gallery run uses the
 earlier phase2-final-bin (51 checks); final parser compatibility correction is
 covered by the extra focused check. Native gates will run again with Phase 3.
+
+### Remote preservation checkpoint — 2026-09-28
+
+Phase 1 complete at 605dd25; Phase 2 core at 0208518. Final focused audience
+proof passed 53 checks, including all six MP4/WebM outputs repeated and decoded.
+Evidence is saved in phase2-core-evidence.json. Browser source integration is
+implemented but NOT gate-approved. Full gallery build failed while launching
+FFmpeg for transforms-B.webm with Windows exit -1073741502 (0xC0000142).
+The atomic gallery publish did not occur, so web/site remains the verified
+eight-card Phase 1 artifact. Do not claim Phase 2 gallery or browser completion.
+
+Restart: verify FFmpeg can launch, rebuild current source to a fresh output, rerun
+webproof with line-flushed log, then run both browser suites with VIDEOLAB_DLL
+pointing to that build. Preserve all regression assertions. Finish Phase 2 report
+and checkpoint before Phase 3. User explicitly requested this intermediate state
+be pushed to origin/experiments/videolab. No merge or public deployment.

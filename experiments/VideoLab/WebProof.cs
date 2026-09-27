@@ -15,6 +15,7 @@ internal static class WebProof
         var cases = new[]
         {
             (Id: "showcase", Title: "Video + audio showcase", Description: "Real coast and companion footage, two trimmed clips, a crossfade, a moving graphic and mixed audio. Switch the sample video or audio below.", Frame: 98, Parameter: "accentX", Value: 180m),
+            (Id: "audience", Title: "One composition, three audiences", Description: "The same synthetic footage becomes shop-floor instructions, QA inspection or engineering review. Audience groups change titles, callouts and markers; the source composition stays identical.", Frame: 30, Parameter: "", Value: 0m),
             (Id: "editing", Title: "Titles, callouts and familiar edits", Description: "Two trimmed clips, crossfade, title, moving callout, shape and audio. Explore position, scale, rotation, opacity, crop and gain in local mode; source defines timing.", Frame: 30, Parameter: "position", Value: 30m),
             (Id: "demo", Title: "Composition MVP", Description: "Two clips, a crossfade, animated overlay and mixed audio. Compare quieter/left and louder/right bindings.", Frame: 98, Parameter: "accentX", Value: 180m),
             (Id: "transforms", Title: "Transforms, easing and gain", Description: "Position, size, scale, rotation, opacity, crop and pivot with eased keyframes. Audio gain steps at frame 15; compare startX bindings.", Frame: 15, Parameter: "startX", Value: 60m),
@@ -42,7 +43,7 @@ internal static class WebProof
                 var source = node.ToJsonString();
                 var composition = Composition.Compile(source, Path.GetFullPath("examples"));
                 var runtime = composition.CreateRuntime();
-                foreach (var name in item.Parameter == "" ? new[] { "A" } : new[] { "A", "B" })
+                foreach (var name in item.Id == "audience" ? new[] { "shopfloor", "qa", "engineering" } : item.Parameter == "" ? new[] { "A" } : new[] { "A", "B" })
                 {
                     if (name == "B")
                     {
@@ -51,10 +52,11 @@ internal static class WebProof
                         if (item.Id == "editing") { changes["rotation"] = 5; changes["scale"] = 0.9m; changes["opacity"] = 0.8m; changes["crop"] = 0.1m; changes["showCallout"] = 0; }
                         runtime.SetMany(changes);
                     }
+                    if (item.Id == "audience") runtime.SetBindings(new Dictionary<string, JsonElement> { ["audience"] = JsonSerializer.SerializeToElement(name) });
                     var snapshot = runtime.Bind();
                     var stem = item.Id == "demo" ? name : item.Id == "showcase" ? $"showcase-{variant.Video}-{variant.Audio}-{name}" : $"{item.Id}-{name}";
                     firstStem ??= stem;
-                    snapshots.Add(new { name, stem, video = variant.Video, audio = variant.Audio, parameters = snapshot.Values,
+                    snapshots.Add(new { name, stem, video = variant.Video, audio = variant.Audio, parameters = snapshot.Bindings,
                         script = JsonSerializer.Deserialize<JsonElement>(source), tracks = Tracks(composition),
                         scenes = Enumerable.Range(0, composition.Script.Frames).Select(snapshot.SceneAt).ToArray() });
                     foreach (var extension in new[] { "mp4", "webm" })
