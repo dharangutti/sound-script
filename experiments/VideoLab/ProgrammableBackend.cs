@@ -18,6 +18,13 @@ internal static class ProgrammableBackend
             string normalize = $"[{i}:v:0]setpts=PTS-STARTPTS,fps=fps={s.Fps}:start_time=0:round=near:eof_action=round,scale={s.Width}:{s.Height}:force_original_aspect_ratio=decrease,pad={s.Width}:{s.Height}:(ow-iw)/2:(oh-ih)/2,setsar=1,format=rgba";
             graph.Add(frames.Length == 0 ? normalize + ",nullsink" : normalize + $",split={frames.Length}" + string.Concat(frames.Select(f => $"[source{i}_{f}]")));
         }
+        // Caption content is static in Phase 1. Build its local plane once, as with
+        // normalized video sources; per-frame transforms remain the semantic oracle.
+        foreach (var caption in c.Visuals.Where(v => v.Caption != null))
+        {
+            var frames = scenes.SelectMany((scene, frame) => scene.Layers.Where(l => l.Id == caption.Id && l.Included).Select(_ => frame)).ToArray();
+            graph.Add(Captions.Source(caption, s.Fps) + (frames.Length == 0 ? ",nullsink" : $",split={frames.Length}" + string.Concat(frames.Select(f => $"[caption{caption.ZOrder}_{f}]"))));
+        }
         for (int frame = 0; frame < s.Frames; frame++)
         {
             string current = $"base{frame}";
@@ -26,7 +33,7 @@ internal static class ProgrammableBackend
             {
                 var program = c.Visuals[layer.ZOrder]; var t = layer.Transform; var r = t.Raster();
                 string id = $"f{frame}l{layer.ZOrder}";
-                string source = layer.Kind == "video"
+                string source = program.Caption != null ? $"[caption{program.ZOrder}_{frame}]null" : layer.Kind == "video"
                     ? $"[source{layer.ZOrder}_{frame}]trim=start_frame={layer.SourceFrame}:end_frame={layer.SourceFrame + 1},setpts=PTS-STARTPTS"
                     : $"color=c=0x{layer.Source}:s={program.BaseWidth}x{program.BaseHeight}:r={s.Fps},trim=end_frame=1,setpts=PTS-STARTPTS,format=rgba";
                 // Normalized crop refers to the untransformed layer plane. Floor the edges,
@@ -56,6 +63,7 @@ internal static class ProgrammableBackend
             mixed += $"[audio{i}]";
         }
         graph.Add(mixed + $"amix=inputs={s.Audio.Length + 1}:duration=first:normalize=0:dropout_transition=0,alimiter=limit=0.95:level=0:latency=1,atrim=end_sample={totalSamples}[aout]");
-        return Ffmpeg.Assemble(s, output, inputs, graph);
+        var captions = c.Visuals.Where(v => v.Caption != null).Select(v => new CaptionResource(Captions.FileName(v.ZOrder), v.Caption!.Text)).ToArray();
+        return Ffmpeg.Assemble(s, output, inputs, graph) with { GeneratedText = captions.Length == 0 ? null : captions };
     }
 }

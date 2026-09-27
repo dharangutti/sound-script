@@ -1,0 +1,25 @@
+{
+  "width": 480, "height": 270, "fps": 30, "frames": 60,
+  "parameters": {
+    "position": { "default": 0, "min": 0, "max": 40 },
+    "scale": { "default": 1, "min": 0.8, "max": 1 },
+    "rotation": { "default": 0, "min": 0, "max": 10 },
+    "opacity": { "default": 1, "min": 0, "max": 1 },
+    "crop": { "default": 0, "min": 0, "max": 0.2 },
+    "musicGain": { "default": 0.3, "min": 0, "max": 1 },
+    "showCallout": { "default": 1, "min": 0, "max": 1 }
+  },
+  "videos": [
+    { "asset": "../web/samples/montage.mp4", "trim": 0, "frames": 36, "at": 0,
+      "transform": { "x": "position", "scale": "scale", "rotation": "rotation", "cropX": "crop", "cropWidth": "1-crop" } },
+    { "asset": "../web/samples/pattern.mp4", "trim": 10, "frames": 36, "fade": 12,
+      "transform": { "x": "position", "scale": "scale", "rotation": "rotation", "cropX": "crop", "cropWidth": "1-crop" } }
+  ],
+  "audio": [{ "asset": "../web/samples/calm.wav", "trim": 0, "frames": 60, "at": 0, "gain": "musicGain" }],
+  "shapes": [{ "at": 0, "frames": 60, "width": 440, "height": 4, "color": "6EE7B7", "transform": { "x": 20, "y": 66 } }],
+  "texts": [{ "text": "Composition review", "at": 0, "frames": 60, "width": 440, "height": 52, "fontSize": 32, "align": "center",
+    "transform": { "x": 20, "y": 10, "opacity": "opacity" } }],
+  "callouts": [{ "label": "Inspect the detail", "at": 12, "frames": 42, "width": 230, "height": 120, "fontSize": 20,
+    "background": "182438", "color": "FFFFFF", "targetX": 160, "targetY": 106, "when": "showCallout > 0.5",
+    "transform": { "x": { "keys": [{ "frame": 0, "value": 150 }, { "frame": 41, "value": 180 }] }, "y": 100, "opacity": "opacity" } }]
+}

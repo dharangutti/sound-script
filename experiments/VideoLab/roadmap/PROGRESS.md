@@ -64,6 +64,25 @@ not an in-progress development build.
 
 ## Decisions and known constraints
 
+### Phase 1 checkpoint (implementation in progress)
+
+- Added optional texts/callouts schema, immutable caption metadata, bundled font,
+  safe generated resources and shared transforms/conditions. Initial 39 editing
+  checks passed and artifacts/editing-test.png was visually inspected.
+- Added examples/editing.json and eighth browser card, six readable track kinds,
+  clip/transform/gain summary and default-media reset. Browser tests expanded, not
+  yet run against the rebuilt distribution.
+- The first full run was interrupted (its empty log is not evidence). A fresh full
+  run uses artifacts/phase1-final-bin/VideoLab.dll and a line-flushed log at
+  artifacts/roadmap-phase1-final.log. Poll this log/process or rerun if interrupted.
+  Latest focused editing run: 43/43 PASS. Static-plane reuse produced exactly the
+  same acceptance MP4 hash as the initial implementation (E7E1ABA4…EE8CCB7).
+- Do not overwrite the old preview's loaded binary. Build with `-o
+  artifacts/phase1-final-bin`; use VIDEOLAB_DLL to select it for local.test.cjs.
+- Remaining: final native/browser/real-media checks, decoded acceptance outputs,
+  semantics/usage/report updates, final artifact evidence as private development
+  evidence (not a public pin), clean commits and restart instructions.
+
 - Source JSON remains authoritative; no drag-and-drop editor or typed audience
   parameters in Phase 1.
 - Preserve immutable Composition/Runtime/Snapshot/SceneAt semantics and bounded

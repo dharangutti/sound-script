@@ -1,3 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="fonts/DejaVuSans.ttf" LogicalName="VideoLab.DejaVuSans.ttf" /></ItemGroup>
+  <ItemGroup><None Update="fonts/LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
 </Project>

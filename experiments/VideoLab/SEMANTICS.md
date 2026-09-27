@@ -6,7 +6,52 @@ All spans are integer frames with `[at, at + frames)` lifetimes. Frames start at
 
 `frame` is element-local. `progress = frame / (frames - 1)`, except a one-frame element where it is 0. Expressions and keyframes do not use elapsed wall time or evaluation history. `SourceFrame = trim + local frame` identifies the normalized source timeline, not a physical compressed packet or raw decoded frame.
 
-Videos are ordered. Missing `at` sequences at the previous end minus incoming `fade`. A crossfade must overlap exactly the previous clip's end and cannot overlap another transition. Incoming opacity is multiplied by `min(1, localFrame/fade)`; outgoing video remains underneath until its lifetime ends. Cuts and explicitly placed black gaps are valid. Z-order is video declaration order, then shape declaration order. Conditional exclusion does not renumber layers.
+Videos are ordered. Missing `at` sequences at the previous end minus incoming `fade`. A crossfade must overlap exactly the previous clip's end and cannot overlap another transition. Incoming opacity is multiplied by `min(1, localFrame/fade)`; outgoing video remains underneath until its lifetime ends. Cuts and explicitly placed black gaps are valid. Z-order is video declaration order, then shapes, text, and callouts in declaration order within each array. Conditional exclusion does not renumber layers. Scripts without captions retain their original order.
+
+## Text and callouts (Phase 1)
+
+Optional `texts` entries require literal `text`, `at`, `frames`, even `width`/`height`
+plane dimensions. `fontSize` defaults to 24; `color` to FFFFFF; `align` to left.
+Optional `callouts` require `label`, lifetime, plane dimensions and `targetX/targetY`;
+fontSize defaults to 20, color FFFFFF, background 182438, align left. Both support
+the existing `transform`, `when` and `effects`. Thus x/y, scale, size, rotation,
+opacity, crop and anchor can be animated or bound without introducing new evaluation
+rules. Label content, fontSize, color and local pointer target are compile-time data.
+Runtime strings, font selection, wrapping and rich text are not Phase 1 features.
+
+Text is 1–160 printable ASCII characters (U+0020–U+007E), nonblank and single-line.
+Unsupported glyphs/control characters fail instead of relying on fallback. The
+unmodified DejaVu Sans 2.37 font is embedded, licensed and fingerprinted under
+fonts/. No system font discovery. Font size is an integer 8–96. Planes have even
+dimensions 24–4096; height must accommodate fontSize + 16. Captions count toward all
+existing element, element-frame, canvas and transform-work limits.
+
+Text is drawn onto a transparent plane with top offset 8. Horizontal x is 8 (left),
+(planeWidth - measuredTextWidth)/2 (center), or planeWidth - measuredTextWidth - 8
+(right), using the pinned font/FFmpeg glyph metrics. Overflow clips at plane edges;
+there is no implicit resize/wrap. Hinting, bitmap glyphs and text shaping are disabled.
+Existing crop/scale/rotation/opacity/placement then apply to the complete plane.
+
+A callout uses this same text plane, a full-width opaque label rectangle of height
+fontSize + 16, and a 3-pixel-wide pointer segment from (width/2, fontSize+16) to the
+local target. Pixel centers at distance <=1.5 from the clamped segment are included.
+The target must be inside the plane and at y >= fontSize + 20. It is not a tracking
+coordinate: moving or transforming the plane moves label and pointer together.
+Pointer color equals text color; background has its own six-digit RGB value.
+
+`SceneAt` exposes Kind=text/callout, literal Source and immutable Caption metadata
+(text, font identity/hash, fontSize, color, alignment and optional background/target).
+The existing layer Transform defines the plane in canvas space. Excluded captions
+remain inspectable and validate normally. Legacy Clips/Shapes projections exclude
+caption layers; consumers should use Layers for the complete composition.
+
+Plans declare GeneratedText resources with safe generated filenames. Literal text
+never enters filter syntax: Render writes UTF-8 files, supplies the embedded font,
+and uses expansion=none in a dedicated temporary working directory. Static caption
+planes are constructed once and split into the reference backend's frame transforms.
+Normal failure/cancellation removes those resources; output replacement remains
+atomic. Exact pixels/bytes remain conditional on the same FFmpeg/FreeType and machine
+environment, not a cross-version typography guarantee.
 
 ## Source normalization
 

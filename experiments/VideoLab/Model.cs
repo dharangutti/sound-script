@@ -14,11 +14,18 @@ public sealed record Video(string Asset, int Trim, int Frames, int? At = null, i
 public sealed record Audio(string Asset, int Trim, int Frames, int At, JsonElement Gain, string? When = null);
 public sealed record Shape(int At, int Frames, int Width, int Height, string Color, string? X = null, int? ToX = null, int Y = 0,
     ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default);
+public sealed record TextOverlay(string Text, int At, int Frames, int Width, int Height, int FontSize = 24,
+    string Color = "FFFFFF", string Align = "left", ImmutableDictionary<string, JsonElement>? Transform = null,
+    string? When = null, ImmutableArray<EffectUse> Effects = default);
+public sealed record Callout(string Label, int At, int Frames, int Width, int Height, int TargetX, int TargetY,
+    int FontSize = 20, string Color = "FFFFFF", string Background = "182438", string Align = "left",
+    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default);
 public sealed record Script(int Width, int Height, int Fps, int Frames,
     ImmutableDictionary<string, Parameter> Parameters, ImmutableArray<Video> Videos,
     ImmutableArray<Audio> Audio, ImmutableArray<Shape> Shapes,
     ImmutableDictionary<string, EffectDefinition>? Effects = null,
-    ImmutableDictionary<string, ImmutableArray<DataRecord>>? Data = null, ImmutableArray<Sequence> Sequences = default);
+    ImmutableDictionary<string, ImmutableArray<DataRecord>>? Data = null, ImmutableArray<Sequence> Sequences = default,
+    ImmutableArray<TextOverlay> Texts = default, ImmutableArray<Callout> Callouts = default);
 public sealed record Clip(string Asset, int Trim, int Frames, int At, int Fade);
 public sealed record VisibleClip(string Asset, int SourceFrame, decimal Opacity);
 public sealed record VisibleShape(decimal X, int Y, int Width, int Height, string Color);
@@ -60,8 +67,8 @@ public sealed class Composition
         Require(s.Width is > 0 and <= 4096 && s.Height is > 0 and <= 4096 && s.Width % 2 == 0 && s.Height % 2 == 0, "Canvas must have even dimensions up to 4096.");
         Require(new[] {24, 25, 30, 50, 60}.Contains(s.Fps), "fps must be 24, 25, 30, 50 or 60.");
         Require(s.Frames is > 0 and <= 216000, "Invalid timeline length.");
-        Require(s.Parameters != null && !s.Videos.IsDefault && !s.Audio.IsDefault && !s.Shapes.IsDefault && s.Videos.Length + s.Shapes.Length > 0, "Collections and at least one visual are required.");
-        Require(s.Parameters!.Count <= 64 && s.Videos.Length + s.Shapes.Length + s.Audio.Length <= 64, "Limit: 64 parameters and 64 total elements.");
+        Require(s.Parameters != null && !s.Videos.IsDefault && !s.Audio.IsDefault && !s.Shapes.IsDefault && s.Videos.Length + s.Shapes.Length + s.Texts.Length + s.Callouts.Length > 0, "Collections and at least one visual are required.");
+        Require(s.Parameters!.Count <= 64 && s.Videos.Length + s.Shapes.Length + s.Audio.Length + s.Texts.Length + s.Callouts.Length <= 64, "Limit: 64 parameters and 64 total elements.");
         Require(s.Videos.Select(v => v.Asset).Concat(s.Audio.Select(a => a.Asset)).Distinct(StringComparer.Ordinal).Count() <= 64, "Limit: 64 assets.");
         foreach (var (name, p) in s.Parameters!)
             Require(System.Text.RegularExpressions.Regex.IsMatch(name, "^[A-Za-z_][A-Za-z0-9_]*$") && !Expressions.Builtins.Contains(name) && p != null && p.Min <= p.Default && p.Default <= p.Max, "Invalid or reserved parameter declaration.");
@@ -100,6 +107,19 @@ public sealed class Composition
                 Reference(o.X, 0, s.Width - o.Width);
             }
             else Require(o.ToX == null, "toX requires a legacy x parameter.");
+        }
+        foreach (var text in s.Texts)
+        {
+            Require(text != null, "Text overlay required."); Span(text!.At, text.Frames);
+            Captions.Validate(text.Text, text.Width, text.Height, text.FontSize, text.Color, text.Align);
+        }
+        foreach (var callout in s.Callouts)
+        {
+            Require(callout != null, "Callout required."); Span(callout!.At, callout.Frames);
+            Captions.Validate(callout.Label, callout.Width, callout.Height, callout.FontSize, callout.Color, callout.Align);
+            Captions.Color(callout.Background);
+            Require(callout.TargetX >= 0 && callout.TargetX < callout.Width && callout.TargetY >= callout.FontSize + 20 && callout.TargetY < callout.Height,
+                "Callout target must lie inside its plane, below the label (fontSize + 20).");
         }
         var result = new Composition(s, clips.ToImmutable(), Path.GetFullPath(directory));
         result.ValidateValues(s.Parameters.ToImmutableDictionary(p => p.Key, p => p.Value.Default));

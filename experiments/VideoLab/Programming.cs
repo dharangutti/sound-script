@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace VideoLab;
 
@@ -22,11 +23,12 @@ public sealed record Transform(decimal X, decimal Y, decimal Width, decimal Heig
     }
 }
 public sealed record LayerState(string Id, string Kind, string Source, int? SourceFrame, int ZOrder, bool Included,
-    Transform Transform, ImmutableDictionary<string, decimal> Outputs);
+    Transform Transform, ImmutableDictionary<string, decimal> Outputs,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CaptionStyle? Caption = null);
 public sealed record AudioState(string Id, string Source, int SourceFrame, decimal Gain, bool Included);
 public sealed record EffectTemplate(ImmutableDictionary<string, decimal> Defaults, ImmutableDictionary<string, Scalar> Transform);
 public sealed record VisualProgram(string Id, string Kind, string Source, int Trim, int At, int Frames, int Fade,
-    int ZOrder, int BaseWidth, int BaseHeight, ImmutableDictionary<string, Scalar> Properties, Expression? Condition)
+    int ZOrder, int BaseWidth, int BaseHeight, ImmutableDictionary<string, Scalar> Properties, Expression? Condition, CaptionStyle? Caption = null)
 {
     public LayerState Evaluate(EvaluationContext context)
     {
@@ -44,7 +46,7 @@ public sealed record VisualProgram(string Id, string Kind, string Source, int Tr
             decimal opacity = V("opacity") * (Fade == 0 ? 1 : Math.Min(1m, (decimal)context.Frame / Fade));
             return new(Id, Kind, Source, Kind == "video" ? checked(Trim + context.Frame) : null, ZOrder,
                 Condition?.Evaluate(context).Boolean ?? true,
-                new(V("x"), V("y"), V("width"), V("height"), V("scaleX"), V("scaleY"), V("rotation"), opacity, V("anchorX"), V("anchorY"), crop), p);
+                new(V("x"), V("y"), V("width"), V("height"), V("scaleX"), V("scaleY"), V("rotation"), opacity, V("anchorX"), V("anchorY"), crop), p, Caption);
         }
         catch (Exception e) when (e is ArgumentException or OverflowException)
         { throw new ArgumentException($"{Id}, local frame {context.Frame}: {e.Message}", e); }
@@ -96,7 +98,7 @@ internal static class Programming
                 }
             }
         }
-        return script with { Videos = videos.ToImmutable() };
+        return script with { Videos = videos.ToImmutable(), Texts = script.Texts.IsDefault ? [] : script.Texts, Callouts = script.Callouts.IsDefault ? [] : script.Callouts };
     }
 
     internal static (ImmutableArray<VisualProgram>, ImmutableArray<AudioProgram>, ImmutableDictionary<string, EffectTemplate>, bool) Compile(Script s, ImmutableArray<Clip> clips)
@@ -182,6 +184,19 @@ internal static class Programming
             var v = s.Shapes[i]; advanced |= v.Transform != null || v.When != null || !v.Effects.IsDefaultOrEmpty || v.X == null;
             visuals.Add(new($"shape[{i}]", "shape", v.Color, 0, v.At, v.Frames, 0, clips.Length + i, v.Width, v.Height,
                 Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, v), Condition(v.When)));
+        }
+        for (int i = 0; i < s.Texts.Length; i++)
+        {
+            var v = s.Texts[i]; advanced = true;
+            visuals.Add(new($"text[{i}]", "text", v.Text, 0, v.At, v.Frames, 0, visuals.Count, v.Width, v.Height,
+                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When), new(v.Text, v.FontSize, v.Color, v.Align)));
+        }
+        for (int i = 0; i < s.Callouts.Length; i++)
+        {
+            var v = s.Callouts[i]; advanced = true;
+            visuals.Add(new($"callout[{i}]", "callout", v.Label, 0, v.At, v.Frames, 0, visuals.Count, v.Width, v.Height,
+                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When),
+                new(v.Label, v.FontSize, v.Color, v.Align, v.Background, v.TargetX, v.TargetY)));
         }
         var audio = ImmutableArray.CreateBuilder<AudioProgram>();
         for (int i = 0; i < s.Audio.Length; i++)

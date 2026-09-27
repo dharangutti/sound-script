@@ -6,7 +6,8 @@ using System.Text.Json;
 namespace VideoLab;
 
 public sealed record OutputSettings(int Width, int Height, int Fps, int Frames, int SampleRate, string Container);
-public sealed record RenderPlan(string FilterGraph, string[] Arguments, string[] Inputs, OutputSettings Expected);
+public sealed record RenderPlan(string FilterGraph, string[] Arguments, string[] Inputs, OutputSettings Expected,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CaptionResource[]? GeneratedText = null);
 
 public static class Ffmpeg
 {
@@ -64,9 +65,10 @@ public static class Ffmpeg
         return new(string.Join(";\n", graph), args.ToArray(), inputs, new(s.Width, s.Height, s.Fps, s.Frames, 48000, Path.GetExtension(output).ToLowerInvariant()));
     }
 
-    public static async Task<string> Run(string executable, IEnumerable<string> args, CancellationToken cancellationToken = default)
+    public static async Task<string> Run(string executable, IEnumerable<string> args, CancellationToken cancellationToken = default, string? workingDirectory = null)
     {
         var start = new ProcessStartInfo(executable) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
+        if (workingDirectory != null) start.WorkingDirectory = workingDirectory;
         foreach (var arg in args) start.ArgumentList.Add(arg);
         using var process = Process.Start(start) ?? throw new InvalidOperationException($"Cannot start {executable}.");
         var stdout = process.StandardOutput.ReadToEndAsync(); var stderr = process.StandardError.ReadToEndAsync();
@@ -100,19 +102,30 @@ public static class Ffmpeg
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         var temporary = Path.Combine(Path.GetDirectoryName(output)!, $".videolab-{Guid.NewGuid():N}{Path.GetExtension(output)}");
         var graphFile = temporary + ".filters";
+        var resources = temporary + ".assets";
         try
         {
             // Long bounded frame plans exceed Windows' command-line limit. The public plan
             // still contains the complete graph; only transport is moved to a temporary file.
             var render = Plan(snapshot, temporary);
+            if (render.GeneratedText != null) await Captions.Materialize(resources, render.GeneratedText);
             var arguments = render.Arguments.ToArray();
             int index = Array.IndexOf(arguments, "-filter_complex");
             await File.WriteAllTextAsync(graphFile, render.FilterGraph);
             arguments[index] = "-/filter_complex"; arguments[index + 1] = graphFile;
-            await Run("ffmpeg", arguments, cancellationToken);
+            await Run("ffmpeg", arguments, cancellationToken, render.GeneratedText != null ? resources : null);
             File.Move(temporary, output, true);
         }
-        finally { if (File.Exists(temporary)) File.Delete(temporary); if (File.Exists(graphFile)) File.Delete(graphFile); }
+        finally
+        {
+            if (File.Exists(temporary)) File.Delete(temporary); if (File.Exists(graphFile)) File.Delete(graphFile);
+            if (Directory.Exists(resources))
+            {
+                Composition.Require(Path.GetDirectoryName(Path.GetFullPath(resources)) == Path.GetDirectoryName(output)
+                    && Path.GetFileName(resources).StartsWith(".videolab-", StringComparison.Ordinal), "Unsafe caption cleanup target.");
+                Directory.Delete(resources, true);
+            }
+        }
     }
     public static string Hash(string path) { using var stream = File.OpenRead(path); return Convert.ToHexString(SHA256.HashData(stream)); }
 }

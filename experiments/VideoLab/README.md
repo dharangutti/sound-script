@@ -33,6 +33,7 @@ dotnet run -- realtest real-media/manifest.json
 | Example | Purpose |
 | --- | --- |
 | [demo.json](examples/demo.json) | Unchanged original two clips, crossfade, animated shape, music and clip audio |
+| [editing.json](examples/editing.json) | Phase 1: two trimmed clips, crossfade, controlled-font title, moving callout, shape, audio and transform/gain bindings |
 | [transforms.json](examples/transforms.json) | Position, size, scale, rotation, opacity, crop, pivot and animated gain |
 | [expressions.json](examples/expressions.json) | Frame/progress-driven motion and runtime parameter |
 | [effects.json](examples/effects.json) | Reusable zoom, fade, slide and pulse |
@@ -76,4 +77,11 @@ The frame-oriented programmable renderer remains a correctness-first **reference
 
 Repeated output bytes are guaranteed only for identical script, bindings, asset bytes, VideoLab code, FFmpeg/encoders and machine environment. Software codecs, fixed timing/formats, single-threaded work, bitexact flags and stripped metadata are used. No cross-machine/version equality claim is made. See [VALIDATION.md](VALIDATION.md) for measured results.
 
-Unsupported: text/subtitles/font discovery, masks/blur/grading, HDR/wide-gamut/Dolby Vision preservation, general scripting/plugins, arbitrary overlapping video tracks, negative scale, speed ramps, nested effects, audio-envelope analysis, GPU rendering, interactive preview, production packaging or automatic extraction. Parameterized batches provide procedural generation. Inputs are local trusted media: FFmpeg is not sandboxed for hostile uploads. Processes use argument lists, no shell and `-nostdin`; ordinary failure cleans temporary graph/output files before any destination replacement.
+Unsupported: subtitles/rich text/system font discovery, masks/blur/grading, HDR/wide-gamut/Dolby Vision preservation, general scripting/plugins, arbitrary overlapping video tracks, negative scale, speed ramps, nested effects, audio-envelope analysis, GPU rendering, real-time rendered editing, production packaging or automatic extraction. Parameterized batches provide procedural generation. Inputs are local trusted media: FFmpeg is not sandboxed for hostile uploads. Processes use argument lists, no shell and `-nostdin`; ordinary failure cleans temporary graph/output/caption files before any destination replacement.
+
+Roadmap development is tracked in [roadmap/PROGRESS.md](roadmap/PROGRESS.md), with
+phase reports and exact restart instructions. Phase 1 adds literal, single-line
+ASCII text and callouts using a bundled controlled font. It requires FFmpeg drawtext
+with FreeType/Harfbuzz support (validated 9.0.1 build). See [caption semantics](SEMANTICS.md)
+and [font license/fingerprint](fonts/README.md). This development branch can be ahead
+of the public Lab: no roadmap capability is deployed merely because it is committed.

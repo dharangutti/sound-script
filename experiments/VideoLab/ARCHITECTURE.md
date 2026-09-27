@@ -22,7 +22,17 @@ Effects are immutable templates with numeric argument defaults and scalar proper
 
 `Ffmpeg.Plan` performs no media I/O or subprocess work and returns inputs, complete graph, argument vector and expected settings. `AssetProbe` is render-time ingestion policy: metadata, stream presence/duration, SDR/square-pixel/progressive restrictions and consumed-prefix CFR validation. Multiple references probe once per path/stream through the furthest requested end. Fractional CFR inputs normalize to integer output ticks; noautorotate explicitly defines orientation policy. See the semantic spec for detection limits.
 
-Render launches processes via `ProcessStartInfo.ArgumentList`, `UseShellExecute=false`, with independent stdout/stderr draining and `-nostdin`. Error output is capped at 1600 characters; concise coded probe diagnostics preserve an underlying cause when useful. A temporary filter file avoids command-line length limits. Successful output is atomically moved into place; `finally` cleans temporary graph/output on ordinary failure. No timeout, cancellation, crash-recovery or hostile-media sandbox is claimed.
+Render launches processes via `ProcessStartInfo.ArgumentList`, `UseShellExecute=false`, with independent stdout/stderr draining and `-nostdin`. Error output is capped at 1600 characters; concise coded probe diagnostics preserve an underlying cause when useful. A temporary filter file avoids command-line length limits. Successful output is atomically moved into place; `finally` cleans temporary graph/output on ordinary failure. Optional cancellation terminates the process tree; the local adapter imposes operation timeouts. Crash recovery and a hostile-media sandbox are not claimed.
+
+Phase 1 captions add optional schema arrays and immutable style metadata to existing
+visual programs/layer states. Old scene JSON omits absent caption metadata. Text and
+callouts use controlled DejaVu Sans font bytes embedded in the isolated assembly;
+no package or production project dependency is added. A callout shares the text
+plane with a background rectangle and bounded pointer line. Literal content is
+render-time file data, never graph syntax. Generated resource filenames are fixed
+from layer indices, with safe temporary-directory cleanup. The planner stays pure.
+Existing numeric transforms, conditions, effects, frame evaluation and reference
+lowering remain authoritative. See SEMANTICS.md for glyph/plane/target rules.
 
 The optional `realtest` harness never participates in normal selftest. It validates a strict local manifest, protects all input destinations, records source fingerprints, renders both containers twice, fully decodes/counts output and checks source bytes remain unchanged. Its local report can contain private paths/hashes and belongs under ignored `real-media/` only. Missing manifest is a successful skip. Synthetic counterparts remain reproducible without copyrighted media.
 
@@ -51,6 +61,8 @@ The boundary includes script, parameter bindings, asset bytes, VideoLab code, FF
 | Opacity / anchor | [0,1] |
 | Crop | Within normalized source plane, positive and at least one source pixel |
 | Audio gain | [0,4] |
+| Caption text | 1–160 nonblank printable ASCII characters, single-line |
+| Caption font / plane | Bundled DejaVu Sans 2.37, 8–96px; even axes 24–4096, height >= fontSize+16 |
 | Batch file / records | 100,000 characters / 1–32 |
 | Real-media manifest / cases | 100,000 characters / 1–32 |
 | Validated input timing | Positive nominal/average CFR ≤240 fps, usable time base ≤one frame |

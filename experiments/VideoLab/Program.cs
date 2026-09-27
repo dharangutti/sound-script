@@ -4,13 +4,14 @@ using VideoLab;
 
 try
 {
+    if (args.Length == 1 && args[0] == "editingtest") { await EditingProof.Run(); return 0; }
     if (args.Length is 1 or 2 && args[0] == "serve")
     {
         await LocalWorkbench.Run(args.Length == 2 ? int.Parse(args[1], CultureInfo.InvariantCulture) : 8745); return 0;
     }
     if (args.Length == 1 && args[0] == "webproof")
     {
-        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run();
+        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run();
         await WebProof.Publish(); return 0;
     }
     if (args.Length > 0 && args[0] == "realtest")
@@ -18,7 +19,7 @@ try
         if (args.Length != 2) { Console.Error.WriteLine("VideoLab: realtest <optional-manifest.json>"); return 2; }
         return await RealMediaTests.Run(args[1]);
     }
-    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); return 0; }
+    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); return 0; }
     if (args.Length < 3 || !new[] { "inspect", "render", "plan", "batch" }.Contains(args[0]))
     {
         Console.Error.WriteLine("VideoLab: inspect <script.json> <frame> [name=value ...]\n          render <script.json> <output.mp4|webm> [name=value ...]\n          plan <script.json> <output.mp4|webm> [name=value ...]\n          batch <script.json> <batch.json>\n          serve [port] (private local browser workbench)\n          webproof (rebuild static gallery)\n          realtest <optional-manifest.json>\n          selftest (generates fixtures and reproducibility proof in artifacts/)");
