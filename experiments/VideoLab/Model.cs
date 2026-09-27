@@ -8,24 +8,25 @@ public sealed record Parameter(decimal Default, decimal Min, decimal Max);
 public sealed record EffectUse(string Name, ImmutableDictionary<string, JsonElement>? Arguments = null);
 public sealed record EffectDefinition(ImmutableDictionary<string, decimal> Parameters, ImmutableDictionary<string, JsonElement> Transform);
 public sealed record DataRecord(string Asset, int Frames, int Trim = 0);
-public sealed record Sequence(string Data, int At, int Fade = 0, ImmutableDictionary<string, JsonElement>? Transform = null, ImmutableArray<EffectUse> Effects = default);
+public sealed record Sequence(string Data, int At, int Fade = 0, ImmutableDictionary<string, JsonElement>? Transform = null, ImmutableArray<EffectUse> Effects = default, string? Group = null);
 public sealed record Video(string Asset, int Trim, int Frames, int? At = null, int Fade = 0,
-    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default);
-public sealed record Audio(string Asset, int Trim, int Frames, int At, JsonElement Gain, string? When = null);
+    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default, string? Group = null);
+public sealed record Audio(string Asset, int Trim, int Frames, int At, JsonElement Gain, string? When = null, string? Group = null);
 public sealed record Shape(int At, int Frames, int Width, int Height, string Color, string? X = null, int? ToX = null, int Y = 0,
-    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default);
+    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default, string? Group = null);
 public sealed record TextOverlay(string Text, int At, int Frames, int Width, int Height, int FontSize = 24,
     string Color = "FFFFFF", string Align = "left", ImmutableDictionary<string, JsonElement>? Transform = null,
-    string? When = null, ImmutableArray<EffectUse> Effects = default);
+    string? When = null, ImmutableArray<EffectUse> Effects = default, string? Group = null);
 public sealed record Callout(string Label, int At, int Frames, int Width, int Height, int TargetX, int TargetY,
     int FontSize = 20, string Color = "FFFFFF", string Background = "182438", string Align = "left",
-    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default);
+    ImmutableDictionary<string, JsonElement>? Transform = null, string? When = null, ImmutableArray<EffectUse> Effects = default, string? Group = null);
 public sealed record Script(int Width, int Height, int Fps, int Frames,
     ImmutableDictionary<string, Parameter> Parameters, ImmutableArray<Video> Videos,
     ImmutableArray<Audio> Audio, ImmutableArray<Shape> Shapes,
     ImmutableDictionary<string, EffectDefinition>? Effects = null,
     ImmutableDictionary<string, ImmutableArray<DataRecord>>? Data = null, ImmutableArray<Sequence> Sequences = default,
-    ImmutableArray<TextOverlay> Texts = default, ImmutableArray<Callout> Callouts = default);
+    ImmutableArray<TextOverlay> Texts = default, ImmutableArray<Callout> Callouts = default,
+    ImmutableDictionary<string, TypedParameter>? TypedParameters = null, ImmutableDictionary<string, LayerGroup>? Groups = null);
 public sealed record Clip(string Asset, int Trim, int Frames, int At, int Fade);
 public sealed record VisibleClip(string Asset, int SourceFrame, decimal Opacity);
 public sealed record VisibleShape(decimal X, int Y, int Width, int Height, string Color);
@@ -72,6 +73,7 @@ public sealed class Composition
         Require(s.Videos.Select(v => v.Asset).Concat(s.Audio.Select(a => a.Asset)).Distinct(StringComparer.Ordinal).Count() <= 64, "Limit: 64 assets.");
         foreach (var (name, p) in s.Parameters!)
             Require(System.Text.RegularExpressions.Regex.IsMatch(name, "^[A-Za-z_][A-Za-z0-9_]*$") && !Expressions.Builtins.Contains(name) && p != null && p.Min <= p.Default && p.Default <= p.Max, "Invalid or reserved parameter declaration.");
+        TypedParameters.Validate(s);
         void Reference(string name, decimal min, decimal max)
         {
             Require(s.Parameters.TryGetValue(name, out var p) && p.Min >= min && p.Max <= max, $"Parameter '{name}' must be declared within [{min}, {max}].");
@@ -128,10 +130,10 @@ public sealed class Composition
     internal static void Require([System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)] bool condition, string message)
     { if (!condition) throw new ArgumentException(message); }
     public Runtime CreateRuntime() => new(this);
-    internal void ValidateValues(ImmutableDictionary<string, decimal> values)
+    internal void ValidateValues(ImmutableDictionary<string, decimal> values, ImmutableDictionary<string, JsonElement>? typed = null)
     {
         if (!Programmable) return;
-        var snapshot = new Snapshot(this, values);
+        var snapshot = new Snapshot(this, values, typed ?? TypedParameters.Defaults(Script));
         long pixels = 0;
         for (int frame = 0; frame < Script.Frames; frame++)
             foreach (var layer in snapshot.SceneAt(frame).Layers)
@@ -147,31 +149,47 @@ public sealed class Runtime
 {
     private readonly Composition composition;
     private ImmutableDictionary<string, decimal> values;
+    private ImmutableDictionary<string, JsonElement> typed;
     private readonly object gate = new();
-    internal Runtime(Composition c) { composition = c; values = c.Script.Parameters.ToImmutableDictionary(p => p.Key, p => p.Value.Default); }
-    public void SetMany(IReadOnlyDictionary<string, decimal> changes)
+    internal Runtime(Composition c) { composition = c; values = c.Script.Parameters.ToImmutableDictionary(p => p.Key, p => p.Value.Default); typed = TypedParameters.Defaults(c.Script); }
+    public void SetMany(IReadOnlyDictionary<string, decimal> changes) => SetBindings(changes.ToDictionary(p => p.Key, p => JsonSerializer.SerializeToElement(p.Value)));
+    // One atomic transaction spans numeric and typed values; snapshots own clones.
+    public void SetBindings(IReadOnlyDictionary<string, JsonElement> changes)
     {
         lock (gate)
         {
-            var next = values;
+            var next = values; var nextTyped = typed;
             foreach (var (name, value) in changes)
             {
-                Composition.Require(composition.Script.Parameters.TryGetValue(name, out var p) && value >= p.Min && value <= p.Max, $"Unknown or out-of-range parameter '{name}'.");
-                next = next.SetItem(name, value);
+                if (composition.Script.Parameters.TryGetValue(name, out var p))
+                {
+                    Composition.Require(value.ValueKind == JsonValueKind.Number && value.TryGetDecimal(out _), $"Numeric value required for '{name}'.");
+                    var number = value.GetDecimal(); Composition.Require(number >= p.Min && number <= p.Max, $"Out-of-range parameter '{name}'.");
+                    next = next.SetItem(name, number);
+                }
+                else
+                {
+                    Composition.Require(composition.Script.TypedParameters != null && composition.Script.TypedParameters.ContainsKey(name), $"Unknown parameter '{name}'.");
+                    TypedParameters.ValidateValue(name, composition.Script.TypedParameters![name], value);
+                    nextTyped = nextTyped.SetItem(name, value.Clone());
+                }
             }
-            composition.ValidateValues(next);
-            values = next;
+            composition.ValidateValues(next, nextTyped);
+            values = next; typed = nextTyped;
         }
     }
-    public Snapshot Bind() { lock (gate) return new(composition, values); }
+    public Snapshot Bind() { lock (gate) return new(composition, values, typed); }
+
 }
 
 public sealed class Snapshot
 {
     public Composition Composition { get; }
     public ImmutableDictionary<string, decimal> Values { get; }
-    internal Snapshot(Composition composition, ImmutableDictionary<string, decimal> values)
-        => (Composition, Values) = (composition, values);
+    public ImmutableDictionary<string, JsonElement> TypedValues { get; }
+    public ImmutableDictionary<string, JsonElement> Bindings => Values.ToImmutableDictionary(p => p.Key, p => JsonSerializer.SerializeToElement(p.Value)).AddRange(TypedValues);
+    internal Snapshot(Composition composition, ImmutableDictionary<string, decimal> values, ImmutableDictionary<string, JsonElement>? typed = null)
+        => (Composition, Values, TypedValues) = (composition, values, typed ?? TypedParameters.Defaults(composition.Script));
     public Scene SceneAt(int frame)
     {
         Composition.Require(frame >= 0 && frame < Composition.Script.Frames, "Frame outside timeline.");
@@ -183,5 +201,5 @@ public sealed class Snapshot
             layers.Where(l => l.Kind == "video" && l.Included).Select(l => new VisibleClip(l.Source, l.SourceFrame!.Value, l.Transform.Opacity)).ToImmutableArray(),
             layers.Where(l => l.Kind == "shape" && l.Included).Select(l => new VisibleShape(l.Transform.X, (int)l.Transform.Y, (int)l.Transform.Width, (int)l.Transform.Height, l.Source)).ToImmutableArray(), layers, audio);
     }
-    private EvaluationContext Context(int frame, int frames) => new(Values, frame, frames, Composition.Script.Fps, Composition.Script.Width, Composition.Script.Height);
+    private EvaluationContext Context(int frame, int frames) => new(Values, frame, frames, Composition.Script.Fps, Composition.Script.Width, Composition.Script.Height, TypedValues);
 }

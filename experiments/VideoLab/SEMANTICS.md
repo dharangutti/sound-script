@@ -100,3 +100,35 @@ Effects compile to immutable transform templates. Local argument names cannot sh
 Data records are `{asset, frames, trim?}`. Sequence blocks select a named dataset, at, fade and optional transform/effects. They append generated videos after explicit declarations, preserving order. No automatic sort, file discovery or general template language occurs. Counts are bounded.
 
 Batch records bind separate immutable snapshots over the same composition. Destinations are unique and cannot overwrite inputs; CLI hosts protect source script/batch files. Outputs replace atomically per file, but a batch has no global rollback. Snapshots freeze semantics/parameters, not external asset bytes. Fingerprinting is optional; validation records it privately.
+
+
+## Typed audience bindings and groups (Phase 2)
+
+Existing parameters remain decimal declarations. Optional typedParameters contains
+{type:"enum", default:"qa", values:["shopfloor","qa","engineering"]} or
+{type:"boolean", default:true}. Numeric and typed declarations share one 64-name
+namespace. Enums have 1–32 unique, case-sensitive ASCII identifier values of at
+most 64 characters. Arbitrary strings and implicit coercion are unsupported.
+
+Runtime.SetMany remains the decimal API. Runtime.SetBindings accepts JSON scalars
+for either kind in one atomic transaction. It validates every frame before
+publishing; rejected changes alter neither kind. Snapshot.Values is the existing
+decimal projection, TypedValues stores cloned enum/boolean JSON, and Bindings is
+the combined view. Old snapshots retain their values and compiled structure.
+
+Conditions accept audience == 'qa', showSafety == true, direct boolean names,
+&&, || and parentheses. Equality requires matching types and enum domains;
+literals must belong to the declared domain. Arithmetic and transforms remain
+numeric. Logical operators short-circuit, with && above || and comparisons above
+both. Existing numeric parameters named true/false retain precedence over boolean
+literals; use a direct boolean name in such compositions. No reflection or host
+script evaluation is available. Expression size/depth bounds still apply.
+
+Optional groups maps names to {when?:expression}; each element/sequence can name
+one group. At most 32 groups, no nesting, no implicit ordering or timing changes.
+The group's predicate ANDs with the member's predicate; frame/progress remain
+local to each member. SceneAt records group identity even on excluded layers and
+audio. Group membership does not change stable z-order. Excluded members still
+validate resource/transform bounds. A batch mixes numeric, enum and boolean JSON
+bindings over one compiled composition. CLI enum assignments use audience=qa;
+boolean assignments use showSafety=false.

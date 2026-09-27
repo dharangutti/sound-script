@@ -19,3 +19,7 @@ motion and audio gain.
 
 These samples are for explaining composition mechanics. They are not a general
 stock-media library. Public exports include the current composition and graphics.
+
+`assembly.mp4` is an original synthetic housing/slot/bearing schematic, generated
+with FFmpeg color/geq for the audience workflow. It represents no real product
+and carries no engineering or safety validation.

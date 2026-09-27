@@ -18,7 +18,7 @@ or deploying; the user will decide when to merge.
 | --- | --- | --- | --- | --- |
 | 0 — baseline audit | Complete | PASS; exact baseline artifact reproduced | Audit only | Baseline v0.3.0 already live |
 | 1 — text/callouts/editing foundation | Complete | PASS; see PHASE_1_REPORT.md | Yes, bounded Lab scope | No |
-| 2 — typed audience variants | Next; authorized | Pending | Pending | No |
+| 2 — typed audience variants | Core implemented; browser gate running | 52 focused checks PASS | Pending full gate | No |
 | 3 — structured annotations | Authorized after Phase 2 gate | Pending | Pending | No |
 | 4 — ranked editor improvements | Not authorized | No | No | No |
 | 5 — explicit variant generation | Not authorized | No | No | No |
@@ -75,3 +75,18 @@ local/encoder tests when using that isolated output. Public pins remain unchange
   Test servers own port 18745. Do not confuse either with the deployed public site.
 - Public provenance was fetched directly over HTTPS; it pins db9ebeb and artifact
   SHA256 24c9ae42feb38e98871ff5c6c2f90795f109447dc2c92bbad7ba33bf002280e9.
+
+### Phase 2 active checkpoint
+
+TypedParameters.cs adds bounded enum/boolean declarations; legacy decimal API is
+retained. SetBindings publishes mixed values atomically. Group predicates compile
+into typed ASTs and appear in SceneAt. One audience.json and audience-batch.json
+produce three synthetic views; 52 focused checks including six repeated/decoded
+outputs passed. Full native/gallery run uses artifacts/phase2-final-bin and log
+artifacts/roadmap-phase2-final.log. Browser suites still pending. Do not start
+Phase 3 until this gate/report is complete.
+
+Final focused Phase 2 binary: artifacts/phase2-verified-bin/VideoLab.dll;
+52/52 checks PASS on the synthetic assembly fixture. Full gallery run uses the
+earlier phase2-final-bin (51 checks); final parser compatibility correction is
+covered by the extra focused check. Native gates will run again with Phase 3.

@@ -1,0 +1,247 @@
+{
+  "width": 480,
+  "height": 270,
+  "fps": 30,
+  "frames": 60,
+  "parameters": {
+    "musicGain": {
+      "default": 0.15,
+      "min": 0,
+      "max": 1
+    }
+  },
+  "typedParameters": {
+    "audience": {
+      "type": "enum",
+      "default": "shopfloor",
+      "values": [
+        "shopfloor",
+        "qa",
+        "engineering"
+      ]
+    },
+    "showSafety": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "groups": {
+    "shopfloor": {
+      "when": "audience == 'shopfloor'"
+    },
+    "qa": {
+      "when": "audience == 'qa'"
+    },
+    "engineering": {
+      "when": "audience == 'engineering'"
+    }
+  },
+  "videos": [
+    {
+      "asset": "../web/samples/assembly.mp4",
+      "trim": 0,
+      "frames": 60,
+      "transform": {
+        "opacity": 1
+      }
+    }
+  ],
+  "audio": [
+    {
+      "asset": "../web/samples/calm.wav",
+      "trim": 0,
+      "frames": 60,
+      "at": 0,
+      "gain": "musicGain"
+    }
+  ],
+  "shapes": [
+    {
+      "group": "shopfloor",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 4,
+      "color": "F4C95D",
+      "transform": {
+        "x": 12,
+        "y": 104
+      }
+    },
+    {
+      "group": "qa",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 4,
+      "color": "6EE7B7",
+      "transform": {
+        "x": 12,
+        "y": 104
+      }
+    },
+    {
+      "group": "engineering",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 4,
+      "color": "91B7FF",
+      "transform": {
+        "x": 12,
+        "y": 104
+      }
+    }
+  ],
+  "texts": [
+    {
+      "group": "shopfloor",
+      "text": "SHOP FLOOR | Assembly",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 46,
+      "fontSize": 26,
+      "color": "F4C95D",
+      "transform": {
+        "x": 12,
+        "y": 14
+      }
+    },
+    {
+      "group": "shopfloor",
+      "text": "1. Seat bearing   2. Secure cover",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 40,
+      "fontSize": 20,
+      "transform": {
+        "x": 12,
+        "y": 62
+      }
+    },
+    {
+      "group": "qa",
+      "text": "QA | Inspection",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 46,
+      "fontSize": 26,
+      "color": "6EE7B7",
+      "transform": {
+        "x": 12,
+        "y": 14
+      }
+    },
+    {
+      "group": "qa",
+      "text": "Check fit and inspect contact edge",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 40,
+      "fontSize": 20,
+      "transform": {
+        "x": 12,
+        "y": 62
+      }
+    },
+    {
+      "group": "engineering",
+      "text": "ENGINEERING | Revision B",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 46,
+      "fontSize": 26,
+      "color": "91B7FF",
+      "transform": {
+        "x": 12,
+        "y": 14
+      }
+    },
+    {
+      "group": "engineering",
+      "text": "Added relief to reduce edge stress",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 40,
+      "fontSize": 20,
+      "transform": {
+        "x": 12,
+        "y": 62
+      }
+    },
+    {
+      "group": "shopfloor",
+      "when": "showSafety == true",
+      "text": "SAFETY: Isolate power before assembly",
+      "at": 0,
+      "frames": 60,
+      "width": 456,
+      "height": 38,
+      "fontSize": 18,
+      "color": "FFB4A6",
+      "transform": {
+        "x": 12,
+        "y": 224
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "group": "shopfloor",
+      "label": "Align bearing with housing",
+      "at": 0,
+      "frames": 60,
+      "width": 372,
+      "height": 100,
+      "fontSize": 20,
+      "targetX": 280,
+      "targetY": 90,
+      "background": "182438",
+      "color": "F4C95D",
+      "transform": {
+        "x": 32,
+        "y": 118
+      }
+    },
+    {
+      "group": "qa",
+      "label": "Acceptance: no visible gap",
+      "at": 0,
+      "frames": 60,
+      "width": 372,
+      "height": 100,
+      "fontSize": 20,
+      "targetX": 280,
+      "targetY": 90,
+      "background": "182438",
+      "color": "6EE7B7",
+      "transform": {
+        "x": 32,
+        "y": 118
+      }
+    },
+    {
+      "group": "engineering",
+      "label": "Review clearance at this edge",
+      "at": 0,
+      "frames": 60,
+      "width": 372,
+      "height": 100,
+      "fontSize": 20,
+      "targetX": 280,
+      "targetY": 90,
+      "background": "182438",
+      "color": "91B7FF",
+      "transform": {
+        "x": 32,
+        "y": 118
+      }
+    }
+  ]
+}

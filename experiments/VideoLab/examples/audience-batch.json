@@ -1,0 +1,23 @@
+[
+  {
+    "output": "../artifacts/audience-shopfloor.mp4",
+    "parameters": {
+      "audience": "shopfloor",
+      "showSafety": true
+    }
+  },
+  {
+    "output": "../artifacts/audience-qa.mp4",
+    "parameters": {
+      "audience": "qa",
+      "showSafety": true
+    }
+  },
+  {
+    "output": "../artifacts/audience-engineering.mp4",
+    "parameters": {
+      "audience": "engineering",
+      "showSafety": true
+    }
+  }
+]

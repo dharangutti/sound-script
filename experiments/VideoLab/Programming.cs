@@ -24,11 +24,12 @@ public sealed record Transform(decimal X, decimal Y, decimal Width, decimal Heig
 }
 public sealed record LayerState(string Id, string Kind, string Source, int? SourceFrame, int ZOrder, bool Included,
     Transform Transform, ImmutableDictionary<string, decimal> Outputs,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CaptionStyle? Caption = null);
-public sealed record AudioState(string Id, string Source, int SourceFrame, decimal Gain, bool Included);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CaptionStyle? Caption = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Group = null);
+public sealed record AudioState(string Id, string Source, int SourceFrame, decimal Gain, bool Included, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Group = null);
 public sealed record EffectTemplate(ImmutableDictionary<string, decimal> Defaults, ImmutableDictionary<string, Scalar> Transform);
 public sealed record VisualProgram(string Id, string Kind, string Source, int Trim, int At, int Frames, int Fade,
-    int ZOrder, int BaseWidth, int BaseHeight, ImmutableDictionary<string, Scalar> Properties, Expression? Condition, CaptionStyle? Caption = null)
+    int ZOrder, int BaseWidth, int BaseHeight, ImmutableDictionary<string, Scalar> Properties, Expression? Condition, CaptionStyle? Caption = null, string? Group = null)
 {
     public LayerState Evaluate(EvaluationContext context)
     {
@@ -46,13 +47,13 @@ public sealed record VisualProgram(string Id, string Kind, string Source, int Tr
             decimal opacity = V("opacity") * (Fade == 0 ? 1 : Math.Min(1m, (decimal)context.Frame / Fade));
             return new(Id, Kind, Source, Kind == "video" ? checked(Trim + context.Frame) : null, ZOrder,
                 Condition?.Evaluate(context).Boolean ?? true,
-                new(V("x"), V("y"), V("width"), V("height"), V("scaleX"), V("scaleY"), V("rotation"), opacity, V("anchorX"), V("anchorY"), crop), p, Caption);
+                new(V("x"), V("y"), V("width"), V("height"), V("scaleX"), V("scaleY"), V("rotation"), opacity, V("anchorX"), V("anchorY"), crop), p, Caption, Group);
         }
         catch (Exception e) when (e is ArgumentException or OverflowException)
         { throw new ArgumentException($"{Id}, local frame {context.Frame}: {e.Message}", e); }
     }
 }
-public sealed record AudioProgram(string Id, string Asset, int Trim, int At, int Frames, Scalar Gain, Expression? Condition)
+public sealed record AudioProgram(string Id, string Asset, int Trim, int At, int Frames, Scalar Gain, Expression? Condition, string? Group = null)
 {
     public AudioState Evaluate(EvaluationContext context)
     {
@@ -60,7 +61,7 @@ public sealed record AudioProgram(string Id, string Asset, int Trim, int At, int
         {
             var gain = Gain.Evaluate(context);
             Composition.Require(gain >= 0 && gain <= 4, "Audio gain outside [0,4].");
-            return new(Id, Asset, checked(Trim + context.Frame), gain, Condition?.Evaluate(context).Boolean ?? true);
+            return new(Id, Asset, checked(Trim + context.Frame), gain, Condition?.Evaluate(context).Boolean ?? true, Group);
         }
         catch (Exception e) when (e is ArgumentException or OverflowException)
         { throw new ArgumentException($"{Id}, local frame {context.Frame}: {e.Message}", e); }
@@ -93,7 +94,7 @@ internal static class Programming
                 {
                     Composition.Require(++generated <= 128, "Limit: 128 generated elements.");
                     int fade = at == sequence.At ? 0 : sequence.Fade;
-                    videos.Add(new(record.Asset, record.Trim, record.Frames, at - fade, fade, sequence.Transform, Effects: sequence.Effects));
+                    videos.Add(new(record.Asset, record.Trim, record.Frames, at - fade, fade, sequence.Transform, Effects: sequence.Effects, Group: sequence.Group));
                     at = checked(at - fade + record.Frames);
                 }
             }
@@ -124,12 +125,21 @@ internal static class Programming
             { throw new ArgumentException($"Effect definition '{name}': {e.Message}", e); }
         }
         bool advanced = s.Effects?.Count > 0 || !s.Sequences.IsDefaultOrEmpty;
-        Expression? Condition(string? expression)
+        Expression? Condition(string? expression, string? group = null)
         {
-            if (expression == null) return null;
-            var result = Expressions.Parse(expression, s.Parameters.Keys);
-            Composition.Require(result.Kind == ValueKind.Boolean, "Condition must be a comparison returning boolean."); return result;
+            Expression? groupCondition = null;
+            if (group != null)
+            {
+                Composition.Require(s.Groups != null && s.Groups.ContainsKey(group), $"Unknown group '{group}'.");
+                groupCondition = Condition(s.Groups![group].When);
+            }
+            if (expression == null) return groupCondition;
+            var result = Expressions.Parse(expression, s.Parameters.Keys, typed: s.TypedParameters);
+            Composition.Require(result.Kind == ValueKind.Boolean, "Condition must return boolean."); var combined = groupCondition == null ? result : new LogicalBinary("&&", groupCondition, result); Expressions.ValidateSize(combined); return combined;
         }
+        Composition.Require((s.Groups?.Count ?? 0) <= 32, "Limit: 32 groups.");
+        foreach (var (name, group) in s.Groups ?? ImmutableDictionary<string, LayerGroup>.Empty)
+        { Composition.Require(TypedParameters.Identifier(name) && group != null, "Invalid group declaration."); Condition(group.When); }
         ImmutableDictionary<string, Scalar> Properties(int width, int height, int frames, ImmutableDictionary<string, JsonElement>? transform, ImmutableArray<EffectUse> uses, Shape? legacy)
         {
             var props = new Dictionary<string, Scalar>(StringComparer.Ordinal)
@@ -175,35 +185,35 @@ internal static class Programming
         for (int i = 0; i < clips.Length; i++)
         {
             var c = clips[i]; var v = s.Videos[i];
-            advanced |= v.Transform != null || v.When != null || !v.Effects.IsDefaultOrEmpty;
+            advanced |= v.Transform != null || v.When != null || v.Group != null || !v.Effects.IsDefaultOrEmpty;
             visuals.Add(new($"video[{i}]", "video", c.Asset, c.Trim, c.At, c.Frames, c.Fade, i, s.Width, s.Height,
-                Properties(s.Width, s.Height, c.Frames, v.Transform, v.Effects, null), Condition(v.When)));
+                Properties(s.Width, s.Height, c.Frames, v.Transform, v.Effects, null), Condition(v.When, v.Group), Group: v.Group));
         }
         for (int i = 0; i < s.Shapes.Length; i++)
         {
-            var v = s.Shapes[i]; advanced |= v.Transform != null || v.When != null || !v.Effects.IsDefaultOrEmpty || v.X == null;
+            var v = s.Shapes[i]; advanced |= v.Transform != null || v.When != null || v.Group != null || !v.Effects.IsDefaultOrEmpty || v.X == null;
             visuals.Add(new($"shape[{i}]", "shape", v.Color, 0, v.At, v.Frames, 0, clips.Length + i, v.Width, v.Height,
-                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, v), Condition(v.When)));
+                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, v), Condition(v.When, v.Group), Group: v.Group));
         }
         for (int i = 0; i < s.Texts.Length; i++)
         {
             var v = s.Texts[i]; advanced = true;
             visuals.Add(new($"text[{i}]", "text", v.Text, 0, v.At, v.Frames, 0, visuals.Count, v.Width, v.Height,
-                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When), new(v.Text, v.FontSize, v.Color, v.Align)));
+                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When, v.Group), new(v.Text, v.FontSize, v.Color, v.Align), v.Group));
         }
         for (int i = 0; i < s.Callouts.Length; i++)
         {
             var v = s.Callouts[i]; advanced = true;
             visuals.Add(new($"callout[{i}]", "callout", v.Label, 0, v.At, v.Frames, 0, visuals.Count, v.Width, v.Height,
-                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When),
-                new(v.Label, v.FontSize, v.Color, v.Align, v.Background, v.TargetX, v.TargetY)));
+                Properties(v.Width, v.Height, v.Frames, v.Transform, v.Effects, null), Condition(v.When, v.Group),
+                new(v.Label, v.FontSize, v.Color, v.Align, v.Background, v.TargetX, v.TargetY), v.Group));
         }
         var audio = ImmutableArray.CreateBuilder<AudioProgram>();
         for (int i = 0; i < s.Audio.Length; i++)
         {
             var a = s.Audio[i];
-            advanced |= a.When != null || a.Gain.ValueKind != JsonValueKind.String || !s.Parameters.ContainsKey(a.Gain.GetString()!);
-            audio.Add(new($"audio[{i}]", a.Asset, a.Trim, a.At, a.Frames, Scalar.Compile(a.Gain, a.Frames, s.Parameters.Keys), Condition(a.When)));
+            advanced |= a.When != null || a.Group != null || a.Gain.ValueKind != JsonValueKind.String || !s.Parameters.ContainsKey(a.Gain.GetString()!);
+            audio.Add(new($"audio[{i}]", a.Asset, a.Trim, a.At, a.Frames, Scalar.Compile(a.Gain, a.Frames, s.Parameters.Keys), Condition(a.When, a.Group), a.Group));
         }
         if (advanced)
         {

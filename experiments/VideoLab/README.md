@@ -85,3 +85,20 @@ ASCII text and callouts using a bundled controlled font. It requires FFmpeg draw
 with FreeType/Harfbuzz support (validated 9.0.1 build). See [caption semantics](SEMANTICS.md)
 and [font license/fingerprint](fonts/README.md). This development branch can be ahead
 of the public Lab: no roadmap capability is deployed merely because it is committed.
+
+
+### Audience variants (Phase 2, private development)
+
+One synthetic assembly clip and one source composition generate three views:
+
+~~~powershell
+dotnet run -c Release -- batch examples/audience.json examples/audience-batch.json
+dotnet run -c Release -- render examples/audience.json artifacts/qa.webm audience=qa showSafety=false
+dotnet run -c Release -- audiencetest
+~~~
+
+Use typedParameters for bounded enums/booleans and groups for shared conditions.
+See SEMANTICS.md for bounds and atomic binding behavior. The browser's audience
+card offers three verified variants; the local workbench exposes typed selectors.
+The synthetic schematic and instructional text are illustrative, not validated
+assembly, safety or inspection instructions for a real product.

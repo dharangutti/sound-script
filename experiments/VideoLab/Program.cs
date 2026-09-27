@@ -4,6 +4,7 @@ using VideoLab;
 
 try
 {
+    if (args.Length == 1 && args[0] == "audiencetest") { await AudienceProof.Run(); return 0; }
     if (args.Length == 1 && args[0] == "editingtest") { await EditingProof.Run(); return 0; }
     if (args.Length is 1 or 2 && args[0] == "serve")
     {
@@ -11,7 +12,7 @@ try
     }
     if (args.Length == 1 && args[0] == "webproof")
     {
-        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run();
+        await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run();
         await WebProof.Publish(); return 0;
     }
     if (args.Length > 0 && args[0] == "realtest")
@@ -19,7 +20,7 @@ try
         if (args.Length != 2) { Console.Error.WriteLine("VideoLab: realtest <optional-manifest.json>"); return 2; }
         return await RealMediaTests.Run(args[1]);
     }
-    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); return 0; }
+    if (args.Length == 1 && args[0] == "selftest") { await Proof.Run(); await ProgrammableProof.Run(); await NormalizationProof.Run(); await EditingProof.Run(); await AudienceProof.Run(); return 0; }
     if (args.Length < 3 || !new[] { "inspect", "render", "plan", "batch" }.Contains(args[0]))
     {
         Console.Error.WriteLine("VideoLab: inspect <script.json> <frame> [name=value ...]\n          render <script.json> <output.mp4|webm> [name=value ...]\n          plan <script.json> <output.mp4|webm> [name=value ...]\n          batch <script.json> <batch.json>\n          serve [port] (private local browser workbench)\n          webproof (rebuild static gallery)\n          realtest <optional-manifest.json>\n          selftest (generates fixtures and reproducibility proof in artifacts/)");
@@ -35,14 +36,21 @@ try
         return 0;
     }
     var runtime = composition.CreateRuntime();
-    var changes = new Dictionary<string, decimal>();
+    var changes = new Dictionary<string, JsonElement>();
     foreach (var arg in args.Skip(3))
     {
         var pair = arg.Split('=', 2);
-        if (pair.Length != 2 || !decimal.TryParse(pair[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var value) || !changes.TryAdd(pair[0], value))
+        if (pair.Length != 2) throw new ArgumentException($"Invalid assignment: {arg}");
+        var value = composition.Script.TypedParameters?.GetValueOrDefault(pair[0])?.Type switch
+        {
+            "enum" => JsonSerializer.SerializeToElement(pair[1]),
+            "boolean" => bool.TryParse(pair[1], out var boolean) ? JsonSerializer.SerializeToElement(boolean) : throw new ArgumentException("Boolean assignment requires true or false."),
+            _ => decimal.TryParse(pair[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ? JsonSerializer.SerializeToElement(number) : throw new ArgumentException("Numeric assignment required.")
+        };
+        if (!changes.TryAdd(pair[0], value))
             throw new ArgumentException($"Invalid or duplicate parameter assignment: {arg}");
     }
-    runtime.SetMany(changes); var snapshot = runtime.Bind();
+    runtime.SetBindings(changes); var snapshot = runtime.Bind();
     if (args[0] == "inspect") Console.WriteLine(JsonSerializer.Serialize(snapshot.SceneAt(int.Parse(args[2], CultureInfo.InvariantCulture)), new JsonSerializerOptions { WriteIndented = true }));
     else if (args[0] == "plan") Console.WriteLine(JsonSerializer.Serialize(Ffmpeg.Plan(snapshot, args[2]), new JsonSerializerOptions { WriteIndented = true }));
     else

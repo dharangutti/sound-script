@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace VideoLab;
 
-public sealed record BatchRecord(string Output, ImmutableDictionary<string, decimal> Parameters);
+public sealed record BatchRecord(string Output, ImmutableDictionary<string, JsonElement> Parameters);
 public sealed record BoundRender(string Output, Snapshot Snapshot);
 public static class Batches
 {
@@ -21,7 +21,7 @@ public static class Batches
             Composition.Require(record != null && !string.IsNullOrWhiteSpace(record.Output) && record.Parameters != null, "Invalid batch record.");
             var output = Path.GetFullPath(record.Output, directory);
             Composition.Require(outputs.Add(output), "Duplicate batch output.");
-            var runtime = composition.CreateRuntime(); runtime.SetMany(record.Parameters);
+            var runtime = composition.CreateRuntime(); runtime.SetBindings(record.Parameters);
             var snapshot = runtime.Bind(); var plan = Ffmpeg.Plan(snapshot, output);
             Composition.Require(!plan.Inputs.Contains(output, StringComparer.OrdinalIgnoreCase), "Batch output cannot replace an input.");
             result.Add(new(output, snapshot));
