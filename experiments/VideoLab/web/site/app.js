@@ -3,7 +3,7 @@ const byId = id => document.getElementById(id);
 const local = document.body.dataset.localWorkbench === 'true';
 const fail = message => { byId('error').textContent = message; byId('error').hidden = false; };
 let token, proof, demo, snapshot, candidates = [], sourceMode = 'samples', values = {}, revision = 0, pendingFrame = null;
-let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = false;
+let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = false, busyDepth = 0;
 const video = byId('video');
 const option = (text,value) => { const item=document.createElement('option');item.textContent=text;item.value=value;return item; };
 const publicFile = format => `${snapshot.stem}.${format}`;
@@ -26,11 +26,19 @@ function exportsFor(mp4,webm){for(const [format,url] of [['mp4',mp4],['webm',web
 function dirty(){exportsFor(null,null);byId('render-state').textContent='Parameters/media changed · render to update video';byId('export-note').textContent='Exact frame state is updated. Render the current composition before export; the video still shows the previous render.';}
 function parameters(){
     byId('parameter-controls').replaceChildren();
-    const metadata=demo.script.parameters||{};
+    const metadata={...demo.script.parameters,...demo.script.typedParameters};
     for(const [name,p] of Object.entries(metadata)){
         const row=document.createElement('div');row.className='param';
         const line=document.createElement('div');line.className='param-line';
         const label=document.createElement('label');label.textContent=name;label.htmlFor=`parameter-${name}`;
+        if(p.type){
+            const select=document.createElement('select');select.id=`parameter-${name}`;select.disabled=!local;
+            const choices=p.type==='boolean'?[true,false]:p.values;
+            select.replaceChildren(...choices.map(v=>option(String(v),String(v))));select.value=String(values[name]);
+            select.addEventListener('change',()=>{clearError();values[name]=p.type==='boolean'?select.value==='true':select.value;bindLocal();});
+            const defaults=document.createElement('small');defaults.textContent=`Source default ${p.default} · ${p.type}`;
+            row.append(label,select,defaults);byId('parameter-controls').append(row);continue;
+        }
         const number=document.createElement('input');number.type='number';number.id=`parameter-${name}`;number.min=p.min;number.max=p.max;number.step=p.max-p.min<=1?'0.01':'1';number.value=values[name];number.disabled=!local;number.setAttribute('aria-label',name);
         const slider=document.createElement('input');slider.type='range';slider.min=p.min;slider.max=p.max;slider.step=number.step;slider.value=values[name];slider.disabled=!local;slider.setAttribute('aria-label',`${name} slider`);
         const defaults=document.createElement('small');defaults.textContent=`Source default ${p.default} · range ${p.min}–${p.max}`;
@@ -58,7 +66,7 @@ function editingProperties(scene){
     const panel=byId('edit-properties');panel.replaceChildren();
     const line=text=>{const p=document.createElement('p');p.textContent=text;panel.append(p);};
     for(const t of snapshot.tracks.filter(t=>t.kind==='video'))line(`${t.label}: source trim ${t.trim}–${t.trim+t.frames-1}; timeline ${t.at}–${t.at+t.frames-1}; ${t.fade?`crossfade ${t.fade} frames`:'cut / placement'}.`);
-    for(const l of scene.Layers){const t=l.Transform;line(`${l.Id} · ${l.Included?'visible':'excluded'} · position (${t.X}, ${t.Y}) · scale ${t.ScaleX} × ${t.ScaleY} · rotation ${t.Rotation}° · opacity ${t.Opacity} · crop (${t.Crop.X}, ${t.Crop.Y}, ${t.Crop.Width}, ${t.Crop.Height})`);if(l.Caption)line(`${l.Caption.Text} · ${l.Caption.Font}, ${l.Caption.FontSize}px · ${l.Caption.Align} aligned`);}
+    for(const l of scene.Layers){const t=l.Transform;line(`${l.Id}${l.Group?` · group ${l.Group}`:''} · ${l.Included?'visible':'excluded'} · position (${t.X}, ${t.Y}) · scale ${t.ScaleX} × ${t.ScaleY} · rotation ${t.Rotation}° · opacity ${t.Opacity} · crop (${t.Crop.X}, ${t.Crop.Y}, ${t.Crop.Width}, ${t.Crop.Height})`);if(l.Caption)line(`${l.Caption.Text} · ${l.Caption.Font}, ${l.Caption.FontSize}px · ${l.Caption.Align} aligned`);}
     for(const a of scene.Audio)line(`${a.Id}: source frame ${a.SourceFrame}; gain ${a.Gain}; ${a.Included?'included':'muted by condition'}.`);
 }
 function inspect(seek){
@@ -110,6 +118,10 @@ function bindLocal(markDirty=true){
 }
 const disabled=new Map();
 function setBusy(value,rendering=false){
+    // File-picker events can overlap while the first upload awaits its bind.
+    // Capture original control states once and restore after the last operation.
+    if(value){if(++busyDepth>1)return;}
+    else{busyDepth=Math.max(0,busyDepth-1);if(busyDepth)return;}
     busy=value;
     if(value){for(const el of document.querySelectorAll('button,input,select')){disabled.set(el,el.disabled);el.disabled=true;}}
     else{for(const [el,was]of disabled)el.disabled=was;disabled.clear();}
@@ -136,7 +148,7 @@ async function upload(kind,file){
 (async()=>{
     try{
         const response=await fetch('proof.json');if(!response.ok)throw new Error(`Timeline request failed (${response.status}).`);proof=await response.json();
-        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==8||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
+        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==9||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
         for(const d of proof.demos){
             byId('demo').append(option(d.title,d.id));
             const card=document.createElement('article');card.className='card';card.dataset.id=d.id;
@@ -152,7 +164,7 @@ async function upload(kind,file){
         for(const id of ['sample-video','sample-audio'])byId(id).addEventListener('change',()=>local?bindLocal():selectMedia());
         byId('format').addEventListener('change',()=>{if(local){dirty();byId('render-state').textContent='Render the selected format for current settings';}else selectBinding();});
         byId('frame').addEventListener('input',()=>inspect(true));byId('transition').addEventListener('click',()=>{byId('frame').value=demo.inspectFrame;inspect(true);});
-        byId('reset-parameters').addEventListener('click',()=>{if(local){values=Object.fromEntries(Object.entries(demo.script.parameters).map(([k,v])=>[k,v.default]));parameters();bindLocal();}else{byId('snapshot').value='0';selectBinding();}});
+        byId('reset-parameters').addEventListener('click',()=>{if(local){values=Object.fromEntries(Object.entries({...demo.script.parameters,...demo.script.typedParameters}).map(([k,v])=>[k,v.default]));parameters();bindLocal();}else{byId('snapshot').value='0';selectBinding();}});
         byId('sample-mode').addEventListener('click',()=>mode('samples'));byId('personal-mode').addEventListener('click',()=>mode('personal'));
         byId('open-local').addEventListener('click',()=>location.assign('http://127.0.0.1:8745/labs/videolab/'));
         for(const kind of ['video','audio'])byId(`${kind}-file`).addEventListener('change',e=>upload(kind,e.target.files[0]));

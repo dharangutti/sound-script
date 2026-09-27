@@ -3,7 +3,7 @@ const byId = id => document.getElementById(id);
 const local = document.body.dataset.localWorkbench === 'true';
 const fail = message => { byId('error').textContent = message; byId('error').hidden = false; };
 let token, proof, demo, snapshot, candidates = [], sourceMode = 'samples', values = {}, revision = 0, pendingFrame = null;
-let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = false;
+let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = false, busyDepth = 0;
 const video = byId('video');
 const option = (text,value) => { const item=document.createElement('option');item.textContent=text;item.value=value;return item; };
 const publicFile = format => `${snapshot.stem}.${format}`;
@@ -118,6 +118,10 @@ function bindLocal(markDirty=true){
 }
 const disabled=new Map();
 function setBusy(value,rendering=false){
+    // File-picker events can overlap while the first upload awaits its bind.
+    // Capture original control states once and restore after the last operation.
+    if(value){if(++busyDepth>1)return;}
+    else{busyDepth=Math.max(0,busyDepth-1);if(busyDepth)return;}
     busy=value;
     if(value){for(const el of document.querySelectorAll('button,input,select')){disabled.set(el,el.disabled);el.disabled=true;}}
     else{for(const [el,was]of disabled)el.disabled=was;disabled.clear();}

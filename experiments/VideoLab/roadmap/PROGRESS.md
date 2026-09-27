@@ -18,8 +18,8 @@ or deploying; the user will decide when to merge.
 | --- | --- | --- | --- | --- |
 | 0 — baseline audit | Complete | PASS; exact baseline artifact reproduced | Audit only | Baseline v0.3.0 already live |
 | 1 — text/callouts/editing foundation | Complete | PASS; see PHASE_1_REPORT.md | Yes, bounded Lab scope | No |
-| 2 — typed audience variants | Core implemented; browser gate running | 53 focused checks PASS | Pending full gate | No |
-| 3 — structured annotations | Authorized after Phase 2 gate | Pending | Pending | No |
+| 2 — typed audience variants | Complete | PASS; see PHASE_2_REPORT.md | Yes, bounded Lab scope | No |
+| 3 — structured annotations | In progress; authorized | Pending | Pending | No |
 | 4 — ranked editor improvements | Not authorized | No | No | No |
 | 5 — explicit variant generation | Not authorized | No | No | No |
 | 6 — build artifacts/provenance | Not authorized | No | No | No |
@@ -31,9 +31,10 @@ or deploying; the user will decide when to merge.
 1. Read this file, MASTER_ROADMAP.md and completed phase reports.
 2. Inspect git status/log; preserve in-progress work. No merge/deployment.
 3. Phase 0 and Phase 1 gates passed. Do not repeat the baseline audit.
-4. Implement Phase 2 next: bounded enum/boolean parameters, typed conditions,
-   named composition groups and three synthetic audience outputs from one source.
-5. Record Phase 2 gate/report, then implement Phase 3 external annotations.
+4. Phase 2 completed with 239 native checks, 42 repeated gallery pairs and both
+   browser suites passing. See PHASE_2_REPORT.md. Do not redo its completed gate.
+5. Implement Phase 3 now using PHASE_3_DESIGN.md: external annotations over one
+   unchanged base composition, native/batch/browser integration and validation.
 6. Stop after Phase 3 report. Update this file and commit each coherent slice.
 
 ## Validation commands
@@ -106,3 +107,10 @@ webproof with line-flushed log, then run both browser suites with VIDEOLAB_DLL
 pointing to that build. Preserve all regression assertions. Finish Phase 2 report
 and checkpoint before Phase 3. User explicitly requested this intermediate state
 be pushed to origin/experiments/videolab. No merge or public deployment.
+
+### Phase 2 final gate supersedes pending notes above
+
+Fresh phase2-resume-bin build and full webproof passed; 239 native checks and
+42 gallery pairs. Both browser suites, typed CLI and encoder tests passed.
+All Phase 1 media bytes preserved. See PHASE_2_REPORT.md and phase2-evidence.json.
+Phase 3 may now proceed under the user's explicit authorization.

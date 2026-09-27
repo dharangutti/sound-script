@@ -88,6 +88,9 @@ async function upload(kind, filename, bytes) { return api('upload?kind='+kind+'&
         await page.locator('#parameter-showSafety').selectOption('false');
         await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).showSafety===false);
         await page.locator('#render').click();await page.waitForFunction(()=>document.getElementById('render-state').textContent==='Current composition rendered',null,{timeout:120000});
+        await page.setViewportSize({width:1280,height:900});await page.evaluate(()=>scrollTo(0,0));
+        await page.waitForFunction(()=>document.getElementById('video').readyState>=2);await page.locator('#transition').click();await page.waitForFunction(()=>!document.getElementById('video').seeking);
+        await page.screenshot({path:path.join(lab,'artifacts/phase2-local.png')});
         await page.locator('#reset-parameters').click();
         await page.waitForFunction(()=>JSON.parse(document.getElementById('parameters').textContent).audience==='shopfloor');
         assert.equal(await page.locator('#parameter-showSafety').inputValue(),'true');

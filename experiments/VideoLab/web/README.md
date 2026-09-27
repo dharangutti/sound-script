@@ -1,7 +1,7 @@
 # VideoLab browser workbench
 
 Experimental programmable composition in .NET, separate from the supported
-SoundScript NuGet package and CLI. Eight development cards cover real video/audio,
+SoundScript NuGet package and CLI. Nine development cards cover real video/audio,
 multiple clips, crossfade, titles, callouts, graphics, motion, expressions, effects,
 conditions and sequences. Preview, read-only clip/text/callout/transition/audio tracks,
 parameters and collapsible source
@@ -10,8 +10,8 @@ video seeking is approximate. Export is MP4/H.264/AAC or WebM/VP9/Opus.
 
 ## Development and public gallery
 
-This branch includes Phase 1 development ahead of the public v0.3.0 pin. Development
-has eight demos, 20 snapshots and 40 exports; the currently approved baseline has
+This branch includes Phase 2 development ahead of the public v0.3.0 pin. Development
+has nine demos, 23 snapshots and 46 exports; the currently approved baseline has
 seven demos, 18 snapshots and 36 exports. Building this directory does not update
 the website. See roadmap/PROGRESS.md and public publication.json for exact status.
 
@@ -20,7 +20,7 @@ synthetic audio. Sample Library offers two videos and two audio tracks in this
 showcase, each with default and alternate bindings. Focused examples retain their
 validated media, and Composition defaults restores their distinct source choices.
 Choose a binding to change current runtime values; source defaults are shown beside
-the numeric controls. Arbitrary values and personal media require local mode.
+the numeric and typed controls. Arbitrary values and personal media require local mode.
 The static site cannot execute native .NET/FFmpeg and never uploads personal files.
 
 ## Private local mode

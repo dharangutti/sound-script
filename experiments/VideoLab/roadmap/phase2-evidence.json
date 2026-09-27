@@ -1,0 +1,16 @@
+{
+  "phase": 2,
+  "status": "PASS",
+  "publication": "private-branch-only",
+  "checksumsManifestSha256": "f39d2f7dcde58256d33001ecb0f66349d81aaed5e7a8c2fdf21caa08880c88f9",
+  "nativeChecks": 239,
+  "galleryRepeatedPairs": 42,
+  "demos": 9,
+  "snapshots": 23,
+  "exports": 46,
+  "phase1VideoAssetsUnchanged": 42,
+  "publicBrowser": "PASS",
+  "localBrowser": "PASS",
+  "typedCli": "PASS",
+  "encoderRepeats": 12
+}
