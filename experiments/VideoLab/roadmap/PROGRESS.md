@@ -16,8 +16,8 @@ NuGet, SoundScript CLI/runtime, release or deployment changes.
 
 | Phase | Implemented | Validated | MVP-worthy | Publicly hosted |
 | --- | --- | --- | --- | --- |
-| 0 — baseline audit | In progress | Fresh full baseline run in progress | Audit only | Baseline v0.3.0 already live |
-| 1 — text/callouts/editing foundation | Not started | Not started | Not assessed | No |
+| 0 — baseline audit | Complete | PASS; exact baseline artifact reproduced | Audit only | Baseline v0.3.0 already live |
+| 1 — text/callouts/editing foundation | In progress | Not started | Not assessed | No |
 | 2 — typed audience variants | Not authorized | No | No | No |
 | 3 — structured annotations | Not authorized | No | No | No |
 | 4 — ranked editor improvements | Not authorized | No | No | No |
@@ -30,11 +30,12 @@ NuGet, SoundScript CLI/runtime, release or deployment changes.
 
 1. Read this file, MASTER_ROADMAP.md and phase reports before editing.
 2. Inspect `git status` and the latest commits; preserve in-progress user work.
-3. Baseline validation is running as `dotnet bin/Release/net10.0/VideoLab.dll webproof`
+3. Baseline validation passed as `dotnet bin/Release/net10.0/VideoLab.dll webproof`
    from the Lab directory. Log: ignored `artifacts/roadmap-phase0-native.log`.
    If interrupted, rerun it and the browser/local/encoder checks below. Never infer
    success from an empty/partial log. Compare rebuilt web/site bytes to baseline.
-4. Finish Phase 0 report and commit the audit before Phase 1 product changes.
+4. Phase 0 is complete; see PHASE_0_REPORT.md. All checks passed and the complete
+   artifact hash exactly matched the published baseline. Do not redo the audit.
 5. Phase 1 work: controlled-font deterministic text; text+shape callouts; ordinary
    editing example and readable browser tracks/controls; regression and render gates.
 6. After every completed slice, update this checklist and record commands/results.
