@@ -1,30 +1,29 @@
 {
   "schemaVersion": 1,
   "mvp": "pass",
-  "artifactSha256": "24c9ae42feb38e98871ff5c6c2f90795f109447dc2c92bbad7ba33bf002280e9",
-  "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_shared; Windows x64; Playwright 1.63.0 Chromium",
+  "artifactSha256": "5dfec0a84685e0bc22b035fbdabf73c859cdd0f17068d020f219aa94e7a4eb45",
+  "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_build; Windows x64; Playwright 1.63.0 Chromium",
   "checks": {
     "build": {
       "result": "pass",
-      "command": "dotnet run -c Release -- webproof"
+      "command": "dotnet build -c Release -o artifacts/phase3-verified-bin"
     },
     "tests": {
       "result": "pass",
-      "command": "dotnet run -c Release -- webproof",
-      "count": 143,
-      "galleryRepeatAndDecodePairs": 32
+      "command": "dotnet artifacts/phase3-final-bin/VideoLab.dll webproof; node web/typed-cli.test.cjs; node web/annotations-cli.test.cjs; node web/shutdown.test.cjs",
+      "count": 294,
+      "galleryRepeatAndDecodePairs": 48
     },
     "determinism": {
       "result": "pass",
-      "command": "dotnet run -c Release -- webproof; node web/encoder.test.cjs",
-      "detail": "All core assertions and 32 gallery format/binding repeat/decode pairs passed. Twelve independent data-sequence MP4 renders matched.",
-      "packaging": "Two fresh builds reproduced every media, thumbnail and scene-data byte. Final frontend change only stacked overlapping timeline spans; checksums regenerated."
+      "command": "dotnet artifacts/phase3-final-bin/VideoLab.dll webproof; node web/encoder.test.cjs",
+      "detail": "48 gallery format/binding pairs rendered twice, byte-identical and fully decoded. Twelve independent encoder repeats match. All 49 Phase 2 MP4/WebM assets retain their hashes."
     },
     "browser": {
       "result": "pass",
       "command": "node web/smoke.cjs; node web/local.test.cjs",
-      "detail": "Seven demos, 18 bindings, 36 exports, sample switching, exact scenes/source, timeline, keyboard seeking, playback, three responsive widths and errors. Local MP4/WebM/WAV/MP3 selection, parameter updates, invalid/oversized/short inputs, repeated export, cancellation, reset and shutdown cleanup."
+      "detail": "Ten demos, 26 bindings, 52 exports. Exact scenes, base/annotation/generated source, playback, reset, typed selectors, local rendering and media validation, cancellation, cleanup, three responsive widths. Local tests use VIDEOLAB_DLL=artifacts/phase3-verified-bin/VideoLab.dll after shutdown fix."
     }
   },
-  "limits": "Static public gallery; arbitrary parameters and personal media require the optional loopback workbench. 50 MiB per file; generated session paths. No production API/CLI integration. Same-environment repeatability; x264 cpu-independent mode changes some older Lab MP4 bytes. See web/README.md and web/VALIDATION.md."
+  "limits": "Static public gallery; arbitrary supported bindings and personal media require the optional loopback workbench. Bundled single-line ASCII text; bounded enums/booleans; 24 annotation records with aggregate element/frame/pixel limits. No editable timeline or public upload service. Repeatability is scoped to identical inputs/tools/environment."
 }

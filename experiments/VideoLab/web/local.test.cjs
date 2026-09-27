@@ -24,7 +24,7 @@ async function upload(kind, filename, bytes) { return api('upload?kind='+kind+'&
         const audienceBound=await api('bind',audienceState);assert.equal(audienceBound.status,200);assert.equal(audienceBound.data.parameters.audience,'qa');
         assert.equal((await api('bind',{...audienceState,parameters:{audience:'unknown'}})).status,400);
         assert.equal((await api('bind',{...audienceState,parameters:{showSafety:'true'}})).status,400);
-        const annotationState={...audienceState,demo:'annotations',annotationSet:'qa'};
+        const annotationState={...audienceState,demo:'annotations',annotationSet:'qa',parameters:{audience:'qa'}};
         const annotationBound=await api('bind',annotationState);assert.equal(annotationBound.status,200);
         assert.equal(annotationBound.data.annotationData.annotations[0].id,'qa_note');assert.equal(annotationBound.data.baseScript.texts.length,1);
         assert.equal((await api('bind',{...annotationState,annotationSet:'../../secret'})).status,400);

@@ -49,7 +49,7 @@ internal sealed class LocalWorkbench
             while (!stopped.IsCancellationRequested)
             {
                 var context = await listener.GetContextAsync();
-                tasks.RemoveAll(t => t.IsCompleted);
+                tasks.RemoveAll(t => t.IsCompletedSuccessfully);
                 tasks.Add(app.Handle(context));
             }
         }
@@ -86,15 +86,22 @@ internal sealed class LocalWorkbench
         response.ContentType = "application/json"; response.ContentLength64 = bytes.Length;
         await response.OutputStream.WriteAsync(bytes);
     }
+    private static async Task Error(HttpListenerResponse response, string message, int status)
+    {
+        // Stop/navigation can close a response after headers were sent. Reporting
+        // that transport failure must not attempt a second response or fail shutdown.
+        try { await Json(response, new { error = message }, status); }
+        catch (Exception e) when (e is IOException or HttpListenerException or ObjectDisposedException or InvalidOperationException) { }
+    }
     private async Task Handle(HttpListenerContext context)
     {
         var request = context.Request; var response = context.Response;
-        response.Headers["X-Content-Type-Options"] = "nosniff";
-        response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
-        response.Headers["Cache-Control"] = "no-store";
         bool locked = false;
         try
         {
+            response.Headers["X-Content-Type-Options"] = "nosniff";
+            response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
+            response.Headers["Cache-Control"] = "no-store";
             if (request.Url?.GetLeftPart(UriPartial.Authority) != origin) { await Json(response, new { error = "Loopback host required." }, 403); return; }
             var route = request.Url.AbsolutePath;
             if (route.StartsWith("/api/", StringComparison.Ordinal))
@@ -170,12 +177,17 @@ internal sealed class LocalWorkbench
             }
             await ServeFile(request, response, file);
         }
-        catch (MediaDiagnostic e) { await Json(response, new { error = $"{e.Code}: Media is malformed, too short, or outside the supported SDR/CFR stream policy. Choose another file." }, 400); }
-        catch (OperationCanceledException) { await Json(response, new { error = "Operation cancelled or exceeded its time limit. Previous source selections remain available." }, 408); }
-        catch (ArgumentException e) { await Json(response, new { error = e.Message.Replace(root, "<local session>", StringComparison.OrdinalIgnoreCase) }, 400); }
-        catch (Exception e) when (e is IOException or InvalidOperationException or JsonException or System.ComponentModel.Win32Exception or HttpListenerException)
-        { try { await Json(response, new { error = "Local operation failed. Check the input and FFmpeg/ffprobe installation (9.0.1 validated), then retry." }, 500); } catch (Exception send) when (send is IOException or HttpListenerException or ObjectDisposedException) { } }
-        finally { if (locked) gate.Release(); response.Close(); }
+        catch (MediaDiagnostic e) { await Error(response, $"{e.Code}: Media is malformed, too short, or outside the supported SDR/CFR stream policy. Choose another file.", 400); }
+        catch (OperationCanceledException) { await Error(response, "Operation cancelled or exceeded its time limit. Previous source selections remain available.", 408); }
+        catch (ArgumentException e) { await Error(response, e.Message.Replace(root, "<local session>", StringComparison.OrdinalIgnoreCase), 400); }
+        catch (Exception e) when (e is IOException or InvalidOperationException or JsonException or System.ComponentModel.Win32Exception or HttpListenerException or ObjectDisposedException)
+        { await Error(response, "Local operation failed. Check the input and FFmpeg/ffprobe installation (9.0.1 validated), then retry.", 500); }
+        finally
+        {
+            if (locked) gate.Release();
+            try { response.Close(); }
+            catch (Exception e) when (e is HttpListenerException or ObjectDisposedException or InvalidOperationException) { }
+        }
     }
 
     private async Task Upload(HttpListenerRequest request, HttpListenerResponse response)
