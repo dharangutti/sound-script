@@ -9,14 +9,14 @@
       "mvp": true,
       "publish": true,
       "branch": "experiments/videolab",
-      "commit": "53ddf3d3ef71e81b559acbc6a5a30d392a2f5c04",
-      "milestone": "labs-videolab-mvp-web-v0.2.0",
-      "reason": "MVP browser explorer: two validated pre-rendered snapshots, timeline inspection and MP4/WebM downloads. Custom rendering uses the CLI.",
+      "commit": "03130ca8b6e2cda5c9cb3e9d8913f189641a6f41",
+      "milestone": "labs-videolab-mvp-web-v0.2.2",
+      "reason": "Six validated feature demos, ten pre-rendered snapshots, exact frame inspection and MP4/WebM downloads. Custom rendering uses the CLI.",
       "artifact": {
         "directory": "experiments/VideoLab/web/site",
-        "sha256": "3127fb4d0895cdf95acc285bd3af04d8896fc8abf598b4124ad49edd5154e014",
+        "sha256": "241b9a8270a258eafd7043a25abeb687b50f8fd15c550697b86db9eb7baea234",
         "evidence": "experiments/VideoLab/web/publication-evidence.json",
-        "evidenceSha256": "100f74649078fad3c8fc8a22013857ea9447025714cc990b5f53aff298d1fd2b"
+        "evidenceSha256": "236c171873db32d9c616c814705f56946a30027f8d29cd4d1659e0e466aa8da0"
       }
     },
     {
