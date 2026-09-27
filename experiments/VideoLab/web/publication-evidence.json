@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "mvp": "pass",
-  "artifactSha256": "3127fb4d0895cdf95acc285bd3af04d8896fc8abf598b4124ad49edd5154e014",
+  "artifactSha256": "3a84742543e5238aabe5d23814c71b105640e562dcc1ecdac04aeb5753a0969b",
   "environment": ".NET SDK 10.0.303; FFmpeg/ffprobe 9.0.1 full_shared; Windows x64; Playwright 1.63.0 Chromium",
   "checks": {
     "build": {
@@ -11,18 +11,19 @@
     "tests": {
       "result": "pass",
       "command": "dotnet run -c Release -- webproof",
-      "count": 143
+      "count": 143,
+      "galleryRepeatAndDecodePairs": 16
     },
     "determinism": {
       "result": "pass",
       "command": "dotnet run -c Release -- webproof",
-      "detail": "A/B MP4/WebM rendered twice; byte comparison and decoded frame/audio assertions passed"
+      "detail": "Original MVP plus every additional gallery binding exported twice in MP4/WebM, byte-compared and fully decoded; 16 additional format/binding pairs passed."
     },
     "browser": {
       "result": "pass",
       "command": "node web/smoke.cjs",
-      "detail": "subpath, both codecs, playback, snapshot controls, scene inspection, downloads, mobile overflow and missing-data handling"
+      "detail": "Six demos, ten bindings, twenty media URLs/codecs, exact engine scene equality, conditional inclusion, audio step gain, keyboard frames, mobile layout, playback and missing-data error. Immediate demo-switch seek verified with byte-range media responses."
     }
   },
-  "limits": "Static synthetic MVP explorer; two pre-rendered bindings. Arbitrary uploads and rendering require the CLI. Same-environment determinism only."
+  "limits": "Six synthetic pre-rendered demos, ten predefined snapshots. No browser uploads, arbitrary parameter input or compilation. Custom rendering remains in the CLI; determinism is same-environment only."
 }
