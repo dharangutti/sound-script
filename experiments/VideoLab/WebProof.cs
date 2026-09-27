@@ -15,6 +15,7 @@ internal static class WebProof
         var cases = new[]
         {
             (Id: "showcase", Title: "Video + audio showcase", Description: "Real coast and companion footage, two trimmed clips, a crossfade, a moving graphic and mixed audio. Switch the sample video or audio below.", Frame: 98, Parameter: "accentX", Value: 180m),
+            (Id: "editing", Title: "Titles, callouts and familiar edits", Description: "Two trimmed clips, crossfade, title, moving callout, shape and audio. Explore position, scale, rotation, opacity, crop and gain in local mode; source defines timing.", Frame: 30, Parameter: "position", Value: 30m),
             (Id: "demo", Title: "Composition MVP", Description: "Two clips, a crossfade, animated overlay and mixed audio. Compare quieter/left and louder/right bindings.", Frame: 98, Parameter: "accentX", Value: 180m),
             (Id: "transforms", Title: "Transforms, easing and gain", Description: "Position, size, scale, rotation, opacity, crop and pivot with eased keyframes. Audio gain steps at frame 15; compare startX bindings.", Frame: 15, Parameter: "startX", Value: 60m),
             (Id: "expressions", Title: "Expressions and parameter variants", Description: "Frame and progress drive motion, rotation and opacity. Two frozen offset bindings demonstrate the shared-composition pattern used by batch exports.", Frame: 15, Parameter: "offset", Value: 20m),
@@ -47,6 +48,7 @@ internal static class WebProof
                     {
                         var changes = new Dictionary<string, decimal> { [item.Parameter] = item.Value };
                         if (item.Id is "demo" or "showcase") changes["musicGain"] = 0.6m;
+                        if (item.Id == "editing") { changes["rotation"] = 5; changes["scale"] = 0.9m; changes["opacity"] = 0.8m; changes["crop"] = 0.1m; changes["showCallout"] = 0; }
                         runtime.SetMany(changes);
                     }
                     var snapshot = runtime.Bind();
@@ -98,9 +100,12 @@ internal static class WebProof
         Console.WriteLine($"PASS: {repeatChecks} gallery format/binding pairs repeated byte-identically and fully decoded. Published {cases.Length} demos.");
     }
 
-    internal static object[] Tracks(Composition c) => c.Clips.Select((v, i) => (object)new { kind = "video", label = $"Video {i + 1}", at = v.At, frames = v.Frames })
+    internal static object[] Tracks(Composition c) => c.Clips.Select((v, i) => (object)new { kind = "video", label = $"Clip {i + 1}", at = v.At, frames = v.Frames, trim = v.Trim, fade = v.Fade })
+        .Concat(c.Clips.Where(v => v.Fade > 0).Select(v => (object)new { kind = "transition", label = "Crossfade", at = v.At, frames = v.Fade }))
         .Concat(c.Script.Audio.Select((a, i) => (object)new { kind = "audio", label = $"Audio {i + 1}", at = a.At, frames = a.Frames }))
-        .Concat(c.Script.Shapes.Select((o, i) => (object)new { kind = "overlay", label = $"Overlay {i + 1}", at = o.At, frames = o.Frames })).ToArray();
+        .Concat(c.Script.Shapes.Select((o, i) => (object)new { kind = "overlay", label = $"Shape {i + 1}", at = o.At, frames = o.Frames }))
+        .Concat(c.Script.Texts.Select((o, i) => (object)new { kind = "text", label = $"Title {i + 1}", at = o.At, frames = o.Frames }))
+        .Concat(c.Script.Callouts.Select((o, i) => (object)new { kind = "callout", label = $"Callout {i + 1}", at = o.At, frames = o.Frames })).ToArray();
 
     private static void WriteJson(string path, object value)
     {

@@ -6,7 +6,7 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
 const lab=path.resolve(__dirname,'..');let hash;
 for(let i=0;i<12;i++) {
     const output='artifacts/encoder-regression-'+i+'.mp4';
-    execFileSync('dotnet',['bin/Release/net10.0/VideoLab.dll','render','examples/data-sequence.json',output],{cwd:lab});
+    execFileSync('dotnet',[process.env.VIDEOLAB_DLL || 'bin/Release/net10.0/VideoLab.dll','render','examples/data-sequence.json',output],{cwd:lab});
     const current=createHash('sha256').update(fs.readFileSync(path.join(lab,output))).digest('hex');
     if(hash)assert.equal(current,hash,'Data-sequence MP4 changed between identical native renders');hash=current;
 }

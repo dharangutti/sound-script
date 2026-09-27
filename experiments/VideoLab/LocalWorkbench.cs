@@ -11,7 +11,7 @@ namespace VideoLab;
 internal sealed class LocalWorkbench
 {
     private const long MaxFile = 50 * 1024 * 1024;
-    private static readonly string[] Demos = ["showcase", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
+    private static readonly string[] Demos = ["showcase", "editing", "demo", "transforms", "expressions", "effects", "conditional", "data-sequence"];
     private readonly string lab = Path.GetFullPath(".");
     private readonly string root = Path.Combine(Path.GetTempPath(), "videolab-session-" + Guid.NewGuid().ToString("N"));
     private readonly string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));

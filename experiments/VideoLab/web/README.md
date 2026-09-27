@@ -1,18 +1,24 @@
 # VideoLab browser workbench
 
 Experimental programmable composition in .NET, separate from the supported
-SoundScript NuGet package and CLI. Seven cards cover real video/audio, multiple
-clips, crossfade, graphics, motion, expressions, effects, conditions and sequences.
-Preview, read-only video/audio/graphics timeline, parameters and collapsible source
+SoundScript NuGet package and CLI. Eight development cards cover real video/audio,
+multiple clips, crossfade, titles, callouts, graphics, motion, expressions, effects,
+conditions and sequences. Preview, read-only clip/text/callout/transition/audio tracks,
+parameters and collapsible source
 update together. Exact frame values come from native Snapshot.SceneAt; browser
 video seeking is approximate. Export is MP4/H.264/AAC or WebM/VP9/Opus.
 
-## Public gallery
+## Development and public gallery
+
+This branch includes Phase 1 development ahead of the public v0.3.0 pin. Development
+has eight demos, 20 snapshots and 40 exports; the currently approved baseline has
+seven demos, 18 snapshots and 36 exports. Building this directory does not update
+the website. See roadmap/PROGRESS.md and public publication.json for exact status.
 
 The first composition combines coast/dog footage, animated graphics and mixed
 synthetic audio. Sample Library offers two videos and two audio tracks in this
-showcase, each with default and alternate bindings. Across seven demos there are
-18 snapshots and 36 exports. Focused examples retain their validated media.
+showcase, each with default and alternate bindings. Focused examples retain their
+validated media, and Composition defaults restores their distinct source choices.
 Choose a binding to change current runtime values; source defaults are shown beside
 the numeric controls. Arbitrary values and personal media require local mode.
 The static site cannot execute native .NET/FFmpeg and never uploads personal files.
@@ -64,6 +70,23 @@ at a time. Uploads time out after 30 seconds, renders after three minutes; Cance
 kills the FFmpeg process tree. Trusted local media only: FFmpeg is not a sandbox.
 Commands use the existing argument-list API, never shell interpolation.
 
+## Phase 1 familiar editing example
+
+Load **Titles, callouts and familiar edits**. Its source has two trimmed clips,
+an explicit placement and 12-frame crossfade, a title, moving callout, shape and
+music. The six track types make their lifetimes visible. **Editing properties**
+shows source trims, timeline placement, join type, selected-frame transforms/crop,
+caption font/alignment and audio gain. Timing remains authored in the source JSON;
+this is not a drag-and-drop or trimming UI.
+
+In local mode adjust position, scale, rotation, opacity, crop or musicGain; inspect
+the updated frame and render. showCallout is still a bounded numeric condition
+parameter, not a typed boolean. The alternate verified binding hides the callout
+and changes transforms. Text/callout content uses the bundled licensed DejaVu Sans
+font and single-line printable ASCII; no system font lookup or user font path.
+Transforming a callout moves its label, rectangle and pointer as one plane. See
+../SEMANTICS.md for exact clipping, alignment and local-target semantics.
+
 ## Rebuild and verify
 
 ```powershell
@@ -73,12 +96,15 @@ node web/local.test.cjs
 node web/encoder.test.cjs
 ```
 
-webproof runs all 143 existing checks plus 32 gallery repeat/decode pairs. It stages
+webproof runs all 143 existing checks, 43 Phase 1 editing checks and 36 gallery
+repeat/decode pairs. It stages
 a fresh distribution, canonicalizes JSON/text and writes checksums. Browser tests
 use pinned Playwright from scripts/package.json; set PLAYWRIGHT_MODULE to its
 installation when outside this checkout. Local tests own port 18745 and verify
 uploads, native bindings, exports, cancellation, reset and shutdown cleanup.
 Encoder regression compares 12 data-sequence MP4 renders in independent processes.
+`dotnet run -c Release -- editingtest` runs the focused 43-check caption suite.
+For a separately built local executable, set VIDEOLAB_DLL before local.test.cjs.
 
 The x264 cpu-independent=1 setting fixes an observed repeat mismatch despite
 identical raw frames. Some MP4 bytes differ from earlier milestones; old tags stay

@@ -1,0 +1,17 @@
+{
+  "phase": 1,
+  "status": "PASS",
+  "publication": "private-branch-only",
+  "baselineCommit": "db9ebebb778fd823f490cc3a886ab8ea0f4dab77",
+  "checksumsManifestSha256": "09f9f1142347ce8d31698a0afdf2e7b0cf51eba74480a8daf1dd4c1ea1c5db62",
+  "nativeChecks": 186,
+  "galleryRepeatedPairs": 36,
+  "demos": 8,
+  "snapshots": 20,
+  "exports": 40,
+  "baselineVideoAssetsUnchanged": 38,
+  "encoderRepeats": 12,
+  "realMediaCases": 17,
+  "publicBrowser": "PASS",
+  "localBrowser": "PASS"
+}

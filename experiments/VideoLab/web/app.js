@@ -3,16 +3,23 @@ const byId = id => document.getElementById(id);
 const local = document.body.dataset.localWorkbench === 'true';
 const fail = message => { byId('error').textContent = message; byId('error').hidden = false; };
 let token, proof, demo, snapshot, candidates = [], sourceMode = 'samples', values = {}, revision = 0, pendingFrame = null;
-let bindQueue = Promise.resolve(), busy = false;
+let bindQueue = Promise.resolve(), requestQueue = Promise.resolve(), busy = false;
 const video = byId('video');
 const option = (text,value) => { const item=document.createElement('option');item.textContent=text;item.value=value;return item; };
 const publicFile = format => `${snapshot.stem}.${format}`;
 function state() {return {demo:demo.id,media:sourceMode,video:byId('sample-video').value,audio:byId('sample-audio').value,parameters:values};}
 async function api(action,body={},file) {
+    // Media selection can immediately follow a binding change. Serialize native
+    // operations so the workbench's single-operation gate cannot reject that UI
+    // sequence; cancellation must still reach an in-flight render immediately.
+    const send=async()=>{
     const headers={'X-VideoLab-Session':token};
     if(file) headers['X-File-Name']=encodeURIComponent(file.name); else headers['Content-Type']='application/json';
     const response=await fetch(new URL(`api/${action}`,location.origin),{method:'POST',headers,body:file||JSON.stringify(body)});
     const data=await response.json(); if(!response.ok)throw new Error(data.error||'Local operation failed.');return data;
+    };
+    if(action==='cancel')return send();
+    const pending=requestQueue.catch(()=>{}).then(send);requestQueue=pending;return pending;
 }
 function clearError(){byId('error').hidden=true;}
 function exportsFor(mp4,webm){for(const [format,url] of [['mp4',mp4],['webm',webm]]){const link=byId(`export-${format}`);if(url)link.href=url;else link.removeAttribute('href');link.setAttribute('aria-disabled',String(!url));}}
@@ -37,20 +44,28 @@ function parameters(){
 function timeline(){
     byId('timeline').replaceChildren();
     const tracks=snapshot.tracks||[];
-    for(const kind of ['video','audio','overlay']){
+    for(const kind of ['video','transition','text','callout','overlay','audio']){
         const items=tracks.filter(t=>t.kind===kind);if(!items.length)continue;
         const row=document.createElement('div');row.className='track-row';
-        const label=document.createElement('span');label.className='track-label';label.textContent=kind==='overlay'?'Graphics':kind[0].toUpperCase()+kind.slice(1);
+        const label=document.createElement('span');label.className='track-label';label.textContent=kind==='overlay'?'Shape':kind[0].toUpperCase()+kind.slice(1);
         const lane=document.createElement('div');lane.className='track-lane';
         lane.style.height=(items.length*27)+'px';
         for(const [index,track] of items.entries()){const block=document.createElement('span');block.className=`track-block ${kind}`;block.style.top=(index*27+2)+'px';block.style.left=`${100*track.at/demo.frames}%`;block.style.width=`${100*track.frames/demo.frames}%`;block.textContent=track.label;block.title=`${track.label}: frames ${track.at}–${track.at+track.frames-1}`;lane.append(block);}
         const head=document.createElement('span');head.className='playhead';lane.append(head);row.append(label,lane);byId('timeline').append(row);
     }
 }
+function editingProperties(scene){
+    const panel=byId('edit-properties');panel.replaceChildren();
+    const line=text=>{const p=document.createElement('p');p.textContent=text;panel.append(p);};
+    for(const t of snapshot.tracks.filter(t=>t.kind==='video'))line(`${t.label}: source trim ${t.trim}–${t.trim+t.frames-1}; timeline ${t.at}–${t.at+t.frames-1}; ${t.fade?`crossfade ${t.fade} frames`:'cut / placement'}.`);
+    for(const l of scene.Layers){const t=l.Transform;line(`${l.Id} · ${l.Included?'visible':'excluded'} · position (${t.X}, ${t.Y}) · scale ${t.ScaleX} × ${t.ScaleY} · rotation ${t.Rotation}° · opacity ${t.Opacity} · crop (${t.Crop.X}, ${t.Crop.Y}, ${t.Crop.Width}, ${t.Crop.Height})`);if(l.Caption)line(`${l.Caption.Text} · ${l.Caption.Font}, ${l.Caption.FontSize}px · ${l.Caption.Align} aligned`);}
+    for(const a of scene.Audio)line(`${a.Id}: source frame ${a.SourceFrame}; gain ${a.Gain}; ${a.Included?'included':'muted by condition'}.`);
+}
 function inspect(seek){
     const frame=Number(byId('frame').value),scene=snapshot.scenes[frame];if(!scene)return;
     byId('frame-label').textContent=`${frame} / ${demo.frames-1}`;
     byId('scene').textContent=JSON.stringify(scene,null,2);
+    editingProperties(scene);
     byId('summary').textContent=`${(frame/demo.fps).toFixed(3)} s · ${scene.Clips.length} visible clip(s) · ${scene.Layers.filter(l=>l.Included).length}/${scene.Layers.length} included layer(s)`;
     for(const head of document.querySelectorAll('.playhead'))head.style.left=`${100*frame/demo.frames}%`;
     if(seek){video.pause();pendingFrame=frame;if(video.readyState){video.currentTime=frame/demo.fps;pendingFrame=null;}}
@@ -66,12 +81,14 @@ function selectBinding(){
     if(local)bindLocal();
 }
 function selectMedia(){
-    candidates=demo.id==='showcase'?demo.snapshots.filter(s=>s.video===byId('sample-video').value&&s.audio===byId('sample-audio').value):demo.snapshots;
+    const sampleVideo=byId('sample-video').value==='original'?'montage':byId('sample-video').value,sampleAudio=byId('sample-audio').value==='original'?'calm':byId('sample-audio').value;
+    candidates=demo.id==='showcase'?demo.snapshots.filter(s=>s.video===sampleVideo&&s.audio===sampleAudio):demo.snapshots;
     byId('snapshot').replaceChildren(...candidates.map((s,i)=>option(`${s.name} · ${i?'alternate runtime values':'source defaults'}`,String(i))));
     byId('snapshot').disabled=candidates.length===1;selectBinding();
 }
 function selectDemo(){
     demo=proof.demos.find(d=>d.id===byId('demo').value);revision++;
+    byId('sample-video').value=demo.id==='showcase'?'montage':'original';byId('sample-audio').value=demo.id==='showcase'?'calm':'original';
     byId('demo-title').textContent=demo.title;byId('description').textContent=demo.description;
     byId('dimensions').textContent=`${demo.width} × ${demo.height} · ${demo.frames} frames · ${demo.fps} fps`;
     video.style.aspectRatio=`${demo.width} / ${demo.height}`;byId('frame').max=demo.frames-1;
@@ -119,7 +136,7 @@ async function upload(kind,file){
 (async()=>{
     try{
         const response=await fetch('proof.json');if(!response.ok)throw new Error(`Timeline request failed (${response.status}).`);proof=await response.json();
-        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==7||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
+        if(proof.schemaVersion!==2||!Array.isArray(proof.demos)||proof.demos.length!==8||proof.demos.some(d=>!Number.isInteger(d.frames)||d.frames<1||!d.snapshots.length||d.snapshots.some(s=>!/^[A-Za-z0-9-]+$/.test(s.stem)||s.scenes.length!==d.frames)))throw new Error('Unsupported or incomplete proof data.');
         for(const d of proof.demos){
             byId('demo').append(option(d.title,d.id));
             const card=document.createElement('article');card.className='card';card.dataset.id=d.id;

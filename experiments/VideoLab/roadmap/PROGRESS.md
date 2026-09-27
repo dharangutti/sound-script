@@ -8,18 +8,18 @@ roadmap development. The user will decide when to merge after completion.
 
 ## Authorized scope
 
-Implement Phase 0 and Phase 1 from [the saved roadmap](MASTER_ROADMAP.md).
-Its final execution instruction explicitly excludes Phase 2. Report and stop after
-the Phase 1 gate. Track all later phases here, but do not implement them yet.
-All implementation stays under experiments/VideoLab; no production solution,
-NuGet, SoundScript CLI/runtime, release or deployment changes.
+Initial roadmap scope was Phases 0 and 1 only. On 2026-09-27 the user explicitly
+extended it: complete the current milestone, then the next two phases (2 and 3).
+Finish and report each gate before starting the next. Phase 4+ remains queued.
+Keep all work in experiments/VideoLab on the experimental branch, without merging
+or deploying; the user will decide when to merge.
 
 | Phase | Implemented | Validated | MVP-worthy | Publicly hosted |
 | --- | --- | --- | --- | --- |
 | 0 — baseline audit | Complete | PASS; exact baseline artifact reproduced | Audit only | Baseline v0.3.0 already live |
-| 1 — text/callouts/editing foundation | In progress | Not started | Not assessed | No |
-| 2 — typed audience variants | Not authorized | No | No | No |
-| 3 — structured annotations | Not authorized | No | No | No |
+| 1 — text/callouts/editing foundation | Complete | PASS; see PHASE_1_REPORT.md | Yes, bounded Lab scope | No |
+| 2 — typed audience variants | Next; authorized | Pending | Pending | No |
+| 3 — structured annotations | Authorized after Phase 2 gate | Pending | Pending | No |
 | 4 — ranked editor improvements | Not authorized | No | No | No |
 | 5 — explicit variant generation | Not authorized | No | No | No |
 | 6 — build artifacts/provenance | Not authorized | No | No | No |
@@ -28,18 +28,13 @@ NuGet, SoundScript CLI/runtime, release or deployment changes.
 
 ## Current checkpoint / restart here
 
-1. Read this file, MASTER_ROADMAP.md and phase reports before editing.
-2. Inspect `git status` and the latest commits; preserve in-progress user work.
-3. Baseline validation passed as `dotnet bin/Release/net10.0/VideoLab.dll webproof`
-   from the Lab directory. Log: ignored `artifacts/roadmap-phase0-native.log`.
-   If interrupted, rerun it and the browser/local/encoder checks below. Never infer
-   success from an empty/partial log. Compare rebuilt web/site bytes to baseline.
-4. Phase 0 is complete; see PHASE_0_REPORT.md. All checks passed and the complete
-   artifact hash exactly matched the published baseline. Do not redo the audit.
-5. Phase 1 work: controlled-font deterministic text; text+shape callouts; ordinary
-   editing example and readable browser tracks/controls; regression and render gates.
-6. After every completed slice, update this checklist and record commands/results.
-   Commit coherent milestones on the experimental branch. Do not merge or deploy.
+1. Read this file, MASTER_ROADMAP.md and completed phase reports.
+2. Inspect git status/log; preserve in-progress work. No merge/deployment.
+3. Phase 0 and Phase 1 gates passed. Do not repeat the baseline audit.
+4. Implement Phase 2 next: bounded enum/boolean parameters, typed conditions,
+   named composition groups and three synthetic audience outputs from one source.
+5. Record Phase 2 gate/report, then implement Phase 3 external annotations.
+6. Stop after Phase 3 report. Update this file and commit each coherent slice.
 
 ## Validation commands
 
@@ -64,24 +59,12 @@ not an in-progress development build.
 
 ## Decisions and known constraints
 
-### Phase 1 checkpoint (implementation in progress)
+### Phase 1 checkpoint — complete
 
-- Added optional texts/callouts schema, immutable caption metadata, bundled font,
-  safe generated resources and shared transforms/conditions. Initial 39 editing
-  checks passed and artifacts/editing-test.png was visually inspected.
-- Added examples/editing.json and eighth browser card, six readable track kinds,
-  clip/transform/gain summary and default-media reset. Browser tests expanded, not
-  yet run against the rebuilt distribution.
-- The first full run was interrupted (its empty log is not evidence). A fresh full
-  run uses artifacts/phase1-final-bin/VideoLab.dll and a line-flushed log at
-  artifacts/roadmap-phase1-final.log. Poll this log/process or rerun if interrupted.
-  Latest focused editing run: 43/43 PASS. Static-plane reuse produced exactly the
-  same acceptance MP4 hash as the initial implementation (E7E1ABA4…EE8CCB7).
-- Do not overwrite the old preview's loaded binary. Build with `-o
-  artifacts/phase1-final-bin`; use VIDEOLAB_DLL to select it for local.test.cjs.
-- Remaining: final native/browser/real-media checks, decoded acceptance outputs,
-  semantics/usage/report updates, final artifact evidence as private development
-  evidence (not a public pin), clean commits and restart instructions.
+See PHASE_1_REPORT.md and phase1-evidence.json. Full native/gallery, browser,
+local API, encoder and private real-media checks passed. Core commit f36122c.
+Final binary is artifacts/phase1-final-bin/VideoLab.dll. Set VIDEOLAB_DLL for
+local/encoder tests when using that isolated output. Public pins remain unchanged.
 
 - Source JSON remains authoritative; no drag-and-drop editor or typed audience
   parameters in Phase 1.
