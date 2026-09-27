@@ -9,14 +9,14 @@
       "mvp": true,
       "publish": true,
       "branch": "experiments/videolab",
-      "commit": "03130ca8b6e2cda5c9cb3e9d8913f189641a6f41",
-      "milestone": "labs-videolab-mvp-web-v0.2.2",
-      "reason": "Six validated feature demos, ten pre-rendered snapshots, exact frame inspection and MP4/WebM downloads. Custom rendering uses the CLI.",
+      "commit": "db9ebebb778fd823f490cc3a886ab8ea0f4dab77",
+      "milestone": "labs-videolab-mvp-web-v0.3.0",
+      "reason": "Seven demos, real-footage showcase, sample swaps, timeline and 36 MP4/WebM outputs. My Files and free parameters use the private local workbench.",
       "artifact": {
         "directory": "experiments/VideoLab/web/site",
-        "sha256": "241b9a8270a258eafd7043a25abeb687b50f8fd15c550697b86db9eb7baea234",
+        "sha256": "24c9ae42feb38e98871ff5c6c2f90795f109447dc2c92bbad7ba33bf002280e9",
         "evidence": "experiments/VideoLab/web/publication-evidence.json",
-        "evidenceSha256": "236c171873db32d9c616c814705f56946a30027f8d29cd4d1659e0e466aa8da0"
+        "evidenceSha256": "5c2c942a73f22dde569bd56e0b781eb98a5f9958e067cb52b056d04148f48e11"
       }
     },
     {
