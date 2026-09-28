@@ -42,6 +42,18 @@ Promotion removes either `(unreleased)` or `(unpublished candidate)` from that
 exact heading, preserving historical releases. The publication workflow tests
 this contract before uploading.
 
+### Package README version
+
+The NuGet workflow generates a release-specific README before `dotnet pack`.
+The package project's `GeneratePackageReadme` target also regenerates it on every
+pack, including `--no-build`, using the evaluated `PackageVersion` (including
+`-p:PackageVersion=...` overrides). Node.js is required for local library packing.
+The output lives under `obj/` and is included as the package's root `README.md`.
+The tracked `packaging/README.md` remains a public documentation template;
+`docs/release-state.json` advances only through the existing verified promotion.
+`validate-nuget.ps1` rejects missing, duplicate or mismatched install commands and
+NuGet link versions before restoring the fresh consumer.
+
 ### Manual recovery and verification
 
 After the automation workflow is merged into `main`, open **Actions → Promote
@@ -92,7 +104,7 @@ including package README and Playground HTML metadata. Changes to runtime code,
 workflows or the documentation manifest are rejected in generated promotion PRs.
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
-Development: **16.0.0 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
+Development: **16.0.1 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->

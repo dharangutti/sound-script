@@ -95,6 +95,8 @@
     "scripts/corpus-provenance.test.cjs",
     "scripts/dependency-inventory.ps1",
     "scripts/docs-state.mjs",
+    "scripts/package-readme.mjs",
+    "scripts/package-readme.test.mjs",
     "scripts/homepage-release.test.cjs",
     "scripts/labs.cjs",
     "scripts/labs.test.cjs",
