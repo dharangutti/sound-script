@@ -12,9 +12,9 @@ no account or installation. It is the fastest way to hear a script and inspect
 the visual timeline.
 
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
-`SoundScript.Cli` 16.0.0 is not published on nuget.org.
+`SoundScript.Cli` 16.0.1 is not published on nuget.org.
 
-Download a platform archive from [CLI 16.0.0](https://github.com/dharangutti/sound-script/releases/tag/v16.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+No CLI GitHub Release is published for this public version. Build from a source checkout.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 ## Run the CLI from the repository
@@ -55,10 +55,10 @@ Requires .NET 10.0 (`net10.0`). Use the SDK selected by `global.json` for reposi
 Install the published library:
 
 ```bash
-dotnet add package SoundScript --version 16.0.0
+dotnet add package SoundScript --version 16.0.1
 ```
 
-[SoundScript 16.0.0 on NuGet](https://www.nuget.org/packages/SoundScript/16.0.0).
+[SoundScript 16.0.1 on NuGet](https://www.nuget.org/packages/SoundScript/16.0.1).
 <!-- GENERATED:LIBRARY_INSTALL_END -->
 
 For package installation and API examples, see [NuGet](nuget.md) and the

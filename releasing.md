@@ -108,13 +108,13 @@ Development: **16.0.1 / V16 — Adaptive Runtime Parameters**. Development ident
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_START -->
-Current public version: **16.0.0**. Publication channels are recorded in `docs/release-state.json`.
+Current public version: **16.0.1**. Publication channels are recorded in `docs/release-state.json`.
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 <!-- GENERATED:CLI_DISTRIBUTION_START -->
-`SoundScript.Cli` 16.0.0 is not published on nuget.org.
+`SoundScript.Cli` 16.0.1 is not published on nuget.org.
 
-Download a platform archive from [CLI 16.0.0](https://github.com/dharangutti/sound-script/releases/tag/v16.0.0), verify its SHA-256 checksum, extract it, and run `soundscript` from that directory.
+No CLI GitHub Release is published for this public version. Build from a source checkout.
 <!-- GENERATED:CLI_DISTRIBUTION_END -->
 
 ## Verify from a clean checkout
