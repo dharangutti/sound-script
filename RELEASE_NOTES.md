@@ -1,5 +1,11 @@
 # SoundScript Release Notes
 
+## 16.0.1 — Adaptive Runtime Parameters (unreleased)
+
+- Packaging-only correction: generate the NuGet README install command and link from the package version being packed.
+- Reject packages whose README install version or NuGet link differs from their nuspec version.
+- Preserve runtime code, public APIs and the existing publish and public-release promotion flow.
+
 ## 16.0.0 — Adaptive Runtime Parameters
 
 - Compile controlled decimal parameters once, then update state and bind stable audio/visual snapshots through the existing renderers.

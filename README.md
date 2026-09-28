@@ -244,7 +244,7 @@ Current public version: **16.0.0**. Publication channels are recorded in `docs/r
 <!-- GENERATED:CURRENT_PUBLIC_RELEASE_END -->
 
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_START -->
-Development: **16.0.0 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
+Development: **16.0.1 / V16 — Adaptive Runtime Parameters**. Development identity does not imply publication.
 <!-- GENERATED:CURRENT_DEVELOPMENT_VERSION_END -->
 
 Release history is in [RELEASE_NOTES.md](RELEASE_NOTES.md).

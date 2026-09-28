@@ -166,15 +166,16 @@ try {
         Fail "Nuspec README entry '$readmeEntryName' is missing from the package."
     } else {
         $readmeText = Get-Content -LiteralPath (Join-Path $extractRoot $readmeEntryName) -Raw
-        # The package under test may be an unpublished development version. Its
-        # README must retain independently validated public onboarding, not
-        # advertise that development package as already available on NuGet.
-        $canonicalReadme = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'packaging/README.md') -Raw
-        if ($readmeText.Replace("`r`n", "`n") -cne $canonicalReadme.Replace("`r`n", "`n")) {
-            Fail 'Packaged README differs from the canonical, release-state-validated packaging/README.md. Regenerate documentation and repack.'
-        } else {
-            Pass 'Packaged README matches validated public documentation independently of development package version.'
+        $installVersions = [regex]::Matches($readmeText, '(?m)^dotnet add package SoundScript --version ([^\s`]+)\s*$')
+        $nugetLinks = [regex]::Matches($readmeText, '\[SoundScript ([^\s]+) on NuGet\]\(https://www\.nuget\.org/packages/SoundScript/([^\s)]+)\)')
+        if ($installVersions.Count -ne 1 -or $installVersions[0].Groups[1].Value -cne $nuspecVersion) {
+            Fail "Packaged README install version must match nuspec version '$nuspecVersion' exactly (one install command required)."
         }
+        if ($nugetLinks.Count -ne 1 -or $nugetLinks[0].Groups[1].Value -cne $nuspecVersion -or $nugetLinks[0].Groups[2].Value -cne $nuspecVersion) {
+            Fail "Packaged README NuGet link label and URL must match nuspec version '$nuspecVersion' exactly."
+        }
+        if ($script:Failures.Count -gt 0) { throw 'Package README/metadata validation failed before consumer restore.' }
+        Pass "Packaged README install command and NuGet link match package version $nuspecVersion"
     }
     $iconEntry = $entries | Where-Object { $_.FullName -eq 'icon.png' } | Select-Object -First 1
     if ($null -ne $iconEntry -and $iconEntry.Length -gt 1MB) { Fail "Package icon is larger than 1 MiB ($($iconEntry.Length) bytes)." }

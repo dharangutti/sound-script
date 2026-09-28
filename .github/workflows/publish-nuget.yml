@@ -42,7 +42,7 @@ jobs:
         run: node scripts/corpus-provenance.cjs
 
       - name: Validate release promotion contracts
-        run: node --test scripts/release-promotion.test.mjs
+        run: node --test scripts/release-promotion.test.mjs scripts/package-readme.test.mjs
 
       - name: Restore solution
         run: dotnet restore SoundScript.sln
@@ -82,6 +82,9 @@ jobs:
           dotnet build samples/DynamicAudio/DynamicAudio.csproj -c Release --no-restore
           dotnet build samples/DevOpsSonification/DevOpsSonification.csproj -c Release --no-restore
           dotnet build samples/TestFixtureGenerator/TestFixtureGenerator.csproj -c Release --no-restore
+
+      - name: Generate release-specific package README
+        run: dotnet msbuild src/SoundScript/SoundScript.csproj -t:GeneratePackageReadme -p:Configuration=Release
 
       - name: Pack SoundScript
         shell: pwsh

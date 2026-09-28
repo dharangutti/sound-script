@@ -40,13 +40,23 @@
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.4" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.5" />
-    <None Include="../../packaging/README.md" Pack="true" PackagePath="/" />
     <None Include="../../docs/assets/soundscript-logo.png" Pack="true" PackagePath="/icon.png" />
     <None Include="../../LICENSE" Pack="true" PackagePath="/LICENSE" />
     <None Include="../../wordbank/LICENSE" Pack="true" PackagePath="/licenses/Wordbank-CC0.txt" />
     <None Include="../SoundScript.Wordbank/Data/corpus/**/SOURCES.md" Pack="true" PackagePath="licenses/corpus/%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="../SoundScript.Media/Fonts/LICENSE.txt" Pack="true" PackagePath="/licenses/Fonts.txt" />
   </ItemGroup>
+  <!-- Generate for every pack (including no-build) from evaluated PackageVersion,
+       independently of the version advertised by public documentation. -->
+  <Target Name="GeneratePackageReadme" BeforeTargets="_GetPackageFiles">
+    <PropertyGroup>
+      <_PackageReadmePath>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)package-readme/$(PackageVersion)/README.md</_PackageReadmePath>
+    </PropertyGroup>
+    <Exec Command="node &quot;$(MSBuildProjectDirectory)/../../scripts/package-readme.mjs&quot; &quot;$(PackageVersion)&quot; &quot;$(_PackageReadmePath)&quot;" />
+    <ItemGroup>
+      <None Include="$(_PackageReadmePath)" Pack="true" PackagePath="/README.md" />
+    </ItemGroup>
+  </Target>
   <Target Name="IncludeSoundScriptLibraries" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <_SoundScriptProjectReferenceOutputs Include="@(ReferenceCopyLocalPaths)"
