@@ -85,3 +85,7 @@ evidence, not current installation advice.
 - [V13 hardening](v13-reliability-hardening.md) and [readiness](v13-release-readiness.md) — inspect earlier reliability evidence.
 - [NuGet validation](nuget-end-to-end-validation.md) — review the pinned consumer baseline.
 - [Release history](../RELEASE_NOTES.md) — follow earlier release-specific changes.
+
+## Articles
+
+- [What If Your Next Media Asset Was a Pull Request?](articles/soundscript-developer-feature-map.md)
