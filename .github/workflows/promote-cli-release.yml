@@ -38,15 +38,16 @@ jobs:
       base_sha: ${{ steps.resolve.outputs.base_sha }}
       run_id: ${{ steps.resolve.outputs.run_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
 
       - name: Verify CLI release provenance and resolve version
         id: resolve
@@ -148,17 +149,18 @@ jobs:
     outputs:
       changed: ${{ steps.prepare.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve.outputs.base_sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -320,7 +322,7 @@ jobs:
           git diff --binary --no-ext-diff | Set-Content -Encoding utf8NoBOM artifacts/cli-promotion/promotion.patch
           "changed=true" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.prepare.outputs.changed == 'true'
         with:
           name: public-cli-release-promotion
@@ -336,12 +338,12 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: public-cli-release-promotion
           path: ${{ runner.temp }}/cli-promotion

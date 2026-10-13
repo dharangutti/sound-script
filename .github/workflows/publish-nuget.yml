@@ -21,19 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
 
       - name: Install eSpeak
         run: sudo apt-get update && sudo apt-get install -y espeak-ng
@@ -103,7 +104,7 @@ jobs:
           ./scripts/validate-nuget.ps1 -PackagePath $package.FullName
 
       - name: Upload validated package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: soundscript-nuget-${{ github.run_number }}
           path: artifacts/nuget/*
@@ -134,13 +135,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
-      - uses: actions/setup-dotnet@v4
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - name: Verify exact public package with fresh consumer
