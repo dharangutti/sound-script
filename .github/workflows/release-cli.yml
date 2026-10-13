@@ -19,10 +19,10 @@ jobs:
           - rid: osx-arm64
     runs-on: ${{ startsWith(matrix.rid, 'win-') && 'windows-latest' || startsWith(matrix.rid, 'osx-') && 'macos-latest' || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Publish self-contained single-file executable
@@ -35,7 +35,7 @@ jobs:
           Compress-Archive -Path artifacts/${{ matrix.rid }}/* -DestinationPath $asset
           (Get-FileHash -Algorithm SHA256 -LiteralPath $asset).Hash.ToLowerInvariant() + "  " + $asset | Set-Content -NoNewline "$asset.sha256"
           "asset=$asset" >> $env:GITHUB_OUTPUT
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: soundscript-${{ github.ref_name }}-${{ matrix.rid }}
           path: |
@@ -44,15 +44,15 @@ jobs:
   tool-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Pack .NET tool
         run: dotnet pack src/SoundScript.Cli/SoundScript.Cli.csproj -c Release --output artifacts/nuget
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: soundscript-dotnet-tool
           path: artifacts/nuget/*.nupkg
@@ -63,12 +63,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           body_path: RELEASE_NOTES.md
           files: artifacts/*
